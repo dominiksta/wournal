@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <title>Wournal</title>
+        <link rel="stylesheet" href="index.css">
+    </head>
+    <body>
+        <div id="divSmoothingFactor">
+            <label for="cmbBufferSize">Buffer size:</label>
+            <select id="cmbBufferSize">
+                <option value="1">1 - No smoothing</option>
+                <option value="2" selected="selected">2 - smoothing</option>
+                <option value="4" selected="selected">4 - smoothing</option>
+                <option value="6" selected="selected">6 - smoothing</option>
+            </select>
+        </div>
+        <div id="canvas">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"
+                 id="svgElement" x="0px" y="0px" width="600px" height="400px"
+                 viewBox="0 0 600 400" enable-background="new 0 0 600 400"
+                 xml:space="preserve"/>
+        </div>
+    </body>
+    <script src="index.js"></script>
+</html>
