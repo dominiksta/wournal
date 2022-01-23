@@ -2,6 +2,9 @@ const path = require('path');
 
 module.exports = {
     mode: 'development',
+    // Apparently this setting is supposed to be slow. So if that causes any
+    // issues, it could be set to something else according to
+    // https://webpack.js.org/configuration/devtool/
     devtool: 'source-map',
     entry: './src/main.ts',
     module: {

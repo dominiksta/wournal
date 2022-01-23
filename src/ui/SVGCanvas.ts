@@ -11,16 +11,16 @@ export class SVGCanvas {
     private rect: DOMRect;
 
     /** The width of a stroke */
-    _strokeWidth = 2;
+    private strokeWidth = 2;
     /** Buffer size for line smoothing */
-    mouseBufferSize = 4;
+    public mouseBufferSize = 4;
     /** Buffer for smoothing. Contains the last positions of the mouse cursor */
     private mouseBuffer: {x: number, y: number}[] = [];
 
     /** The svg path for the current line */
     private path: SVGPathElement | null = null;
     /** The stroke path for the current line */
-    _pathStroke = "";
+    private pathStroke = "";
 
     constructor(svgElement: HTMLSVGElement) {
         this.svgElement = svgElement;
@@ -35,12 +35,12 @@ export class SVGCanvas {
         this.path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         this.path.setAttribute("fill", "none");
         this.path.setAttribute("stroke", "#000");
-        this.path.setAttribute("stroke-width", this._strokeWidth.toString());
+        this.path.setAttribute("stroke-width", this.strokeWidth.toString());
         this.mouseBuffer = [];
         var pt = this.getMousePosition(e);
         this.appendToBuffer(pt);
-        this._pathStroke = "M" + pt.x + " " + pt.y;
-        this.path.setAttribute("d", this._pathStroke);
+        this.pathStroke = "M" + pt.x + " " + pt.y;
+        this.path.setAttribute("d", this.pathStroke);
         this.svgElement.appendChild(this.path);
     }
 
@@ -48,7 +48,7 @@ export class SVGCanvas {
         console.log("onMouseMove");
         if (this.path) {
             this.appendToBuffer(this.getMousePosition(e));
-            this._updateSvgPath();
+            this.updateSvgPath();
         }
     }
 
@@ -93,12 +93,12 @@ export class SVGCanvas {
         return null;
     }
 
-    _updateSvgPath() {
+    private updateSvgPath() {
         var pt = this.getAveragePoint(0);
 
         if (pt) {
             // Get the smoothed part of the path that will not change
-            this._pathStroke += " L" + pt.x + " " + pt.y;
+            this.pathStroke += " L" + pt.x + " " + pt.y;
 
             // Get the last part of the path (close to the current mouse position)
             // This part will change if the mouse moves again
@@ -109,7 +109,7 @@ export class SVGCanvas {
             }
 
             // Set the complete current path coordinates
-            this.path.setAttribute("d", this._pathStroke + tmpPath);
+            this.path.setAttribute("d", this.pathStroke + tmpPath);
         }
     }
 }

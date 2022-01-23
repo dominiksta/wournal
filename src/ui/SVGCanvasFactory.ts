@@ -6,7 +6,7 @@ export class SVGCanvasFactory {
     // static DEFAULT_CANVAS_HEIGHT = "400px";
     // static DEFAULT_CANVAS_WIDTH = "600px";
 
-    static newDefault() {
+    public static newDefault() {
         let canvas = new SVGCanvas(
             document.getElementById("svgElement") as HTMLSVGElement
         );
