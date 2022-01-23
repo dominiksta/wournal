@@ -1,12 +1,11 @@
-import { HTMLSVGElement } from "./HTMLSVGElement";
-
 /**
  * An SVG Canvas to draw on.
  */
 export class SVGCanvas {
 
     /** The Canvas Element that will be drawn on */
-    private svgElement: HTMLSVGElement;
+    private _svgElement: SVGSVGElement;
+    get svgElement() { return this._svgElement; }
     /** The bounding rectangle of `_svgElement` */
     private rect: DOMRect;
 
@@ -22,16 +21,16 @@ export class SVGCanvas {
     /** The stroke path for the current line */
     private pathStroke = "";
 
-    constructor(svgElement: HTMLSVGElement) {
-        this.svgElement = svgElement;
+    constructor(svgElement: SVGSVGElement) {
+        this._svgElement = svgElement;
 
-        this.svgElement.addEventListener("mousedown", this.onMouseDown.bind(this));
-        this.svgElement.addEventListener("mousemove", this.onMouseMove.bind(this));
-        this.svgElement.addEventListener("mouseup", this.onMouseUp.bind(this));
+        this._svgElement.addEventListener("mousedown", this.onMouseDown.bind(this));
+        this._svgElement.addEventListener("mousemove", this.onMouseMove.bind(this));
+        this._svgElement.addEventListener("mouseup", this.onMouseUp.bind(this));
     }
 
     private onMouseDown(e: MouseEvent) {
-        this.rect = this.svgElement.getBoundingClientRect();
+        this.rect = this._svgElement.getBoundingClientRect();
         this.path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         this.path.setAttribute("fill", "none");
         this.path.setAttribute("stroke", "#000");
@@ -41,7 +40,7 @@ export class SVGCanvas {
         this.appendToBuffer(pt);
         this.pathStroke = "M" + pt.x + " " + pt.y;
         this.path.setAttribute("d", this.pathStroke);
-        this.svgElement.appendChild(this.path);
+        this._svgElement.appendChild(this.path);
     }
 
     private onMouseMove(e: MouseEvent) {
