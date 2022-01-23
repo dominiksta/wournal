@@ -8,7 +8,7 @@ export class SVGCanvasFactory {
 
     public static newDefault() {
         let canvas = new SVGCanvas(
-            document.getElementById("svgElement") as HTMLSVGElement
+            document.getElementById("page1") as HTMLSVGElement
         );
         let select = document.getElementById("cmbBufferSize") as HTMLSelectElement;
         canvas.mouseBufferSize = parseInt(select.value);

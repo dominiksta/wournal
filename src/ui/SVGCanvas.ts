@@ -24,7 +24,6 @@ export class SVGCanvas {
 
     constructor(svgElement: HTMLSVGElement) {
         this.svgElement = svgElement;
-        this.rect = svgElement.getBoundingClientRect();
 
         this.svgElement.addEventListener("mousedown", this.onMouseDown.bind(this));
         this.svgElement.addEventListener("mousemove", this.onMouseMove.bind(this));
@@ -32,6 +31,7 @@ export class SVGCanvas {
     }
 
     private onMouseDown(e: MouseEvent) {
+        this.rect = this.svgElement.getBoundingClientRect();
         this.path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         this.path.setAttribute("fill", "none");
         this.path.setAttribute("stroke", "#000");
@@ -55,10 +55,10 @@ export class SVGCanvas {
         if (this.path) this.path = null;
     }
 
-    private getMousePosition(e: MouseEvent) {
+    private getMousePosition(e: MouseEvent): {x: number, y: number} {
         return {
-            x: e.pageX - this.rect.left,
-            y: e.pageY - this.rect.top
+            x: e.x - this.rect.left,
+            y: e.y - this.rect.top
         };
     }
 
