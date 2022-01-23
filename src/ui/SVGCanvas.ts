@@ -1,3 +1,6 @@
+import { SVGCanvasTool } from "./SVGCanvasTool";
+import { SVGCanvasToolPointer } from "./SVGCanvasToolPen";
+
 /**
  * An SVG Canvas to draw on.
  */
@@ -6,23 +9,19 @@ export class SVGCanvas {
     /** The Canvas Element that will be drawn on */
     private _svgElement: SVGSVGElement;
     get svgElement() { return this._svgElement; }
-    /** The bounding rectangle of `_svgElement` */
-    private rect: DOMRect;
 
-    /** The width of a stroke */
-    private strokeWidth = 2;
-    /** Buffer size for line smoothing */
-    public mouseBufferSize = 4;
-    /** Buffer for smoothing. Contains the last positions of the mouse cursor */
-    private mouseBuffer: {x: number, y: number}[] = [];
+    public currentTool: SVGCanvasTool;
 
-    /** The svg path for the current line */
-    private path: SVGPathElement | null = null;
-    /** The stroke path for the current line */
-    private pathStroke = "";
+    /**
+     * The bounding rectangle of `_svgElement`. Only updated in `onMouseDown`
+     * for better performance.
+     */
+    private _rect: DOMRect;
+    get rect() { return this._rect; }
 
     constructor(svgElement: SVGSVGElement) {
         this._svgElement = svgElement;
+        this.currentTool = new SVGCanvasToolPointer(this);
 
         this._svgElement.addEventListener("mousedown", this.onMouseDown.bind(this));
         this._svgElement.addEventListener("mousemove", this.onMouseMove.bind(this));
@@ -30,83 +29,22 @@ export class SVGCanvas {
     }
 
     private onMouseDown(e: MouseEvent) {
-        this.rect = this._svgElement.getBoundingClientRect();
-        this.path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        this.path.setAttribute("fill", "none");
-        this.path.setAttribute("stroke", "#000");
-        this.path.setAttribute("stroke-width", this.strokeWidth.toString());
-        this.mouseBuffer = [];
-        var pt = this.getMousePosition(e);
-        this.appendToBuffer(pt);
-        this.pathStroke = "M" + pt.x + " " + pt.y;
-        this.path.setAttribute("d", this.pathStroke);
-        this._svgElement.appendChild(this.path);
+        this._rect = this._svgElement.getBoundingClientRect();
+        this.currentTool.onMouseDown(e);
     }
 
     private onMouseMove(e: MouseEvent) {
-        if (this.path) {
-            this.appendToBuffer(this.getMousePosition(e));
-            this.updateSvgPath();
-        }
+        this.currentTool.onMouseMove(e);
     }
 
     private onMouseUp(e: MouseEvent) {
-        if (this.path) this.path = null;
+        this.currentTool.onMouseUp(e);
     }
 
-    private getMousePosition(e: MouseEvent): {x: number, y: number} {
+    public posForEvent(e: MouseEvent): {x: number, y: number} {
         return {
-            x: e.x - this.rect.left,
-            y: e.y - this.rect.top
+            x: e.x - this._rect.left,
+            y: e.y - this._rect.top
         };
-    }
-
-    private appendToBuffer(pt: {x: number, y: number}) {
-        this.mouseBuffer.push(pt);
-        while (this.mouseBuffer.length > this.mouseBufferSize) {
-            this.mouseBuffer.shift();
-        }
-    }
-
-    /** Calculate the average point, starting at offset in the buffer */
-    private getAveragePoint(offset: number): {x: number, y: number} | null {
-        var len = this.mouseBuffer.length;
-        if (len % 2 === 1 || len >= this.mouseBufferSize) {
-            var totalX = 0;
-            var totalY = 0;
-            var pt, i;
-            var count = 0;
-            for (i = offset; i < len; i++) {
-                count++;
-                pt = this.mouseBuffer[i];
-                totalX += pt.x;
-                totalY += pt.y;
-            }
-            return {
-                x: totalX / count,
-                y: totalY / count
-            };
-        }
-        return null;
-    }
-
-    private updateSvgPath() {
-        var pt = this.getAveragePoint(0);
-
-        if (pt) {
-            // Get the smoothed part of the path that will not change
-            this.pathStroke += " L" + pt.x + " " + pt.y;
-
-            // Get the last part of the path (close to the current mouse position)
-            // This part will change if the mouse moves again
-            var tmpPath = "";
-            for (var offset = 2; offset < this.mouseBuffer.length; offset += 2) {
-                pt = this.getAveragePoint(offset);
-                tmpPath += " L" + pt.x + " " + pt.y;
-            }
-
-            // Set the complete current path coordinates
-            this.path.setAttribute("d", this.pathStroke + tmpPath);
-        }
     }
 }

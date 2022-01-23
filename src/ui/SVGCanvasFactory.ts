@@ -14,8 +14,6 @@ export class SVGCanvasFactory {
         svg.setAttribute("height", height);
 
         let canvas = new SVGCanvas(svg);
-        let select = document.getElementById("cmbBufferSize") as HTMLSelectElement;
-        canvas.mouseBufferSize = parseInt(select.value);
         return canvas;
     }
 }
