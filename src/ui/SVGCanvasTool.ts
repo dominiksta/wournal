@@ -2,7 +2,7 @@ import { SVGCanvas } from "./SVGCanvas";
 
 export abstract class SVGCanvasTool {
 
-    // TODO: cursor
+    protected abstract cursor: string;
 
     constructor(
         protected canvas: SVGCanvas

@@ -14,10 +14,13 @@ export class SVGCanvasToolPointer extends SVGCanvasTool {
     /** The stroke path for the current line */
     private pathStroke = "";
 
+    protected cursor = "url('res/cursor/pen.png'), auto";
+
     constructor(
         protected canvas: SVGCanvas,
     ) {
         super(canvas);
+        this.canvas.svgElement.style.cursor = this.cursor;
     }
 
     public onMouseDown(e: MouseEvent): void {
