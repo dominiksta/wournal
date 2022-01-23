@@ -6,138 +6,26 @@
         <link rel="stylesheet" href="css/main.css">
     </head>
     <body>
-        <div id="divSmoothingFactor">
-            <label for="cmbBufferSize">Buffer size:</label>
-            <select id="cmbBufferSize">
-                <option value="1">1 - No smoothing</option>
-                <option value="2">2 - smoothing</option>
-                <option value="4" selected="selected">4 - smoothing</option>
-                <option value="6">6 - smoothing</option>
-            </select>
+        <div id="toolbar">
+            <div class="toolbar-item">
+                <label for="cmbBufferSize">Buffer size:</label>
+                <select id="cmbBufferSize">
+                    <option value="1">1 - No smoothing</option>
+                    <option value="2">2 - smoothing</option>
+                    <option value="4" selected="selected">4 - smoothing</option>
+                    <option value="6">6 - smoothing</option>
+                </select>
+            </div>
+            <div class="toolbar-item" id="toolbar-tools">
+                <button id="btnToolPen">
+                    <img src="res/cursor/pen.png"/>
+                </button>
+                <button id="btnToolRectangle">
+                    <img src="res/cursor/rectangle.png"/>
+                </button>
+            </div>
         </div>
-        <div id="wournal-document">
-            <p>
-                Pellentesque dapibus suscipit ligula.  Donec posuere augue in
-                quam.  Etiam vel tortor sodales tellus ultricies commodo.
-                Suspendisse potenti.  Aenean in sem ac leo mollis blandit.
-                Donec neque quam, dignissim in, mollis nec, sagittis eu, wisi.
-                Phasellus lacus.  Etiam laoreet quam sed arcu.  Phasellus at dui
-                in ligula mollis ultricies.  Integer placerat tristique nisl.
-                Praesent augue.  Fusce commodo.  Vestibulum convallis, lorem a
-                tempus semper, dui dui euismod elit, vitae placerat urna tortor
-                vitae lacus.  Nullam libero mauris, consequat quis, varius et,
-                dictum id, arcu.  Mauris mollis tincidunt felis.  Aliquam
-                feugiat tellus ut neque.  Nulla facilisis, risus a rhoncus
-                fermentum, tellus tellus lacinia purus, et dictum nunc justo sit
-                amet elit.
-            </p>
-
-            <p>
-                Pellentesque dapibus suscipit ligula.  Donec posuere augue in
-                quam.  Etiam vel tortor sodales tellus ultricies commodo.
-                Suspendisse potenti.  Aenean in sem ac leo mollis blandit.
-                Donec neque quam, dignissim in, mollis nec, sagittis eu, wisi.
-                Phasellus lacus.  Etiam laoreet quam sed arcu.  Phasellus at dui
-                in ligula mollis ultricies.  Integer placerat tristique nisl.
-                Praesent augue.  Fusce commodo.  Vestibulum convallis, lorem a
-                tempus semper, dui dui euismod elit, vitae placerat urna tortor
-                vitae lacus.  Nullam libero mauris, consequat quis, varius et,
-                dictum id, arcu.  Mauris mollis tincidunt felis.  Aliquam
-                feugiat tellus ut neque.  Nulla facilisis, risus a rhoncus
-                fermentum, tellus tellus lacinia purus, et dictum nunc justo sit
-                amet elit.
-            </p>
-            <p>
-                Pellentesque dapibus suscipit ligula.  Donec posuere augue in
-                quam.  Etiam vel tortor sodales tellus ultricies commodo.
-                Suspendisse potenti.  Aenean in sem ac leo mollis blandit.
-                Donec neque quam, dignissim in, mollis nec, sagittis eu, wisi.
-                Phasellus lacus.  Etiam laoreet quam sed arcu.  Phasellus at dui
-                in ligula mollis ultricies.  Integer placerat tristique nisl.
-                Praesent augue.  Fusce commodo.  Vestibulum convallis, lorem a
-                tempus semper, dui dui euismod elit, vitae placerat urna tortor
-                vitae lacus.  Nullam libero mauris, consequat quis, varius et,
-                dictum id, arcu.  Mauris mollis tincidunt felis.  Aliquam
-                feugiat tellus ut neque.  Nulla facilisis, risus a rhoncus
-                fermentum, tellus tellus lacinia purus, et dictum nunc justo sit
-                amet elit.
-            </p>
-            <p>
-                Pellentesque dapibus suscipit ligula.  Donec posuere augue in
-                quam.  Etiam vel tortor sodales tellus ultricies commodo.
-                Suspendisse potenti.  Aenean in sem ac leo mollis blandit.
-                Donec neque quam, dignissim in, mollis nec, sagittis eu, wisi.
-                Phasellus lacus.  Etiam laoreet quam sed arcu.  Phasellus at dui
-                in ligula mollis ultricies.  Integer placerat tristique nisl.
-                Praesent augue.  Fusce commodo.  Vestibulum convallis, lorem a
-                tempus semper, dui dui euismod elit, vitae placerat urna tortor
-                vitae lacus.  Nullam libero mauris, consequat quis, varius et,
-                dictum id, arcu.  Mauris mollis tincidunt felis.  Aliquam
-                feugiat tellus ut neque.  Nulla facilisis, risus a rhoncus
-                fermentum, tellus tellus lacinia purus, et dictum nunc justo sit
-                amet elit.
-            </p>
-            <p>
-                Pellentesque dapibus suscipit ligula.  Donec posuere augue in
-                quam.  Etiam vel tortor sodales tellus ultricies commodo.
-                Suspendisse potenti.  Aenean in sem ac leo mollis blandit.
-                Donec neque quam, dignissim in, mollis nec, sagittis eu, wisi.
-                Phasellus lacus.  Etiam laoreet quam sed arcu.  Phasellus at dui
-                in ligula mollis ultricies.  Integer placerat tristique nisl.
-                Praesent augue.  Fusce commodo.  Vestibulum convallis, lorem a
-                tempus semper, dui dui euismod elit, vitae placerat urna tortor
-                vitae lacus.  Nullam libero mauris, consequat quis, varius et,
-                dictum id, arcu.  Mauris mollis tincidunt felis.  Aliquam
-                feugiat tellus ut neque.  Nulla facilisis, risus a rhoncus
-                fermentum, tellus tellus lacinia purus, et dictum nunc justo sit
-                amet elit.
-            </p>
-            <p>
-                Pellentesque dapibus suscipit ligula.  Donec posuere augue in
-                quam.  Etiam vel tortor sodales tellus ultricies commodo.
-                Suspendisse potenti.  Aenean in sem ac leo mollis blandit.
-                Donec neque quam, dignissim in, mollis nec, sagittis eu, wisi.
-                Phasellus lacus.  Etiam laoreet quam sed arcu.  Phasellus at dui
-                in ligula mollis ultricies.  Integer placerat tristique nisl.
-                Praesent augue.  Fusce commodo.  Vestibulum convallis, lorem a
-                tempus semper, dui dui euismod elit, vitae placerat urna tortor
-                vitae lacus.  Nullam libero mauris, consequat quis, varius et,
-                dictum id, arcu.  Mauris mollis tincidunt felis.  Aliquam
-                feugiat tellus ut neque.  Nulla facilisis, risus a rhoncus
-                fermentum, tellus tellus lacinia purus, et dictum nunc justo sit
-                amet elit.
-            </p>
-            <p>
-                Pellentesque dapibus suscipit ligula.  Donec posuere augue in
-                quam.  Etiam vel tortor sodales tellus ultricies commodo.
-                Suspendisse potenti.  Aenean in sem ac leo mollis blandit.
-                Donec neque quam, dignissim in, mollis nec, sagittis eu, wisi.
-                Phasellus lacus.  Etiam laoreet quam sed arcu.  Phasellus at dui
-                in ligula mollis ultricies.  Integer placerat tristique nisl.
-                Praesent augue.  Fusce commodo.  Vestibulum convallis, lorem a
-                tempus semper, dui dui euismod elit, vitae placerat urna tortor
-                vitae lacus.  Nullam libero mauris, consequat quis, varius et,
-                dictum id, arcu.  Mauris mollis tincidunt felis.  Aliquam
-                feugiat tellus ut neque.  Nulla facilisis, risus a rhoncus
-                fermentum, tellus tellus lacinia purus, et dictum nunc justo sit
-                amet elit.
-            </p>
-            <p>
-                Pellentesque dapibus suscipit ligula.  Donec posuere augue in
-                quam.  Etiam vel tortor sodales tellus ultricies commodo.
-                Suspendisse potenti.  Aenean in sem ac leo mollis blandit.
-                Donec neque quam, dignissim in, mollis nec, sagittis eu, wisi.
-                Phasellus lacus.  Etiam laoreet quam sed arcu.  Phasellus at dui
-                in ligula mollis ultricies.  Integer placerat tristique nisl.
-                Praesent augue.  Fusce commodo.  Vestibulum convallis, lorem a
-                tempus semper, dui dui euismod elit, vitae placerat urna tortor
-                vitae lacus.  Nullam libero mauris, consequat quis, varius et,
-                dictum id, arcu.  Mauris mollis tincidunt felis.  Aliquam
-                feugiat tellus ut neque.  Nulla facilisis, risus a rhoncus
-                fermentum, tellus tellus lacinia purus, et dictum nunc justo sit
-                amet elit.
-            </p>
-        </div>
+        <div id="wournal-document"> </div>
     </body>
     <script src="script/main.js"></script>
 </html>

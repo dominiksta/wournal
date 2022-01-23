@@ -2,7 +2,7 @@ import { CONF } from "../util/Config";
 import { SVGCanvas } from "./SVGCanvas";
 import { SVGCanvasTool } from "./SVGCanvasTool";
 
-export class SVGCanvasToolPointer extends SVGCanvasTool {
+export class SVGCanvasToolPen extends SVGCanvasTool {
 
     /** The width of a stroke */
     private strokeWidth = 2;

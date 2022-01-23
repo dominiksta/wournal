@@ -15,8 +15,24 @@ body {
     cursor: default;
 }
 
-#divSmoothingFactor {
+#toolbar {
     position: absolute;
     left: 14px;
     top: 12px;
+}
+
+#toolbar > .toolbar-item {
+    vertical-align: middle;
+    display: inline-block;
+    padding: 5px;
+}
+
+#toolbar > .toolbar-item:not(:first-child) {
+    border-left: 1px solid black;
+}
+
+#toolbar-tools > button {
+    vertical-align: middle;
+    height: 40px;
+    width: 40px;
 }

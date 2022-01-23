@@ -1,5 +1,5 @@
 import { SVGCanvasTool } from "./SVGCanvasTool";
-import { SVGCanvasToolPointer } from "./SVGCanvasToolPen";
+import { SVGCanvasToolPen } from "./SVGCanvasToolPen";
 
 /**
  * An SVG Canvas to draw on.
@@ -21,7 +21,7 @@ export class SVGCanvas {
 
     constructor(svgElement: SVGSVGElement) {
         this._svgElement = svgElement;
-        this.currentTool = new SVGCanvasToolPointer(this);
+        this.currentTool = new SVGCanvasToolPen(this);
 
         this._svgElement.addEventListener("mousedown", this.onMouseDown.bind(this));
         this._svgElement.addEventListener("mousemove", this.onMouseMove.bind(this));
