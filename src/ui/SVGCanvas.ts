@@ -45,7 +45,6 @@ export class SVGCanvas {
     }
 
     private onMouseMove(e: MouseEvent) {
-        console.log("onMouseMove");
         if (this.path) {
             this.appendToBuffer(this.getMousePosition(e));
             this.updateSvgPath();
@@ -53,7 +52,6 @@ export class SVGCanvas {
     }
 
     private onMouseUp(e: MouseEvent) {
-        console.log("onMouseUp");
         if (this.path) this.path = null;
     }
 
