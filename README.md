@@ -1,4 +1,12 @@
-# Acknowledgements
+# Wournal
+
+## Development
+
+1. `npm install`
+2. `npm run watch`
+3. Open dist/index.html in a browser
+
+## Acknowledgements
 
 - The inspiration to even write this software in the first place came from
   [Xournal][ACK1]
