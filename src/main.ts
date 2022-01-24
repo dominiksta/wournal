@@ -34,3 +34,10 @@ document.getElementById("btnToolRectangle").addEventListener("click", () => {
 document.getElementById("btnToolSelectRectangle").addEventListener("click", () => {
     wournalDoc.setTool(SVGCanvasToolSelectRectangle);
 });
+
+document.addEventListener("keypress", (e: KeyboardEvent) => {
+    e = e || window.event as KeyboardEvent;
+    if (e.key == "w") wournalDoc.setTool(SVGCanvasToolPen)
+    else if (e.key == "s") wournalDoc.setTool(SVGCanvasToolSelectRectangle)
+    else if (e.key == "r") wournalDoc.setTool(SVGCanvasToolRectangle)
+});
