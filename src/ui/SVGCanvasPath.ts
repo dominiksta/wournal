@@ -1,3 +1,5 @@
+import { WournalCanvasElement } from "./WournalCanvasElement";
+
 /**
  * This is a _less_ powerful version of a full SVGPathElement which abstracts
  * away the actual path data into a handful of methods.
@@ -7,24 +9,25 @@
  * point), "L" (draw line to give position) and "Z" (to smoothly close forms
  * like rectangles).
  */
-export class SVGCanvasPath {
+export class SVGCanvasPath extends WournalCanvasElement {
 
     /** Stores the actual svg stroke data to draw */
     private stroke: string;
     /** The temporary tip stroke. See `setTipStroke`*/
     private tipStroke: string;
 
-    get svgPath() { return this._svgPath };
+    get svgPath() { return this._svgElem };
 
     constructor(
         /** The actual underlying svg path */
-        private _svgPath: SVGPathElement,
+        protected _svgElem: SVGPathElement,
         color: string = "#000000",
         width: number = 2,
     ) {
+        super(_svgElem);
         // Filling will have to be implemented by drawing thick paths
         // instead. This is again with a pixel based eraser in mind.
-        this._svgPath.setAttribute("fill", "none");
+        this._svgElem.setAttribute("fill", "none");
 
         this.setColor(color);
         this.setStrokeWidth(width);
@@ -38,7 +41,7 @@ export class SVGCanvasPath {
     }
 
     private render() {
-        this._svgPath.setAttribute("d", this.stroke + this.tipStroke);
+        this._svgElem.setAttribute("d", this.stroke + this.tipStroke);
     }
 
     /** Clear the entire stroke */
@@ -82,16 +85,11 @@ export class SVGCanvasPath {
         this.render();
     }
 
-    /**
-     * Color can be in multiple formats, including hex with a prefixed # ("HTML
-     * Style Colors").
-     */
     public setColor(color: string): void {
-        this._svgPath.setAttribute("stroke", color);
+        this._svgElem.setAttribute("stroke", color);
     }
 
     public setStrokeWidth(width: number): void {
-        this._svgPath.setAttribute("stroke-width", width.toString());
+        this._svgElem.setAttribute("stroke-width", width.toString());
     }
-
 }
