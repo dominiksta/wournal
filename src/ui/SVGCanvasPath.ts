@@ -4,7 +4,8 @@
  *
  * In order to be able to implement a pixel based eraser that can split lines
  * effectively, it was decided to limit svg path commands to just "M" (starting
- * point) and "L" (draw line to give position).
+ * point), "L" (draw line to give position) and "Z" (to smoothly close forms
+ * like rectangles).
  */
 export class SVGCanvasPath {
 
@@ -57,6 +58,11 @@ export class SVGCanvasPath {
     /** Add a line from current last position to given position */
     public addLineToPoint(pt: {x: number, y: number}): void {
         this.stroke += ` L${pt.x} ${pt.y}`;
+        this.render();
+    }
+
+    public close(): void {
+        this.stroke += " Z";
         this.render();
     }
 
