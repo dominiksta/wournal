@@ -11,10 +11,9 @@ let wournalDoc = new WournalDocument(
     document.getElementById("wournal-document") as HTMLDivElement
 );
 
-wournalDoc.newPage(600, 400);
-wournalDoc.newPage(600, 400);
-
-let doc = document.getElementById("wournal-document");
+for(let i = 0; i < 100; i++) {
+    wournalDoc.newPage(600, 400);
+}
 
 (<any>window).wournalDoc = wournalDoc;
 

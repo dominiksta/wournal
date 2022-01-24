@@ -43,10 +43,6 @@ export class WournalPage {
         this.addLayer("", true);
 
         this.currentTool = new SVGCanvasToolPen(this);
-
-        this.toolLayer.addEventListener("mousedown", this.onMouseDown.bind(this));
-        this.toolLayer.addEventListener("mousemove", this.onMouseMove.bind(this));
-        this.toolLayer.addEventListener("mouseup", this.onMouseUp.bind(this));
     }
 
     public addLayer(name: string = "", makeActive: boolean = false): void {
@@ -80,16 +76,16 @@ export class WournalPage {
 
     public getActivePaintLayer() { return this.activePaintLayer; }
 
-    private onMouseDown(e: MouseEvent) {
+    public onMouseDown(e: MouseEvent) {
         this._rect = this.toolLayer.getBoundingClientRect();
         this.currentTool.onMouseDown(e);
     }
 
-    private onMouseMove(e: MouseEvent) {
+    public onMouseMove(e: MouseEvent) {
         this.currentTool.onMouseMove(e);
     }
 
-    private onMouseUp(e: MouseEvent) {
+    public onMouseUp(e: MouseEvent) {
         this.currentTool.onMouseUp(e);
     }
 
