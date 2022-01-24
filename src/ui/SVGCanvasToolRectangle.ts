@@ -20,7 +20,7 @@ export class SVGCanvasToolRectangle extends SVGCanvasTool {
 
     public onMouseDown(e: MouseEvent): void {
         this.path = SVGCanvasPath.fromNewPath(this.page.display.ownerDocument);
-        this.pointStart = this.page.posForEvent(e)
+        this.pointStart = this.page.globalCoordsToCanvas({x: e.x, y: e.y})
         this.page.getActivePaintLayer().appendChild(this.path.svgPath);
     }
 
@@ -31,7 +31,7 @@ export class SVGCanvasToolRectangle extends SVGCanvasTool {
     public onMouseMove(e: MouseEvent): void {
         if (this.path == null) return;
         this.path.startAt(this.pointStart);
-        const mouse = this.page.posForEvent(e);
+        const mouse = this.page.globalCoordsToCanvas({x: e.x, y: e.y});
 
         const goingRight = mouse.x > this.pointStart.x;
         const goingDown = mouse.y > this.pointStart.y;

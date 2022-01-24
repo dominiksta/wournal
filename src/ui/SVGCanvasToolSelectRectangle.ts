@@ -1,16 +1,23 @@
 import { LOG } from "../util/Logging";
+import { SVGUtils } from "../util/SVGUtils";
 import { SVGCanvasTool } from "./SVGCanvasTool";
 import { WournalPage } from "./WournalPage";
 
 export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
     protected cursor = "default";
 
-    private state: "idle" | "selecting" | "moving" | "resizing" = "idle";
+    private state: "idle" | "selecting" | "selected" | "moving" | "resizing"
+        = "idle";
 
     private selectionDisplay: SVGRectElement = null;
-    private selectionCoords: {
-        startX: number, startY: number, endX: number, endY: number
-    };
+
+    /** The initial position after mouse is pressed down */
+    private mouseStart: {x: number, y: number};
+    /** The current selection rectangle */
+    private selectionRect: DOMRect;
+
+    /** The currently selected elements */
+    private selectionElems: SVGGraphicsElement[] = [];
 
     constructor(
         protected page: WournalPage,
@@ -20,14 +27,11 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
     }
 
     public onMouseDown(e: MouseEvent): void {
-        const mouse = this.page.posForEvent(e);
+        const mouse = this.page.globalCoordsToCanvas({x: e.x, y: e.y});
         switch(this.state) {
             case "idle":
                 this.state = "selecting";
-                this.selectionCoords = {
-                    startX: mouse.x, startY: mouse.y,
-                    endX: mouse.x, endY: mouse.y,
-                }
+                this.mouseStart = {x: mouse.x, y: mouse.y}
                 this.selectionDisplay =
                     this.page.toolLayer.ownerDocument.createElementNS(
                         "http://www.w3.org/2000/svg", "rect"
@@ -39,7 +43,10 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
                 this.page.toolLayer.appendChild(this.selectionDisplay);
                 break;
             case "selecting":
+                LOG.error("onMouseDown called in selecting state - " +
+                    "state set incorrectly?")
                 break;
+            case "selected":
             case "moving":
             case "resizing":
                 LOG.error("not implemented yet")
@@ -51,9 +58,27 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
             case "idle":
                 break;
             case "selecting":
-                this.page.toolLayer.removeChild(this.selectionDisplay);
-                this.state = "idle";
+                this.selectionElems = [];
+                for (let el of this.page.getActivePaintLayer().children) {
+                    if (!(el instanceof SVGGraphicsElement)) continue;
+                    LOG.info(this.selectionRect);
+                    LOG.info(el.getBoundingClientRect());
+                    if (SVGUtils.rectInRect(
+                        this.selectionRect, this.page.globalDOMRectToCanvas(
+                            el.getBoundingClientRect())
+                    )) {
+                        this.selectionElems.push(el);
+                    }
+                }
+                if (this.selectionElems.length == 0) {
+                    this.page.toolLayer.removeChild(this.selectionDisplay);
+                    this.state = "idle";
+                } else {
+                    this.selectionDisplay.style.cursor = "move";
+                    this.state = "selected";
+                }
                 break;
+            case "selected":
             case "moving":
             case "resizing":
                 LOG.error("not implemented yet")
@@ -63,27 +88,28 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
     public onMouseMove(e: MouseEvent): void {
         if (this.state === "idle") return;
 
-        const mouse = this.page.posForEvent(e);
+        const mouse = this.page.globalCoordsToCanvas({x: e.x, y: e.y});
 
-        let c = this.selectionCoords;
-        c.endX = mouse.x; c.endY = mouse.y;
-
-        let bounds = {
-            highX: Math.max(c.endX, c.startX), lowX: Math.min(c.endX, c.startX),
-            highY: Math.max(c.endY, c.startY), lowY: Math.min(c.endY, c.startY),
-        }
+        this.selectionRect = DOMRect.fromRect({
+            x: Math.min(mouse.x, this.mouseStart.x),
+            y: Math.min(mouse.y, this.mouseStart.y),
+            width: Math.abs(mouse.x - this.mouseStart.x),
+            height: Math.abs(mouse.y - this.mouseStart.y),
+        });
+        let s = this.selectionRect;
 
         switch(this.state) {
             case "selecting":
-                this.selectionDisplay.setAttribute("x", bounds.lowX.toString());
-                this.selectionDisplay.setAttribute("y", bounds.lowY.toString());
+                this.selectionDisplay.setAttribute("x", s.left.toString());
+                this.selectionDisplay.setAttribute("y", s.top.toString());
                 this.selectionDisplay.setAttribute(
-                    "width", (bounds.highX - bounds.lowX).toString() + "px",
+                    "width", (s.right - s.left).toString() + "px",
                 );
                 this.selectionDisplay.setAttribute(
-                    "height", (bounds.highY - bounds.lowY).toString() + "px",
+                    "height", (s.bottom - s.top).toString() + "px",
                 );
                 break;
+            case "selected":
             case "moving":
             case "resizing":
                 LOG.error("not implemented yet")

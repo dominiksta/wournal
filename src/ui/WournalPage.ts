@@ -106,10 +106,23 @@ export class WournalPage {
         }
     }
 
-    public posForEvent(e: MouseEvent): {x: number, y: number} {
+    /** Translate x and y to canvas coords */
+    public globalCoordsToCanvas(
+        pt: {x: number, y: number}
+    ): {x: number, y: number} {
         return {
-            x: e.x - this._rect.left,
-            y: e.y - this._rect.top
+            x: pt.x - this._rect.left,
+            y: pt.y - this._rect.top
         };
+    }
+
+    /** Translate r to canvas coords */
+    public globalDOMRectToCanvas(r: DOMRect): DOMRect {
+        return DOMRect.fromRect({
+            x: r.x - this._rect.left,
+            y: r.y - this._rect.top,
+            width: r.width,
+            height: r.height,
+        });
     }
 }

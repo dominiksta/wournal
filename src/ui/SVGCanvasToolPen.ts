@@ -23,7 +23,7 @@ export class SVGCanvasToolPen extends SVGCanvasTool {
     public onMouseDown(e: MouseEvent): void {
         this.path = SVGCanvasPath.fromNewPath(this.page.display.ownerDocument);
         this.mouseBuffer = [];
-        var pt = this.page.posForEvent(e);
+        var pt = this.page.globalCoordsToCanvas({x: e.x, y: e.y});
         this.appendToBuffer(pt);
         this.path.startAt(pt);
         this.page.getActivePaintLayer().appendChild(this.path.svgPath);
@@ -35,7 +35,7 @@ export class SVGCanvasToolPen extends SVGCanvasTool {
 
     public onMouseMove(e: MouseEvent): void {
         if (this.path) {
-            this.appendToBuffer(this.page.posForEvent(e));
+            this.appendToBuffer(this.page.globalCoordsToCanvas({x: e.x, y: e.y}));
             this.updateSvgPath();
         }
     }
