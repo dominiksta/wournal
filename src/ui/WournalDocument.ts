@@ -1,9 +1,9 @@
 import { Newable } from "../util/Newable";
-import { SVGCanvas } from "./SVGCanvas";
+import { WournalPage } from "./WournalPage";
 import { SVGCanvasTool } from "./SVGCanvasTool";
 
 export class WournalDocument {
-    private canvases: SVGCanvas[] = [];
+    private pages: WournalPage[] = [];
 
     constructor(public display: HTMLDivElement) {}
 
@@ -13,19 +13,13 @@ export class WournalDocument {
         width: number = this.defaultPageDimensions.width,
         height: number = this.defaultPageDimensions.height
     ): void {
-        let svg = this.display.ownerDocument.createElementNS(
-            "http://www.w3.org/2000/svg", "svg"
-        );
-        svg.setAttribute("width", `${width}px`);
-        svg.setAttribute("height", `${height}px`);
-        this.display.appendChild(svg);
-
-        let canvas = new SVGCanvas(svg);
-        this.canvases.push(canvas);
+        let page = new WournalPage(this, width, height);
+        this.display.appendChild(page.display);
+        this.pages.push(page);
     }
 
     public setTool(tool: Newable<SVGCanvasTool>) {
-        this.canvases.forEach((canvas) => {
+        this.pages.forEach((canvas) => {
             canvas.currentTool = new tool(canvas);
         })
     }

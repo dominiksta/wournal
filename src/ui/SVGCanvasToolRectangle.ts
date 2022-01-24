@@ -1,5 +1,5 @@
 import { LOG } from "../util/Logging";
-import { SVGCanvas } from "./SVGCanvas";
+import { WournalPage } from "./WournalPage";
 import { SVGCanvasPath } from "./SVGCanvasPath";
 import { SVGCanvasTool } from "./SVGCanvasTool";
 
@@ -12,18 +12,16 @@ export class SVGCanvasToolRectangle extends SVGCanvasTool {
     private pointStart: {x: number, y: number} = null;
 
     constructor(
-        protected canvas: SVGCanvas,
+        protected canvas: WournalPage,
     ) {
         super(canvas);
-        this.canvas.svgElement.style.cursor = this.cursor;
+        this.canvas.toolLayer.style.cursor = this.cursor;
     }
 
     public onMouseDown(e: MouseEvent): void {
-        this.path = SVGCanvasPath.fromNewPath(
-            this.canvas.svgElement.ownerDocument
-        );
+        this.path = SVGCanvasPath.fromNewPath(this.canvas.display.ownerDocument);
         this.pointStart = this.canvas.posForEvent(e)
-        this.canvas.svgElement.appendChild(this.path.svgPath);
+        this.canvas.getActivePaintLayer().appendChild(this.path.svgPath);
     }
 
     public onMouseUp(e: MouseEvent): void {

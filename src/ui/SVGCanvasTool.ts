@@ -1,11 +1,11 @@
-import { SVGCanvas } from "./SVGCanvas";
+import { WournalPage } from "./WournalPage";
 
 export abstract class SVGCanvasTool {
 
     protected abstract cursor: string;
 
     constructor(
-        protected canvas: SVGCanvas
+        protected canvas: WournalPage
     ) {}
 
     abstract onMouseDown(e: MouseEvent): void;

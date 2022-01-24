@@ -1,5 +1,5 @@
 import { CONF } from "../util/Config";
-import { SVGCanvas } from "./SVGCanvas";
+import { WournalPage } from "./WournalPage";
 import { SVGCanvasPath } from "./SVGCanvasPath";
 import { SVGCanvasTool } from "./SVGCanvasTool";
 
@@ -14,21 +14,19 @@ export class SVGCanvasToolPen extends SVGCanvasTool {
     protected cursor = "url('res/cursor/pen.png'), auto";
 
     constructor(
-        protected canvas: SVGCanvas,
+        protected canvas: WournalPage,
     ) {
         super(canvas);
-        this.canvas.svgElement.style.cursor = this.cursor;
+        this.canvas.toolLayer.style.cursor = this.cursor;
     }
 
     public onMouseDown(e: MouseEvent): void {
-        this.path = SVGCanvasPath.fromNewPath(
-            this.canvas.svgElement.ownerDocument
-        );
+        this.path = SVGCanvasPath.fromNewPath(this.canvas.display.ownerDocument);
         this.mouseBuffer = [];
         var pt = this.canvas.posForEvent(e);
         this.appendToBuffer(pt);
         this.path.startAt(pt);
-        this.canvas.svgElement.appendChild(this.path.svgPath);
+        this.canvas.getActivePaintLayer().appendChild(this.path.svgPath);
     }
 
     public onMouseUp(e: MouseEvent): void {

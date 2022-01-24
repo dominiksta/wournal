@@ -8,13 +8,6 @@ body {
     max-width: 700px;
 }
 
-#wournal-document > svg {
-    border: 1px solid;
-    margin-top: 4px;
-    margin-left: 4px;
-    cursor: default;
-}
-
 #toolbar {
     position: absolute;
     left: 14px;
