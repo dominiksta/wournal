@@ -1,18 +1,15 @@
 import { CONF } from "../util/Config";
 import { SVGCanvas } from "./SVGCanvas";
+import { SVGCanvasPath } from "./SVGCanvasPath";
 import { SVGCanvasTool } from "./SVGCanvasTool";
 
 export class SVGCanvasToolPen extends SVGCanvasTool {
 
-    /** The width of a stroke */
-    private strokeWidth = 2;
     /** Buffer for smoothing. Contains the last positions of the mouse cursor */
     private mouseBuffer: {x: number, y: number}[] = [];
 
     /** The svg path for the current line */
-    private path: SVGPathElement | null = null;
-    /** The stroke path for the current line */
-    private pathStroke = "";
+    private path: SVGCanvasPath = null;
 
     protected cursor = "url('res/cursor/pen.png'), auto";
 
@@ -24,16 +21,14 @@ export class SVGCanvasToolPen extends SVGCanvasTool {
     }
 
     public onMouseDown(e: MouseEvent): void {
-        this.path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        this.path.setAttribute("fill", "none");
-        this.path.setAttribute("stroke", "#000");
-        this.path.setAttribute("stroke-width", this.strokeWidth.toString());
+        this.path = SVGCanvasPath.fromNewPath(
+            this.canvas.svgElement.ownerDocument
+        );
         this.mouseBuffer = [];
         var pt = this.canvas.posForEvent(e);
         this.appendToBuffer(pt);
-        this.pathStroke = "M" + pt.x + " " + pt.y;
-        this.path.setAttribute("d", this.pathStroke);
-        this.canvas.svgElement.appendChild(this.path);
+        this.path.startAt(pt);
+        this.canvas.svgElement.appendChild(this.path.svgPath);
     }
 
     public onMouseUp(e: MouseEvent): void {
@@ -81,18 +76,16 @@ export class SVGCanvasToolPen extends SVGCanvasTool {
 
         if (pt) {
             // Get the smoothed part of the path that will not change
-            this.pathStroke += " L" + pt.x + " " + pt.y;
+            this.path.addLineToPoint(pt);
 
             // Get the last part of the path (close to the current mouse position)
             // This part will change if the mouse moves again
-            var tmpPath = "";
+            var tipStroke = [];
             for (var offset = 2; offset < this.mouseBuffer.length; offset += 2) {
                 pt = this.getAveragePoint(offset);
-                tmpPath += " L" + pt.x + " " + pt.y;
+                tipStroke.push(pt);
             }
-
-            // Set the complete current path coordinates
-            this.path.setAttribute("d", this.pathStroke + tmpPath);
+            this.path.setTipStroke(tipStroke);
         }
     }
 }
