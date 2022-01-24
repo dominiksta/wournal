@@ -31,8 +31,9 @@ export class WournalPage {
     ) {
         this.display = doc.display.ownerDocument.createElement("div");
         this.display.setAttribute("class", "wournal-page");
-        this.display.style.border = "1px solid black";
-        this.display.style.margin = "10px";
+
+        this.display.style.border = "2px solid gray";
+        this.display.style.margin = "10px auto 10px auto";
 
         this.toolLayer = this.doc.display.ownerDocument.createElementNS(
             "http://www.w3.org/2000/svg", "svg"
@@ -40,12 +41,17 @@ export class WournalPage {
         this.toolLayer.style.position = "absolute";
 
         this.setSize(width, height);
+
+        let bg = this.addLayer("background", true);
+        bg.style.background = "white";
         this.addLayer("", true);
 
         this.currentTool = new SVGCanvasToolPen(this);
     }
 
-    public addLayer(name: string = "", makeActive: boolean = false): void {
+    public addLayer(
+        name: string = "", makeActive: boolean = false
+    ): SVGSVGElement {
         let svg = this.doc.display.ownerDocument.createElementNS(
             "http://www.w3.org/2000/svg", "svg"
         );
@@ -56,16 +62,18 @@ export class WournalPage {
         this.paintLayers.push({name: n, svg: svg});
         this.drawLayers();
         if (makeActive) this.setActivePaintLayer(n);
+        return svg;
     }
 
     private drawLayers() {
         while (this.display.firstChild)
             this.display.removeChild(this.display.lastChild);
 
-        this.display.appendChild(this.toolLayer);
         for (let layer of this.paintLayers) {
-            this.display.insertBefore(layer.svg, this.display.firstChild);
+            // this.display.insertBefore(layer.svg, this.display.firstChild);
+            this.display.appendChild(layer.svg);
         }
+        this.display.appendChild(this.toolLayer);
     }
 
     public setActivePaintLayer(name: string) {

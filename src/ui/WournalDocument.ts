@@ -50,6 +50,7 @@ export class WournalDocument {
 
     private onMouseDown(e: MouseEvent) {
         this.toolPage = this.pageAtPoint(e);
+        if (this.toolPage == null) return;
         this.toolPage.onMouseDown(e);
     }
 

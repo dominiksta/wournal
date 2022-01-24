@@ -1,17 +1,21 @@
-html {
+html, body {
     padding: 0px;
     margin: 0px;
+    font-family: sans-serif;
 }
 
-body {
-    margin: 20px auto 0 auto;
-    max-width: 700px;
+#wournal-document {
+    background: #333333;
+    padding: 20px;
 }
 
 #toolbar {
-    position: absolute;
+    position: fixed;
+    z-index: 1030;
     left: 14px;
     top: 12px;
+    background: lightgray;
+    color: black;
 }
 
 #toolbar > .toolbar-item {
