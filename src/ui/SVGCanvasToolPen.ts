@@ -14,19 +14,19 @@ export class SVGCanvasToolPen extends SVGCanvasTool {
     protected cursor = "url('res/cursor/pen.png'), auto";
 
     constructor(
-        protected canvas: WournalPage,
+        protected page: WournalPage,
     ) {
-        super(canvas);
-        this.canvas.toolLayer.style.cursor = this.cursor;
+        super(page);
+        this.page.toolLayer.style.cursor = this.cursor;
     }
 
     public onMouseDown(e: MouseEvent): void {
-        this.path = SVGCanvasPath.fromNewPath(this.canvas.display.ownerDocument);
+        this.path = SVGCanvasPath.fromNewPath(this.page.display.ownerDocument);
         this.mouseBuffer = [];
-        var pt = this.canvas.posForEvent(e);
+        var pt = this.page.posForEvent(e);
         this.appendToBuffer(pt);
         this.path.startAt(pt);
-        this.canvas.getActivePaintLayer().appendChild(this.path.svgPath);
+        this.page.getActivePaintLayer().appendChild(this.path.svgPath);
     }
 
     public onMouseUp(e: MouseEvent): void {
@@ -35,7 +35,7 @@ export class SVGCanvasToolPen extends SVGCanvasTool {
 
     public onMouseMove(e: MouseEvent): void {
         if (this.path) {
-            this.appendToBuffer(this.canvas.posForEvent(e));
+            this.appendToBuffer(this.page.posForEvent(e));
             this.updateSvgPath();
         }
     }

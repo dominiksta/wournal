@@ -1,5 +1,6 @@
 import { SVGCanvasToolPen } from "./ui/SVGCanvasToolPen";
 import { SVGCanvasToolRectangle } from "./ui/SVGCanvasToolRectangle";
+import { SVGCanvasToolSelectRectangle } from "./ui/SVGCanvasToolSelectRectangle";
 import { WournalDocument } from "./ui/WournalDocument";
 import { CONF } from "./util/Config";
 
@@ -30,4 +31,7 @@ document.getElementById("btnToolPen").addEventListener("click", () => {
 });
 document.getElementById("btnToolRectangle").addEventListener("click", () => {
     wournalDoc.setTool(SVGCanvasToolRectangle);
+});
+document.getElementById("btnToolSelectRectangle").addEventListener("click", () => {
+    wournalDoc.setTool(SVGCanvasToolSelectRectangle);
 });

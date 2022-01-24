@@ -12,16 +12,16 @@ export class SVGCanvasToolRectangle extends SVGCanvasTool {
     private pointStart: {x: number, y: number} = null;
 
     constructor(
-        protected canvas: WournalPage,
+        protected page: WournalPage,
     ) {
-        super(canvas);
-        this.canvas.toolLayer.style.cursor = this.cursor;
+        super(page);
+        this.page.toolLayer.style.cursor = this.cursor;
     }
 
     public onMouseDown(e: MouseEvent): void {
-        this.path = SVGCanvasPath.fromNewPath(this.canvas.display.ownerDocument);
-        this.pointStart = this.canvas.posForEvent(e)
-        this.canvas.getActivePaintLayer().appendChild(this.path.svgPath);
+        this.path = SVGCanvasPath.fromNewPath(this.page.display.ownerDocument);
+        this.pointStart = this.page.posForEvent(e)
+        this.page.getActivePaintLayer().appendChild(this.path.svgPath);
     }
 
     public onMouseUp(e: MouseEvent): void {
@@ -31,7 +31,7 @@ export class SVGCanvasToolRectangle extends SVGCanvasTool {
     public onMouseMove(e: MouseEvent): void {
         if (this.path == null) return;
         this.path.startAt(this.pointStart);
-        const mouse = this.canvas.posForEvent(e);
+        const mouse = this.page.posForEvent(e);
 
         const goingRight = mouse.x > this.pointStart.x;
         const goingDown = mouse.y > this.pointStart.y;

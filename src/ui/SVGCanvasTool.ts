@@ -5,7 +5,7 @@ export abstract class SVGCanvasTool {
     protected abstract cursor: string;
 
     constructor(
-        protected canvas: WournalPage
+        protected page: WournalPage
     ) {}
 
     abstract onMouseDown(e: MouseEvent): void;
