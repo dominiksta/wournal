@@ -49,6 +49,16 @@ export abstract class WournalCanvasElement {
         this.updateTransformAttribute();
     }
 
+    currentTransformToInitial() {
+        this.initialTransform = {
+            translateX: this.currentTransform.translateX,
+            translateY: this.currentTransform.translateY,
+            rotateDeg: this.currentTransform.rotateDeg,
+            scaleX: this.currentTransform.scaleX,
+            scaleY: this.currentTransform.scaleY
+        }
+    }
+
     translate(x: number, y: number): void {
         this.currentTransform.translateX += x;
         this.currentTransform.translateY += y;

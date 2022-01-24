@@ -18,8 +18,6 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
     private mouseStartSelect: {x: number, y: number};
     /** The initial position after mouse is pressed down (Canvas Coordinates) */
     private mouseStartSelected: {x: number, y: number};
-    /** The current selection rectangle (Canvas Coordinates) */
-    private selectionRect: DOMRect;
 
     /** The currently selected elements */
     private selectionElems: WournalCanvasElement[] = [];
@@ -52,7 +50,7 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
                     "state set incorrectly?")
                 break;
             case "selected":
-                if (SVGUtils.pointInRect(mouse, this.selectionRect)) {
+                if (SVGUtils.pointInRect(mouse, this.currentDisplayRect())) {
                     this.mouseStartSelected = {x: mouse.x, y: mouse.y};
                     this.state = "moving";
                 } else {
@@ -72,10 +70,11 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
                 break;
             case "selecting":
                 this.selectionElems = [];
+                const selection = this.currentDisplayRect();
                 for (let el of this.page.getActivePaintLayer().children) {
                     if (!(el instanceof SVGGraphicsElement)) continue;
                     if (SVGUtils.rectInRect(
-                        this.selectionRect, this.page.globalDOMRectToCanvas(
+                        selection, this.page.globalDOMRectToCanvas(
                             el.getBoundingClientRect())
                     )) {
                         if (el instanceof SVGPathElement)
@@ -95,12 +94,25 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
                     "state set incorrectly?")
                 break;
             case "moving":
-                this.page.toolLayer.removeChild(this.selectionDisplay);
-                this.state = "idle";
+                for (let el of this.selectionElems)
+                    el.currentTransformToInitial();
+
+                const r = this.currentDisplayRect();
+                this.selectionDisplay.setAttribute("x", r.left.toString());
+                this.selectionDisplay.setAttribute("y", r.top.toString());
+                this.selectionDisplay.setAttribute("transform", "");
+
+                this.state = "selected";
                 break;
             case "resizing":
                 LOG.error("not implemented yet")
         }
+    }
+
+    private currentDisplayRect(): DOMRect {
+        return this.page.globalDOMRectToCanvas(
+            this.selectionDisplay.getBoundingClientRect()
+        );
     }
 
     public onMouseMove(e: MouseEvent): void {
@@ -110,13 +122,12 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
 
         switch(this.state) {
             case "selecting":
-                this.selectionRect = DOMRect.fromRect({
+                let s = DOMRect.fromRect({
                     x: Math.min(mouse.x, this.mouseStartSelect.x),
                     y: Math.min(mouse.y, this.mouseStartSelect.y),
                     width: Math.abs(mouse.x - this.mouseStartSelect.x),
                     height: Math.abs(mouse.y - this.mouseStartSelect.y),
                 });
-                let s = this.selectionRect;
                 this.selectionDisplay.setAttribute("x", s.left.toString());
                 this.selectionDisplay.setAttribute("y", s.top.toString());
                 this.selectionDisplay.setAttribute(
