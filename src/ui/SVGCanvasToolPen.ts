@@ -17,6 +17,8 @@ export class SVGCanvasToolPen extends SVGCanvasTool {
 
     public onMouseDown(e: MouseEvent): void {
         this.toolUseStartPage = this.getActivePage();
+        if (this.toolUseStartPage === null) return;
+
         this.path = SVGCanvasPath.fromNewPath(this.toolUseStartPage.display.ownerDocument);
         this.mouseBuffer = [];
         var pt = this.toolUseStartPage.globalCoordsToCanvas({x: e.x, y: e.y});

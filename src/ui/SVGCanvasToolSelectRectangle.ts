@@ -24,6 +24,11 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
     private selectionElems: WournalCanvasElement[] = [];
 
     public onMouseDown(e: MouseEvent): void {
+        if (this.getActivePage() == null) {
+            this.toolUseStartPage?.toolLayer.removeChild(this.selectionDisplay);
+            this.state = "idle";
+            return;
+        }
         const mouse = this.getActivePage().globalCoordsToCanvas({x: e.x, y: e.y});
         switch(this.state) {
             case "idle":
@@ -61,6 +66,7 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
     }
 
     public onMouseUp(e: MouseEvent): void {
+        if (this.getActivePage() == null) return;
         switch(this.state) {
             case "idle":
                 break;
@@ -113,6 +119,7 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
 
     public onMouseMove(e: MouseEvent): void {
         if (this.state === "idle") return;
+        if (this.getActivePage() == null) return;
 
         const mouse = this.toolUseStartPage.globalCoordsToCanvas({x: e.x, y: e.y});
 

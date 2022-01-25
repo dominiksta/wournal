@@ -13,11 +13,11 @@ export class WournalDocument {
     private currentTool: SVGCanvasTool;
 
     constructor(public display: HTMLDivElement) {
-        this.setTool(SVGCanvasToolPen);
-
         this.display.addEventListener("mouseup", this.onMouseUp.bind(this));
         this.display.addEventListener("mousedown", this.onMouseDown.bind(this));
         this.display.addEventListener("mousemove", this.onMouseMove.bind(this));
+
+        this.setTool(SVGCanvasToolPen);
     }
 
     public defaultPageDimensions = {height: 600, width: 400};
@@ -29,13 +29,14 @@ export class WournalDocument {
         let page = new WournalPage(this, width, height);
         this.display.appendChild(page.display);
         this.pages.push(page);
+        for(let page of this.pages)
+            page.toolLayer.style.cursor = this.currentTool.idleCursor;
     }
 
     public setTool(tool: Newable<SVGCanvasTool>) {
         this.currentTool = new tool(this.getActivePage.bind(this));
-        for(let page of this.pages) {
+        for(let page of this.pages)
             page.toolLayer.style.cursor = this.currentTool.idleCursor;
-        }
     }
 
     private pageAtPoint(pt: {x: number, y: number}) {
@@ -60,18 +61,15 @@ export class WournalDocument {
 
     private onMouseDown(e: MouseEvent) {
         this.activePage = this.pageAtPoint(e);
-        if (this.activePage == null) return;
-        this.activePage.onMouseDown(e);
+        if (this.activePage) this.activePage.onMouseDown(e);
         this.currentTool.onMouseDown(e);
     }
 
     private onMouseUp(e: MouseEvent) {
-        if (this.activePage == null) return;
         this.currentTool.onMouseUp(e);
     }
 
     private onMouseMove(e: MouseEvent) {
-        if (this.activePage == null) return;
         this.currentTool.onMouseMove(e);
     }
 

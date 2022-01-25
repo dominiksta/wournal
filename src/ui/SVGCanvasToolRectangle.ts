@@ -14,6 +14,8 @@ export class SVGCanvasToolRectangle extends SVGCanvasTool {
 
     public onMouseDown(e: MouseEvent): void {
         this.toolUseStartPage = this.getActivePage();
+        if (this.toolUseStartPage === null) return;
+
         this.path = SVGCanvasPath.fromNewPath(this.toolUseStartPage.display.ownerDocument);
         this.pointStart = this.toolUseStartPage.globalCoordsToCanvas({x: e.x, y: e.y})
         this.toolUseStartPage.getActivePaintLayer().appendChild(this.path.svgPath);
