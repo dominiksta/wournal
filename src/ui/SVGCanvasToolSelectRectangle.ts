@@ -1,3 +1,4 @@
+import { DOMUtils } from "../util/DOMUtils";
 import { LOG } from "../util/Logging";
 import { SVGUtils } from "../util/SVGUtils";
 import { SVGCanvasPath } from "./SVGCanvasPath";
@@ -25,7 +26,7 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
 
     public onMouseDown(e: MouseEvent): void {
         if (this.getActivePage() == null) {
-            this.toolUseStartPage?.toolLayer.removeChild(this.selectionDisplay);
+            this.clearSelectionDisplay();
             this.state = "idle";
             return;
         }
@@ -55,11 +56,14 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
                     this.mouseStartSelected = {x: mouse.x, y: mouse.y};
                     this.state = "moving";
                 } else {
-                    this.toolUseStartPage.toolLayer.removeChild(this.selectionDisplay);
+                    this.clearSelectionDisplay();
                     this.state = "idle";
                 }
                 break;
             case "moving":
+                LOG.error("onMouseDown called in moving state - " +
+                    "state set incorrectly?")
+                break;
             case "resizing":
                 LOG.error("not implemented yet")
         }
@@ -84,7 +88,7 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
                     }
                 }
                 if (this.selectionElems.length == 0) {
-                    this.toolUseStartPage.toolLayer.removeChild(this.selectionDisplay);
+                    this.clearSelectionDisplay();
                     this.state = "idle";
                 } else {
                     this.selectionDisplay.style.cursor = "move";
@@ -160,7 +164,14 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
         }
     }
 
+    private clearSelectionDisplay () {
+        if (this.toolUseStartPage)
+            DOMUtils.maybeRemoveChild(
+                this.toolUseStartPage.toolLayer, this.selectionDisplay
+            );
+    }
+
     onDeselect(): void {
-        this.toolUseStartPage?.toolLayer.removeChild(this.selectionDisplay);
+        this.clearSelectionDisplay();
     }
 }
