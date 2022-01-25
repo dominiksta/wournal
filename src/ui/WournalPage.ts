@@ -17,8 +17,6 @@ export class WournalPage {
     private paintLayers: {name: string, svg: SVGSVGElement}[] = [];
     public activePaintLayer: SVGSVGElement;
 
-    public currentTool: SVGCanvasTool;
-
     /**
      * The bounding rectangle of `_svgElement`. Only updated in `onMouseDown`
      * for better performance.
@@ -45,8 +43,6 @@ export class WournalPage {
         let bg = this.addLayer("background", true);
         bg.style.background = "white";
         this.addLayer("", true);
-
-        this.currentTool = new SVGCanvasToolPen(this);
     }
 
     public addLayer(
@@ -86,15 +82,6 @@ export class WournalPage {
 
     public onMouseDown(e: MouseEvent) {
         this._rect = this.toolLayer.getBoundingClientRect();
-        this.currentTool.onMouseDown(e);
-    }
-
-    public onMouseMove(e: MouseEvent) {
-        this.currentTool.onMouseMove(e);
-    }
-
-    public onMouseUp(e: MouseEvent) {
-        this.currentTool.onMouseUp(e);
     }
 
     public setSize(width: number, height: number) {

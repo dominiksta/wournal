@@ -3,13 +3,18 @@ import { WournalPage } from "./WournalPage";
 import { SVGCanvasTool } from "./SVGCanvasTool";
 import { SVGUtils } from "../util/SVGUtils";
 import { LOG } from "../util/Logging";
+import { SVGCanvasToolPen } from "./SVGCanvasToolPen";
 
 export class WournalDocument {
     private pages: WournalPage[] = [];
 
-    private toolPage: WournalPage = null;
+    private activePage: WournalPage = null;
+
+    private currentTool: SVGCanvasTool;
 
     constructor(public display: HTMLDivElement) {
+        this.setTool(SVGCanvasToolPen);
+
         this.display.addEventListener("mouseup", this.onMouseUp.bind(this));
         this.display.addEventListener("mousedown", this.onMouseDown.bind(this));
         this.display.addEventListener("mousemove", this.onMouseMove.bind(this));
@@ -27,9 +32,10 @@ export class WournalDocument {
     }
 
     public setTool(tool: Newable<SVGCanvasTool>) {
-        this.pages.forEach((canvas) => {
-            canvas.currentTool = new tool(canvas);
-        })
+        this.currentTool = new tool(this.getActivePage.bind(this));
+        for(let page of this.pages) {
+            page.toolLayer.style.cursor = this.currentTool.idleCursor;
+        }
     }
 
     private pageAtPoint(pt: {x: number, y: number}) {
@@ -48,20 +54,25 @@ export class WournalDocument {
         return result;
     }
 
+    public getActivePage() {
+        return this.activePage;
+    }
+
     private onMouseDown(e: MouseEvent) {
-        this.toolPage = this.pageAtPoint(e);
-        if (this.toolPage == null) return;
-        this.toolPage.onMouseDown(e);
+        this.activePage = this.pageAtPoint(e);
+        if (this.activePage == null) return;
+        this.activePage.onMouseDown(e);
+        this.currentTool.onMouseDown(e);
     }
 
     private onMouseUp(e: MouseEvent) {
-        if (this.toolPage == null) return;
-        this.toolPage.onMouseUp(e);
+        if (this.activePage == null) return;
+        this.currentTool.onMouseUp(e);
     }
 
     private onMouseMove(e: MouseEvent) {
-        if (this.toolPage == null) return;
-        this.toolPage.onMouseMove(e);
+        if (this.activePage == null) return;
+        this.currentTool.onMouseMove(e);
     }
 
 

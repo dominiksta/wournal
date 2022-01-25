@@ -8,25 +8,21 @@ export class SVGCanvasToolPen extends SVGCanvasTool {
     /** Buffer for smoothing. Contains the last positions of the mouse cursor */
     private mouseBuffer: {x: number, y: number}[] = [];
 
+    protected toolUseStartPage: WournalPage;
+
     /** The svg path for the current line */
     private path: SVGCanvasPath = null;
 
-    protected cursor = "url('res/cursor/pen.png'), auto";
-
-    constructor(
-        protected page: WournalPage,
-    ) {
-        super(page);
-        this.page.toolLayer.style.cursor = this.cursor;
-    }
+    public idleCursor = "url('res/cursor/pen.png'), auto";
 
     public onMouseDown(e: MouseEvent): void {
-        this.path = SVGCanvasPath.fromNewPath(this.page.display.ownerDocument);
+        this.toolUseStartPage = this.getActivePage();
+        this.path = SVGCanvasPath.fromNewPath(this.toolUseStartPage.display.ownerDocument);
         this.mouseBuffer = [];
-        var pt = this.page.globalCoordsToCanvas({x: e.x, y: e.y});
+        var pt = this.toolUseStartPage.globalCoordsToCanvas({x: e.x, y: e.y});
         this.appendToBuffer(pt);
         this.path.startAt(pt);
-        this.page.getActivePaintLayer().appendChild(this.path.svgPath);
+        this.toolUseStartPage.getActivePaintLayer().appendChild(this.path.svgPath);
     }
 
     public onMouseUp(e: MouseEvent): void {
@@ -35,7 +31,9 @@ export class SVGCanvasToolPen extends SVGCanvasTool {
 
     public onMouseMove(e: MouseEvent): void {
         if (this.path) {
-            this.appendToBuffer(this.page.globalCoordsToCanvas({x: e.x, y: e.y}));
+            this.appendToBuffer(
+                this.toolUseStartPage.globalCoordsToCanvas({x: e.x, y: e.y})
+            );
             this.updateSvgPath();
         }
     }

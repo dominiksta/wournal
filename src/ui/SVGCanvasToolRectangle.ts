@@ -6,22 +6,17 @@ import { SVGCanvasTool } from "./SVGCanvasTool";
 const TOOL_RECTANGLE_POINT_DIFF_PX = 5;
 
 export class SVGCanvasToolRectangle extends SVGCanvasTool {
-    protected cursor = "crosshair";
+    public idleCursor = "crosshair";
+    protected toolUseStartPage: WournalPage;
 
     private path: SVGCanvasPath = null;
     private pointStart: {x: number, y: number} = null;
 
-    constructor(
-        protected page: WournalPage,
-    ) {
-        super(page);
-        this.page.toolLayer.style.cursor = this.cursor;
-    }
-
     public onMouseDown(e: MouseEvent): void {
-        this.path = SVGCanvasPath.fromNewPath(this.page.display.ownerDocument);
-        this.pointStart = this.page.globalCoordsToCanvas({x: e.x, y: e.y})
-        this.page.getActivePaintLayer().appendChild(this.path.svgPath);
+        this.toolUseStartPage = this.getActivePage();
+        this.path = SVGCanvasPath.fromNewPath(this.toolUseStartPage.display.ownerDocument);
+        this.pointStart = this.toolUseStartPage.globalCoordsToCanvas({x: e.x, y: e.y})
+        this.toolUseStartPage.getActivePaintLayer().appendChild(this.path.svgPath);
     }
 
     public onMouseUp(e: MouseEvent): void {
@@ -31,7 +26,7 @@ export class SVGCanvasToolRectangle extends SVGCanvasTool {
     public onMouseMove(e: MouseEvent): void {
         if (this.path == null) return;
         this.path.startAt(this.pointStart);
-        const mouse = this.page.globalCoordsToCanvas({x: e.x, y: e.y});
+        const mouse = this.toolUseStartPage.globalCoordsToCanvas({x: e.x, y: e.y});
 
         const goingRight = mouse.x > this.pointStart.x;
         const goingDown = mouse.y > this.pointStart.y;

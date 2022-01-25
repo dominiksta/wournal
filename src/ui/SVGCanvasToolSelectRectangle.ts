@@ -6,7 +6,8 @@ import { WournalCanvasElement } from "./WournalCanvasElement";
 import { WournalPage } from "./WournalPage";
 
 export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
-    protected cursor = "default";
+    public idleCursor = "default";
+    protected toolUseStartPage: WournalPage;
 
     private state: "idle" | "selecting" | "selected" | "moving" | "resizing"
         = "idle";
@@ -22,39 +23,34 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
     /** The currently selected elements */
     private selectionElems: WournalCanvasElement[] = [];
 
-    constructor(
-        protected page: WournalPage,
-    ) {
-        super(page);
-        this.page.toolLayer.style.cursor = this.cursor;
-    }
-
     public onMouseDown(e: MouseEvent): void {
-        const mouse = this.page.globalCoordsToCanvas({x: e.x, y: e.y});
+        const mouse = this.getActivePage().globalCoordsToCanvas({x: e.x, y: e.y});
         switch(this.state) {
             case "idle":
+                this.toolUseStartPage = this.getActivePage();
                 this.state = "selecting";
                 this.mouseStartSelect = {x: mouse.x, y: mouse.y}
                 this.selectionDisplay =
-                    this.page.toolLayer.ownerDocument.createElementNS(
+                    this.toolUseStartPage.toolLayer.ownerDocument.createElementNS(
                         "http://www.w3.org/2000/svg", "rect"
                     );
                 this.selectionDisplay.setAttribute("stroke", "darkblue");
                 this.selectionDisplay.setAttribute("stroke-opacity", "0.5");
                 this.selectionDisplay.setAttribute("fill", "lightblue");
                 this.selectionDisplay.setAttribute("fill-opacity", "0.5");
-                this.page.toolLayer.appendChild(this.selectionDisplay);
+                this.toolUseStartPage.toolLayer.appendChild(this.selectionDisplay);
                 break;
             case "selecting":
                 LOG.error("onMouseDown called in selecting state - " +
                     "state set incorrectly?")
                 break;
             case "selected":
-                if (SVGUtils.pointInRect(mouse, this.currentDisplayRect())) {
+                if (this.toolUseStartPage === this.getActivePage() &&
+                    SVGUtils.pointInRect(mouse, this.currentDisplayRect())) {
                     this.mouseStartSelected = {x: mouse.x, y: mouse.y};
                     this.state = "moving";
                 } else {
-                    this.page.toolLayer.removeChild(this.selectionDisplay);
+                    this.toolUseStartPage.toolLayer.removeChild(this.selectionDisplay);
                     this.state = "idle";
                 }
                 break;
@@ -71,10 +67,10 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
             case "selecting":
                 this.selectionElems = [];
                 const selection = this.currentDisplayRect();
-                for (let el of this.page.getActivePaintLayer().children) {
+                for (let el of this.toolUseStartPage.getActivePaintLayer().children) {
                     if (!(el instanceof SVGGraphicsElement)) continue;
                     if (SVGUtils.rectInRect(
-                        selection, this.page.globalDOMRectToCanvas(
+                        selection, this.toolUseStartPage.globalDOMRectToCanvas(
                             el.getBoundingClientRect())
                     )) {
                         if (el instanceof SVGPathElement)
@@ -82,7 +78,7 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
                     }
                 }
                 if (this.selectionElems.length == 0) {
-                    this.page.toolLayer.removeChild(this.selectionDisplay);
+                    this.toolUseStartPage.toolLayer.removeChild(this.selectionDisplay);
                     this.state = "idle";
                 } else {
                     this.selectionDisplay.style.cursor = "move";
@@ -110,7 +106,7 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
     }
 
     private currentDisplayRect(): DOMRect {
-        return this.page.globalDOMRectToCanvas(
+        return this.toolUseStartPage.globalDOMRectToCanvas(
             this.selectionDisplay.getBoundingClientRect()
         );
     }
@@ -118,7 +114,7 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
     public onMouseMove(e: MouseEvent): void {
         if (this.state === "idle") return;
 
-        const mouse = this.page.globalCoordsToCanvas({x: e.x, y: e.y});
+        const mouse = this.toolUseStartPage.globalCoordsToCanvas({x: e.x, y: e.y});
 
         switch(this.state) {
             case "selecting":

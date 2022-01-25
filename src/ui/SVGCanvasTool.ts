@@ -2,10 +2,11 @@ import { WournalPage } from "./WournalPage";
 
 export abstract class SVGCanvasTool {
 
-    protected abstract cursor: string;
+    public abstract idleCursor: string;
+    protected abstract toolUseStartPage: WournalPage;
 
     constructor(
-        protected page: WournalPage
+        protected getActivePage: () => WournalPage
     ) {}
 
     abstract onMouseDown(e: MouseEvent): void;
