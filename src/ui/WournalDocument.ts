@@ -34,6 +34,7 @@ export class WournalDocument {
     }
 
     public setTool(tool: Newable<SVGCanvasTool>) {
+        this.currentTool?.onDeselect();
         this.currentTool = new tool(this.getActivePage.bind(this));
         for(let page of this.pages)
             page.toolLayer.style.cursor = this.currentTool.idleCursor;

@@ -59,4 +59,6 @@ export class SVGCanvasToolRectangle extends SVGCanvasTool {
         }
         this.path.close();
     }
+
+    onDeselect(): void {}
 }

@@ -159,4 +159,8 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
                 LOG.error("not implemented yet")
         }
     }
+
+    onDeselect(): void {
+        this.toolUseStartPage?.toolLayer.removeChild(this.selectionDisplay);
+    }
 }

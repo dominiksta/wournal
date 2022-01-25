@@ -86,4 +86,6 @@ export class SVGCanvasToolPen extends SVGCanvasTool {
             this.path.setTipStroke(tipStroke);
         }
     }
+
+    onDeselect(): void {}
 }

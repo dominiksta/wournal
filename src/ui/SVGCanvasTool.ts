@@ -11,6 +11,11 @@ export abstract class SVGCanvasTool {
         protected getActivePage: () => WournalPage
     ) {}
 
+    /**
+     * When the tool is deselected (from e.g. the toolbar), it might have to do
+     * some cleanup work.
+     */
+    abstract onDeselect(): void;
     abstract onMouseDown(e: MouseEvent): void;
     abstract onMouseMove(e: MouseEvent): void;
     abstract onMouseUp(e: MouseEvent): void;
