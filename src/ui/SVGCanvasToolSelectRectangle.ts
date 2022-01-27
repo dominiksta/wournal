@@ -16,10 +16,19 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
     /** A visual display of `selectionRect` */
     private selectionDisplay: SelectionDisplay = null;
 
-    /** The initial position after mouse is pressed down (Canvas Coordinates) */
-    private mouseStartSelect: {x: number, y: number};
-    /** The initial position after mouse is pressed down (Canvas Coordinates) */
-    private mouseStartSelected: {x: number, y: number};
+    /** Stores some mouse canvas coordinates needed for calculations */
+    private savedMouse: {
+        beforeSelect: {x: number, y: number},
+        beforeMove: {x: number, y: number}
+    } = {
+        beforeSelect: null, beforeMove: null
+    }
+
+    private savedSelectionRect: {
+        beforeResize: DOMRect,
+    } = {
+        beforeResize: null,
+    }
 
     /** The currently selected elements */
     private selectionElems: WournalCanvasElement[] = [];
@@ -35,7 +44,7 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
             case "idle":
                 this.toolUseStartPage = this.getActivePage();
                 this.state = "selecting";
-                this.mouseStartSelect = {x: mouse.x, y: mouse.y}
+                this.savedMouse.beforeSelect = {x: mouse.x, y: mouse.y}
                 this.selectionDisplay = new SelectionDisplay(this.getActivePage());
                 break;
             case "selecting":
@@ -51,14 +60,16 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
                 }
                 switch(this.selectionDisplay.lastClicked) {
                     case "main":
-                        this.mouseStartSelected = {x: mouse.x, y: mouse.y};
+                        this.savedMouse.beforeMove = {x: mouse.x, y: mouse.y};
                         this.state = "moving";
                         break;
                     case "top":
                     case "right":
                     case "bottom":
                     case "left":
-                        // this.state = "resizing";
+                        this.savedSelectionRect.beforeResize =
+                            DOMRect.fromRect(this.selectionDisplay.canvasRect());
+                        this.state = "resizing";
                         break;
                 }
                 break;
@@ -104,8 +115,9 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
                     "state set incorrectly?")
                 break;
             case "moving":
+            case "resizing":
                 for (let el of this.selectionElems)
-                    el.currentTransformToInitial();
+                    el.writeTransform();
 
                 const r = this.selectionDisplay.canvasRect();
                 this.selectionDisplay.setDimension(r);
@@ -113,8 +125,6 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
 
                 this.state = "selected";
                 break;
-            case "resizing":
-                LOG.error("not implemented yet")
         }
     }
 
@@ -127,10 +137,10 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
         switch(this.state) {
             case "selecting":
                 let s = DOMRect.fromRect({
-                    x: Math.min(mouse.x, this.mouseStartSelect.x),
-                    y: Math.min(mouse.y, this.mouseStartSelect.y),
-                    width: Math.abs(mouse.x - this.mouseStartSelect.x),
-                    height: Math.abs(mouse.y - this.mouseStartSelect.y),
+                    x: Math.min(mouse.x, this.savedMouse.beforeSelect.x),
+                    y: Math.min(mouse.y, this.savedMouse.beforeSelect.y),
+                    width: Math.abs(mouse.x - this.savedMouse.beforeSelect.x),
+                    height: Math.abs(mouse.y - this.savedMouse.beforeSelect.y),
                 });
                 this.selectionDisplay.setDimension(s);
                 break;
@@ -138,8 +148,8 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
                 break;
             case "moving":
                 let to = {
-                    x: mouse.x - this.mouseStartSelected.x,
-                    y: mouse.y - this.mouseStartSelected.y
+                    x: mouse.x - this.savedMouse.beforeMove.x,
+                    y: mouse.y - this.savedMouse.beforeMove.y
                 }
                 for (let el of this.selectionElems) {
                     el.resetTransform();
@@ -148,7 +158,50 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
                 this.selectionDisplay.translate(to);
                 break;
             case "resizing":
-                LOG.error("not implemented yet")
+                const before = this.savedSelectionRect.beforeResize;
+                const after = DOMRect.fromRect(this.savedSelectionRect.beforeResize);
+                const diff = {
+                    left: mouse.x - before.left,
+                    right: mouse.x - before.right,
+                    top: mouse.y - before.top,
+                    bottom: mouse.y - before.bottom,
+                }
+                for (let el of this.selectionElems)
+                    el.resetTransform();
+                let resizeFactor = 0;
+                switch (this.selectionDisplay.lastClicked) {
+                    case "main":
+                        LOG.error("lastClicked = main in resizing state");
+                        return;
+                    case "top":
+                        after.y += diff.top;
+                        after.height -= diff.top;
+                        resizeFactor = (before.bottom - mouse.y) /
+                            (before.bottom - before.top);
+                        break;
+                    case "right":
+                        after.width += diff.right;
+                        resizeFactor = (mouse.x - before.left) /
+                            (before.right - before.left);
+                        break;
+                    case "bottom":
+                        after.height += diff.bottom;
+                        resizeFactor = (mouse.y - before.top) /
+                            (before.bottom - before.top);
+                        break;
+                    case "left":
+                        after.x += diff.left;
+                        after.width -= diff.left;
+                        resizeFactor = (before.right - mouse.x) /
+                            (before.right - before.left);
+                        break;
+                }
+                for (let el of this.selectionElems)
+                    el.scaleInPlace(
+                        before, this.selectionDisplay.lastClicked, resizeFactor
+                    );
+                this.selectionDisplay.setDimension(after);
+                break;
         }
     }
 
@@ -271,6 +324,7 @@ class SelectionDisplay {
 
     /** Get main bounding client rect */
     canvasRect(): DOMRect {
+        // TODO: slightly too large because of edges
         return this.page.globalDOMRectToCanvas(
             this.mainRect.getBoundingClientRect()
         );

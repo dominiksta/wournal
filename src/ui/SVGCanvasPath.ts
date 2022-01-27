@@ -1,3 +1,4 @@
+import { LOG } from "../util/Logging";
 import { WournalCanvasElement } from "./WournalCanvasElement";
 
 /**
@@ -91,5 +92,105 @@ export class SVGCanvasPath extends WournalCanvasElement {
 
     public setStrokeWidth(width: number): void {
         this._svgElem.setAttribute("stroke-width", width.toString());
+    }
+
+    public writeTransform() {
+        let pathData = SVGCanvasPath.parseSvgPathData(
+            this._svgElem.getAttribute("d"));
+        const t = this.currentTransform;
+        for(let el of pathData) {
+            el.x *= this.currentTransform.scaleX;
+            el.y *= this.currentTransform.scaleY;
+            el.x += this.currentTransform.translateX;
+            el.y += this.currentTransform.translateY;
+        }
+        this._svgElem.setAttribute(
+            "d", SVGCanvasPath.svgPathDataToString(pathData)
+        );
+        this.resetTransform();
+    }
+
+    /**
+     * Take an svg path like those from from `parseSvgPathData` and turn it back
+     * into a string that can be set as the 'd' attribute of an svg path.
+     */
+    private static svgPathDataToString(
+        pathData: {t: string, x: number, y: number}[]
+    ): string {
+        let res = "";
+        for (let el of pathData) {
+            if (el.x && el.y)
+                res += `${el.t} ${el.x} ${el.y}`;
+            else
+                res += `${el.t}`; // for Z
+        }
+        return res;
+    }
+
+    /**
+     * Parse an svg path data string into a more digestible data structure.
+     */
+    public static parseSvgPathData(
+        path: string
+    ): {t: string, x: number, y: number}[] {
+        if (!path.startsWith("M"))
+            throw new Error(`Could not parse path: ${path}`)
+
+        let result: {t: string, x: number, y: number}[] = [];
+
+        // NOTE(dominiksta): This could have been written (much) more concisely
+        // *at the expense of speed*. I decided to implement it like this so
+        // that we would only have to loop through the string once.
+
+        let currX: number; // hold currently parsed X
+        let currY: number; // hold currently parsed Y
+        let currT: string; // hold current type (T)
+        let i = 0; // position in path string
+        let count = 0; // only used for error heuristics
+
+        while(i !== path.length) {
+            count++;
+            if (count > 5000)
+                throw new Error(
+                    `parsing point with more then 5000 points, assuming error`
+                )
+
+            currT = path[i];
+            // LOG.debug(`i: ${i}`);
+            if (path[i] === "M" || path[i] === "L") {
+                // skip initial spaces after letter
+                while(path[i+1] === " ") i++;
+
+                // --- X ---
+                let jx = i+1;
+                while(path[jx] !== " ") jx++;
+                // LOG.debug(`i: ${i}, jx: ${jx}`)
+                currX = parseFloat(path.substring(i + 1, jx));
+
+                // --- Y ---
+                let jy = jx + 1;
+                while(
+                    path[jy] !== "M" && path[jy] !== "L" && path[jy] !== "Z"
+                    && jy !== path.length
+                ) jy++;
+                // LOG.debug(`jx: ${jx}, jy: ${jy}`)
+                currY = parseFloat(path.substring(jx + 1, jy));
+
+                // check wether any parseFloat has failed
+                if (isNaN(currX) || isNaN(currY))
+                    throw new Error(`Could not parse path: ${path}`)
+
+                i = jy;
+                result.push({t: currT, x: currX, y: currY});
+                // LOG.debug(result);
+            } else if (path[i] === "Z") {
+                result.push({t: "Z", x: null, y: null});
+                i++;
+            } else {
+                throw new Error(`Could not parse path: ${path}`)
+            }
+        }
+
+        return result;
     }
 }

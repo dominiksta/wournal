@@ -2,16 +2,16 @@ import { LOG } from "../util/Logging";
 
 export abstract class WournalCanvasElement {
 
-    private initialTransform = {
+    protected initialTransform = {
         translateX: 0, translateY: 0,
         rotateDeg: 0,
-        scaleX: 0, scaleY: 0
+        scaleX: 1, scaleY: 1
     }
 
-    private currentTransform = {
+    protected currentTransform = {
         translateX: 0, translateY: 0,
         rotateDeg: 0,
-        scaleX: 0, scaleY: 0
+        scaleX: 1, scaleY: 1
     }
 
     constructor(protected _svgElem: SVGGraphicsElement) {
@@ -33,12 +33,12 @@ export abstract class WournalCanvasElement {
                 ? `translate(${t.translateX} ${t.translateY}) ` : "") +
             (t.rotateDeg != 0
                 ? `rotate(${t.rotateDeg}) ` : "") +
-            (t.scaleX != 0 || t.scaleY != 0
+            (t.scaleX != 1 || t.scaleY != 1
                 ? `scale(${t.scaleX} ${t.scaleY}) ` : "")
         );
     }
 
-    resetTransform() {
+    public resetTransform() {
         this.currentTransform = {
             translateX: this.initialTransform.translateX,
             translateY: this.initialTransform.translateY,
@@ -49,25 +49,73 @@ export abstract class WournalCanvasElement {
         this.updateTransformAttribute();
     }
 
-    currentTransformToInitial() {
-        this.initialTransform = {
-            translateX: this.currentTransform.translateX,
-            translateY: this.currentTransform.translateY,
-            rotateDeg: this.currentTransform.rotateDeg,
-            scaleX: this.currentTransform.scaleX,
-            scaleY: this.currentTransform.scaleY
-        }
-    }
+    /**
+     * Write the current transform to the elements coordinates/path. This is
+     * done for several reasons:
+     * - It makes it easier to do certain transformations (for example scaling
+     *   in place)
+     * - If wournal should ever actually evolve into a xournal clone, we would
+     *   have to take care of PDF export. PDF export libraries typically only
+     *   allow drawing points/lines and don't take any transformation
+     *   attributes. So, writing the transformation to the coordinates/path
+     *   should allow for easier pdf export.
+     */
+    public abstract writeTransform(): void;
 
-    translate(x: number, y: number): void {
+    /** Move the element from its current position */
+    public translate(x: number, y: number): void {
         this.currentTransform.translateX += x;
         this.currentTransform.translateY += y;
         this.updateTransformAttribute();
     }
 
+    /**
+     * Scale the element *without accounting for its position*. See
+     * `scaleInPlace`.
+     */
+    private scale(x: number, y: number): void {
+        this.currentTransform.scaleX *= x;
+        this.currentTransform.scaleY *= y;
+        this.updateTransformAttribute();
+    }
+
+    public scaleInPlace(
+        before: DOMRect, direction: "top" | "right" | "bottom" | "left",
+        amount: number
+    ): void {
+        switch(direction) {
+            case "top":
+                this.scale(1, amount);
+                this.translate(
+                    0, -((before.bottom * this.currentTransform.scaleY -
+                        before.bottom * this.initialTransform.scaleY
+                         )));
+                break;
+            case "right":
+                this.scale(amount, 1);
+                this.translate(
+                    -((before.left * this.currentTransform.scaleX -
+                        before.left * this.initialTransform.scaleX
+                      )), 0);
+                break;
+            case "bottom":
+                this.scale(1, amount);
+                this.translate(
+                    0, -((before.top * this.currentTransform.scaleY -
+                        before.top * this.initialTransform.scaleY
+                         )));
+                break;
+            case "left":
+                this.scale(amount, 1);
+                this.translate(
+                    -((before.right * this.currentTransform.scaleX -
+                        before.right * this.initialTransform.scaleX
+                      )), 0);
+                break;
+        }
+    }
+
     // rotate(deg: number): void {
-    // }
-    // scale(x: number, y: number): void {
     // }
 
     /**
