@@ -21,24 +21,22 @@ export class SVGCanvasPath extends WournalCanvasElement {
 
     constructor(
         /** The actual underlying svg path */
-        protected _svgElem: SVGPathElement,
-        color: string = "#000000",
-        width: number = 2,
+        protected _svgElem: SVGPathElement
     ) {
         super(_svgElem);
         // Filling will have to be implemented by drawing thick paths
         // instead. This is again with a pixel based eraser in mind.
         this._svgElem.setAttribute("fill", "none");
-
-        this.setColor(color);
-        this.setStrokeWidth(width);
     }
 
     /** Create a new SVGCanvasPath in the given doc and return it */
     public static fromNewPath(doc: Document): SVGCanvasPath {
-        return new SVGCanvasPath(
+        let ret = new SVGCanvasPath(
             doc.createElementNS('http://www.w3.org/2000/svg', 'path')
         );
+        ret.setColor("#000000");
+        ret.setStrokeWidth(2);
+        return ret;
     }
 
     private render() {
@@ -94,19 +92,23 @@ export class SVGCanvasPath extends WournalCanvasElement {
         this._svgElem.setAttribute("stroke-width", width.toString());
     }
 
-    public writeTransform() {
+    public override writeTransform() {
         let pathData = SVGCanvasPath.parseSvgPathData(
             this._svgElem.getAttribute("d"));
         const t = this.currentTransform;
         for(let el of pathData) {
-            el.x *= this.currentTransform.scaleX;
-            el.y *= this.currentTransform.scaleY;
-            el.x += this.currentTransform.translateX;
-            el.y += this.currentTransform.translateY;
+            // scaling *has* to come first here
+            el.x *= t.scaleX; el.y *= t.scaleY;
+            el.x += t.translateX; el.y += t.translateY;
         }
         this._svgElem.setAttribute(
             "d", SVGCanvasPath.svgPathDataToString(pathData)
         );
+
+        this.setStrokeWidth(
+            parseFloat(this._svgElem.getAttribute("stroke-width")) *
+                t.scaleX * t.scaleY
+        )
         this.resetTransform();
     }
 
