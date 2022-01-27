@@ -2,12 +2,14 @@ import { LOG } from "../util/Logging";
 
 export abstract class WournalCanvasElement {
 
+    /** The transform as it was parsed from the actual svg element */
     protected initialTransform = {
         translateX: 0, translateY: 0,
         rotateDeg: 0,
         scaleX: 1, scaleY: 1
     }
 
+    /** The currently set transform */
     protected currentTransform = {
         translateX: 0, translateY: 0,
         rotateDeg: 0,
@@ -25,6 +27,10 @@ export abstract class WournalCanvasElement {
      */
     abstract setColor(color: string): void;
 
+    /**
+     * "Render" `currentTransform` into the transform attribute of the svg
+     * element
+     */
     private updateTransformAttribute() {
         const t = this.currentTransform;
         this._svgElem.setAttribute(
@@ -38,6 +44,7 @@ export abstract class WournalCanvasElement {
         );
     }
 
+    /** Reset `currentTransform` back to `initialTransform` and render. */
     public resetTransform() {
         this.currentTransform = {
             translateX: this.initialTransform.translateX,
@@ -79,6 +86,10 @@ export abstract class WournalCanvasElement {
         this.updateTransformAttribute();
     }
 
+    /**
+     * Scale the element within the given bounding rectangle instead of in the
+     * canvas coordinate system.
+     */
     public scaleInPlace(
         before: DOMRect, direction: "top" | "right" | "bottom" | "left",
         amount: number
