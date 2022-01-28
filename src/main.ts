@@ -27,21 +27,21 @@ select.addEventListener("change", () => {
 });
 
 document.getElementById("btnToolPen").addEventListener("click", () => {
-    wournalDoc.setTool(SVGCanvasToolPen);
+    wournalDoc.setTool(new SVGCanvasToolPen());
 });
 document.getElementById("btnToolEraser").addEventListener("click", () => {
-    wournalDoc.setTool(SVGCanvasToolEraser);
+    wournalDoc.setTool(new SVGCanvasToolEraser());
 });
 document.getElementById("btnToolRectangle").addEventListener("click", () => {
-    wournalDoc.setTool(SVGCanvasToolRectangle);
+    wournalDoc.setTool(new SVGCanvasToolRectangle());
 });
 document.getElementById("btnToolSelectRectangle").addEventListener("click", () => {
-    wournalDoc.setTool(SVGCanvasToolSelectRectangle);
+    wournalDoc.setTool(new SVGCanvasToolSelectRectangle());
 });
 
 document.addEventListener("keypress", (e: KeyboardEvent) => {
     e = e || window.event as KeyboardEvent;
-    if (e.key == "w") wournalDoc.setTool(SVGCanvasToolPen)
-    else if (e.key == "s") wournalDoc.setTool(SVGCanvasToolSelectRectangle)
-    else if (e.key == "r") wournalDoc.setTool(SVGCanvasToolRectangle)
+    if (e.key == "w") wournalDoc.setTool(new SVGCanvasToolPen())
+    else if (e.key == "s") wournalDoc.setTool(new SVGCanvasToolSelectRectangle())
+    else if (e.key == "r") wournalDoc.setTool(new SVGCanvasToolRectangle())
 });

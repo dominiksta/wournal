@@ -17,7 +17,7 @@ export class WournalDocument {
         this.display.addEventListener("mousedown", this.onMouseDown.bind(this));
         this.display.addEventListener("mousemove", this.onMouseMove.bind(this));
 
-        this.setTool(SVGCanvasToolPen);
+        this.setTool(new SVGCanvasToolPen());
     }
 
     public defaultPageDimensions = {height: 600, width: 400};
@@ -33,9 +33,10 @@ export class WournalDocument {
             page.toolLayer.style.cursor = this.currentTool.idleCursor;
     }
 
-    public setTool(tool: Newable<SVGCanvasTool>) {
+    public setTool(tool: SVGCanvasTool) {
         this.currentTool?.onDeselect();
-        this.currentTool = new tool(this.getActivePage.bind(this));
+        this.currentTool = tool;
+        tool.getActivePage = this.getActivePage.bind(this);
         for(let page of this.pages)
             page.toolLayer.style.cursor = this.currentTool.idleCursor;
     }

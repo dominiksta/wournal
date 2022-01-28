@@ -7,9 +7,11 @@ export abstract class SVGCanvasTool {
     /** The page where the first mousedown event for the tool was fired */
     protected abstract toolUseStartPage: WournalPage;
 
-    constructor(
-        protected getActivePage: () => WournalPage
-    ) {}
+    /**
+     * Get the page of the wournal document to draw on. HAS TO BE SET FROM
+     * OUTSIDE.
+     */
+    public getActivePage: () => WournalPage;
 
     /**
      * When the tool is deselected (from e.g. the toolbar), it might have to do

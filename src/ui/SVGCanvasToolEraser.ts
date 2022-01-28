@@ -5,13 +5,31 @@ import { SVGUtils } from "../util/SVGUtils";
 
 export class SVGCanvasToolEraser extends SVGCanvasTool {
 
-    /** The (configurable) size of the rectangular eraser tip. */
-    public size: number = 5;
 
     private erasing: boolean = false;
     protected toolUseStartPage: WournalPage = null;
 
     public idleCursor = "default";
+
+    constructor(
+        /** The (configurable) size of the rectangular eraser tip. */
+        private size: number = 10
+    ) {
+        super();
+
+        // To actually really reflect the area to be erased, we would have to
+        // somehow listen to zoom events and change the cursor size
+        // accordingly. Considering that xournal, xournal++ and pdf annotator
+        // all don't do that and have constant cursor sizes for their erasers,
+        // this should be fine for now.
+        this.idleCursor =
+            `url('data:image/svg+xml;utf8,` +
+            `<svg height="${this.size}" width="${this.size}" ` +
+            `     xmlns="http://www.w3.org/2000/svg">` +
+            `  <rect x="0" y="0" height="${this.size}" width="${this.size}" ` +
+            `        stroke="black" stroke-width="2" fill="white"></rect>` +
+            `</svg>') ${this.size / 2} ${this.size / 2}, auto`;
+    }
 
     public onMouseDown(e: MouseEvent): void {
         this.toolUseStartPage = this.getActivePage();
