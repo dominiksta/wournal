@@ -1,4 +1,5 @@
 import { LOG } from "../util/Logging";
+import { SVGUtils } from "../util/SVGUtils";
 import { WournalCanvasElement } from "./WournalCanvasElement";
 
 /**
@@ -63,8 +64,16 @@ export class SVGCanvasPath extends WournalCanvasElement {
         this.render();
     }
 
+    /**
+     * This originally used the svg "Z" attribute. However, using that attribute
+     * has one significant downside: Determining wether a given point is on the
+     * path (`isPointOnPath`) becomes a lot more difficult. So this "manually"
+     * closes the path with an "L" now. The closing is therefore somewhat less
+     * fancy and might leave small bumps.
+     */
     public close(): void {
-        this.stroke += " Z";
+        const path = SVGCanvasPath.parseSvgPathData(this._svgElem.getAttribute("d"));
+        this.stroke += ` L${path[0].x} ${path[0].y}`;
         this.render();
     }
 
@@ -92,6 +101,10 @@ export class SVGCanvasPath extends WournalCanvasElement {
         this._svgElem.setAttribute("stroke-width", width.toString());
     }
 
+    public getStrokeWidth(): number {
+        return parseFloat(this._svgElem.getAttribute("stroke-width"));
+    }
+
     public override writeTransform() {
         let pathData = SVGCanvasPath.parseSvgPathData(
             this._svgElem.getAttribute("d"));
@@ -110,6 +123,53 @@ export class SVGCanvasPath extends WournalCanvasElement {
                 t.scaleX * t.scaleY
         )
         this.resetTransform();
+    }
+
+    /**
+     * Wether any point of the rectangle `r` is touching the path of this
+     * element.
+     */
+    public isRectTouchingPath(r: DOMRect): boolean {
+        const path = SVGCanvasPath.parseSvgPathData(
+            this._svgElem.getAttribute("d"));
+        for(let i = 0; i < path.length - 1; i++) {
+            if (path[i].t === "M" || path[i].t === "L") {
+                const tmpRect = {
+                    top: Math.min(path[i].y, path[i+1].y),
+                    right: Math.max(path[i].x, path[i+1].x),
+                    bottom: Math.max(path[i].y, path[i+1].y),
+                    left: Math.min(path[i].x, path[i+1].x),
+                }
+                // rectangle from point to next point
+                let pToP = DOMRect.fromRect({
+                    x: tmpRect.left, y: tmpRect.top,
+                    // if the points are on the same x/y coord, we still need to
+                    // set a width of at least 1, otherwise it will never be
+                    // detected
+                    height: tmpRect.bottom - tmpRect.top < 5 ?
+                        5 : tmpRect.bottom - tmpRect.top,
+                    width: tmpRect.right - tmpRect.left < 5 ?
+                        5 : tmpRect.right - tmpRect.left,
+                });
+                // SVGUtils.tmpDisplayRect(
+                //     pointToPoint,
+                //         <SVGSVGElement><unknown>this._svgElem.parentElement,
+                //     500, "orange"
+                // );
+                if (SVGUtils.pointInRect({x: r.left, y: r.top}, pToP)
+                    || SVGUtils.pointInRect({x: r.right, y: r.top}, pToP)
+                    || SVGUtils.pointInRect({x: r.left, y: r.bottom}, pToP)
+                    || SVGUtils.pointInRect({x: r.right, y: r.bottom}, pToP)
+                   ) {
+                    return true;
+                }
+            } else {
+                LOG.error(`Invalid path data: {t: ${path[i].t}, ` +
+                    `x: ${path[i].x}, y: ${path[i].y}}`);
+                return false;
+            }
+        }
+        return false;
     }
 
     /**

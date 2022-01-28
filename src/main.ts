@@ -1,3 +1,4 @@
+import { SVGCanvasToolEraser } from "./ui/SVGCanvasToolEraser";
 import { SVGCanvasToolPen } from "./ui/SVGCanvasToolPen";
 import { SVGCanvasToolRectangle } from "./ui/SVGCanvasToolRectangle";
 import { SVGCanvasToolSelectRectangle } from "./ui/SVGCanvasToolSelectRectangle";
@@ -27,6 +28,9 @@ select.addEventListener("change", () => {
 
 document.getElementById("btnToolPen").addEventListener("click", () => {
     wournalDoc.setTool(SVGCanvasToolPen);
+});
+document.getElementById("btnToolEraser").addEventListener("click", () => {
+    wournalDoc.setTool(SVGCanvasToolEraser);
 });
 document.getElementById("btnToolRectangle").addEventListener("click", () => {
     wournalDoc.setTool(SVGCanvasToolRectangle);

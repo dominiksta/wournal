@@ -11,5 +11,28 @@ export const SVGUtils = {
     pointInRect: function(pt: {x: number, y: number}, r: DOMRect) {
         return pt.y >= r.top && pt.y <= r.bottom &&
             pt.x <= r.right && pt.x >= r.left
-    }
+    },
+
+    /** Display `r` in `canvas` for `ms` milliseconds. Inteded for debugging. */
+    tmpDisplayRect: function(
+        r: DOMRect, canvas: SVGSVGElement, ms: number = 1000, color = "red"
+    ) {
+        let rect = canvas.ownerDocument.createElementNS(
+            "http://www.w3.org/2000/svg", "rect"
+        );
+        rect.setAttribute("stroke", color);
+        rect.setAttribute("stroke-opacity", "0.5");
+        rect.setAttribute("fill", color);
+        rect.setAttribute("fill-opacity", "0.5");
+        rect.setAttribute("x", r.x.toString());
+        rect.setAttribute("y", r.y.toString());
+        rect.setAttribute("height", r.height.toString());
+        rect.setAttribute("width", r.width.toString());
+
+        canvas.appendChild(rect);
+
+        setTimeout(() => {
+            canvas.removeChild(rect);
+        }, ms);
+    },
 }

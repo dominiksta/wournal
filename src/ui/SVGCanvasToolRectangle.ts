@@ -33,8 +33,14 @@ export class SVGCanvasToolRectangle extends SVGCanvasTool {
         const goingRight = mouse.x > this.pointStart.x;
         const goingDown = mouse.y > this.pointStart.y;
 
+        // When the path for the rectangle is closed at the end of this method,
+        // it would leave a little empty bit at the start without compensating
+        // for the stroke width either at the start or end of the rectangle
+        // path. So we need to compensate.
+        const cmpStart = this.path.getStrokeWidth() / 2;
+
         // top
-        for(let x = this.pointStart.x;
+        for(let x = this.pointStart.x + (goingRight ? -cmpStart : cmpStart);
             goingRight ? x <= mouse.x : x >= mouse.x;
             x += TOOL_RECTANGLE_POINT_DIFF_PX * (goingRight ? 1 : -1)) {
             this.path.addLineToPoint({x: x, y: this.pointStart.y});
