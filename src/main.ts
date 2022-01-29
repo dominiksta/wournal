@@ -45,6 +45,13 @@ document.getElementById("btnToolSelectRectangle").addEventListener("click", () =
     wournalDoc.setTool(new SVGCanvasToolSelectRectangle());
 });
 
+document.getElementById("btnToolZoomIncrease").addEventListener("click", () => {
+    wournalDoc.setZoom(wournalDoc.getZoom() + 0.1);
+});
+document.getElementById("btnToolZoomDecrease").addEventListener("click", () => {
+    wournalDoc.setZoom(wournalDoc.getZoom() - 0.1);
+});
+
 document.addEventListener("keypress", (e: KeyboardEvent) => {
     e = e || window.event as KeyboardEvent;
     if (e.key == "w") wournalDoc.setTool(new SVGCanvasToolPen())

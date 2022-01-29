@@ -6,6 +6,7 @@ import { WournalPageSize } from "./WournalPageSize";
 
 export class WournalDocument {
     private pages: WournalPage[] = [];
+    private zoom: number = 1;
 
     private activePage: WournalPage = null;
 
@@ -30,6 +31,13 @@ export class WournalDocument {
         for(let page of this.pages)
             page.toolLayer.style.cursor = this.currentTool.idleCursor;
     }
+
+    /** Set the zoom level of all pages. [0-inf[ */
+    public setZoom(zoom: number) {
+        this.zoom = zoom;
+        for(let page of this.pages) page.setZoom(zoom);
+    }
+    public getZoom(): number { return this.zoom; }
 
     public setTool(tool: SVGCanvasTool) {
         this.currentTool?.onDeselect();
