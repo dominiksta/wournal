@@ -152,15 +152,11 @@ export class SVGCanvasPath extends WournalCanvasElement {
                         5 : tmpRect.right - tmpRect.left,
                 });
                 // SVGUtils.tmpDisplayRect(
-                //     pointToPoint,
+                //     pToP,
                 //         <SVGSVGElement><unknown>this._svgElem.parentElement,
                 //     500, "orange"
                 // );
-                if (SVGUtils.pointInRect({x: r.left, y: r.top}, pToP)
-                    || SVGUtils.pointInRect({x: r.right, y: r.top}, pToP)
-                    || SVGUtils.pointInRect({x: r.left, y: r.bottom}, pToP)
-                    || SVGUtils.pointInRect({x: r.right, y: r.bottom}, pToP)
-                   ) {
+                if (SVGUtils.rectIntersect(r, pToP)) {
                     return true;
                 }
             } else {

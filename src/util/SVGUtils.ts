@@ -13,6 +13,14 @@ export const SVGUtils = {
             pt.x <= r.right && pt.x >= r.left
     },
 
+    /** Wether r1 and r2 have any intersection */
+    rectIntersect: function(r1: DOMRect, r2: DOMRect): boolean {
+        return !(
+            r2.left > r1.right || r2.right < r1.left ||
+                r2.top > r1.bottom || r2.bottom < r1.top
+        );
+    },
+
     /** Display `r` in `canvas` for `ms` milliseconds. Inteded for debugging. */
     tmpDisplayRect: function(
         r: DOMRect, canvas: SVGSVGElement, ms: number = 1000, color = "red"
