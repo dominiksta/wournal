@@ -25,7 +25,8 @@ export class WournalPage {
     get rect() { return this._rect; }
 
     constructor(
-        private doc: WournalDocument, width: number, height: number,
+        private doc: WournalDocument,
+        dimensions: {height: number, width: number}
     ) {
         this.display = doc.display.ownerDocument.createElement("div");
         this.display.setAttribute("class", "wournal-page");
@@ -38,7 +39,7 @@ export class WournalPage {
         );
         this.toolLayer.style.position = "absolute";
 
-        this.setSize(width, height);
+        this.setSize(dimensions.width, dimensions.height);
 
         let bg = this.addLayer("background", true);
         bg.style.background = "white";
@@ -51,8 +52,8 @@ export class WournalPage {
         let svg = this.doc.display.ownerDocument.createElementNS(
             "http://www.w3.org/2000/svg", "svg"
         );
-        svg.setAttribute("width", `${this.width}px`);
-        svg.setAttribute("height", `${this.height}px`);
+        svg.setAttribute("width", `${this.width}mm`);
+        svg.setAttribute("height", `${this.height}mm`);
         svg.style.position = "absolute";
         const n = name === "" ? `Layer ${this.paintLayers.length + 1}` : name;
         this.paintLayers.push({name: n, svg: svg});
@@ -87,13 +88,13 @@ export class WournalPage {
     public setSize(width: number, height: number) {
         this.width = width;
         this.height = height;
-        this.display.style.width = `${width}px`;
-        this.display.style.height = `${height}px`;
-        this.toolLayer.setAttribute("width", `${width}px`);
-        this.toolLayer.setAttribute("height", `${height}px`);
+        this.display.style.width = `${width}mm`;
+        this.display.style.height = `${height}mm`;
+        this.toolLayer.setAttribute("width", `${width}mm`);
+        this.toolLayer.setAttribute("height", `${height}mm`);
         for (let layer of this.paintLayers) {
-            layer.svg.setAttribute("width", `${width}px`);
-            layer.svg.setAttribute("height", `${height}px`);
+            layer.svg.setAttribute("width", `${width}mm`);
+            layer.svg.setAttribute("height", `${height}mm`);
         }
     }
 

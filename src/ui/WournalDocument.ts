@@ -1,9 +1,8 @@
-import { Newable } from "../util/Newable";
 import { WournalPage } from "./WournalPage";
 import { SVGCanvasTool } from "./SVGCanvasTool";
 import { SVGUtils } from "../util/SVGUtils";
-import { LOG } from "../util/Logging";
 import { SVGCanvasToolPen } from "./SVGCanvasToolPen";
+import { WournalPageSize } from "./WournalPageSize";
 
 export class WournalDocument {
     private pages: WournalPage[] = [];
@@ -20,13 +19,12 @@ export class WournalDocument {
         this.setTool(new SVGCanvasToolPen());
     }
 
-    public defaultPageDimensions = {height: 600, width: 400};
+    public defaultPageDimensions = WournalPageSize.DINA4_PORTRAIT;
 
     public newPage(
-        width: number = this.defaultPageDimensions.width,
-        height: number = this.defaultPageDimensions.height
+        dimensions: {height: number, width: number} = this.defaultPageDimensions
     ): void {
-        let page = new WournalPage(this, width, height);
+        let page = new WournalPage(this, dimensions);
         this.display.appendChild(page.display);
         this.pages.push(page);
         for(let page of this.pages)

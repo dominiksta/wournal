@@ -3,6 +3,7 @@ import { SVGCanvasToolPen } from "./ui/SVGCanvasToolPen";
 import { SVGCanvasToolRectangle } from "./ui/SVGCanvasToolRectangle";
 import { SVGCanvasToolSelectRectangle } from "./ui/SVGCanvasToolSelectRectangle";
 import { WournalDocument } from "./ui/WournalDocument";
+import { WournalPageSize } from "./ui/WournalPageSize";
 import { CONF } from "./util/Config";
 
 // create canvases
@@ -12,8 +13,13 @@ let wournalDoc = new WournalDocument(
     document.getElementById("wournal-document") as HTMLDivElement
 );
 
+wournalDoc.newPage(WournalPageSize.DINA4_PORTRAIT);
+wournalDoc.newPage(WournalPageSize.DINA4_LANDSCAPE);
+wournalDoc.newPage(WournalPageSize.DINA5_PORTRAIT);
+wournalDoc.newPage(WournalPageSize.DINA5_LANDSCAPE);
+
 for(let i = 0; i < 100; i++) {
-    wournalDoc.newPage(600, 400);
+    wournalDoc.newPage();
 }
 
 (<any>window).wournalDoc = wournalDoc;
