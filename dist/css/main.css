@@ -6,15 +6,17 @@ html, body {
 
 #wournal-document {
     background: #333333;
-    padding: 20px;
+    padding: 50px 20px 20px 20px;
 }
 
 #toolbar {
     position: fixed;
     z-index: 1030;
-    left: 14px;
-    top: 12px;
+    width: 100%;
+    left: 0;
+    top: 0;
     background: lightgray;
+    border: 2px solid gray;
     color: black;
 }
 
