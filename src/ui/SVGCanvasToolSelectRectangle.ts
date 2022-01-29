@@ -206,6 +206,7 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
     }
 
     onDeselect(): void {
-        this.selectionDisplay.removeFromDisplay();
+        if (this.selectionDisplay)
+            this.selectionDisplay.removeFromDisplay();
     }
 }
