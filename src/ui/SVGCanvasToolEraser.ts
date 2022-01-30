@@ -76,13 +76,13 @@ export class SVGCanvasToolEraser extends SVGCanvasTool {
                 // path.pulsePoints();
 
                 // check wether mouse is actually on path
-                if (path.isRectTouchingPath(eraserRect)) {
-                    if (!this.eraseStrokes) {
-                        path.eraseRect(eraserRect);
-                    } else {
+                if (this.eraseStrokes) {
+                    if (path.isTouchingRect(eraserRect)) {
                         this.toolUseStartPage.activePaintLayer
                             .removeChild(node);
                     }
+                } else {
+                    path.eraseRect(eraserRect);
                 }
             }
         }

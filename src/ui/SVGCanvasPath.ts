@@ -136,13 +136,15 @@ export class SVGCanvasPath extends WournalCanvasElement {
         }
     }
 
-    /**
-     * Returns the newly split off canvas path.
-     */
-    public eraseRect(rect: DOMRect): void {
-        // this.pulsePoints();
-        const path = SVGCanvasPath.parseSvgPathData(
-            this._svgElem.getAttribute("d"));
+    /** Helper for `eraseRect` */
+    private static eraseRectPoints(
+        rect: DOMRect, path: {t: string, x: number, y: number}[]
+    ): {t: string, x: number, y: number}[][] {
+        // recursion end conditions
+        if (path == null) return [null];
+        if (!SVGCanvasPath.isRectTouchingPath(rect, path))
+            return [path];
+
         const rectMiddle = {
             x: rect.left + rect.width / 2, y: rect.top + rect.height / 2
         };
@@ -178,10 +180,10 @@ export class SVGCanvasPath extends WournalCanvasElement {
                 }
             }
         }
-        LOG.debug(
-            `firstInRect: ${firstInRect}, lastInRect: ${lastInRect},` +
-                `bestmatch: ${bestmatch.pos}`
-        );
+        // LOG.debug(
+        //     `firstInRect: ${firstInRect}, lastInRect: ${lastInRect},` +
+        //         `bestmatch: ${bestmatch.pos}`
+        // );
 
         // Split path at either points within rect or best matching point
         // -----------------------------------------------------------------
@@ -210,31 +212,53 @@ export class SVGCanvasPath extends WournalCanvasElement {
             }
         }
 
-        if (partTwo != null) {
+        return SVGCanvasPath.eraseRectPoints(rect, partOne).concat(
+            SVGCanvasPath.eraseRectPoints(rect, partTwo)
+        );
+    }
+
+    /** Erase all points within `rect` in path. */
+    public eraseRect(rect: DOMRect): void {
+        // this.pulsePoints();
+        const path = SVGCanvasPath.parseSvgPathData(
+            this._svgElem.getAttribute("d"));
+
+        const paths = SVGCanvasPath.eraseRectPoints(rect, path)
+        // LOG.debug(paths);
+
+        for(let i = 1; i < paths.length; i++) {
+            if (paths[i] === null) continue;
+
             let newPath = SVGCanvasPath.fromNewPath(this._svgElem.ownerDocument);
-            newPath._svgElem.setAttribute("d", SVGCanvasPath.svgPathDataToString(partTwo));
+            newPath._svgElem.setAttribute(
+                "d", SVGCanvasPath.svgPathDataToString(paths[i])
+            );
             newPath.setStrokeWidth(this.getStrokeWidth());
             this._svgElem.before(this._svgElem, newPath._svgElem);
         }
 
-        if (partOne == null) {
+        if (paths[0] == null) {
             this._svgElem.parentElement?.removeChild(this._svgElem);
         } else {
-            this._svgElem.setAttribute("d", SVGCanvasPath.svgPathDataToString(partOne));
+            this._svgElem.setAttribute(
+                "d", SVGCanvasPath.svgPathDataToString(paths[0]));
         }
-
-        // TODO: Use recursion (or something else) to properly delete
-        // self-crossing strokes.
-        // this.eraseRect(rect);
     }
 
     /**
      * Wether any point of the rectangle `r` is touching the path of this
      * element.
      */
-    public isRectTouchingPath(r: DOMRect): boolean {
+    public isTouchingRect(r: DOMRect): boolean {
         const path = SVGCanvasPath.parseSvgPathData(
-            this._svgElem.getAttribute("d"));
+            this._svgElem.getAttribute("d")
+        );
+        return SVGCanvasPath.isRectTouchingPath(r, path);
+    }
+
+    private static isRectTouchingPath(
+        r: DOMRect, path: {t: string, x: number, y: number}[]
+    ): boolean {
         for(let i = 0; i < path.length - 1; i++) {
             if (path[i].t === "M" || path[i].t === "L") {
                 const tmpRect = {
