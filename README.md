@@ -4,7 +4,8 @@
 
 1. `npm install`
 2. `npm run watch`
-3. Open dist/index.html in a browser
+3. `npm run serve` in another terminal
+4. Open browser at http://localhost:8080
 
 ## Acknowledgements
 
