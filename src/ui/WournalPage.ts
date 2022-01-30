@@ -1,6 +1,9 @@
+import { DOMUtils } from "../util/DOMUtils";
+import { LOG } from "../util/Logging";
 import { SVGCanvasTool } from "./SVGCanvasTool";
 import { SVGCanvasToolPen } from "./SVGCanvasToolPen";
 import { WournalDocument } from "./WournalDocument";
+import { WournalPageSize } from "./WournalPageSize";
 
 /**
  * An SVG Canvas to draw on.
@@ -58,6 +61,24 @@ export class WournalPage {
         let bg = this.addLayer("background", true);
         bg.style.background = "white";
         this.addLayer("", true);
+
+        if (dimensions.height === WournalPageSize.DINA4_PORTRAIT.height &&
+            dimensions.width === WournalPageSize.DINA4_PORTRAIT.width)
+            this.loadFromUrl("res/testpage.svg");
+    }
+
+    public loadFromUrl(url: string) {
+        LOG.info(`Loading url: ${url}...`);
+        fetch(url)
+            .then((response: Response) => response.text())
+            .then((response: string) => {
+                LOG.info(`Loaded url: ${url}...`);
+                const loaded = DOMUtils.createElementFromHTML<SVGSVGElement>(
+                    response
+                );
+                this.activePaintLayer.innerHTML = loaded.innerHTML;
+                LOG.info(this.activePaintLayer);
+            });
     }
 
     public addLayer(

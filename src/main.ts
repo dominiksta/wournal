@@ -18,9 +18,9 @@ wournalDoc.newPage(WournalPageSize.DINA4_LANDSCAPE);
 wournalDoc.newPage(WournalPageSize.DINA5_PORTRAIT);
 wournalDoc.newPage(WournalPageSize.DINA5_LANDSCAPE);
 
-for(let i = 0; i < 100; i++) {
-    wournalDoc.newPage();
-}
+// for(let i = 0; i < 20; i++) {
+//     wournalDoc.newPage();
+// }
 
 (<any>window).wournalDoc = wournalDoc;
 
