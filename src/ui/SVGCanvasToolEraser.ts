@@ -13,7 +13,8 @@ export class SVGCanvasToolEraser extends SVGCanvasTool {
 
     constructor(
         /** The (configurable) size of the rectangular eraser tip. */
-        private size: number = 10
+        private size: number = 10,
+        private eraseStrokes: boolean = false,
     ) {
         super();
 
@@ -66,15 +67,23 @@ export class SVGCanvasToolEraser extends SVGCanvasTool {
 
             // pre-select elements where mouse is at least in bounding client
             // rect
-            if (SVGUtils.rectInRect(elRect, eraserRect)) {
+            if (SVGUtils.rectIntersect(elRect, eraserRect)) {
                 let path = new SVGCanvasPath(node);
                 // SVGUtils.tmpDisplayRect(
                 //     eraserRect, this.toolUseStartPage.activePaintLayer,
                 //     500, "blue"
                 // );
+                // path.pulsePoints();
+
                 // check wether mouse is actually on path
-                if (path.isRectTouchingPath(eraserRect))
-                    this.toolUseStartPage.activePaintLayer.removeChild(node);
+                if (path.isRectTouchingPath(eraserRect)) {
+                    if (!this.eraseStrokes) {
+                        path.eraseRect(eraserRect);
+                    } else {
+                        this.toolUseStartPage.activePaintLayer
+                            .removeChild(node);
+                    }
+                }
             }
         }
     }

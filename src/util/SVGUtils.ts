@@ -13,6 +13,16 @@ export const SVGUtils = {
             pt.x <= r.right && pt.x >= r.left
     },
 
+    /** compute the distance between to points */
+    pointDistance: function(
+        p1: {x: number, y: number}, p2: {x: number, y: number}
+    ): number {
+        // pythagoras
+        return Math.sqrt(
+            (p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2
+        );
+    },
+
     /** Wether r1 and r2 have any intersection */
     rectIntersect: function(r1: DOMRect, r2: DOMRect): boolean {
         return !(
@@ -42,5 +52,16 @@ export const SVGUtils = {
         setTimeout(() => {
             canvas.removeChild(rect);
         }, ms);
+    },
+
+    /** Display `pt` in `canvas` for `ms` milliseconds. Inteded for debugging. */
+    tmpDisplayPoint(
+        pt: {x: number, y: number}, canvas: SVGSVGElement,
+        ms: number = 1000, color: string = "red"
+    ) {
+        this.tmpDisplayRect(DOMRect.fromRect({
+            x: pt.x - 2, y: pt.y - 2,
+            height: 4, width: 4
+        }), canvas, ms, color);
     },
 }
