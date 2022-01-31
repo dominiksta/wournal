@@ -4,11 +4,11 @@
 <svg
    id="svg2"
    sodipodi:docname="pen.svg"
-   viewBox="0 0 268.45435 270.26636"
+   viewBox="0 0 24 24"
    version="1.1"
    inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
-   width="268.45435"
-   height="270.26636"
+   width="24"
+   height="24"
    inkscape:export-filename="C:\Users\dominik\Source\git\wournal\dist\res\cursor\pen.png"
    inkscape:export-xdpi="9.1824579"
    inkscape:export-ydpi="9.1824579"
@@ -17,9 +17,7 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:dc="http://purl.org/dc/elements/1.1/">
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
   <defs
      id="defs4">
     <linearGradient
@@ -53,20 +51,21 @@
      pagecolor="#ffffff"
      fit-margin-top="0"
      inkscape:window-maximized="1"
-     inkscape:zoom="1.772042"
+     inkscape:zoom="10.024183"
      inkscape:window-x="1592"
      inkscape:window-height="1027"
      showgrid="false"
      borderopacity="1.0"
-     inkscape:current-layer="g3845"
-     inkscape:cx="98.473964"
-     inkscape:cy="187.63664"
+     inkscape:current-layer="layer1"
+     inkscape:cx="20.999218"
+     inkscape:cy="26.286432"
      fit-margin-right="0"
      fit-margin-bottom="0"
      inkscape:window-width="1920"
      inkscape:pageopacity="0.0"
      inkscape:document-units="px"
-     inkscape:pagecheckerboard="0" />
+     inkscape:pagecheckerboard="0"
+     width="268.45435px" />
   <g
      id="layer1"
      inkscape:label="Layer 1"
@@ -74,7 +73,7 @@
      transform="translate(-29.941513,-91.286855)">
     <g
        id="g3835"
-       transform="matrix(-0.22165192,0.21878764,-0.21878764,-0.22165192,-11.489993,301.56937)">
+       transform="matrix(-0.0182364,0.01800074,-0.01800074,-0.0182364,27.530331,109.58543)">
       <rect
          id="rect3800"
          style="fill:#1a1a1a"
@@ -142,7 +141,7 @@
     <g
        id="g3845"
        style="fill:url(#linearGradient3891)"
-       transform="matrix(-0.22165192,0.21878764,-0.21878764,-0.22165192,-11.489993,301.56937)">
+       transform="matrix(-0.0182364,0.01800074,-0.01800074,-0.0182364,27.530331,109.58543)">
       <rect
          id="rect3847"
          style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:24.4024;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
@@ -228,47 +227,6 @@
   </g>
   <metadata
      id="metadata28">
-    <rdf:RDF>
-      <cc:Work>
-        <dc:format>image/svg+xml</dc:format>
-        <dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <cc:license
-           rdf:resource="http://creativecommons.org/publicdomain/zero/1.0/" />
-        <dc:publisher>
-          <cc:Agent
-             rdf:about="http://openclipart.org/">
-            <dc:title>Openclipart</dc:title>
-          </cc:Agent>
-        </dc:publisher>
-        <dc:date>2011-05-21T14:53:33</dc:date>
-        <dc:description>Ball point pen</dc:description>
-        <dc:source>https://openclipart.org/detail/139771/pen-by-gsagri04</dc:source>
-        <dc:creator>
-          <cc:Agent>
-            <dc:title>gsagri04</dc:title>
-          </cc:Agent>
-        </dc:creator>
-        <dc:subject>
-          <rdf:Bag>
-            <rdf:li>ball</rdf:li>
-            <rdf:li>black</rdf:li>
-            <rdf:li>clip_art</rdf:li>
-            <rdf:li>pen</rdf:li>
-            <rdf:li>point</rdf:li>
-            <rdf:li>write</rdf:li>
-          </rdf:Bag>
-        </dc:subject>
-      </cc:Work>
-      <cc:License
-         rdf:about="http://creativecommons.org/publicdomain/zero/1.0/">
-        <cc:permits
-           rdf:resource="http://creativecommons.org/ns#Reproduction" />
-        <cc:permits
-           rdf:resource="http://creativecommons.org/ns#Distribution" />
-        <cc:permits
-           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
-      </cc:License>
-    </rdf:RDF>
+    <rdf:RDF />
   </metadata>
 </svg>

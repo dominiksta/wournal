@@ -15,8 +15,8 @@ html, body {
     width: 100%;
     left: 0;
     top: 0;
-    background: lightgray;
-    border: 2px solid gray;
+    background: white;
+    border: 1px solid gray;
     color: black;
 }
 
@@ -30,8 +30,27 @@ html, body {
     border-left: 1px solid black;
 }
 
-#toolbar-tools > button {
+.toolbar-tool-btns {
+    font-size: 0;
+}
+
+.toolbar-tool-btns > button {
+    background: white;
+    border: none;
     vertical-align: middle;
     height: 40px;
     width: 40px;
+}
+
+.toolbar-tool-btns > button:hover {
+    background: #efefef;
+}
+
+.toolbar-tool-btns > button:active {
+    background: lightblue;
+}
+
+.toolbar-tool-btns > button.pressed {
+    border-bottom: 3px solid lightblue !important;
+    border-top: 3px solid white !important;
 }

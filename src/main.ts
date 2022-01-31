@@ -27,10 +27,10 @@ wournalDoc.newPage(WournalPageSize.DINA5_LANDSCAPE);
 // register toolbar functions
 // ----------------------------------------------------------------------
 
-let select = document.getElementById("cmbBufferSize") as HTMLSelectElement;
-select.addEventListener("change", () => {
-    CONF.pen.mouseBufferSize = parseInt(select.value);
-});
+// let select = document.getElementById("cmbBufferSize") as HTMLSelectElement;
+// select.addEventListener("change", () => {
+//     CONF.pen.mouseBufferSize = parseInt(select.value);
+// });
 
 document.getElementById("btnToolPen").addEventListener("click", () => {
     wournalDoc.setTool(new SVGCanvasToolPen());
@@ -53,6 +53,9 @@ document.getElementById("btnToolZoomIncrease").addEventListener("click", () => {
 });
 document.getElementById("btnToolZoomDecrease").addEventListener("click", () => {
     wournalDoc.setZoom(wournalDoc.getZoom() - 0.1);
+});
+document.getElementById("btnToolZoomDefault").addEventListener("click", () => {
+    wournalDoc.setZoom(1);
 });
 
 document.addEventListener("keypress", (e: KeyboardEvent) => {

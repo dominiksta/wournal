@@ -13,7 +13,7 @@ export class SVGCanvasToolPen extends SVGCanvasTool {
     /** The svg path for the current line */
     private path: SVGCanvasPath = null;
 
-    public idleCursor = "url('res/cursor/pen.png'), auto";
+    public idleCursor = "url('res/custom/pen.svg'), auto";
 
     public onMouseDown(e: MouseEvent): void {
         this.toolUseStartPage = this.getActivePage();
