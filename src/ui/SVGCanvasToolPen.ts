@@ -20,6 +20,7 @@ export class SVGCanvasToolPen extends SVGCanvasTool {
         if (this.toolUseStartPage === null) return;
 
         this.path = SVGCanvasPath.fromNewPath(this.toolUseStartPage.display.ownerDocument);
+        this.path.setLineCap("round");
         this.mouseBuffer = [];
         var pt = this.toolUseStartPage.globalCoordsToCanvas({x: e.x, y: e.y});
         this.appendToBuffer(pt);

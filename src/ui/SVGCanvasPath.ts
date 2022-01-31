@@ -97,6 +97,10 @@ export class SVGCanvasPath extends WournalCanvasElement {
         this._svgElem.setAttribute("stroke", color);
     }
 
+    public setLineCap(lineCap: string): void {
+        this._svgElem.setAttribute("stroke-linecap", lineCap);
+    }
+
     public setStrokeWidth(width: number): void {
         this._svgElem.setAttribute("stroke-width", width.toString());
     }
