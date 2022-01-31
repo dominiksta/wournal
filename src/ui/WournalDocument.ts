@@ -2,9 +2,12 @@ import { WournalPage } from "./WournalPage";
 import { SVGCanvasTool } from "./SVGCanvasTool";
 import { SVGUtils } from "../util/SVGUtils";
 import { SVGCanvasToolPen } from "./SVGCanvasToolPen";
-import { WournalPageSize } from "./WournalPageSize";
+import { WournalPageSize, computeZoomFactor } from "./WournalPageSize";
 
 export class WournalDocument {
+    /** An initial zoom factor, invisible to the user. */
+    private initialZoomFactor: number;
+
     private pages: WournalPage[] = [];
     private zoom: number = 1;
 
@@ -17,6 +20,7 @@ export class WournalDocument {
         this.display.addEventListener("mousedown", this.onMouseDown.bind(this));
         this.display.addEventListener("mousemove", this.onMouseMove.bind(this));
 
+        this.initialZoomFactor = computeZoomFactor();
         this.setTool(new SVGCanvasToolPen());
     }
 
@@ -26,6 +30,7 @@ export class WournalDocument {
         dimensions: {height: number, width: number} = this.defaultPageDimensions
     ): void {
         let page = new WournalPage(this, dimensions);
+        page.setZoom(this.zoom * this.initialZoomFactor);
         this.display.appendChild(page.display);
         this.pages.push(page);
         for(let page of this.pages)
@@ -35,7 +40,7 @@ export class WournalDocument {
     /** Set the zoom level of all pages. [0-inf[ */
     public setZoom(zoom: number) {
         this.zoom = zoom;
-        for(let page of this.pages) page.setZoom(zoom);
+        for(let page of this.pages) page.setZoom(zoom * this.initialZoomFactor);
     }
     public getZoom(): number { return this.zoom; }
 

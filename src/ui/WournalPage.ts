@@ -1,9 +1,6 @@
 import { DOMUtils } from "../util/DOMUtils";
 import { LOG } from "../util/Logging";
-import { Newable } from "../util/Newable";
 import { BackgroundGenerator, BackgroundGeneratorColor } from "./BackgroundGenerators";
-import { SVGCanvasTool } from "./SVGCanvasTool";
-import { SVGCanvasToolPen } from "./SVGCanvasToolPen";
 import { WournalDocument } from "./WournalDocument";
 import { WournalPageSize } from "./WournalPageSize";
 
@@ -156,8 +153,8 @@ export class WournalPage {
 
     /** Update the size of this page according to the set width/height */
     private updateDisplaySize() {
-        this.display.style.width = `${this.width*this.zoom}mm`;
-        this.display.style.height = `${this.height*this.zoom}mm`;
+        this.display.style.width = `${this.width*this.zoom}px`;
+        this.display.style.height = `${this.height*this.zoom}px`;
     }
 
     /**
@@ -168,10 +165,10 @@ export class WournalPage {
     public setPageSize(d: {width: number, height: number}) {
         this.width = d.width;
         this.height = d.height;
-        this.toolLayer.setAttribute("width", `${d.width}mm`);
-        this.toolLayer.setAttribute("height", `${d.height}mm`);
-        this.canvas.setAttribute("width", `${d.width}mm`);
-        this.canvas.setAttribute("height", `${d.height}mm`);
+        this.toolLayer.setAttribute("width", `${d.width}`);
+        this.toolLayer.setAttribute("height", `${d.height}`);
+        this.canvas.setAttribute("width", `${d.width}`);
+        this.canvas.setAttribute("height", `${d.height}`);
         this.updateDisplaySize();
     }
 

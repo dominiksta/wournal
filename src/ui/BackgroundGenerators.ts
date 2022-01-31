@@ -22,8 +22,8 @@ export class BackgroundGeneratorColor extends BackgroundGenerator {
         let rect = g.ownerDocument.createElementNS(
             "http://www.w3.org/2000/svg", "rect"
         );
-        rect.setAttribute("width", width.toString() + "mm");
-        rect.setAttribute("height", height.toString() + "mm");
+        rect.setAttribute("width", width.toString());
+        rect.setAttribute("height", height.toString());
         rect.setAttribute("fill", this.color);
         rect.setAttribute("stroke", this.color);
         g.appendChild(rect);
