@@ -46,6 +46,7 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
                 this.state = "selecting";
                 this.savedMouse.beforeSelect = {x: mouse.x, y: mouse.y}
                 this.selectionDisplay = new SelectionDisplay(this.getActivePage());
+                this.getActivePage().toolLayer.style.cursor = "crosshair";
                 break;
             case "selecting":
                 LOG.error("onMouseDown called in selecting state - " +
@@ -85,6 +86,7 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
     }
 
     public onMouseUp(e: MouseEvent): void {
+        this.getActivePage().toolLayer.style.cursor = this.idleCursor;
         if (this.getActivePage() == null) return;
         switch(this.state) {
             case "idle":
