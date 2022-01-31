@@ -1,9 +1,17 @@
 import { DOMUtils } from "../util/DOMUtils";
 import { LOG } from "../util/Logging";
+import { Newable } from "../util/Newable";
+import { BackgroundGenerator, BackgroundGeneratorColor } from "./BackgroundGenerators";
 import { SVGCanvasTool } from "./SVGCanvasTool";
 import { SVGCanvasToolPen } from "./SVGCanvasToolPen";
 import { WournalDocument } from "./WournalDocument";
 import { WournalPageSize } from "./WournalPageSize";
+
+/**
+ * The attribute defining a "layer" element for wournal. Really they are just
+ * svg groups ("g" elements), but they are marked with this attribute.
+ */
+const WOURNAL_SVG_LAYER_NAME_ATTR = "wournal-layer-name";
 
 /**
  * An SVG Canvas to draw on.
@@ -25,8 +33,8 @@ export class WournalPage {
 
     public toolLayer: SVGSVGElement;
 
-    private paintLayers: {name: string, svg: SVGSVGElement}[] = [];
-    public activePaintLayer: SVGSVGElement;
+    private canvas: SVGSVGElement;
+    public activePaintLayer: SVGGElement;
 
     /**
      * The bounding rectangle of `_svgElement`. Only updated in `onMouseDown`
@@ -49,17 +57,24 @@ export class WournalPage {
         this.svgWrapperEl.style.transformOrigin = "0 0";
         this.display.appendChild(this.svgWrapperEl);
 
+        this.canvas = this.doc.display.ownerDocument.createElementNS(
+            "http://www.w3.org/2000/svg", "svg"
+        );
+        this.canvas.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+        this.canvas.style.position = "absolute";
+        this.svgWrapperEl.appendChild(this.canvas)
+
         this.toolLayer = this.doc.display.ownerDocument.createElementNS(
             "http://www.w3.org/2000/svg", "svg"
         );
         this.toolLayer.style.position = "absolute";
+        this.svgWrapperEl.appendChild(this.toolLayer)
 
         this.setPageSize(dimensions);
         this.updateDisplaySize();
         this.setZoom(1);
 
-        let bg = this.addLayer("background", true);
-        bg.style.background = "white";
+        this.setBackgroundLayer(new BackgroundGeneratorColor("white"));
         this.addLayer("", true);
 
         if (dimensions.height === WournalPageSize.DINA4_PORTRAIT.height &&
@@ -81,37 +96,56 @@ export class WournalPage {
             });
     }
 
-    public addLayer(
-        name: string = "", makeActive: boolean = false
-    ): SVGSVGElement {
-        let svg = this.doc.display.ownerDocument.createElementNS(
-            "http://www.w3.org/2000/svg", "svg"
-        );
-        svg.setAttribute("width", `${this.width}mm`);
-        svg.setAttribute("height", `${this.height}mm`);
-        svg.style.position = "absolute";
-        const n = name === "" ? `Layer ${this.paintLayers.length + 1}` : name;
-        this.paintLayers.push({name: n, svg: svg});
-        this.drawLayers();
-        if (makeActive) this.setActivePaintLayer(n);
-        return svg;
+    public setBackgroundLayer(generator: BackgroundGenerator) {
+        let bg = this.getLayer("background");
+        if (!bg) {
+            bg = this.addLayer("background", false, true);
+        }
+        generator.generate(this.width, this.height, bg);
     }
 
-    private drawLayers() {
-        while (this.svgWrapperEl.firstChild)
-            this.svgWrapperEl.removeChild(this.svgWrapperEl.lastChild);
+    public addLayer(
+        name: string = "", makeActive: boolean = false, prepend: boolean = false
+    ): SVGGElement {
+        const existing = this.getLayers();
+        const n = name === "" ? `Layer ${existing.length}` : name;
+        if (this.getLayer(n) !== undefined)
+            throw new Error(`Layer with name '${n}' already exists!`);
 
-        for (let layer of this.paintLayers) {
-            // this.svgWrapperEl.insertBefore(layer.svg, this.svgWrapperEl.firstChild);
-            this.svgWrapperEl.appendChild(layer.svg);
+        let g = this.doc.display.ownerDocument.createElementNS(
+            "http://www.w3.org/2000/svg", "g"
+        );
+        g.setAttribute(WOURNAL_SVG_LAYER_NAME_ATTR, n);
+
+        if (prepend && this.canvas.firstChild) this.canvas.firstChild.before(g)
+        else this.canvas.appendChild(g);
+
+        if (makeActive) this.setActivePaintLayer(n);
+        return g;
+    }
+
+    /** Get a layer by its name */
+    public getLayer(name: string): SVGGElement {
+        return this.getLayers().find(
+            l => l.getAttribute(WOURNAL_SVG_LAYER_NAME_ATTR) === name
+        );
+    }
+
+    /** Get all layers */
+    public getLayers(): SVGGElement[] {
+        let layers = [];
+        for (let el of this.canvas.getElementsByTagName("g")) {
+            if (el.getAttribute(WOURNAL_SVG_LAYER_NAME_ATTR) !== null) {
+                layers.push(el);
+            }
         }
-        this.svgWrapperEl.appendChild(this.toolLayer);
+        return layers;
     }
 
     public setActivePaintLayer(name: string) {
-        this.activePaintLayer = this.paintLayers.find(
-            (layer) => layer.name === name
-        ).svg;
+        this.activePaintLayer = this.getLayers().find(
+            (layer) => layer.getAttribute(WOURNAL_SVG_LAYER_NAME_ATTR) === name
+        );
     }
 
     public getActivePaintLayer() { return this.activePaintLayer; }
@@ -136,10 +170,8 @@ export class WournalPage {
         this.height = d.height;
         this.toolLayer.setAttribute("width", `${d.width}mm`);
         this.toolLayer.setAttribute("height", `${d.height}mm`);
-        for (let layer of this.paintLayers) {
-            layer.svg.setAttribute("width", `${d.width}mm`);
-            layer.svg.setAttribute("height", `${d.height}mm`);
-        }
+        this.canvas.setAttribute("width", `${d.width}mm`);
+        this.canvas.setAttribute("height", `${d.height}mm`);
         this.updateDisplaySize();
     }
 

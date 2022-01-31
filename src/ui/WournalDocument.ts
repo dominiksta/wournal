@@ -52,7 +52,7 @@ export class WournalDocument {
         let result: WournalPage = null;
         for(let page of this.pages) {
             if (SVGUtils.pointInRect(
-                pt, page.activePaintLayer.getBoundingClientRect()
+                pt, page.toolLayer.getBoundingClientRect()
             )) {
                 result = page;
             }
