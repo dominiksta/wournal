@@ -58,12 +58,34 @@ document.getElementById("btnToolZoomDefault").addEventListener("click", () => {
     wournalDoc.setZoom(1);
 });
 
-document.addEventListener("keypress", (e: KeyboardEvent) => {
+document.addEventListener("keydown", (e: KeyboardEvent) => {
     e = e || window.event as KeyboardEvent;
     if (e.key == "w") wournalDoc.setTool(new SVGCanvasToolPen())
     else if (e.key == "s") wournalDoc.setTool(new SVGCanvasToolSelectRectangle())
     else if (e.key == "r") wournalDoc.setTool(new SVGCanvasToolRectangle())
     else if (e.key == "e") wournalDoc.setTool(new SVGCanvasToolEraser(10, false))
-    else if (e.key == "+") wournalDoc.setZoom(wournalDoc.getZoom() + 0.1)
-    else if (e.key == "-") wournalDoc.setZoom(wournalDoc.getZoom() - 0.1)
+    else if (e.key == "+") {
+        e.preventDefault();
+        wournalDoc.setZoom(wournalDoc.getZoom() + 0.1);
+    }
+    else if (e.key == "-") {
+        e.preventDefault();
+        wournalDoc.setZoom(wournalDoc.getZoom() - 0.1);
+    }
+    else if (e.ctrlKey && e.key == "0") {
+        e.preventDefault();
+        wournalDoc.setZoom(1);
+    }
+});
+
+document.addEventListener("wheel", (e: WheelEvent) => {
+    if (e.altKey && e.deltaY < 0) {
+        e.preventDefault();
+        wournalDoc.setZoom(wournalDoc.getZoom() + 0.1);
+    }
+    else if (e.altKey && e.deltaY > 0) {
+        e.preventDefault();
+        wournalDoc.setZoom(wournalDoc.getZoom() - 0.1);
+    }
+
 });
