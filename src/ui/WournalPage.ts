@@ -3,7 +3,7 @@ import { DOMUtils } from "../util/DOMUtils";
 import { LOG } from "../util/Logging";
 import { BackgroundGenerator, BackgroundGeneratorColor } from "./BackgroundGenerators";
 import { WournalDocument } from "./WournalDocument";
-import { WournalPageSize } from "./WournalPageSize";
+import { WournalPageSize, xToPx } from "./WournalPageSize";
 
 /**
  * The attribute defining a "layer" element for wournal. Really they are just
@@ -53,9 +53,8 @@ export class WournalPage {
      * - `init`: Either the svg data of a saved document as a string or
      *   dimensions for a new, blank page.
      */
-    constructor(
-        private doc: WournalDocument,
-        init: string | {height: number, width: number}
+    private constructor(
+        private doc: WournalDocument
     ) {
         this.display = doc.display.ownerDocument.createElement("div");
         this.display.setAttribute("class", "wournal-page");
@@ -85,42 +84,86 @@ export class WournalPage {
         this.toolLayer.setAttribute("class", "wournal-page-toollayer");
         this.toolLayer.style.position = "absolute";
         this.svgWrapperEl.appendChild(this.toolLayer)
-
-        this.init(init);
-        this.updateDisplaySize();
-        this.setZoom(1);
     }
 
-    private init(init: string | {width: number, height: number}) {
-        switch(typeof(init)) {
-            case 'string':
-                this.canvasWrapper.innerHTML = init;
-                this.canvas = this.canvasWrapper.children[0] as SVGSVGElement;
-                const layers = this.getLayers();
-                this.setActivePaintLayer(
-                    layers[layers.length - 1].getAttribute(
-                        WOURNAL_SVG_LAYER_NAME_ATTR
-                    )
-                );
-                let dim =  {
-                    width: parseFloat(this.canvas.getAttribute("width")),
-                    height: parseFloat(this.canvas.getAttribute("height")),
-                }
-                this.setPageSize(dim);
-                break;
-            case 'object':
-                this.setPageSize(init);
-                this.setBackgroundLayer(new BackgroundGeneratorColor("white"));
-                this.addLayer("", true);
-                break;
-            default:
-                throw new Error(`Invalid initialization for Page: ${init}`);
+    // ------------------------------------------------------------
+    // initialization and serialization
+    // ------------------------------------------------------------
+
+    /** Return a new page with dimensions according to `init` */
+    public static createNew(
+        doc: WournalDocument, init: { height: number, width: number }
+    ): WournalPage {
+        let page = new WournalPage(doc);
+        page.setPageSize(init);
+        page.setBackgroundLayer(new BackgroundGeneratorColor("white"));
+        page.addLayer("", true);
+
+        page.updateDisplaySize();
+        return page;
+    }
+
+    /** Return a page parsed from the <svg> element string `svg` */
+    public static fromSvgString(
+        doc: WournalDocument, svg: string
+    ): WournalPage {
+        let page = new WournalPage(doc);
+        let outerSvg = doc.display.ownerDocument.createElementNS(
+                "http://www.w3.org/2000/svg", "svg"
+        );
+        outerSvg.innerHTML = svg;
+
+        let svgEl = outerSvg.children[0] as SVGSVGElement;
+        let layers = WournalPage.getLayers(svgEl);
+
+        // dimensions
+        // ------------------------------------------------------------
+
+        let dim =  {
+            width: xToPx(svgEl.getAttribute("width")),
+            height: xToPx(svgEl.getAttribute("height")),
+        };
+        page.setPageSize(dim);
+
+        // layers
+        // ------------------------------------------------------------
+        // page was created outside of wournal -> no wournal layers detected
+        if (layers.length === 0) {
+            // create a layer for wrapping the foreign svg element
+            let wrappingLayer = document.createElementNS(
+                "http://www.w3.org/2000/svg", "g"
+            );
+            wrappingLayer.setAttribute(WOURNAL_SVG_LAYER_NAME_ATTR, "imported");
+            wrappingLayer.appendChild(outerSvg.children[0]);
+            page.canvas.appendChild(wrappingLayer);
+
+            page.setBackgroundLayer(new BackgroundGeneratorColor("white"));
+            // add a new layer to paint on instead of the foreign svg
+            page.addLayer("", true);
+
+            layers = page.getLayers();
+        } else {
+            page.canvasWrapper.innerHTML = svg;
+            page.canvas = svgEl;
         }
+
+        page.setActivePaintLayer(
+            layers[layers.length - 1].getAttribute(
+                WOURNAL_SVG_LAYER_NAME_ATTR
+            )
+        );
+
+        page.updateDisplaySize();
+        return page;
     }
 
     public asSvgString(): string {
         return this.canvas.outerHTML;
     }
+
+    // ------------------------------------------------------------
+    // layers
+    // ------------------------------------------------------------
 
     public setBackgroundLayer(generator: BackgroundGenerator) {
         let bg = this.getLayer("background");
@@ -157,15 +200,19 @@ export class WournalPage {
         );
     }
 
-    /** Get all layers */
-    public getLayers(): SVGGElement[] {
+    private static getLayers(svgEl: SVGSVGElement) {
         let layers = [];
-        for (let el of this.canvas.getElementsByTagName("g")) {
+        for (let el of svgEl.getElementsByTagName("g")) {
             if (el.getAttribute(WOURNAL_SVG_LAYER_NAME_ATTR) !== null) {
                 layers.push(el);
             }
         }
         return layers;
+    }
+
+    /** Get all layers */
+    public getLayers(): SVGGElement[] {
+        return WournalPage.getLayers(this.canvas);
     }
 
     public setActivePaintLayer(name: string) {
@@ -176,9 +223,9 @@ export class WournalPage {
 
     public getActivePaintLayer() { return this.activePaintLayer; }
 
-    public onMouseDown(e: MouseEvent) {
-        this._rect = this.toolLayer.getBoundingClientRect();
-    }
+    // ------------------------------------------------------------
+    // dimensions
+    // ------------------------------------------------------------
 
     /** Update the size of this page according to the set width/height */
     private updateDisplaySize() {
@@ -216,6 +263,14 @@ export class WournalPage {
         this.svgWrapperEl.style.transform = `scale(${zoom})`;
         this.zoom = zoom;
         this.updateDisplaySize();
+    }
+
+    // ------------------------------------------------------------
+    // tools and helpers
+    // ------------------------------------------------------------
+
+    public onMouseDown(e: MouseEvent) {
+        this._rect = this.toolLayer.getBoundingClientRect();
     }
 
     /**

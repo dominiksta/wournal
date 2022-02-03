@@ -1,3 +1,5 @@
+import { LOG } from "../util/Logging";
+
 /**
  * How many pixels should be displayed for each millimeters of a real
  * document. Sadly, we cannot simply use mm measurements in the svg we produce,
@@ -8,22 +10,28 @@
 const MM_TO_PIXEL = 4;
 
 /**
+ * Translate any given measurement (cm, mm, etc) into px. See
+ * https://stackoverflow.com/a/56549861.
+ */
+export function xToPx(x: string) {
+    // if no measurement is provided, assume pixels
+    if (!x.match(/[\d\.]+(m|cm|mm|rem|px)/)) x = x + "px"
+
+    let div = document.createElement('div');
+    div.style.display = 'block';
+    div.style.height = x;
+    document.body.appendChild(div);
+    let px = parseFloat(window.getComputedStyle(div, null).height);
+    div.parentNode.removeChild(div);
+    return px;
+}
+
+/**
  * Compute an initial zoom factor according to device dpi. When applied, an A4
  * Wournal document should be displayed in the same size as an A4 document in MS
  * Word, Sumatra PDF and other applications.
  */
 export function computeZoomFactor() {
-    // Return the height `x` in any format (such as cm, mm, etc.) in px.
-    // See https://stackoverflow.com/a/56549861.
-    const xToPx = (x: string) => {
-        var div = document.createElement('div');
-        div.style.display = 'block';
-        div.style.height = x;
-        document.body.appendChild(div);
-        var px = parseFloat(window.getComputedStyle(div, null).height);
-        div.parentNode.removeChild(div);
-        return px;
-    }
     return xToPx(1000 + "mm") / (1000 * MM_TO_PIXEL);
 }
 

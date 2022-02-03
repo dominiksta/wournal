@@ -30,21 +30,13 @@ export class WournalDocument {
 
     public defaultPageDimensions = WournalPageSize.DINA4_PORTRAIT;
 
-    public newPage(
-        init: {height: number, width: number} | string
-            = this.defaultPageDimensions
-    ): void {
-        let page = new WournalPage(this, init);
-        page.setZoom(this.zoom * this.initialZoomFactor);
-        this.display.appendChild(page.display);
-        this.pages.push(page);
-        for(let page of this.pages)
-            page.toolLayer.style.cursor = this.currentTool.idleCursor;
-    }
+    // ------------------------------------------------------------
+    // initialization and serialization
+    // ------------------------------------------------------------
 
     public static create(display: HTMLDivElement): WournalDocument {
         let doc = new WournalDocument(display);
-        doc.newPage(WournalPageSize.DINA4_PORTRAIT);
+        doc.addNewPage(WournalPageSize.DINA4_PORTRAIT);
         return doc;
     }
 
@@ -54,7 +46,7 @@ export class WournalDocument {
         let doc = new WournalDocument(display);
         doc.identification = dto.identification;
         for (let page of dto.pagesSvg) {
-            doc.newPage(page);
+            doc.addPageFromSvg(page);
         }
         return doc;
     }
@@ -66,12 +58,41 @@ export class WournalDocument {
         );
     }
 
+    // ------------------------------------------------------------
+    // adding pages
+    // ------------------------------------------------------------
+
+    public addNewPage(
+        init: {height: number, width: number} = this.defaultPageDimensions
+    ): void {
+        this.addPage(WournalPage.createNew(this, init));
+    }
+
+    public addPageFromSvg(svg: string) {
+        this.addPage(WournalPage.fromSvgString(this, svg));
+    }
+
+    private addPage(page: WournalPage) {
+        page.setZoom(this.zoom * this.initialZoomFactor);
+        this.display.appendChild(page.display);
+        this.pages.push(page);
+        page.toolLayer.style.cursor = this.currentTool.idleCursor;
+    }
+
+    // ------------------------------------------------------------
+    // zoom
+    // ------------------------------------------------------------
+
     /** Set the zoom level of all pages. [0-inf[ */
     public setZoom(zoom: number) {
         this.zoom = zoom;
         for(let page of this.pages) page.setZoom(zoom * this.initialZoomFactor);
     }
     public getZoom(): number { return this.zoom; }
+
+    // ------------------------------------------------------------
+    // tools and helpers
+    // ------------------------------------------------------------
 
     public setTool(tool: SVGCanvasTool) {
         this.currentTool?.onDeselect();

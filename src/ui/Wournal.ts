@@ -51,9 +51,9 @@ export class Wournal {
     }
 
     private createTestPages() {
-        this.doc.newPage(WournalPageSize.DINA4_LANDSCAPE);
-        this.doc.newPage(WournalPageSize.DINA5_PORTRAIT);
-        this.doc.newPage(WournalPageSize.DINA5_LANDSCAPE);
+        this.doc.addNewPage(WournalPageSize.DINA4_LANDSCAPE);
+        this.doc.addNewPage(WournalPageSize.DINA5_PORTRAIT);
+        this.doc.addNewPage(WournalPageSize.DINA5_LANDSCAPE);
     }
 
     private registerKeyBinds() {
