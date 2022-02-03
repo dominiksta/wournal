@@ -3,6 +3,7 @@ import { SVGCanvasTool } from "./SVGCanvasTool";
 import { SVGUtils } from "../util/SVGUtils";
 import { SVGCanvasToolPen } from "./SVGCanvasToolPen";
 import { WournalPageSize, computeZoomFactor } from "./WournalPageSize";
+import { DocumentDTO } from "../persistence/DocumentDTO";
 
 export class WournalDocument {
     /** An initial zoom factor, invisible to the user. */
@@ -15,7 +16,10 @@ export class WournalDocument {
 
     private currentTool: SVGCanvasTool;
 
-    constructor(public display: HTMLDivElement) {
+    private constructor(
+        public display: HTMLDivElement,
+        public identification: string = "wournaldoc.svg",
+    ) {
         this.display.addEventListener("mouseup", this.onMouseUp.bind(this));
         this.display.addEventListener("mousedown", this.onMouseDown.bind(this));
         this.display.addEventListener("mousemove", this.onMouseMove.bind(this));
@@ -27,14 +31,39 @@ export class WournalDocument {
     public defaultPageDimensions = WournalPageSize.DINA4_PORTRAIT;
 
     public newPage(
-        dimensions: {height: number, width: number} = this.defaultPageDimensions
+        init: {height: number, width: number} | string
+            = this.defaultPageDimensions
     ): void {
-        let page = new WournalPage(this, dimensions);
+        let page = new WournalPage(this, init);
         page.setZoom(this.zoom * this.initialZoomFactor);
         this.display.appendChild(page.display);
         this.pages.push(page);
         for(let page of this.pages)
             page.toolLayer.style.cursor = this.currentTool.idleCursor;
+    }
+
+    public static create(display: HTMLDivElement): WournalDocument {
+        let doc = new WournalDocument(display);
+        doc.newPage(WournalPageSize.DINA4_PORTRAIT);
+        return doc;
+    }
+
+    public static fromDto(
+        display: HTMLDivElement, dto: DocumentDTO
+    ): WournalDocument {
+        let doc = new WournalDocument(display);
+        doc.identification = dto.identification;
+        for (let page of dto.pagesSvg) {
+            doc.newPage(page);
+        }
+        return doc;
+    }
+
+    public toDto(): DocumentDTO {
+        return new DocumentDTO(
+            this.identification,
+            this.pages.map((p) => p.asSvgString()),
+        );
     }
 
     /** Set the zoom level of all pages. [0-inf[ */

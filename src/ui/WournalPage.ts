@@ -1,3 +1,4 @@
+import { DocumentDTO } from "../persistence/DocumentDTO";
 import { DOMUtils } from "../util/DOMUtils";
 import { LOG } from "../util/Logging";
 import { BackgroundGenerator, BackgroundGeneratorColor } from "./BackgroundGenerators";
@@ -24,6 +25,13 @@ export class WournalPage {
      */
     private svgWrapperEl: HTMLDivElement;
 
+    /**
+     * This wrapper element is used so that saving/loading svg can be done with
+     * `canvasWrapper.innerHTML`, because `canvas.outerHTML` did not work
+     * properly.
+     */
+    private canvasWrapper: HTMLDivElement;
+
     private width: number;
     private height: number;
     private zoom: number = 1;
@@ -40,9 +48,14 @@ export class WournalPage {
     private _rect: DOMRect;
     get rect() { return this._rect; }
 
+    /**
+     * - `doc`: The wournal document this page is creted as a part of.
+     * - `init`: Either the svg data of a saved document as a string or
+     *   dimensions for a new, blank page.
+     */
     constructor(
         private doc: WournalDocument,
-        dimensions: {height: number, width: number}
+        init: string | {height: number, width: number}
     ) {
         this.display = doc.display.ownerDocument.createElement("div");
         this.display.setAttribute("class", "wournal-page");
@@ -54,43 +67,59 @@ export class WournalPage {
         this.svgWrapperEl.style.transformOrigin = "0 0";
         this.display.appendChild(this.svgWrapperEl);
 
+        this.canvasWrapper = this.doc.display.ownerDocument.createElement("div");
+        this.canvasWrapper.setAttribute("class", "wournal-canvas-wrapper");
+        this.svgWrapperEl.appendChild(this.canvasWrapper);
+
         this.canvas = this.doc.display.ownerDocument.createElementNS(
             "http://www.w3.org/2000/svg", "svg"
         );
+        this.canvas.setAttribute("class", "wournal-page-canvas");
         this.canvas.setAttribute("xmlns", "http://www.w3.org/2000/svg");
         this.canvas.style.position = "absolute";
-        this.svgWrapperEl.appendChild(this.canvas)
+        this.canvasWrapper.appendChild(this.canvas);
 
         this.toolLayer = this.doc.display.ownerDocument.createElementNS(
             "http://www.w3.org/2000/svg", "svg"
         );
+        this.toolLayer.setAttribute("class", "wournal-page-toollayer");
         this.toolLayer.style.position = "absolute";
         this.svgWrapperEl.appendChild(this.toolLayer)
 
-        this.setPageSize(dimensions);
+        this.init(init);
         this.updateDisplaySize();
         this.setZoom(1);
-
-        this.setBackgroundLayer(new BackgroundGeneratorColor("white"));
-        this.addLayer("", true);
-
-        if (dimensions.height === WournalPageSize.DINA4_PORTRAIT.height &&
-            dimensions.width === WournalPageSize.DINA4_PORTRAIT.width)
-            this.loadFromUrl("res/testpage.svg");
     }
 
-    public loadFromUrl(url: string) {
-        LOG.info(`Loading url: ${url}...`);
-        fetch(url)
-            .then((response: Response) => response.text())
-            .then((response: string) => {
-                LOG.info(`Loaded url: ${url}...`);
-                const loaded = DOMUtils.createElementFromHTML<SVGSVGElement>(
-                    response
+    private init(init: string | {width: number, height: number}) {
+        switch(typeof(init)) {
+            case 'string':
+                this.canvasWrapper.innerHTML = init;
+                this.canvas = this.canvasWrapper.children[0] as SVGSVGElement;
+                const layers = this.getLayers();
+                this.setActivePaintLayer(
+                    layers[layers.length - 1].getAttribute(
+                        WOURNAL_SVG_LAYER_NAME_ATTR
+                    )
                 );
-                this.activePaintLayer.innerHTML = loaded.innerHTML;
-                LOG.info(this.activePaintLayer);
-            });
+                let dim =  {
+                    width: parseFloat(this.canvas.getAttribute("width")),
+                    height: parseFloat(this.canvas.getAttribute("height")),
+                }
+                this.setPageSize(dim);
+                break;
+            case 'object':
+                this.setPageSize(init);
+                this.setBackgroundLayer(new BackgroundGeneratorColor("white"));
+                this.addLayer("", true);
+                break;
+            default:
+                throw new Error(`Invalid initialization for Page: ${init}`);
+        }
+    }
+
+    public asSvgString(): string {
+        return this.canvas.outerHTML;
     }
 
     public setBackgroundLayer(generator: BackgroundGenerator) {
