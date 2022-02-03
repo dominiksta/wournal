@@ -134,7 +134,7 @@ export class WournalPage {
                 "http://www.w3.org/2000/svg", "g"
             );
             wrappingLayer.setAttribute(WOURNAL_SVG_LAYER_NAME_ATTR, "imported");
-            wrappingLayer.appendChild(outerSvg.children[0]);
+            wrappingLayer.appendChild(svgEl);
             page.canvas.appendChild(wrappingLayer);
 
             page.setBackgroundLayer(new BackgroundGeneratorColor("white"));
@@ -144,7 +144,7 @@ export class WournalPage {
             layers = page.getLayers();
         } else {
             page.canvasWrapper.innerHTML = svg;
-            page.canvas = svgEl;
+            page.canvas = page.canvasWrapper.children[0] as SVGSVGElement;
         }
 
         page.setActivePaintLayer(
