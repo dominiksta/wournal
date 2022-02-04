@@ -6,6 +6,8 @@ export interface UndoAction {
     redo(doc: WournalDocument): void;
 }
 
+const MAX_UNDO_ACTIONS = 100;
+
 export class UndoStack {
     private undoable: UndoAction[] = [];
     private redoable: UndoAction[] = [];
@@ -20,6 +22,8 @@ export class UndoStack {
     public push(action: UndoAction): void {
         this.redoable = [];
         this.undoable.push(action);
+        if (this.undoable.length > MAX_UNDO_ACTIONS)
+            this.undoable.splice(0, 1)
         LOG.debug("Undoable action pushed");
         LOG.debug(action);
     }
