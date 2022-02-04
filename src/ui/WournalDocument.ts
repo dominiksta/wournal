@@ -4,10 +4,13 @@ import { SVGUtils } from "../util/SVGUtils";
 import { SVGCanvasToolPen } from "./SVGCanvasToolPen";
 import { WournalPageSize, computeZoomFactor } from "./WournalPageSize";
 import { DocumentDTO } from "../persistence/DocumentDTO";
+import { UndoStack } from "./UndoStack";
 
 export class WournalDocument {
     /** An initial zoom factor, invisible to the user. */
     private initialZoomFactor: number;
+
+    private undoStack: UndoStack;
 
     private pages: WournalPage[] = [];
     private zoom: number = 1;
@@ -25,6 +28,7 @@ export class WournalDocument {
         this.display.addEventListener("mousemove", this.onMouseMove.bind(this));
 
         this.initialZoomFactor = computeZoomFactor();
+        this.undoStack = new UndoStack(this);
         this.setTool(new SVGCanvasToolPen());
     }
 
@@ -56,6 +60,20 @@ export class WournalDocument {
             this.identification,
             this.pages.map((p) => p.asSvgString()),
         );
+    }
+
+    // ------------------------------------------------------------
+    // undo
+    // ------------------------------------------------------------
+
+    public undo(): void {
+        this.currentTool?.onDeselect();
+        this.undoStack.undo();
+    }
+
+    public redo(): void {
+        this.currentTool?.onDeselect();
+        this.undoStack.redo();
     }
 
     // ------------------------------------------------------------
@@ -98,6 +116,7 @@ export class WournalDocument {
         this.currentTool?.onDeselect();
         this.currentTool = tool;
         tool.getActivePage = this.getActivePage.bind(this);
+        tool.undoStack = this.undoStack;
         for(let page of this.pages)
             page.toolLayer.style.cursor = this.currentTool.idleCursor;
     }

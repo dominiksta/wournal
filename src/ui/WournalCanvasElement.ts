@@ -27,6 +27,8 @@ export abstract class WournalCanvasElement {
      */
     abstract setColor(color: string): void;
 
+    abstract getAttributes(): Map<string, string>;
+
     /**
      * "Render" `currentTransform` into the transform attribute of the svg
      * element

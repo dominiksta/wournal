@@ -1,9 +1,6 @@
-import { DocumentDTO } from "../persistence/DocumentDTO";
-import { DOMUtils } from "../util/DOMUtils";
-import { LOG } from "../util/Logging";
 import { BackgroundGenerator, BackgroundGeneratorColor } from "./BackgroundGenerators";
 import { WournalDocument } from "./WournalDocument";
-import { WournalPageSize, xToPx } from "./WournalPageSize";
+import { xToPx } from "./WournalPageSize";
 
 /**
  * The attribute defining a "layer" element for wournal. Really they are just

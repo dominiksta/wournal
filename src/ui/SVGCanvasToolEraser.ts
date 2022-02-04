@@ -2,12 +2,18 @@ import { WournalPage } from "./WournalPage";
 import { SVGCanvasPath } from "./SVGCanvasPath";
 import { SVGCanvasTool } from "./SVGCanvasTool";
 import { SVGUtils } from "../util/SVGUtils";
+import { UndoActionPaths } from "./UndoActionPaths";
 
 export class SVGCanvasToolEraser extends SVGCanvasTool {
 
 
     private erasing: boolean = false;
     protected toolUseStartPage: WournalPage = null;
+    /**
+     * Build up an array of undo actions to merge into one big undo action on
+     * mouse up.
+     */
+    private currentUndo: UndoActionPaths[] = [];
 
     public idleCursor = "default";
 
@@ -35,11 +41,20 @@ export class SVGCanvasToolEraser extends SVGCanvasTool {
     public onMouseDown(e: MouseEvent): void {
         this.toolUseStartPage = this.getActivePage();
         if (this.toolUseStartPage === null) return;
+        this.currentUndo = [];
         this.erasing = true;
         this.eraseTouched(e);
     }
 
     public onMouseUp(e: MouseEvent): void {
+        if (this.currentUndo.length !== 0) {
+            let finalUndo = new UndoActionPaths(null, null, null);
+            for (let i = this.currentUndo.length - 1; i >= 0; i--)
+                finalUndo.add(this.currentUndo[i]);
+
+            this.undoStack.push(finalUndo);
+        }
+
         this.erasing = false;
     }
 
@@ -78,11 +93,14 @@ export class SVGCanvasToolEraser extends SVGCanvasTool {
                 // check wether mouse is actually on path
                 if (this.eraseStrokes) {
                     if (path.isTouchingRect(eraserRect)) {
+                        this.currentUndo.push(
+                            new UndoActionPaths([node], null, null)
+                        );
                         this.toolUseStartPage.activePaintLayer
                             .removeChild(node);
                     }
                 } else {
-                    path.eraseRect(eraserRect);
+                    this.currentUndo.push(path.eraseRect(eraserRect));
                 }
             }
         }

@@ -1,5 +1,8 @@
+import { DOMUtils } from "../util/DOMUtils";
+import { DSUtils } from "../util/DSUtils";
 import { LOG } from "../util/Logging";
 import { SVGUtils } from "../util/SVGUtils";
+import { UndoActionPaths } from "./UndoActionPaths";
 import { WournalCanvasElement } from "./WournalCanvasElement";
 
 /**
@@ -95,6 +98,10 @@ export class SVGCanvasPath extends WournalCanvasElement {
 
     public setColor(color: string): void {
         this._svgElem.setAttribute("stroke", color);
+    }
+
+    public getAttributes(): Map<string, string> {
+        return DOMUtils.attributesAsMap(this._svgElem);
     }
 
     public setLineCap(lineCap: string): void {
@@ -221,14 +228,16 @@ export class SVGCanvasPath extends WournalCanvasElement {
         );
     }
 
-    /** Erase all points within `rect` in path. */
-    public eraseRect(rect: DOMRect): void {
+    /** Erase all points within `rect` in path. Return an undoable action */
+    public eraseRect(rect: DOMRect): UndoActionPaths {
         // this.pulsePoints();
         const path = SVGCanvasPath.parseSvgPathData(
             this._svgElem.getAttribute("d"));
 
         const paths = SVGCanvasPath.eraseRectPoints(rect, path)
         // LOG.debug(paths);
+
+        let added = []; let attrsBefore = this.getAttributes();
 
         for(let i = 1; i < paths.length; i++) {
             if (paths[i] === null) continue;
@@ -239,13 +248,24 @@ export class SVGCanvasPath extends WournalCanvasElement {
             );
             newPath.setStrokeWidth(this.getStrokeWidth());
             this._svgElem.before(this._svgElem, newPath._svgElem);
+            added.push(newPath._svgElem);
         }
 
         if (paths[0] == null) {
+            let undo = new UndoActionPaths([this._svgElem], null, added);
             this._svgElem.parentElement?.removeChild(this._svgElem);
+            return undo;
         } else {
             this._svgElem.setAttribute(
                 "d", SVGCanvasPath.svgPathDataToString(paths[0]));
+            let changed = null;
+            if (!DSUtils.compareMaps(attrsBefore, this.getAttributes()))
+                changed = [{
+                    path: this._svgElem,
+                    attrsBefore: attrsBefore,
+                    attrsAfter: this.getAttributes()
+                }];
+            return new UndoActionPaths(null, changed, added);
         }
     }
 

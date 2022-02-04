@@ -3,6 +3,7 @@ import { SVGUtils } from "../util/SVGUtils";
 import { SelectionDisplay } from "./SelectionDisplay";
 import { SVGCanvasPath } from "./SVGCanvasPath";
 import { SVGCanvasTool } from "./SVGCanvasTool";
+import { UndoActionPaths } from "./UndoActionPaths";
 import { WournalCanvasElement } from "./WournalCanvasElement";
 import { WournalPage } from "./WournalPage";
 
@@ -31,7 +32,9 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
     }
 
     /** The currently selected elements */
-    private selectionElems: WournalCanvasElement[] = [];
+    private selectionElems: {
+        savedAttrs: Map<string, string>, el: WournalCanvasElement
+    }[] = [];
 
     public onMouseDown(e: MouseEvent): void {
         if (this.getActivePage() == null) {
@@ -59,6 +62,10 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
                     this.state = "idle";
                     return;
                 }
+
+                for (let el of this.selectionElems)
+                    el.savedAttrs = el.el.getAttributes();
+
                 switch(this.selectionDisplay.lastClicked) {
                     case "main":
                         this.savedMouse.beforeMove = {x: mouse.x, y: mouse.y};
@@ -100,8 +107,12 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
                         selection, this.toolUseStartPage.globalDOMRectToCanvas(
                             el.getBoundingClientRect())
                     )) {
-                        if (el instanceof SVGPathElement)
-                            this.selectionElems.push(new SVGCanvasPath(el));
+                        if (el instanceof SVGPathElement) {
+                            let path = new SVGCanvasPath(el);
+                            this.selectionElems.push(
+                                {savedAttrs: path.getAttributes(), el: path}
+                            );
+                        }
                     }
                 }
                 if (this.selectionElems.length == 0) {
@@ -118,8 +129,20 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
                 break;
             case "moving":
             case "resizing":
-                for (let el of this.selectionElems)
-                    el.writeTransform();
+                let undo = [];
+                for (let el of this.selectionElems) {
+                    el.el.writeTransform();
+                    if (el.el instanceof SVGCanvasPath) {
+                        undo.push({
+                            path: el.el.svgPath, attrsBefore: el.savedAttrs,
+                            attrsAfter: el.el.getAttributes()
+                        })
+                    }
+                }
+                this.undoStack.push(new UndoActionPaths(
+                    null, undo, null
+                ));
+
 
                 const r = this.selectionDisplay.canvasRect();
                 this.selectionDisplay.setDimension(r);
@@ -154,8 +177,8 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
                     y: mouse.y - this.savedMouse.beforeMove.y
                 }
                 for (let el of this.selectionElems) {
-                    el.resetTransform();
-                    el.translate(to.x, to.y);
+                    el.el.resetTransform();
+                    el.el.translate(to.x, to.y);
                 }
                 this.selectionDisplay.translate(to);
                 break;
@@ -169,7 +192,7 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
                     bottom: mouse.y - before.bottom,
                 }
                 for (let el of this.selectionElems)
-                    el.resetTransform();
+                    el.el.resetTransform();
                 let resizeFactor = 0;
                 switch (this.selectionDisplay.lastClicked) {
                     case "main":
@@ -199,7 +222,7 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
                         break;
                 }
                 for (let el of this.selectionElems)
-                    el.scaleInPlace(
+                    el.el.scaleInPlace(
                         before, this.selectionDisplay.lastClicked, resizeFactor
                     );
                 this.selectionDisplay.setDimension(after);

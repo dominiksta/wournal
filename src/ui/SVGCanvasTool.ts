@@ -1,3 +1,4 @@
+import { UndoStack } from "./UndoStack";
 import { WournalPage } from "./WournalPage";
 
 export abstract class SVGCanvasTool {
@@ -12,6 +13,11 @@ export abstract class SVGCanvasTool {
      * OUTSIDE.
      */
     public getActivePage: () => WournalPage;
+
+    /**
+     * The undo stack to push undoable actions to. HAS TO BE SET FROM OUTSIDE.
+     */
+    public undoStack: UndoStack;
 
     /**
      * When the tool is deselected (from e.g. the toolbar), it might have to do

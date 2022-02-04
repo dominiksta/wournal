@@ -75,6 +75,14 @@ export class Wournal {
                 e.preventDefault();
                 this.doc.setZoom(1);
             }
+            else if (e.ctrlKey && e.key == "z") {
+                e.preventDefault();
+                this.doc.undo();
+            }
+            else if (e.ctrlKey && e.key == "y") {
+                e.preventDefault();
+                this.doc.redo();
+            }
         });
 
         document.addEventListener("wheel", (e: WheelEvent) => {
@@ -125,6 +133,13 @@ export class Wournal {
         });
         document.getElementById("btnToolNew").addEventListener("click", () => {
             this.loadDocument(true);
+        });
+
+        document.getElementById("btnToolUndo").addEventListener("click", () => {
+            this.doc.undo();
+        });
+        document.getElementById("btnToolRedo").addEventListener("click", () => {
+            this.doc.redo();
         });
     }
 }

@@ -2,6 +2,7 @@ import { CONF } from "../util/Config";
 import { WournalPage } from "./WournalPage";
 import { SVGCanvasPath } from "./SVGCanvasPath";
 import { SVGCanvasTool } from "./SVGCanvasTool";
+import { UndoActionPaths } from "./UndoActionPaths";
 
 export class SVGCanvasToolPen extends SVGCanvasTool {
 
@@ -29,7 +30,12 @@ export class SVGCanvasToolPen extends SVGCanvasTool {
     }
 
     public onMouseUp(e: MouseEvent): void {
-        if (this.path) this.path = null;
+        if (this.path) {
+            this.undoStack.push(new UndoActionPaths(
+                null, null, [this.path.svgPath]
+            ));
+            this.path = null;
+        }
     }
 
     public onMouseMove(e: MouseEvent): void {

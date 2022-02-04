@@ -2,6 +2,7 @@ import { LOG } from "../util/Logging";
 import { WournalPage } from "./WournalPage";
 import { SVGCanvasPath } from "./SVGCanvasPath";
 import { SVGCanvasTool } from "./SVGCanvasTool";
+import { UndoActionPaths } from "./UndoActionPaths";
 
 const TOOL_RECTANGLE_POINT_DIFF_PX = 5;
 
@@ -22,7 +23,12 @@ export class SVGCanvasToolRectangle extends SVGCanvasTool {
     }
 
     public onMouseUp(e: MouseEvent): void {
-        if (this.path) this.path = null;
+        if (this.path) {
+            this.undoStack.push(new UndoActionPaths(
+                null, null, [this.path.svgPath]
+            ));
+            this.path = null;
+        }
     }
 
     public onMouseMove(e: MouseEvent): void {
