@@ -21,6 +21,7 @@ export class WournalPage {
      * element (this.display);
      */
     private svgWrapperEl: HTMLDivElement;
+    get toolLayerWrapper() { return this.svgWrapperEl; }
 
     /**
      * This wrapper element is used so that saving/loading svg can be done with

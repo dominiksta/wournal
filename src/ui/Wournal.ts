@@ -7,6 +7,7 @@ import { WournalPageSize } from "./WournalPageSize";
 import { DocumentService } from "../persistence/DocumentService";
 import { DocumentRepositoryBrowserFiles } from "../persistence/DocumentRepositoryBrowserFiles";
 import { DocumentRepository } from "../persistence/DocumentRepository";
+import { SVGCanvasToolText } from "./SVGCanvasToolText";
 
 export class Wournal {
     private _doc: WournalDocument;
@@ -101,6 +102,9 @@ export class Wournal {
     private registerToolbarFunctions() {
         document.getElementById("btnToolPen").addEventListener("click", () => {
             this.doc.setTool(new SVGCanvasToolPen());
+        });
+        document.getElementById("btnToolText").addEventListener("click", () => {
+            this.doc.setTool(new SVGCanvasToolText());
         });
         document.getElementById("btnToolPointEraser").addEventListener("click", () => {
             this.doc.setTool(new SVGCanvasToolEraser(10, false));
