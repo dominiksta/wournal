@@ -238,6 +238,8 @@ export class WournalPage {
     public setPageSize(d: {width: number, height: number}) {
         this.width = d.width;
         this.height = d.height;
+        this.svgWrapperEl.style.width = `${this.width.toString()}px`;
+        this.svgWrapperEl.style.height = `${this.height.toString()}px`;
         this.toolLayer.setAttribute("width", `${d.width}`);
         this.toolLayer.setAttribute("height", `${d.height}`);
         this.canvas.setAttribute("width", `${d.width}`);
