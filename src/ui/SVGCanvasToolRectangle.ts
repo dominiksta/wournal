@@ -2,7 +2,7 @@ import { LOG } from "../util/Logging";
 import { WournalPage } from "./WournalPage";
 import { SVGCanvasPath } from "./SVGCanvasPath";
 import { SVGCanvasTool } from "./SVGCanvasTool";
-import { UndoActionPaths } from "./UndoActionPaths";
+import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
 
 const TOOL_RECTANGLE_POINT_DIFF_PX = 5;
 
@@ -19,13 +19,13 @@ export class SVGCanvasToolRectangle extends SVGCanvasTool {
 
         this.path = SVGCanvasPath.fromNewPath(this.toolUseStartPage.display.ownerDocument);
         this.pointStart = this.toolUseStartPage.globalCoordsToCanvas({x: e.x, y: e.y})
-        this.toolUseStartPage.getActivePaintLayer().appendChild(this.path.svgPath);
+        this.toolUseStartPage.getActivePaintLayer().appendChild(this.path.svgElem);
     }
 
     public onMouseUp(e: MouseEvent): void {
         if (this.path) {
-            this.undoStack.push(new UndoActionPaths(
-                null, null, [this.path.svgPath]
+            this.undoStack.push(new UndoActionCanvasElements(
+                null, null, [this.path.svgElem]
             ));
             this.path = null;
         }

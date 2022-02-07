@@ -2,7 +2,7 @@ import { WournalPage } from "./WournalPage";
 import { SVGCanvasPath } from "./SVGCanvasPath";
 import { SVGCanvasTool } from "./SVGCanvasTool";
 import { SVGUtils } from "../util/SVGUtils";
-import { UndoActionPaths } from "./UndoActionPaths";
+import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
 
 export class SVGCanvasToolEraser extends SVGCanvasTool {
 
@@ -13,7 +13,7 @@ export class SVGCanvasToolEraser extends SVGCanvasTool {
      * Build up an array of undo actions to merge into one big undo action on
      * mouse up.
      */
-    private currentUndo: UndoActionPaths[] = [];
+    private currentUndo: UndoActionCanvasElements[] = [];
 
     public idleCursor = "default";
 
@@ -48,7 +48,7 @@ export class SVGCanvasToolEraser extends SVGCanvasTool {
 
     public onMouseUp(e: MouseEvent): void {
         if (this.currentUndo.length !== 0) {
-            let finalUndo = new UndoActionPaths(null, null, null);
+            let finalUndo = new UndoActionCanvasElements(null, null, null);
             for (let i = this.currentUndo.length - 1; i >= 0; i--)
                 finalUndo.add(this.currentUndo[i]);
 
@@ -94,7 +94,7 @@ export class SVGCanvasToolEraser extends SVGCanvasTool {
                 if (this.eraseStrokes) {
                     if (path.isTouchingRect(eraserRect)) {
                         this.currentUndo.push(
-                            new UndoActionPaths([node], null, null)
+                            new UndoActionCanvasElements([node], null, null)
                         );
                         this.toolUseStartPage.activePaintLayer
                             .removeChild(node);

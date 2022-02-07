@@ -1,7 +1,8 @@
 import { SVGUtils } from "../util/SVGUtils";
-import { SVGCanvasText } from "./SVGCanvasText";
+import { SVGCanvasText, SVGCanvasTextData } from "./SVGCanvasText";
 import { SVGCanvasTool } from "./SVGCanvasTool";
 import { TextField } from "./TextField";
+import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
 import { WournalPage } from "./WournalPage";
 
 /** The offset from the svg text element to the ui text element */
@@ -18,7 +19,9 @@ export class SVGCanvasToolText extends SVGCanvasTool {
     private state: "idle" | "writing" = "idle";
 
     constructor(
-        private fontSize: number = 17
+        private fontSize: number = 17,
+        private fontFamily: string = "sans-serif",
+        private color: string = "#000000",
     ) { super(); }
 
     public onDeselect(): void { }
@@ -70,14 +73,13 @@ export class SVGCanvasToolText extends SVGCanvasTool {
     /** Edit the existing svg text element in `node` */
     private editTextField(node: SVGTextElement) {
         let canvasTxt = new SVGCanvasText(node);
-        const pos = canvasTxt.getPos();
         let txt = TextField.fromCanvasText(
             this.toolUseStartPage, canvasTxt, diff_svg_vs_ui
         );
-        canvasTxt.destroy();
+        canvasTxt.hide(true);
         txt.setText(canvasTxt.getText());
         txt.focus();
-        this.registerTextFieldUnfocus(txt);
+        this.registerTextFieldUnfocus(txt, canvasTxt);
     }
 
     /** create a new text field at position `pos` */
@@ -85,36 +87,70 @@ export class SVGCanvasToolText extends SVGCanvasTool {
         // The cursor size should be 32x32 in most situations. Ideally, we could
         // get the current cursor size and set the offset based on that. It
         // seems that this information is not available from js though.
-        const ui_pos = {
+        const svg_pos = {
             x: pos.x - 2,
             y: pos.y - 12
         };
 
-        let txt = new TextField(
-            this.toolUseStartPage, ui_pos, this.fontSize, "sans-serif"
+        let canvasText = SVGCanvasText.fromData(
+            this.toolUseStartPage.toolLayer.ownerDocument,
+            new SVGCanvasTextData(
+                "", {
+                    x: svg_pos.x,
+                    y: svg_pos.y
+                },
+                this.fontSize, this.fontFamily, this.color
+            ),
+        );
+        this.toolUseStartPage.activePaintLayer.appendChild(
+            canvasText.svgElem
+        );
+
+        let txt = TextField.fromCanvasText(
+            this.toolUseStartPage, canvasText, diff_svg_vs_ui
         );
         txt.focus();
 
-        this.registerTextFieldUnfocus(txt);
+        this.registerTextFieldUnfocus(txt, canvasText);
     }
 
     /** register the unfocus handler for `txt` */
-    private registerTextFieldUnfocus(txt: TextField) {
+    private registerTextFieldUnfocus(
+        txt: TextField, canvasText: SVGCanvasText
+    ) {
         this.state = "writing";
-        const pos = txt.getPos();
+        const prevText = canvasText.getText();
+
         txt.addFocusOutListener((e) => {
+            canvasText.hide(false);
             if (txt.getText() !== "") {
-                let textField = SVGCanvasText.fromText(
-                    this.toolUseStartPage.toolLayer.ownerDocument,
-                    txt.getText(), {
-                        x: pos.x - diff_svg_vs_ui.x,
-                        y: pos.y - diff_svg_vs_ui.y
-                    },
-                    this.fontSize
-                );
-                this.toolUseStartPage.activePaintLayer.appendChild(
-                    textField.svgText
-                );
+                canvasText.setText(txt.getText());
+
+                if (prevText !== txt.getText()) {
+                    if (prevText !== "") { // editing
+                        let dataBefore = canvasText.getData();
+                        dataBefore.text = prevText;
+                        this.undoStack.push(
+                            new UndoActionCanvasElements(
+                                null, [{
+                                    el: canvasText.svgElem,
+                                    dataAfter: canvasText.getData(),
+                                    dataBefore: dataBefore
+                                }], null
+                            )
+                        )
+                    } else { // new text
+                        this.undoStack.push(new UndoActionCanvasElements(
+                            null, null, [canvasText.svgElem]
+                        ));
+                    }
+                }
+            } else {
+                if (prevText !== "")
+                    this.undoStack.push(new UndoActionCanvasElements(
+                        [canvasText.svgElem], null, null,
+                    ));
+                canvasText.destroy();
             }
             txt.destroy();
             this.state = "idle";

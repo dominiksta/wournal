@@ -2,7 +2,7 @@ import { CONF } from "../util/Config";
 import { WournalPage } from "./WournalPage";
 import { SVGCanvasPath } from "./SVGCanvasPath";
 import { SVGCanvasTool } from "./SVGCanvasTool";
-import { UndoActionPaths } from "./UndoActionPaths";
+import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
 
 export class SVGCanvasToolPen extends SVGCanvasTool {
 
@@ -26,13 +26,13 @@ export class SVGCanvasToolPen extends SVGCanvasTool {
         var pt = this.toolUseStartPage.globalCoordsToCanvas({x: e.x, y: e.y});
         this.appendToBuffer(pt);
         this.path.startAt(pt);
-        this.toolUseStartPage.getActivePaintLayer().appendChild(this.path.svgPath);
+        this.toolUseStartPage.getActivePaintLayer().appendChild(this.path.svgElem);
     }
 
     public onMouseUp(e: MouseEvent): void {
         if (this.path) {
-            this.undoStack.push(new UndoActionPaths(
-                null, null, [this.path.svgPath]
+            this.undoStack.push(new UndoActionCanvasElements(
+                null, null, [this.path.svgElem]
             ));
             this.path = null;
         }

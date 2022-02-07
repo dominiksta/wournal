@@ -2,8 +2,15 @@ import { DOMUtils } from "../util/DOMUtils";
 import { DSUtils } from "../util/DSUtils";
 import { LOG } from "../util/Logging";
 import { SVGUtils } from "../util/SVGUtils";
-import { UndoActionPaths } from "./UndoActionPaths";
-import { WournalCanvasElement } from "./WournalCanvasElement";
+import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
+import { WournalCanvasElement, WournalCanvasElementData } from "./WournalCanvasElement";
+
+export class SVGCanvasPathData extends WournalCanvasElementData {
+    constructor(
+        /** contains the path ('d' element) along with everything else */
+        public attrs: Map<string, string>,
+    ) { super(); }
+}
 
 /**
  * This is a _less_ powerful version of a full SVGPathElement which abstracts
@@ -20,8 +27,6 @@ export class SVGCanvasPath extends WournalCanvasElement {
     private stroke: string;
     /** The temporary tip stroke. See `setTipStroke`*/
     private tipStroke: string;
-
-    get svgPath() { return this._svgElem };
 
     constructor(
         /** The actual underlying svg path */
@@ -100,7 +105,24 @@ export class SVGCanvasPath extends WournalCanvasElement {
         this._svgElem.setAttribute("stroke", color);
     }
 
-    public getAttributes(): Map<string, string> {
+    public getData(): SVGCanvasPathData {
+        return new SVGCanvasPathData(this.getAttributes());
+    }
+
+    public setData(dto: SVGCanvasPathData) {
+        let currAttrs = this.getAttributes();
+        let delAttrs = new Map<string, string>();
+
+        for (let k of currAttrs.keys())
+            if (dto.attrs.get(k) === undefined)
+                delAttrs.set(k, dto.attrs.get(k));
+
+        for (let attr of dto.attrs)
+            this.svgElem.setAttribute(attr[0], attr[1]);
+        for (let attr of delAttrs) this.svgElem.removeAttribute(attr[0])
+    }
+
+    private getAttributes(): Map<string, string> {
         return DOMUtils.attributesAsMap(this._svgElem);
     }
 
@@ -229,7 +251,7 @@ export class SVGCanvasPath extends WournalCanvasElement {
     }
 
     /** Erase all points within `rect` in path. Return an undoable action */
-    public eraseRect(rect: DOMRect): UndoActionPaths {
+    public eraseRect(rect: DOMRect): UndoActionCanvasElements {
         // this.pulsePoints();
         const path = SVGCanvasPath.parseSvgPathData(
             this._svgElem.getAttribute("d"));
@@ -252,7 +274,7 @@ export class SVGCanvasPath extends WournalCanvasElement {
         }
 
         if (paths[0] == null) {
-            let undo = new UndoActionPaths([this._svgElem], null, added);
+            let undo = new UndoActionCanvasElements([this._svgElem], null, added);
             this._svgElem.parentElement?.removeChild(this._svgElem);
             return undo;
         } else {
@@ -261,11 +283,11 @@ export class SVGCanvasPath extends WournalCanvasElement {
             let changed = null;
             if (!DSUtils.compareMaps(attrsBefore, this.getAttributes()))
                 changed = [{
-                    path: this._svgElem,
-                    attrsBefore: attrsBefore,
-                    attrsAfter: this.getAttributes()
+                    el: this._svgElem,
+                    dataBefore: new SVGCanvasPathData(attrsBefore),
+                    dataAfter: new SVGCanvasPathData(this.getAttributes())
                 }];
-            return new UndoActionPaths(null, changed, added);
+            return new UndoActionCanvasElements(null, changed, added);
         }
     }
 

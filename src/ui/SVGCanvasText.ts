@@ -1,14 +1,12 @@
 import { LOG } from "../util/Logging";
-import { WournalCanvasElement } from "./WournalCanvasElement";
+import { WournalCanvasElement, WournalCanvasElementData } from "./WournalCanvasElement";
 
 export class SVGCanvasText extends WournalCanvasElement {
 
     /** in px */
-    private _lineHeight: number = 15;
+    private _lineHeight: number;
     /** in px */
     private _fontSize: number;
-
-    get svgText() { return this._svgElem };
 
     constructor(
         /** The actual underlying svg path */
@@ -16,20 +14,18 @@ export class SVGCanvasText extends WournalCanvasElement {
     ) {
         super(_svgElem);
         this._fontSize = parseFloat(_svgElem.getAttribute("font-size"));
+        this._lineHeight = _svgElem.children.length > 0
+            ? parseFloat(_svgElem.children[0].getAttribute("dy"))
+            : 15;
     }
 
-    public static fromText(
-        doc: Document, text: string, pos: {x: number, y: number},
-        fontSize: number, fontFamily: string = "sans-serif"
+    public static fromData(
+        doc: Document, data: SVGCanvasTextData,
     ): SVGCanvasText {
         let ret = new SVGCanvasText(
             doc.createElementNS("http://www.w3.org/2000/svg", "text")
         );
-        ret.setPos(pos);
-        ret.setColor("#000000")
-        ret.setFontSize(fontSize);
-        ret.setText(text);
-        ret.setFontFamily(fontFamily);
+        ret.setData(data);
         return ret;
     }
 
@@ -74,13 +70,27 @@ export class SVGCanvasText extends WournalCanvasElement {
         this._svgElem.setAttribute("fill", color);
     }
 
+    public getColor(): string {
+        return this._svgElem.getAttribute("fill");
+    }
+
     public override destroy() {
         this._svgElem.parentNode.removeChild(this._svgElem);
     }
 
-    public override getAttributes(): Map<string, string> {
-        // TODO
-        return new Map<string, string>();
+    public override getData(): SVGCanvasTextData {
+        return new SVGCanvasTextData(
+            this.getText(), this.getPos(), this.getFontSize(),
+            this.getFontFamily(), this.getColor()
+        );
+    }
+
+    public override setData(dto: SVGCanvasTextData) {
+        this.setPos(dto.pos);
+        this.setText(dto.text);
+        this.setFontFamily(dto.fontFamily);
+        this.setFontSize(dto.fontSize);
+        this.setColor(dto.color);
     }
 
     public setFontFamily(fontFamily: string) {
@@ -138,4 +148,17 @@ export class SVGCanvasText extends WournalCanvasElement {
         }
     }
 
+    public hide(hide: boolean) {
+        this._svgElem.style.display = hide ? "none" : "";
+    }
+}
+
+export class SVGCanvasTextData extends WournalCanvasElementData {
+    constructor(
+        public text: string,
+        public pos: {x: number, y: number},
+        public fontSize: number,
+        public fontFamily: string,
+        public color: string,
+    ) { super(); }
 }

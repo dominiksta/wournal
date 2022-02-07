@@ -1,35 +1,37 @@
 import { DOMUtils } from "../util/DOMUtils";
 import { LOG } from "../util/Logging";
 import { UndoAction } from "./UndoStack";
+import {  WournalCanvasElementData } from "./WournalCanvasElement";
+import { WournalCanvasElementFactory } from "./WournalCanvasElementFactory";
 import { WournalDocument } from "./WournalDocument";
 
-export class UndoActionPaths implements UndoAction {
+export class UndoActionCanvasElements implements UndoAction {
 
     private deleted: {
-            layer: SVGGElement, index: number, path: SVGPathElement
+            layer: SVGGElement, index: number, el: SVGGraphicsElement
     }[] = [];
 
     private changed: {
-        path: SVGPathElement,
-        attrsBefore: Map<string, string>,
-        attrsAfter: Map<string, string>
+        el: SVGGraphicsElement,
+        dataBefore: WournalCanvasElementData,
+        dataAfter: WournalCanvasElementData
     }[] = [];
 
     private added: {
-        layer: SVGGElement, index: number, path: SVGPathElement
+        layer: SVGGElement, index: number, el: SVGGraphicsElement
     }[] = [];
 
     constructor(
-        deleted: SVGPathElement[] | null,
+        deleted: SVGGraphicsElement[] | null,
         changed: {
-            path: SVGPathElement,
-            attrsBefore: Map<string, string>,
-            attrsAfter: Map<string, string>
+            el: SVGGraphicsElement,
+            dataBefore: WournalCanvasElementData,
+            dataAfter: WournalCanvasElementData
         }[] | null,
-        added:  SVGPathElement[] | null,
+        added:  SVGGraphicsElement[] | null,
     ) {
         // enrich data about deleted and added elements
-        const enrich = (source: SVGPathElement[]) => {
+        const enrich = (source: SVGGraphicsElement[]) => {
             return source.map(v => {
                 if (!(v.parentNode instanceof SVGGElement)) {
                     LOG.error(v);
@@ -40,7 +42,7 @@ export class UndoActionPaths implements UndoAction {
                 return {
                     layer: v.parentNode as SVGGElement,
                     index: DOMUtils.nodeIndexInParent(v),
-                    path: v
+                    el: v
                 };
             })
         }
@@ -52,46 +54,32 @@ export class UndoActionPaths implements UndoAction {
 
     public undo(doc: WournalDocument): void {
         for(let del of this.deleted) this.addAtIndex(del)
-        for(let add of this.added) add.layer.removeChild(add.path);
+        for(let add of this.added) add.layer.removeChild(add.el);
         for(let chn of this.changed) {
-            let newAttrs = new Map<string, string>();
-
-            for (let k of chn.attrsAfter.keys())
-                if (chn.attrsBefore.get(k) === undefined)
-                    newAttrs.set(k, chn.attrsAfter.get(k));
-
-            for (let attr of chn.attrsBefore)
-                chn.path.setAttribute(attr[0], attr[1]);
-            for (let attr of newAttrs) chn.path.removeAttribute(attr[0])
+            let wournalEl = WournalCanvasElementFactory.fromSvgElem(chn.el);
+            wournalEl.setData(chn.dataBefore);
         }
     }
 
     public redo(doc: WournalDocument): void {
         for(let add of this.added) this.addAtIndex(add);
-        for(let del of this.deleted) del.layer.removeChild(del.path);
+        for(let del of this.deleted) del.layer.removeChild(del.el);
         for(let chn of this.changed.slice().reverse()) {
-            let delAttrs = new Map<string, string>();
-
-            for (let k of chn.attrsBefore.keys())
-                if (chn.attrsAfter.get(k) === undefined)
-                    delAttrs.set(k, chn.attrsAfter.get(k));
-
-            for (let attr of chn.attrsAfter)
-                chn.path.setAttribute(attr[0], attr[1]);
-            for (let attr of delAttrs) chn.path.removeAttribute(attr[0])
+            let wournalEl = WournalCanvasElementFactory.fromSvgElem(chn.el);
+            wournalEl.setData(chn.dataAfter);
         }
     }
 
     private addAtIndex(
-        el: {path: SVGPathElement, layer: SVGGElement, index: number}
+        add: {el: SVGGraphicsElement, layer: SVGGElement, index: number}
     ) {
-        let next = el.layer.children[el.index + 1];
-        if (next) next.before(el.path);
-        else el.layer.appendChild(el.path);
+        let next = add.layer.children[add.index + 1];
+        if (next) next.before(add.el);
+        else add.layer.appendChild(add.el);
     }
 
     /** Append another UndoActionPaths */
-    public add(action: UndoActionPaths) {
+    public add(action: UndoActionCanvasElements) {
         Array.prototype.push.apply(this.added, action.added);
         Array.prototype.push.apply(this.changed, action.changed);
         Array.prototype.push.apply(this.deleted, action.deleted);

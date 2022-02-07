@@ -3,8 +3,9 @@ import { SVGUtils } from "../util/SVGUtils";
 import { SelectionDisplay } from "./SelectionDisplay";
 import { SVGCanvasPath } from "./SVGCanvasPath";
 import { SVGCanvasTool } from "./SVGCanvasTool";
-import { UndoActionPaths } from "./UndoActionPaths";
-import { WournalCanvasElement } from "./WournalCanvasElement";
+import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
+import { WournalCanvasElement, WournalCanvasElementData } from "./WournalCanvasElement";
+import { WournalCanvasElementFactory } from "./WournalCanvasElementFactory";
 import { WournalPage } from "./WournalPage";
 
 export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
@@ -33,7 +34,7 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
 
     /** The currently selected elements */
     private selectionElems: {
-        savedAttrs: Map<string, string>, el: WournalCanvasElement
+        savedData: WournalCanvasElementData, el: WournalCanvasElement
     }[] = [];
 
     public onMouseDown(e: MouseEvent): void {
@@ -64,7 +65,7 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
                 }
 
                 for (let el of this.selectionElems)
-                    el.savedAttrs = el.el.getAttributes();
+                    el.savedData = el.el.getData();
 
                 switch(this.selectionDisplay.lastClicked) {
                     case "main":
@@ -107,12 +108,10 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
                         selection, this.toolUseStartPage.globalDOMRectToCanvas(
                             el.getBoundingClientRect())
                     )) {
-                        if (el instanceof SVGPathElement) {
-                            let path = new SVGCanvasPath(el);
-                            this.selectionElems.push(
-                                {savedAttrs: path.getAttributes(), el: path}
-                            );
-                        }
+                        let wournalEl = WournalCanvasElementFactory.fromSvgElem(el);
+                        this.selectionElems.push(
+                            { savedData: wournalEl.getData(), el: wournalEl }
+                        );
                     }
                 }
                 if (this.selectionElems.length == 0) {
@@ -134,12 +133,12 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
                     el.el.writeTransform();
                     if (el.el instanceof SVGCanvasPath) {
                         undo.push({
-                            path: el.el.svgPath, attrsBefore: el.savedAttrs,
-                            attrsAfter: el.el.getAttributes()
+                            el: el.el.svgElem, dataBefore: el.savedData,
+                            dataAfter: el.el.getData()
                         })
                     }
                 }
-                this.undoStack.push(new UndoActionPaths(
+                this.undoStack.push(new UndoActionCanvasElements(
                     null, undo, null
                 ));
 

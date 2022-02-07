@@ -1,6 +1,17 @@
 import { LOG } from "../util/Logging";
 
+/**
+ * Implementations of this class should hold data describing every property
+ * needed to create a corresponding WournalCanvasElement.
+ */
+export abstract class WournalCanvasElementData { }
+
+/**
+ * An Element on a Wournal svg canvas.
+ */
 export abstract class WournalCanvasElement {
+
+    get svgElem() { return this._svgElem; }
 
     /** The transform as it was parsed from the actual svg element */
     protected initialTransform = {
@@ -27,7 +38,8 @@ export abstract class WournalCanvasElement {
      */
     abstract setColor(color: string): void;
 
-    abstract getAttributes(): Map<string, string>;
+    abstract getData(): WournalCanvasElementData;
+    abstract setData(dto: WournalCanvasElementData): void;
 
     /** Remove the underlying element from whatever parent element */
     public destroy(): void {
