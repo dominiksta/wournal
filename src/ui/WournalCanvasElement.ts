@@ -29,6 +29,11 @@ export abstract class WournalCanvasElement {
 
     abstract getAttributes(): Map<string, string>;
 
+    /** Remove the underlying element from whatever parent element */
+    public destroy(): void {
+        this._svgElem.parentNode.removeChild(this._svgElem);
+    }
+
     /**
      * "Render" `currentTransform` into the transform attribute of the svg
      * element

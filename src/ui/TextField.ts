@@ -1,3 +1,4 @@
+import { SVGCanvasText } from "./SVGCanvasText";
 import { WournalPage } from "./WournalPage";
 
 export class TextField {
@@ -21,7 +22,7 @@ export class TextField {
     private styleText = `
 .wournal-text-field-label::after, .wournal-text-field-text {
     width: auto;
-    font-family: inherit;
+    font: inherit;
     /* min-width: 1em; */
     grid-area: 1 / 2;
     padding: 0.1em;
@@ -47,6 +48,8 @@ export class TextField {
     constructor(
         page: WournalPage,
         private _pos: {x: number, y: number},
+        fontSize: number = 17,
+        fontFamily: string = "sans-serif",
         spellcheck: boolean = false
     ) {
         this.display = page.toolLayer.ownerDocument.createElement("div");
@@ -65,13 +68,10 @@ export class TextField {
         this.textarea = page.toolLayer.ownerDocument.createElement("textarea");
         this.textarea.setAttribute("class", "wournal-text-field-text");
         this.textarea.setAttribute("spellcheck", `${spellcheck}`);
+        this.textarea.style.fontFamily = fontFamily;
         this.textarea.cols = 1;
         this.textarea.rows = 1;
-        this.textarea.addEventListener("input", (e: Event) => {
-            let el = e.target as HTMLInputElement;
-            let parent = el.parentNode as HTMLLabelElement;
-            parent.dataset.value = el.value;
-        })
+        this.textarea.addEventListener("input", this.updateSize.bind(this));
         this.label.appendChild(this.textarea);
 
         this.style = page.toolLayer.ownerDocument.createElement("style");
@@ -79,13 +79,34 @@ export class TextField {
         this.display.appendChild(this.style);
 
         this.setPos(_pos);
+        this.setFontSize(fontSize);
 
         page.toolLayerWrapper.appendChild(this.display);
     }
 
+    private updateSize() {
+        this.label.dataset.value = this.textarea.value;
+    }
+
+    public static fromCanvasText(
+        page: WournalPage, canvasTxt: SVGCanvasText,
+        offset: {x: number, y: number}
+    ) {
+        const canvasPos = canvasTxt.getPos();
+        return new TextField(
+            page, {
+                x: canvasPos.x + offset.x,
+                y: canvasPos.y + offset.y
+            }, canvasTxt.getFontSize(), canvasTxt.getFontFamily()
+        );
+    }
+
     public get pos() { return this._pos; }
 
-    public setText(text: string) { this.textarea.value = text; }
+    public setText(text: string) {
+        this.textarea.value = text;
+        this.updateSize();
+    }
     public getText(): string { return this.textarea.value; }
 
     public focus(): void {
@@ -94,9 +115,22 @@ export class TextField {
         })
     }
 
+    public setFontSize(size: number) {
+        this.label.style.fontSize = size.toString() + "px";
+        this.label.style.lineHeight =
+            SVGCanvasText.lineHeightForFontSize(size).toString() + "px";
+    }
+
     public setPos(pos: {x: number, y: number}) {
         this.display.style.top = `${pos.y}px`;
         this.display.style.left = `${pos.x}px`;
+    }
+
+    public getPos(): {x: number, y: number} {
+        return {
+            x: parseFloat(this.display.style.left),
+            y: parseFloat(this.display.style.top),
+        }
     }
 
     public addFocusOutListener(fun: (e: FocusEvent) => any) {
