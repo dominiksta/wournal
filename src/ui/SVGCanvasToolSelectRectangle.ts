@@ -131,12 +131,10 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
                 let undo = [];
                 for (let el of this.selectionElems) {
                     el.el.writeTransform();
-                    if (el.el instanceof SVGCanvasPath) {
-                        undo.push({
-                            el: el.el.svgElem, dataBefore: el.savedData,
-                            dataAfter: el.el.getData()
-                        })
-                    }
+                    undo.push({
+                        el: el.el.svgElem, dataBefore: el.savedData,
+                        dataAfter: el.el.getData()
+                    })
                 }
                 this.undoStack.push(new UndoActionCanvasElements(
                     null, undo, null

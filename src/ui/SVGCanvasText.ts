@@ -123,11 +123,14 @@ export class SVGCanvasText extends WournalCanvasElement {
     public override writeTransform(): void {
         const curr = this.getPos();
         const t = this.currentTransform;
+        this.setFontSize(this._fontSize * t.scaleX * t.scaleY);
+
         const newT = {
-            x: curr.x + t.translateX,
-            y: curr.y + t.translateY,
+            x: (curr.x * t.scaleX) + t.translateX,
+            y: (curr.y * t.scaleY) + t.translateY,
         }
         this.setPos(newT);
+        this.resetTransform();
     }
 
     public getPos(): {x: number, y: number} {
