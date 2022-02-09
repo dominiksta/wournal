@@ -38,7 +38,7 @@ export class CanvasToolSelectRectangle extends CanvasTool {
 
     public onMouseDown(e: MouseEvent): void {
         if (this.getActivePage() === null) {
-            this.selectionDisplay.removeFromDisplay();
+            this.selectionDisplay?.removeFromDisplay();
             this.state = "idle";
             return;
         }
@@ -57,7 +57,7 @@ export class CanvasToolSelectRectangle extends CanvasTool {
                 break;
             case "selected":
                 if (!(this.toolUseStartPage === this.getActivePage() &&
-                    SVGUtils.pointInRect(mouse, this.selectionDisplay.canvasRect()))) {
+                    SVGUtils.pointInRect(mouse, this.selectionDisplay.hitbox()))) {
                     this.selectionDisplay.removeFromDisplay();
                     this.state = "idle";
                     return;
@@ -76,7 +76,7 @@ export class CanvasToolSelectRectangle extends CanvasTool {
                     case "bottom":
                     case "left":
                         this.savedSelectionRect.beforeResize =
-                            DOMRect.fromRect(this.selectionDisplay.canvasRect());
+                            DOMRect.fromRect(this.selectionDisplay.getMainRect());
                         this.state = "resizing";
                         break;
                 }
@@ -93,14 +93,14 @@ export class CanvasToolSelectRectangle extends CanvasTool {
     }
 
     public onMouseUp(e: MouseEvent): void {
-        this.getActivePage().toolLayer.style.cursor = this.idleCursor;
         if (this.getActivePage() === null) return;
+        this.getActivePage().toolLayer.style.cursor = this.idleCursor;
         switch(this.state) {
             case "idle":
                 break;
             case "selecting":
                 this.selectionElems = [];
-                const selection = this.selectionDisplay.canvasRect();
+                const selection = this.selectionDisplay.getMainRect();
                 for (let el of this.toolUseStartPage.getActivePaintLayer().children) {
                     if (!(el instanceof SVGGraphicsElement)) continue;
                     if (SVGUtils.rectInRect(
@@ -140,7 +140,7 @@ export class CanvasToolSelectRectangle extends CanvasTool {
                 ));
 
 
-                const r = this.selectionDisplay.canvasRect();
+                const r = this.selectionDisplay.getMainRect();
                 this.selectionDisplay.setDimension(r);
                 this.selectionDisplay.translate({x: 0, y: 0});
 

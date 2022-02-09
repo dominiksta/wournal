@@ -1,6 +1,9 @@
 import { DOMUtils } from "../util/DOMUtils";
 import { WournalPage } from "./WournalPage";
 
+const EDGE_WIDTH = 10;
+const MAIN_STROKE_WIDTH = 1;
+
 export class SelectionDisplay {
     private mainRect: SVGRectElement;
 
@@ -32,6 +35,7 @@ export class SelectionDisplay {
         );
         this.mainRect.setAttribute("stroke", "darkblue");
         this.mainRect.setAttribute("stroke-opacity", "0.5");
+        this.mainRect.setAttribute("stroke-width", MAIN_STROKE_WIDTH.toString());
         this.mainRect.setAttribute("fill", "lightblue");
         this.mainRect.setAttribute("fill-opacity", "0.5");
         this.mainRect.addEventListener("mousedown", () => {
@@ -44,7 +48,7 @@ export class SelectionDisplay {
             );
             path.setAttribute("stroke", "black");
             path.setAttribute("stroke-opacity", "0");
-            path.setAttribute("stroke-width", "10");
+            path.setAttribute("stroke-width", EDGE_WIDTH.toString());
 
             path.addEventListener("mousedown", () => {
                 this._lastClicked = side;
@@ -113,11 +117,25 @@ export class SelectionDisplay {
     }
 
     /** Get main bounding client rect */
-    canvasRect(): DOMRect {
-        // TODO: slightly too large because of edges
-        return this.page.globalDOMRectToCanvas(
-            this.mainRect.getBoundingClientRect()
-        );
+    getMainRect(): DOMRect {
+        let mainRect = this.mainRect.getBoundingClientRect();
+        return this.page.globalDOMRectToCanvas(DOMRect.fromRect({
+            x: mainRect.x + MAIN_STROKE_WIDTH / 2,
+            y: mainRect.y + MAIN_STROKE_WIDTH / 2,
+            width: mainRect.width - MAIN_STROKE_WIDTH,
+            height: mainRect.height - MAIN_STROKE_WIDTH,
+        }));
+    }
+
+    /** Get the "hitbox" of the entire selection display (including the edges) */
+    hitbox(): DOMRect {
+        let mainRect = this.mainRect.getBoundingClientRect();
+        return this.page.globalDOMRectToCanvas(DOMRect.fromRect({
+            x: mainRect.x - EDGE_WIDTH / 2,
+            y: mainRect.y - EDGE_WIDTH / 2,
+            width: mainRect.width + EDGE_WIDTH,
+            height: mainRect.height + EDGE_WIDTH,
+        }));
     }
 
     /** Technically we could use setPosition, but this should be a bit faster */
