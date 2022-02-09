@@ -3,9 +3,7 @@
 ## Development
 
 1. `npm install`
-2. `npm run watch`
-3. `npm run serve` in another terminal
-4. Open browser at http://localhost:8080
+2. `npm start`
 
 ## Acknowledgements
 
