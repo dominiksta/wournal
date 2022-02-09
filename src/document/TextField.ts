@@ -58,6 +58,7 @@ export class TextField {
 
         this.label = page.toolLayer.ownerDocument.createElement("label");
         this.label.setAttribute("class", "wournal-text-field-label");
+        this.label.style.fontFamily = fontFamily;
         this.label.style.display = "inline-grid";
         this.label.style.border = "1px solid blue";
         this.label.style.borderRadius = "2px";
@@ -68,7 +69,6 @@ export class TextField {
         this.textarea = page.toolLayer.ownerDocument.createElement("textarea");
         this.textarea.setAttribute("class", "wournal-text-field-text");
         this.textarea.setAttribute("spellcheck", `${spellcheck}`);
-        this.textarea.style.fontFamily = fontFamily;
         this.textarea.cols = 1;
         this.textarea.rows = 1;
         this.textarea.addEventListener("input", this.updateSize.bind(this));
