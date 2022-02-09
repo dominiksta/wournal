@@ -1,10 +1,10 @@
 import { WournalPage } from "./WournalPage";
-import { SVGCanvasPath } from "./SVGCanvasPath";
-import { SVGCanvasTool } from "./SVGCanvasTool";
+import { CanvasPath } from "./CanvasPath";
+import { CanvasTool } from "./CanvasTool";
 import { SVGUtils } from "../util/SVGUtils";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
 
-export class SVGCanvasToolEraser extends SVGCanvasTool {
+export class CanvasToolEraser extends CanvasTool {
 
 
     private erasing: boolean = false;
@@ -83,7 +83,7 @@ export class SVGCanvasToolEraser extends SVGCanvasTool {
             // pre-select elements where mouse is at least in bounding client
             // rect
             if (SVGUtils.rectIntersect(elRect, eraserRect)) {
-                let path = new SVGCanvasPath(node);
+                let path = new CanvasPath(node);
                 // SVGUtils.tmpDisplayRect(
                 //     eraserRect, this.toolUseStartPage.activePaintLayer,
                 //     500, "blue"

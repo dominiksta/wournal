@@ -1,6 +1,6 @@
 import { SVGUtils } from "../util/SVGUtils";
-import { SVGCanvasText, SVGCanvasTextData } from "./SVGCanvasText";
-import { SVGCanvasTool } from "./SVGCanvasTool";
+import { CanvasText, SVGCanvasTextData } from "./CanvasText";
+import { CanvasTool } from "./CanvasTool";
 import { TextField } from "./TextField";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
 import { WournalPage } from "./WournalPage";
@@ -11,7 +11,7 @@ const diff_svg_vs_ui = {
     y: 1,
 };
 
-export class SVGCanvasToolText extends SVGCanvasTool {
+export class CanvasToolText extends CanvasTool {
 
     public idleCursor = "text";
     protected toolUseStartPage: WournalPage;
@@ -72,7 +72,7 @@ export class SVGCanvasToolText extends SVGCanvasTool {
 
     /** Edit the existing svg text element in `node` */
     private editTextField(node: SVGTextElement) {
-        let canvasTxt = new SVGCanvasText(node);
+        let canvasTxt = new CanvasText(node);
         let txt = TextField.fromCanvasText(
             this.toolUseStartPage, canvasTxt, diff_svg_vs_ui
         );
@@ -92,7 +92,7 @@ export class SVGCanvasToolText extends SVGCanvasTool {
             y: pos.y - 12
         };
 
-        let canvasText = SVGCanvasText.fromData(
+        let canvasText = CanvasText.fromData(
             this.toolUseStartPage.toolLayer.ownerDocument,
             new SVGCanvasTextData(
                 "", {
@@ -116,7 +116,7 @@ export class SVGCanvasToolText extends SVGCanvasTool {
 
     /** register the unfocus handler for `txt` */
     private registerTextFieldUnfocus(
-        txt: TextField, canvasText: SVGCanvasText
+        txt: TextField, canvasText: CanvasText
     ) {
         this.state = "writing";
         const prevText = canvasText.getText();

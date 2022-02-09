@@ -1,7 +1,7 @@
 import { LOG } from "../util/Logging";
-import { WournalCanvasElement, WournalCanvasElementData } from "./WournalCanvasElement";
+import { CanvasElement, CanvasElementData } from "./CanvasElement";
 
-export class SVGCanvasText extends WournalCanvasElement {
+export class CanvasText extends CanvasElement {
 
     /** in px */
     private _lineHeight: number;
@@ -21,8 +21,8 @@ export class SVGCanvasText extends WournalCanvasElement {
 
     public static fromData(
         doc: Document, data: SVGCanvasTextData,
-    ): SVGCanvasText {
-        let ret = new SVGCanvasText(
+    ): CanvasText {
+        let ret = new CanvasText(
             doc.createElementNS("http://www.w3.org/2000/svg", "text")
         );
         ret.setData(data);
@@ -103,7 +103,7 @@ export class SVGCanvasText extends WournalCanvasElement {
 
     public setFontSize(size: number) {
         this._fontSize = size;
-        this.setLineHeight(SVGCanvasText.lineHeightForFontSize(size));
+        this.setLineHeight(CanvasText.lineHeightForFontSize(size));
         this._svgElem.setAttribute("font-size", size.toString());
     }
 
@@ -156,7 +156,7 @@ export class SVGCanvasText extends WournalCanvasElement {
     }
 }
 
-export class SVGCanvasTextData extends WournalCanvasElementData {
+export class SVGCanvasTextData extends CanvasElementData {
     constructor(
         public text: string,
         public pos: {x: number, y: number},

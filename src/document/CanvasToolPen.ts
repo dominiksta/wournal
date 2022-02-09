@@ -1,10 +1,10 @@
 import { CONF } from "../util/Config";
 import { WournalPage } from "./WournalPage";
-import { SVGCanvasPath } from "./SVGCanvasPath";
-import { SVGCanvasTool } from "./SVGCanvasTool";
+import { CanvasPath } from "./CanvasPath";
+import { CanvasTool } from "./CanvasTool";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
 
-export class SVGCanvasToolPen extends SVGCanvasTool {
+export class CanvasToolPen extends CanvasTool {
 
     /** Buffer for smoothing. Contains the last positions of the mouse cursor */
     private mouseBuffer: {x: number, y: number}[] = [];
@@ -12,7 +12,7 @@ export class SVGCanvasToolPen extends SVGCanvasTool {
     protected toolUseStartPage: WournalPage;
 
     /** The svg path for the current line */
-    private path: SVGCanvasPath = null;
+    private path: CanvasPath = null;
 
     public idleCursor = "url('res/custom/pen.svg'), auto";
 
@@ -20,7 +20,7 @@ export class SVGCanvasToolPen extends SVGCanvasTool {
         this.toolUseStartPage = this.getActivePage();
         if (this.toolUseStartPage === null) return;
 
-        this.path = SVGCanvasPath.fromNewPath(this.toolUseStartPage.display.ownerDocument);
+        this.path = CanvasPath.fromNewPath(this.toolUseStartPage.display.ownerDocument);
         this.path.setLineCap("round");
         this.mouseBuffer = [];
         var pt = this.toolUseStartPage.globalCoordsToCanvas({x: e.x, y: e.y});

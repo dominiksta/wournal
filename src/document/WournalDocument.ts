@@ -1,7 +1,7 @@
 import { WournalPage } from "./WournalPage";
-import { SVGCanvasTool } from "./SVGCanvasTool";
+import { CanvasTool } from "./CanvasTool";
 import { SVGUtils } from "../util/SVGUtils";
-import { SVGCanvasToolPen } from "./SVGCanvasToolPen";
+import { CanvasToolPen } from "./CanvasToolPen";
 import { WournalPageSize, computeZoomFactor } from "./WournalPageSize";
 import { DocumentDTO } from "../persistence/DocumentDTO";
 import { UndoStack } from "./UndoStack";
@@ -17,7 +17,7 @@ export class WournalDocument {
 
     private activePage: WournalPage = null;
 
-    private currentTool: SVGCanvasTool;
+    private currentTool: CanvasTool;
 
     private constructor(
         public display: HTMLDivElement,
@@ -29,7 +29,7 @@ export class WournalDocument {
 
         this.initialZoomFactor = computeZoomFactor();
         this.undoStack = new UndoStack(this);
-        this.setTool(new SVGCanvasToolPen());
+        this.setTool(new CanvasToolPen());
     }
 
     public defaultPageDimensions = WournalPageSize.DINA4_PORTRAIT;
@@ -112,7 +112,7 @@ export class WournalDocument {
     // tools and helpers
     // ------------------------------------------------------------
 
-    public setTool(tool: SVGCanvasTool) {
+    public setTool(tool: CanvasTool) {
         this.currentTool?.onDeselect();
         this.currentTool = tool;
         tool.getActivePage = this.getActivePage.bind(this);

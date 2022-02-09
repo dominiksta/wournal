@@ -1,14 +1,14 @@
 import { LOG } from "../util/Logging";
 import { SVGUtils } from "../util/SVGUtils";
 import { SelectionDisplay } from "./SelectionDisplay";
-import { SVGCanvasPath } from "./SVGCanvasPath";
-import { SVGCanvasTool } from "./SVGCanvasTool";
+import { CanvasPath } from "./CanvasPath";
+import { CanvasTool } from "./CanvasTool";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
-import { WournalCanvasElement, WournalCanvasElementData } from "./WournalCanvasElement";
-import { WournalCanvasElementFactory } from "./WournalCanvasElementFactory";
+import { CanvasElement, CanvasElementData } from "./CanvasElement";
+import { CanvasElementFactory } from "./CanvasElementFactory";
 import { WournalPage } from "./WournalPage";
 
-export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
+export class CanvasToolSelectRectangle extends CanvasTool {
     public idleCursor = "default";
     protected toolUseStartPage: WournalPage;
 
@@ -34,7 +34,7 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
 
     /** The currently selected elements */
     private selectionElems: {
-        savedData: WournalCanvasElementData, el: WournalCanvasElement
+        savedData: CanvasElementData, el: CanvasElement
     }[] = [];
 
     public onMouseDown(e: MouseEvent): void {
@@ -108,7 +108,7 @@ export class SVGCanvasToolSelectRectangle extends SVGCanvasTool {
                         selection, this.toolUseStartPage.globalDOMRectToCanvas(
                             el.getBoundingClientRect())
                     )) {
-                        let wournalEl = WournalCanvasElementFactory.fromSvgElem(el);
+                        let wournalEl = CanvasElementFactory.fromSvgElem(el);
                         this.selectionElems.push(
                             { savedData: wournalEl.getData(), el: wournalEl }
                         );

@@ -1,8 +1,8 @@
 import { DOMUtils } from "../util/DOMUtils";
 import { LOG } from "../util/Logging";
 import { UndoAction } from "./UndoStack";
-import {  WournalCanvasElementData } from "./WournalCanvasElement";
-import { WournalCanvasElementFactory } from "./WournalCanvasElementFactory";
+import { CanvasElementData } from "./CanvasElement";
+import { CanvasElementFactory } from "./CanvasElementFactory";
 import { WournalDocument } from "./WournalDocument";
 
 export class UndoActionCanvasElements implements UndoAction {
@@ -13,8 +13,8 @@ export class UndoActionCanvasElements implements UndoAction {
 
     private changed: {
         el: SVGGraphicsElement,
-        dataBefore: WournalCanvasElementData,
-        dataAfter: WournalCanvasElementData
+        dataBefore: CanvasElementData,
+        dataAfter: CanvasElementData
     }[] = [];
 
     private added: {
@@ -25,8 +25,8 @@ export class UndoActionCanvasElements implements UndoAction {
         deleted: SVGGraphicsElement[] | null,
         changed: {
             el: SVGGraphicsElement,
-            dataBefore: WournalCanvasElementData,
-            dataAfter: WournalCanvasElementData
+            dataBefore: CanvasElementData,
+            dataAfter: CanvasElementData
         }[] | null,
         added:  SVGGraphicsElement[] | null,
     ) {
@@ -56,7 +56,7 @@ export class UndoActionCanvasElements implements UndoAction {
         for(let del of this.deleted) this.addAtIndex(del)
         for(let add of this.added) add.layer.removeChild(add.el);
         for(let chn of this.changed) {
-            let wournalEl = WournalCanvasElementFactory.fromSvgElem(chn.el);
+            let wournalEl = CanvasElementFactory.fromSvgElem(chn.el);
             wournalEl.setData(chn.dataBefore);
         }
     }
@@ -65,7 +65,7 @@ export class UndoActionCanvasElements implements UndoAction {
         for(let add of this.added) this.addAtIndex(add);
         for(let del of this.deleted) del.layer.removeChild(del.el);
         for(let chn of this.changed.slice().reverse()) {
-            let wournalEl = WournalCanvasElementFactory.fromSvgElem(chn.el);
+            let wournalEl = CanvasElementFactory.fromSvgElem(chn.el);
             wournalEl.setData(chn.dataAfter);
         }
     }

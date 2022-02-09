@@ -3,9 +3,9 @@ import { DSUtils } from "../util/DSUtils";
 import { LOG } from "../util/Logging";
 import { SVGUtils } from "../util/SVGUtils";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
-import { WournalCanvasElement, WournalCanvasElementData } from "./WournalCanvasElement";
+import { CanvasElement, CanvasElementData } from "./CanvasElement";
 
-export class SVGCanvasPathData extends WournalCanvasElementData {
+export class CanvasPathData extends CanvasElementData {
     constructor(
         /** contains the path ('d' element) along with everything else */
         public attrs: Map<string, string>,
@@ -21,7 +21,7 @@ export class SVGCanvasPathData extends WournalCanvasElementData {
  * point), "L" (draw line to give position) and "Z" (to smoothly close forms
  * like rectangles).
  */
-export class SVGCanvasPath extends WournalCanvasElement {
+export class CanvasPath extends CanvasElement {
 
     /** Stores the actual svg stroke data to draw */
     private stroke: string;
@@ -39,8 +39,8 @@ export class SVGCanvasPath extends WournalCanvasElement {
     }
 
     /** Create a new SVGCanvasPath in the given doc and return it */
-    public static fromNewPath(doc: Document): SVGCanvasPath {
-        let ret = new SVGCanvasPath(
+    public static fromNewPath(doc: Document): CanvasPath {
+        let ret = new CanvasPath(
             doc.createElementNS('http://www.w3.org/2000/svg', 'path')
         );
         ret.setColor("#000000");
@@ -80,7 +80,7 @@ export class SVGCanvasPath extends WournalCanvasElement {
      * fancy and might leave small bumps.
      */
     public close(): void {
-        const path = SVGCanvasPath.parseSvgPathData(this._svgElem.getAttribute("d"));
+        const path = CanvasPath.parseSvgPathData(this._svgElem.getAttribute("d"));
         this.stroke += ` L${path[0].x} ${path[0].y}`;
         this.render();
     }
@@ -105,11 +105,11 @@ export class SVGCanvasPath extends WournalCanvasElement {
         this._svgElem.setAttribute("stroke", color);
     }
 
-    public getData(): SVGCanvasPathData {
-        return new SVGCanvasPathData(this.getAttributes());
+    public getData(): CanvasPathData {
+        return new CanvasPathData(this.getAttributes());
     }
 
-    public setData(dto: SVGCanvasPathData) {
+    public setData(dto: CanvasPathData) {
         let currAttrs = this.getAttributes();
         let delAttrs = new Map<string, string>();
 
@@ -139,7 +139,7 @@ export class SVGCanvasPath extends WournalCanvasElement {
     }
 
     public override writeTransform() {
-        let pathData = SVGCanvasPath.parseSvgPathData(
+        let pathData = CanvasPath.parseSvgPathData(
             this._svgElem.getAttribute("d"));
         const t = this.currentTransform;
         for(let el of pathData) {
@@ -148,7 +148,7 @@ export class SVGCanvasPath extends WournalCanvasElement {
             el.x += t.translateX; el.y += t.translateY;
         }
         this._svgElem.setAttribute(
-            "d", SVGCanvasPath.svgPathDataToString(pathData)
+            "d", CanvasPath.svgPathDataToString(pathData)
         );
 
         this.setStrokeWidth(
@@ -160,7 +160,7 @@ export class SVGCanvasPath extends WournalCanvasElement {
 
     /** Briefly show the points of this path. Useful for debugging. */
     public pulsePoints() {
-        const path = SVGCanvasPath.parseSvgPathData(
+        const path = CanvasPath.parseSvgPathData(
             this._svgElem.getAttribute("d"));
         for(let p of path) {
             SVGUtils.tmpDisplayPoint(
@@ -175,7 +175,7 @@ export class SVGCanvasPath extends WournalCanvasElement {
     ): {t: string, x: number, y: number}[][] {
         // recursion end conditions
         if (path == null) return [null];
-        if (!SVGCanvasPath.isRectTouchingPath(rect, path))
+        if (!CanvasPath.isRectTouchingPath(rect, path))
             return [path];
 
         const rectMiddle = {
@@ -245,18 +245,18 @@ export class SVGCanvasPath extends WournalCanvasElement {
             }
         }
 
-        return SVGCanvasPath.eraseRectPoints(rect, partOne).concat(
-            SVGCanvasPath.eraseRectPoints(rect, partTwo)
+        return CanvasPath.eraseRectPoints(rect, partOne).concat(
+            CanvasPath.eraseRectPoints(rect, partTwo)
         );
     }
 
     /** Erase all points within `rect` in path. Return an undoable action */
     public eraseRect(rect: DOMRect): UndoActionCanvasElements {
         // this.pulsePoints();
-        const path = SVGCanvasPath.parseSvgPathData(
+        const path = CanvasPath.parseSvgPathData(
             this._svgElem.getAttribute("d"));
 
-        const paths = SVGCanvasPath.eraseRectPoints(rect, path)
+        const paths = CanvasPath.eraseRectPoints(rect, path)
         // LOG.debug(paths);
 
         let added = []; let attrsBefore = this.getAttributes();
@@ -264,9 +264,9 @@ export class SVGCanvasPath extends WournalCanvasElement {
         for(let i = 1; i < paths.length; i++) {
             if (paths[i] === null) continue;
 
-            let newPath = SVGCanvasPath.fromNewPath(this._svgElem.ownerDocument);
+            let newPath = CanvasPath.fromNewPath(this._svgElem.ownerDocument);
             newPath._svgElem.setAttribute(
-                "d", SVGCanvasPath.svgPathDataToString(paths[i])
+                "d", CanvasPath.svgPathDataToString(paths[i])
             );
             newPath.setStrokeWidth(this.getStrokeWidth());
             this._svgElem.before(this._svgElem, newPath._svgElem);
@@ -279,13 +279,13 @@ export class SVGCanvasPath extends WournalCanvasElement {
             return undo;
         } else {
             this._svgElem.setAttribute(
-                "d", SVGCanvasPath.svgPathDataToString(paths[0]));
+                "d", CanvasPath.svgPathDataToString(paths[0]));
             let changed = null;
             if (!DSUtils.compareMaps(attrsBefore, this.getAttributes()))
                 changed = [{
                     el: this._svgElem,
-                    dataBefore: new SVGCanvasPathData(attrsBefore),
-                    dataAfter: new SVGCanvasPathData(this.getAttributes())
+                    dataBefore: new CanvasPathData(attrsBefore),
+                    dataAfter: new CanvasPathData(this.getAttributes())
                 }];
             return new UndoActionCanvasElements(null, changed, added);
         }
@@ -296,10 +296,10 @@ export class SVGCanvasPath extends WournalCanvasElement {
      * element.
      */
     public isTouchingRect(r: DOMRect): boolean {
-        const path = SVGCanvasPath.parseSvgPathData(
+        const path = CanvasPath.parseSvgPathData(
             this._svgElem.getAttribute("d")
         );
-        return SVGCanvasPath.isRectTouchingPath(r, path);
+        return CanvasPath.isRectTouchingPath(r, path);
     }
 
     private static isRectTouchingPath(

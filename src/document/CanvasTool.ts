@@ -1,7 +1,7 @@
 import { UndoStack } from "./UndoStack";
 import { WournalPage } from "./WournalPage";
 
-export abstract class SVGCanvasTool {
+export abstract class CanvasTool {
 
     /** This cursor should be displayed when the tool is selected */
     public abstract idleCursor: string;

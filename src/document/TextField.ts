@@ -1,4 +1,4 @@
-import { SVGCanvasText } from "./SVGCanvasText";
+import { CanvasText } from "./CanvasText";
 import { WournalPage } from "./WournalPage";
 
 export class TextField {
@@ -89,7 +89,7 @@ export class TextField {
     }
 
     public static fromCanvasText(
-        page: WournalPage, canvasTxt: SVGCanvasText,
+        page: WournalPage, canvasTxt: CanvasText,
         offset: {x: number, y: number}
     ) {
         const canvasPos = canvasTxt.getPos();
@@ -118,7 +118,7 @@ export class TextField {
     public setFontSize(size: number) {
         this.label.style.fontSize = size.toString() + "px";
         this.label.style.lineHeight =
-            SVGCanvasText.lineHeightForFontSize(size).toString() + "px";
+            CanvasText.lineHeightForFontSize(size).toString() + "px";
     }
 
     public setPos(pos: {x: number, y: number}) {
