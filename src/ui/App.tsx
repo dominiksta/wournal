@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
+import { Wournal } from '../document/Wournal';
+import { DocumentRepositoryBrowserFiles }
+    from '../persistence/DocumentRepositoryBrowserFiles';
 import './App.css';
-import { DocumentRepositoryBrowserFiles } from './persistence/DocumentRepositoryBrowserFiles';
-import Toolbar from './Toolbar';
-import { Wournal } from './ui/Wournal';
+import Toolbar from './toolbar/Toolbar';
 
 /** Main React entrypoint */
 function App() {

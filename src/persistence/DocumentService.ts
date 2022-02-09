@@ -1,4 +1,4 @@
-import { WournalDocument } from "../ui/WournalDocument";
+import { WournalDocument } from "../document/WournalDocument";
 import { DocumentRepository } from "./DocumentRepository";
 
 /**

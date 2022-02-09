@@ -1,13 +1,13 @@
+import { SVGCanvasTool } from '../../document/SVGCanvasTool';
+import { SVGCanvasToolEraser } from '../../document/SVGCanvasToolEraser';
+import { SVGCanvasToolPen } from '../../document/SVGCanvasToolPen';
+import { SVGCanvasToolRectangle } from '../../document/SVGCanvasToolRectangle';
+import { SVGCanvasToolSelectRectangle } from '../../document/SVGCanvasToolSelectRectangle';
+import { SVGCanvasToolText } from '../../document/SVGCanvasToolText';
+import { Wournal } from '../../document/Wournal';
 import './Toolbar.css';
 import ToolbarButton from './ToolbarButton';
 import ToolbarGroup from './ToolbarGroup';
-import { SVGCanvasTool } from './ui/SVGCanvasTool';
-import { SVGCanvasToolEraser } from './ui/SVGCanvasToolEraser';
-import { SVGCanvasToolPen } from './ui/SVGCanvasToolPen';
-import { SVGCanvasToolRectangle } from './ui/SVGCanvasToolRectangle';
-import { SVGCanvasToolSelectRectangle } from './ui/SVGCanvasToolSelectRectangle';
-import { SVGCanvasToolText } from './ui/SVGCanvasToolText';
-import { Wournal } from './ui/Wournal';
 
 function Toolbar({wournal}: {wournal: Wournal}) {
     // abbreviation
