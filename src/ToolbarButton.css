@@ -1,0 +1,20 @@
+button {
+    background: white;
+    border: none;
+    vertical-align: middle;
+    height: 40px;
+    width: 40px;
+}
+
+button:hover {
+    background: #efefef;
+}
+
+button:active {
+    background: lightblue;
+}
+
+button.pressed {
+    border-bottom: 3px solid lightblue !important;
+    border-top: 3px solid white !important;
+}

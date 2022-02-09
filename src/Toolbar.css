@@ -1,0 +1,14 @@
+.Toolbar {
+    position: fixed;
+    z-index: 1030;
+    width: 100%;
+    left: 0;
+    top: 0;
+    background: white;
+    border: 1px solid gray;
+    color: black;
+}
+
+.ToolbarGroup:not(:first-child) {
+    border-left: 1px solid black;
+}
