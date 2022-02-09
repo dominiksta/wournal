@@ -25,7 +25,7 @@ function App() {
     return (
         <div className="App">
             <Toolbar wournal={wournal}/>
-            <div ref={wournalContainer}></div>
+            <div id="wournal-container" ref={wournalContainer}></div>
         </div>
     );
 }

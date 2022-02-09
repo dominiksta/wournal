@@ -1,4 +1,15 @@
-#wournal-document {
+.App {
+    display: flex;
+    flex-flow: column;
+    height: 100vh
+}
+
+.Toolbar {
+    flex: 0 1 auto;
+}
+
+#wournal-container {
+    overflow: auto;
+    flex: 1 1 auto;
     background: #333333;
-    padding: 50px 20px 20px 20px;
 }
