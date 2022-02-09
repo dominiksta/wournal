@@ -1,4 +1,3 @@
-import { LOG } from "../util/Logging";
 import { WournalPage } from "./WournalPage";
 import { CanvasPath } from "./CanvasPath";
 import { CanvasTool } from "./CanvasTool";
@@ -32,7 +31,7 @@ export class CanvasToolRectangle extends CanvasTool {
     }
 
     public onMouseMove(e: MouseEvent): void {
-        if (this.path == null) return;
+        if (this.path === null) return;
         this.path.startAt(this.pointStart);
         const mouse = this.toolUseStartPage.globalCoordsToCanvas({x: e.x, y: e.y});
 

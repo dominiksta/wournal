@@ -12,7 +12,7 @@ export class DocumentRepositoryBrowserFiles extends DocumentRepository {
     private static instance: DocumentRepository = null;
     private constructor() { super(); }
     static getInstance(): DocumentRepositoryBrowserFiles {
-        if (this.instance == null)
+        if (this.instance === null)
             this.instance = new DocumentRepositoryBrowserFiles();
         return this.instance;
     }

@@ -10,7 +10,7 @@ export const DOMUtils = {
         div.innerHTML = htmlString.trim();
 
         // Change this to div.childNodes to support multiple top-level nodes.
-        return <any>div.firstChild as T;
+        return (div as any).firstChild as T;
     },
 
     /** Return an elements attributes as a Map */

@@ -1,4 +1,3 @@
-import { LOG } from "../util/Logging";
 import { CanvasElement, CanvasElementData } from "./CanvasElement";
 
 export class CanvasText extends CanvasElement {

@@ -54,11 +54,11 @@ export abstract class CanvasElement {
         const t = this.currentTransform;
         this._svgElem.setAttribute(
             "transform",
-            (t.translateX != 0 || t.translateY != 0
+            (t.translateX !== 0 || t.translateY !== 0
                 ? `translate(${t.translateX} ${t.translateY}) ` : "") +
-            (t.rotateDeg != 0
+            (t.rotateDeg !== 0
                 ? `rotate(${t.rotateDeg}) ` : "") +
-            (t.scaleX != 1 || t.scaleY != 1
+            (t.scaleX !== 1 || t.scaleY !== 1
                 ? `scale(${t.scaleX} ${t.scaleY}) ` : "")
         );
     }

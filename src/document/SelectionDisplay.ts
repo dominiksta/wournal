@@ -34,9 +34,9 @@ export class SelectionDisplay {
         this.mainRect.setAttribute("stroke-opacity", "0.5");
         this.mainRect.setAttribute("fill", "lightblue");
         this.mainRect.setAttribute("fill-opacity", "0.5");
-        this.mainRect.addEventListener("mousedown", (() => {
+        this.mainRect.addEventListener("mousedown", () => {
             this._lastClicked = "main";
-        }).bind(this));
+        });
 
         const createPath = (side: "top" | "right" | "bottom" | "left") => {
             let path = this.page.toolLayer.ownerDocument.createElementNS(
@@ -46,9 +46,9 @@ export class SelectionDisplay {
             path.setAttribute("stroke-opacity", "0");
             path.setAttribute("stroke-width", "10");
 
-            path.addEventListener("mousedown", (() => {
+            path.addEventListener("mousedown", () => {
                 this._lastClicked = side;
-            }).bind(this));
+            });
             return path;
         }
         this.edges.top = createPath("top");

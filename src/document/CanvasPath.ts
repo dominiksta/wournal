@@ -164,7 +164,7 @@ export class CanvasPath extends CanvasElement {
             this._svgElem.getAttribute("d"));
         for(let p of path) {
             SVGUtils.tmpDisplayPoint(
-                p, <any>this._svgElem.parentElement, 1000, "red"
+                p, (this._svgElem.parentElement as any), 1000, "red"
             );
         }
     }
@@ -174,7 +174,7 @@ export class CanvasPath extends CanvasElement {
         rect: DOMRect, path: {t: string, x: number, y: number}[]
     ): {t: string, x: number, y: number}[][] {
         // recursion end conditions
-        if (path == null) return [null];
+        if (path === null) return [null];
         if (!CanvasPath.isRectTouchingPath(rect, path))
             return [path];
 
@@ -273,7 +273,7 @@ export class CanvasPath extends CanvasElement {
             added.push(newPath._svgElem);
         }
 
-        if (paths[0] == null) {
+        if (paths[0] === null) {
             let undo = new UndoActionCanvasElements([this._svgElem], null, added);
             this._svgElem.parentElement?.removeChild(this._svgElem);
             return undo;

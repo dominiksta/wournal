@@ -9,7 +9,7 @@ export class DocumentRepositoryTestFiles extends DocumentRepository {
     private static instance: DocumentRepository = null;
     private constructor() { super(); }
     static getInstance(): DocumentRepositoryTestFiles {
-        if (this.instance == null)
+        if (this.instance === null)
             this.instance = new DocumentRepositoryTestFiles();
         return this.instance;
     }

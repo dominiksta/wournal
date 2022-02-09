@@ -1,5 +1,3 @@
-import { LOG } from "../util/Logging";
-
 /**
  * How many pixels should be displayed for each millimeters of a real
  * document. Sadly, we cannot simply use mm measurements in the svg we produce,
@@ -15,7 +13,7 @@ const MM_TO_PIXEL = 4;
  */
 export function xToPx(x: string) {
     // if no measurement is provided, assume pixels
-    if (!x.match(/[\d\.]+(m|cm|mm|rem|px)/)) x = x + "px"
+    if (!x.match(/[\d.]+(m|cm|mm|rem|px)/)) x = x + "px"
 
     let div = document.createElement('div');
     div.style.display = 'block';

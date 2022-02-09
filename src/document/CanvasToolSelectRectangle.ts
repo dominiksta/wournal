@@ -1,7 +1,6 @@
 import { LOG } from "../util/Logging";
 import { SVGUtils } from "../util/SVGUtils";
 import { SelectionDisplay } from "./SelectionDisplay";
-import { CanvasPath } from "./CanvasPath";
 import { CanvasTool } from "./CanvasTool";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
 import { CanvasElement, CanvasElementData } from "./CanvasElement";
@@ -38,7 +37,7 @@ export class CanvasToolSelectRectangle extends CanvasTool {
     }[] = [];
 
     public onMouseDown(e: MouseEvent): void {
-        if (this.getActivePage() == null) {
+        if (this.getActivePage() === null) {
             this.selectionDisplay.removeFromDisplay();
             this.state = "idle";
             return;
@@ -57,7 +56,7 @@ export class CanvasToolSelectRectangle extends CanvasTool {
                     "state set incorrectly?")
                 break;
             case "selected":
-                if (!(this.toolUseStartPage == this.getActivePage() &&
+                if (!(this.toolUseStartPage === this.getActivePage() &&
                     SVGUtils.pointInRect(mouse, this.selectionDisplay.canvasRect()))) {
                     this.selectionDisplay.removeFromDisplay();
                     this.state = "idle";
@@ -95,7 +94,7 @@ export class CanvasToolSelectRectangle extends CanvasTool {
 
     public onMouseUp(e: MouseEvent): void {
         this.getActivePage().toolLayer.style.cursor = this.idleCursor;
-        if (this.getActivePage() == null) return;
+        if (this.getActivePage() === null) return;
         switch(this.state) {
             case "idle":
                 break;
@@ -114,7 +113,7 @@ export class CanvasToolSelectRectangle extends CanvasTool {
                         );
                     }
                 }
-                if (this.selectionElems.length == 0) {
+                if (this.selectionElems.length === 0) {
                     this.selectionDisplay.removeFromDisplay();
                     this.state = "idle";
                 } else {
@@ -152,7 +151,7 @@ export class CanvasToolSelectRectangle extends CanvasTool {
 
     public onMouseMove(e: MouseEvent): void {
         if (this.state === "idle") return;
-        if (this.getActivePage() == null) return;
+        if (this.getActivePage() === null) return;
 
         const mouse = this.toolUseStartPage.globalCoordsToCanvas({x: e.x, y: e.y});
 
