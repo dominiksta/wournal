@@ -14,4 +14,11 @@ export const DSUtils = {
         }
         return true;
     },
+
+    /** Return a copy of the given array. The elements are not copied. */
+    copyArr: function<T>(arr: T[]) {
+        let res: T[] = [];
+        for (let el of arr) res.push(el);
+        return res;
+    }
 }

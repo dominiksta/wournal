@@ -44,6 +44,20 @@ function Toolbar({wournal}: {wournal: Wournal}) {
             </ToolbarGroup>
             <ToolbarGroup>
                 <ToolbarButton
+                    img="res/remix/scissors-2-line.svg"
+                    fun={() => wournal.doc.selectionCut()}
+                    alt="Cut Selection" />
+                <ToolbarButton
+                    img="res/remix/file-copy-line.svg"
+                    fun={() => wournal.doc.selectionCopy()}
+                    alt="Copy Selection"/>
+                <ToolbarButton
+                    img="res/remix/clipboard-line.svg"
+                    fun={() => wournal.doc.selectionOrClipboardPaste()}
+                    alt="Paste Selection/Clipboard" />
+            </ToolbarGroup>
+            <ToolbarGroup>
+                <ToolbarButton
                     img="res/custom/pen.svg"
                     fun={setTool(new CanvasToolPen())}
                     alt="Pen"/>

@@ -19,7 +19,7 @@ export class CanvasText extends CanvasElement {
     }
 
     public static fromData(
-        doc: Document, data: SVGCanvasTextData,
+        doc: Document, data: CanvasTextData,
     ): CanvasText {
         let ret = new CanvasText(
             doc.createElementNS("http://www.w3.org/2000/svg", "text")
@@ -77,14 +77,14 @@ export class CanvasText extends CanvasElement {
         this._svgElem.parentNode.removeChild(this._svgElem);
     }
 
-    public override getData(): SVGCanvasTextData {
-        return new SVGCanvasTextData(
+    public override getData(): CanvasTextData {
+        return new CanvasTextData(
             this.getText(), this.getPos(), this.getFontSize(),
             this.getFontFamily(), this.getColor()
         );
     }
 
-    public override setData(dto: SVGCanvasTextData) {
+    public override setData(dto: CanvasTextData) {
         this.setPos(dto.pos);
         this.setText(dto.text);
         this.setFontFamily(dto.fontFamily);
@@ -155,7 +155,7 @@ export class CanvasText extends CanvasElement {
     }
 }
 
-export class SVGCanvasTextData extends CanvasElementData {
+export class CanvasTextData extends CanvasElementData {
     constructor(
         public text: string,
         public pos: {x: number, y: number},

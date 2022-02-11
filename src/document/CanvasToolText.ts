@@ -1,5 +1,5 @@
 import { SVGUtils } from "../util/SVGUtils";
-import { CanvasText, SVGCanvasTextData } from "./CanvasText";
+import { CanvasText, CanvasTextData } from "./CanvasText";
 import { CanvasTool } from "./CanvasTool";
 import { TextField } from "./TextField";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
@@ -94,7 +94,7 @@ export class CanvasToolText extends CanvasTool {
 
         let canvasText = CanvasText.fromData(
             this.toolUseStartPage.toolLayer.ownerDocument,
-            new SVGCanvasTextData(
+            new CanvasTextData(
                 "", {
                     x: svg_pos.x,
                     y: svg_pos.y

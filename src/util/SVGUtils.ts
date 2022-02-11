@@ -31,6 +31,18 @@ export const SVGUtils = {
         );
     },
 
+    /** Return a bounding rectangle encompassing both `r1` and `r2` */
+    boundingRectForTwo(r1: DOMRect, r2: DOMRect): DOMRect {
+        return DOMRect.fromRect({
+            x: r1.x < r2.x ? r1.x : r2.x,
+            y: r1.y < r2.y ? r1.y : r2.y,
+            width: (r1.right > r2.right ? r1.right : r2.right) -
+            (r1.left < r2.left ? r1.left : r2.left),
+            height: (r1.bottom > r2.bottom ? r1.bottom : r2.bottom) -
+            (r1.top < r2.top ? r1.top : r2.top),
+        });
+    },
+
     /** Display `r` in `canvas` for `ms` milliseconds. Inteded for debugging. */
     tmpDisplayRect: function(
         r: DOMRect, canvas: SVGSVGElement, ms: number = 1000, color = "red"
