@@ -5,6 +5,7 @@ import { CanvasToolRectangle } from '../../document/CanvasToolRectangle';
 import { CanvasToolSelectRectangle } from '../../document/CanvasToolSelectRectangle';
 import { CanvasToolText } from '../../document/CanvasToolText';
 import { Wournal } from '../../document/Wournal';
+import { useForceUpdate } from '../../useForceUpdate';
 import Menu from '../menu/Menu';
 import './Toolbar.css';
 import ToolbarButton from './ToolbarButton';
@@ -15,6 +16,7 @@ function Toolbar({wournal}: {wournal: Wournal}) {
     const [selectionAvailable, setSelectionAvailable] = useState(false);
     const [undoAvailable, setUndoAvailable] = useState(false);
     const [redoAvailable, setRedoAvailable] = useState(false);
+    const forceUpdate = useForceUpdate();
 
     wournal.doc.notifyUndoAvailable = setUndoAvailable;
     wournal.doc.notifyRedoAvailable = setRedoAvailable;
@@ -27,6 +29,9 @@ function Toolbar({wournal}: {wournal: Wournal}) {
         setRedoAvailable(false);
         setSelectionAvailable(false);
         setCurrentTool("CanvasToolPen");
+        /* if the state has not changed from default, we still have to force an
+        update to set the notify* functions correctly */
+        forceUpdate();
     };
 
     const [hideMenu, setHideMenu] = useState(true);
