@@ -1,4 +1,4 @@
-button {
+button.ToolbarButton {
     background: white;
     border: none;
     vertical-align: middle;
@@ -6,15 +6,15 @@ button {
     width: 40px;
 }
 
-button:hover {
+button.ToolbarButton:hover {
     background: #efefef;
 }
 
-button:active {
+button.ToolbarButton:active {
     background: lightblue;
 }
 
-button.active {
+button.ToolbarButton.active {
     border-bottom: 3px solid lightblue !important;
     border-top: 3px solid white !important;
 }

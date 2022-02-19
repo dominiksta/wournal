@@ -6,6 +6,7 @@ import { CanvasToolRectangle } from '../../document/CanvasToolRectangle';
 import { CanvasToolSelectRectangle } from '../../document/CanvasToolSelectRectangle';
 import { CanvasToolText } from '../../document/CanvasToolText';
 import { Wournal } from '../../document/Wournal';
+import Menu from '../menu/Menu';
 import './Toolbar.css';
 import ToolbarButton from './ToolbarButton';
 import ToolbarGroup from './ToolbarGroup';
@@ -21,8 +22,18 @@ function Toolbar({wournal}: {wournal: Wournal}) {
         };
     }
 
+    const [hideMenu, setHideMenu] = useState(true);
+    const menu = Menu({wournal: wournal, hidden: hideMenu});
+
     return (
         <div className="Toolbar">
+            {menu}
+            <ToolbarGroup>
+                <ToolbarButton
+                    img="res/remix/menu-line.svg"
+                    fun={() => setHideMenu(!hideMenu)}
+                    alt="Menu"/>
+            </ToolbarGroup>
             <ToolbarGroup>
                 <ToolbarButton
                     img="res/remix/save-3-line.svg"
@@ -36,30 +47,6 @@ function Toolbar({wournal}: {wournal: Wournal}) {
                     img="res/remix/folder-open-line.svg"
                     fun={() => wournal.loadDocument()}
                     alt="Open File" />
-            </ToolbarGroup>
-            <ToolbarGroup>
-                <ToolbarButton
-                    img="res/remix/arrow-go-back-line.svg"
-                    fun={() => wournal.doc.undo()}
-                    alt="Undo"/>
-                <ToolbarButton
-                    img="res/remix/arrow-go-forward-line.svg"
-                    fun={() => wournal.doc.redo()}
-                    alt="Redo" />
-            </ToolbarGroup>
-            <ToolbarGroup>
-                <ToolbarButton
-                    img="res/remix/scissors-2-line.svg"
-                    fun={() => wournal.doc.selectionCut()}
-                    alt="Cut Selection" />
-                <ToolbarButton
-                    img="res/remix/file-copy-line.svg"
-                    fun={() => wournal.doc.selectionCopy()}
-                    alt="Copy Selection"/>
-                <ToolbarButton
-                    img="res/remix/clipboard-line.svg"
-                    fun={() => wournal.doc.selectionOrClipboardPaste()}
-                    alt="Paste Selection/Clipboard" />
             </ToolbarGroup>
             <ToolbarGroup>
                 <ToolbarButton
@@ -92,6 +79,30 @@ function Toolbar({wournal}: {wournal: Wournal}) {
                     fun={setTool(new CanvasToolRectangle())}
                     current={currentTool === "CanvasToolRectangle"}
                     alt="Draw Rectangle"/>
+            </ToolbarGroup>
+            <ToolbarGroup>
+                <ToolbarButton
+                    img="res/remix/arrow-go-back-line.svg"
+                    fun={() => wournal.doc.undo()}
+                    alt="Undo"/>
+                <ToolbarButton
+                    img="res/remix/arrow-go-forward-line.svg"
+                    fun={() => wournal.doc.redo()}
+                    alt="Redo" />
+            </ToolbarGroup>
+            <ToolbarGroup>
+                <ToolbarButton
+                    img="res/remix/scissors-2-line.svg"
+                    fun={() => wournal.doc.selectionCut()}
+                    alt="Cut Selection" />
+                <ToolbarButton
+                    img="res/remix/file-copy-line.svg"
+                    fun={() => wournal.doc.selectionCopy()}
+                    alt="Copy Selection"/>
+                <ToolbarButton
+                    img="res/remix/clipboard-line.svg"
+                    fun={() => wournal.doc.selectionOrClipboardPaste()}
+                    alt="Paste Selection/Clipboard" />
             </ToolbarGroup>
             <ToolbarGroup>
                 <ToolbarButton
