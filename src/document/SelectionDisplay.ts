@@ -53,8 +53,8 @@ export class CanvasSelection {
 
     public init(page: WournalPage) {
         this._selection = [];
-        this.clear();
         this._page = page;
+        this.clear();
         this.mainRect = this._page.toolLayer.ownerDocument.createElementNS(
             "http://www.w3.org/2000/svg", "rect"
         );
@@ -115,6 +115,7 @@ export class CanvasSelection {
     /** Remove all elements from given `page` */
     public clear() {
         this._selection = [];
+        this.notifySelectionAvailable();
         for(let el of [
             this.mainRect, this.edges.top, this.edges.right, this.edges.bottom,
             this.edges.left
