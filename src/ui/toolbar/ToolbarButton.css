@@ -14,7 +14,7 @@ button:active {
     background: lightblue;
 }
 
-button.pressed {
+button.active {
     border-bottom: 3px solid lightblue !important;
     border-top: 3px solid white !important;
 }

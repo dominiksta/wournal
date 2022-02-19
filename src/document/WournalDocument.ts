@@ -24,7 +24,8 @@ export class WournalDocument {
 
     private activePage: WournalPage = null;
 
-    private currentTool: CanvasTool;
+    private _currentTool: CanvasTool;
+    get currentTool() { return this._currentTool; }
 
     private constructor(
         public display: HTMLDivElement,
@@ -124,12 +125,12 @@ export class WournalDocument {
     // ------------------------------------------------------------
 
     public undo(): void {
-        this.currentTool?.onDeselect();
+        this._currentTool?.onDeselect();
         this.undoStack.undo();
     }
 
     public redo(): void {
-        this.currentTool?.onDeselect();
+        this._currentTool?.onDeselect();
         this.undoStack.redo();
     }
 
@@ -151,7 +152,7 @@ export class WournalDocument {
         page.setZoom(this.zoom * this.initialZoomFactor);
         this.display.appendChild(page.display);
         this.pages.push(page);
-        page.toolLayer.style.cursor = this.currentTool.idleCursor;
+        page.toolLayer.style.cursor = this._currentTool.idleCursor;
     }
 
     // ------------------------------------------------------------
@@ -170,13 +171,13 @@ export class WournalDocument {
     // ------------------------------------------------------------
 
     public setTool(tool: CanvasTool) {
-        this.currentTool?.onDeselect();
-        this.currentTool = tool;
+        this._currentTool?.onDeselect();
+        this._currentTool = tool;
         tool.setup(new CanvasToolSetupProps(
             this.getActivePage.bind(this), this.undoStack, this.selection
         ));
         for(let page of this.pages)
-            page.toolLayer.style.cursor = this.currentTool.idleCursor;
+            page.toolLayer.style.cursor = this._currentTool.idleCursor;
     }
 
     private pageAtPoint(pt: {x: number, y: number}) {
@@ -209,10 +210,10 @@ export class WournalDocument {
                 this.selection.onMouseDown(e);
             } else {
                 this.selection.clear();
-                this.currentTool.onMouseDown(e);
+                this._currentTool.onMouseDown(e);
             }
         } else {
-            this.currentTool.onMouseDown(e);
+            this._currentTool.onMouseDown(e);
         }
     }
 
@@ -220,14 +221,14 @@ export class WournalDocument {
         if (this.selection.currentlyInteracting)
             this.selection.onMouseUp(e)
         else
-            this.currentTool.onMouseUp(e);
+            this._currentTool.onMouseUp(e);
     }
 
     private onMouseMove(e: MouseEvent) {
         if (this.selection.currentlyInteracting)
             this.selection.onMouseMove(e)
         else
-            this.currentTool.onMouseMove(e);
+            this._currentTool.onMouseMove(e);
     }
 
 

@@ -14,6 +14,7 @@ export class CanvasToolSetupProps {
 }
 
 export abstract class CanvasTool {
+    get name(): string { return (this as any).constructor.name; }
 
     /** This cursor should be displayed when the tool is selected */
     public abstract idleCursor: string;

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { CanvasTool } from '../../document/CanvasTool';
 import { CanvasToolEraser } from '../../document/CanvasToolEraser';
 import { CanvasToolPen } from '../../document/CanvasToolPen';
@@ -10,10 +11,14 @@ import ToolbarButton from './ToolbarButton';
 import ToolbarGroup from './ToolbarGroup';
 
 function Toolbar({wournal}: {wournal: Wournal}) {
-    // abbreviation
+
+    const [currentTool, setCurrentTool] = useState("CanvasToolPen");
+
     const setTool = (tool: CanvasTool) => {
         return () => {
-            wournal.doc.setTool(tool) };
+            setCurrentTool(tool.name)
+            wournal.doc.setTool(tool)
+        };
     }
 
     return (
@@ -60,26 +65,32 @@ function Toolbar({wournal}: {wournal: Wournal}) {
                 <ToolbarButton
                     img="res/custom/pen.svg"
                     fun={setTool(new CanvasToolPen())}
+                    current={currentTool === "CanvasToolPen"}
                     alt="Pen"/>
                 <ToolbarButton
                     img="res/material/selection-drag.svg"
                     fun={setTool(new CanvasToolSelectRectangle())}
+                    current={currentTool === "CanvasToolSelectRectangle"}
                     alt="Select Rectangle"/>
                 <ToolbarButton
                     img="res/remix/text.svg"
                     fun={setTool(new CanvasToolText())}
+                    current={currentTool === "CanvasToolText"}
                     alt="Insert Textbox"/>
                 <ToolbarButton
                     img="res/remix/eraser-line.svg"
                     fun={setTool(new CanvasToolEraser(10, false))}
+                    current={currentTool === "CanvasToolEraser"}
                     alt="Point Eraser"/>
                 <ToolbarButton
                     img="res/remix/eraser-line.svg"
                     fun={setTool(new CanvasToolEraser(10, true))}
+                    current={currentTool === "CanvasToolEraser"}
                     alt="Stroke Eraser"/>
                 <ToolbarButton
                     img="res/material/rectangle-outline.svg"
                     fun={setTool(new CanvasToolRectangle())}
+                    current={currentTool === "CanvasToolRectangle"}
                     alt="Draw Rectangle"/>
             </ToolbarGroup>
             <ToolbarGroup>
