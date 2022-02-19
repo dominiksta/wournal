@@ -120,6 +120,9 @@ export class WournalDocument {
         ));
     }
 
+    /** Called to update react state */
+    public notifySelectionAvailable: (avail: boolean) => void;
+
     // ------------------------------------------------------------
     // undo
     // ------------------------------------------------------------
@@ -133,6 +136,11 @@ export class WournalDocument {
         this._currentTool?.onDeselect();
         this.undoStack.redo();
     }
+
+    /** Called to update react state */
+    public notifyUndoAvailable: (avail: boolean) => void;
+    /** Called to update react state */
+    public notifyRedoAvailable: (avail: boolean) => void;
 
     // ------------------------------------------------------------
     // adding pages
@@ -178,7 +186,12 @@ export class WournalDocument {
         ));
         for(let page of this.pages)
             page.toolLayer.style.cursor = this._currentTool.idleCursor;
+
+        this.notifySetTool(tool.name);
     }
+
+    /** Called to update react state */
+    public notifySetTool: (name: string) => void = (name: string) => null;
 
     private pageAtPoint(pt: {x: number, y: number}) {
         // const start = performance.now();

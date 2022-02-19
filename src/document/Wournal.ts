@@ -30,10 +30,9 @@ export class Wournal {
             default:
                 throw new Error(`Trying to init invalid env: ${env}`)
         };
-        this.init();
     }
 
-    private async init() {
+    public async init() {
         await this.loadConfig();
         await this.loadDocument(true);
         this.createTestPages();

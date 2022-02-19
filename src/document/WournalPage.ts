@@ -298,4 +298,12 @@ export class WournalPage {
             height: r.height * 1/this.zoom,
         });
     }
+
+    // ------------------------------------------------------------
+    // notify react
+    // ------------------------------------------------------------
+
+    public notifySelectionAvailable(avail: boolean) {
+        this.doc.notifySelectionAvailable(avail);
+    }
 }

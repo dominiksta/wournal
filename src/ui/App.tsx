@@ -1,21 +1,15 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { Wournal } from '../document/Wournal';
 import './App.css';
 import Toolbar from './toolbar/Toolbar';
 
 /** Main React entrypoint */
-function App() {
+function App({ wournal }: { wournal: Wournal }) {
     // get a reference to dom element down below for wournal
     const wournalContainer = useRef(null);
-    let [wournal, setWournal] = useState<Wournal>(null);
-
     useEffect(() => {
-        let w = new Wournal(
-            wournalContainer.current as HTMLDivElement, "browser"
-        );
-        setWournal(w);
-        (window as any).wournal = w; // set as window property for debugging
-    }, []);
+        wournalContainer.current.appendChild(wournal.display);
+    }, [])
 
     return (
         <div className="App">

@@ -286,6 +286,7 @@ export class CanvasSelection {
         this.setDimension(page.globalDOMRectToCanvas(boundingRect));
         this._selection = els.map(e => { return { el: e, savedData: e.getData() } });
         this.setCursorState("idle");
+        this.notifySelectionAvailable();
     }
 
     public setSelectionFromCurrentRect() {
@@ -302,5 +303,10 @@ export class CanvasSelection {
                 );
             }
         }
+        this.notifySelectionAvailable();
+    }
+
+    private notifySelectionAvailable() {
+        this.page.notifySelectionAvailable(this._selection.length !== 0);
     }
 }

@@ -10,8 +10,12 @@ button.ToolbarButton:hover {
     background: #efefef;
 }
 
-button.ToolbarButton:active {
+button.ToolbarButton:active:not(:disabled) {
     background: lightblue;
+}
+
+button.ToolbarButton:disabled {
+    opacity: 0.4;
 }
 
 button.ToolbarButton.active {

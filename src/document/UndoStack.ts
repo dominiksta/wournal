@@ -18,6 +18,11 @@ export class UndoStack {
     get undoAvailable(): boolean { return this.undoable.length > 0; }
     get redoAvailable(): boolean { return this.redoable.length > 0; }
 
+    private notifyAvailable() {
+        this.doc.notifyUndoAvailable(this.undoAvailable);
+        this.doc.notifyRedoAvailable(this.redoAvailable);
+    }
+
     public push(action: UndoAction): void {
         this.redoable = [];
         this.undoable.push(action);
@@ -25,6 +30,7 @@ export class UndoStack {
             this.undoable.splice(0, 1)
         // LOG.debug("Undoable action pushed");
         // LOG.debug(action);
+        this.notifyAvailable();
     }
 
     public undo(): void {
@@ -34,6 +40,7 @@ export class UndoStack {
         this.redoable.push(action);
         // LOG.debug("Undo:");
         // LOG.debug(action);
+        this.notifyAvailable();
     }
 
     public redo(): void {
@@ -43,5 +50,6 @@ export class UndoStack {
         this.undoable.push(action);
         // LOG.debug("Redo:");
         // LOG.debug(action);
+        this.notifyAvailable();
     }
 }

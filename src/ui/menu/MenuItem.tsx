@@ -7,7 +7,9 @@ export default function MenuItem({
     fun,
     text,
     mark = "",
-    right = ""
+    right = "",
+    disabled = false,
+    active = false,
 }: {
     /** Call this function on click */
     fun: () => any,
@@ -17,7 +19,11 @@ export default function MenuItem({
     interpreted as a path to an image */
     mark?: "check" | "dot" | string,
     /** Text floating right of the `text` */
-    right?: string
+    right?: string,
+    /** Wether to disabled the button */
+    disabled?: boolean,
+    /** Wether the function of this button is currently active */
+    active?: boolean,
 }) {
     let markItem;
     switch(mark) {
@@ -45,8 +51,9 @@ export default function MenuItem({
     const subMenuCtx = useContext(SubMenuContext);
 
     return (
-        <div className="MenuItem" hidden={!subMenuCtx.active}>
-            <button onClick={() => fun()}>
+        <div className={"MenuItem" + (active ? " active" : "")}
+            hidden={!subMenuCtx.active}>
+            <button onClick={() => fun()} disabled={disabled}>
                 {markItem}
                 <span className="text">{text}</span>
                 {rightItem}

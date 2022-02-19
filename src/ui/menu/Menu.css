@@ -16,6 +16,7 @@
 
 .MenuItem {
     min-width: 150px;
+    background: white;
 }
 
 .MenuItem button {
@@ -28,12 +29,20 @@
     text-align: left;
 }
 
+.MenuItem.active button {
+    background: lightblue;
+}
+
 .MenuItem button:hover {
     background: #efefef;
 }
 
-.MenuItem button:active {
+.MenuItem button:active:not(:disabled) {
     background: lightblue;
+}
+
+.MenuItem button:disabled {
+    opacity: 0.4;
 }
 
 .MenuItem button .mark {

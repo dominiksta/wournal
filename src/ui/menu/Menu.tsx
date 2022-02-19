@@ -14,7 +14,13 @@ import SubMenu from "./SubMenu";
  * instead replace the current menu on click. This design should be a lot more
  * usable on mobile while still providing the same functionality.
  */
-export default function Menu({ wournal, hidden }: { wournal: Wournal, hidden: boolean }) {
+export default function Menu({
+    wournal, hidden, currentTool, selectionAvailable, undoAvailable, redoAvailable
+}: {
+    wournal: Wournal, hidden: boolean, currentTool: string,
+    selectionAvailable: boolean, undoAvailable: boolean, redoAvailable: boolean
+}
+) {
     return (
         <div className="Menu" hidden={hidden}>
             {/* _ROOT_ is not a special symbol, it can be called anything really */}
@@ -37,19 +43,23 @@ export default function Menu({ wournal, hidden }: { wournal: Wournal, hidden: bo
                     <MenuItem
                         mark="res/remix/arrow-go-back-line.svg"
                         fun={() => wournal.doc.undo()}
+                        disabled={!undoAvailable}
                         text="Undo"/>
                     <MenuItem
                         mark="res/remix/arrow-go-forward-line.svg"
                         fun={() => wournal.doc.redo()}
+                        disabled={!redoAvailable}
                         text="Redo"/>
                     <MenuItem
                         mark="res/remix/scissors-2-line.svg"
                         fun={() => wournal.doc.selectionCut()}
-                        text="Cut" />
+                        disabled={!selectionAvailable}
+                        text="Cut"/>
                     <MenuItem
                         mark="res/remix/file-copy-line.svg"
                         fun={() => wournal.doc.selectionCopy()}
-                        text="Copy" />
+                        disabled={!selectionAvailable}
+                        text="Copy"/>
                     <MenuItem
                         mark="res/remix/clipboard-line.svg"
                         fun={() => wournal.doc.selectionOrClipboardPaste()}
@@ -73,26 +83,32 @@ export default function Menu({ wournal, hidden }: { wournal: Wournal, hidden: bo
                     <MenuItem
                         mark="res/custom/pen.svg"
                         fun={() => wournal.doc.setTool(new CanvasToolPen())}
+                        active={currentTool === "CanvasToolPen"}
                         text="Pen" />
                     <MenuItem
                         mark="res/material/selection-drag.svg"
                         fun={() => wournal.doc.setTool(new CanvasToolSelectRectangle())}
+                        active={currentTool === "CanvasToolSelectRectangle"}
                         text="Select Rectangle" />
                     <MenuItem
                         mark="res/remix/text.svg"
                         fun={() => wournal.doc.setTool(new CanvasToolText())}
+                        active={currentTool === "CanvasToolText"}
                         text="Insert Textbox" />
                     <MenuItem
                         mark="res/remix/eraser-line.svg"
                         fun={() => wournal.doc.setTool(new CanvasToolEraser(10, false))}
+                        active={currentTool === "CanvasToolEraser"}
                         text="Point Eraser" />
                     <MenuItem
                         mark="res/remix/eraser-line.svg"
                         fun={() => wournal.doc.setTool(new CanvasToolEraser(10, true))}
+                        active={currentTool === "CanvasToolEraser"}
                         text="Stroke Eraser" />
                     <MenuItem
                         mark="res/material/rectangle-outline.svg"
                         fun={() => wournal.doc.setTool(new CanvasToolRectangle())}
+                        active={currentTool === "CanvasToolRectangle"}
                         text="Draw Rectangle" />
                 </SubMenu>
                 <SubMenu text="Option">
