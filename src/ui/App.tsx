@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { Wournal } from '../document/Wournal';
-import { DocumentRepositoryBrowserFiles }
-    from '../persistence/DocumentRepositoryBrowserFiles';
 import './App.css';
 import Toolbar from './toolbar/Toolbar';
 
@@ -12,11 +10,8 @@ function App() {
     let [wournal, setWournal] = useState<Wournal>(null);
 
     useEffect(() => {
-        let repoImpl = DocumentRepositoryBrowserFiles.getInstance();
-        // let repoImpl = DocumentRepositoryTestFiles.getInstance();
-
         let w = new Wournal(
-            wournalContainer.current as HTMLDivElement, repoImpl
+            wournalContainer.current as HTMLDivElement, "browser"
         );
         setWournal(w);
         (window as any).wournal = w; // set as window property for debugging

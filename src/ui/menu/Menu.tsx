@@ -95,6 +95,14 @@ export default function Menu({ wournal, hidden }: { wournal: Wournal, hidden: bo
                         fun={() => wournal.doc.setTool(new CanvasToolRectangle())}
                         text="Draw Rectangle" />
                 </SubMenu>
+                <SubMenu text="Option">
+                    <MenuItem
+                        fun={() => wournal.saveConfig()}
+                        text="Save Configuration"/>
+                    <MenuItem
+                        fun={() => wournal.loadConfig()}
+                        text="Restore Configuration"/>
+                </SubMenu>
                 <SubMenu text="Test">
                     <SubMenu text="Deeper Nest 1">
                         <MenuItem

@@ -1,4 +1,8 @@
+import { ConfigDTO } from "../persistence/ConfigDTO";
+import { ConfigRepository } from "../persistence/ConfigRepository";
+import { ConfigRepositoryLocalStorage } from "../persistence/ConfigRepositoryLocalStorage";
 import { DocumentRepository } from "../persistence/DocumentRepository";
+import { DocumentRepositoryBrowserFiles } from "../persistence/DocumentRepositoryBrowserFiles";
 import { DocumentService } from "../persistence/DocumentService";
 import { WournalDocument } from "./WournalDocument";
 import { WournalPageSize } from "./WournalPageSize";
@@ -9,25 +13,46 @@ export class Wournal {
     get doc() { return this._doc; }
     get display() { return this._display; }
 
+    private docRepo: DocumentRepository;
+    private confRepo: ConfigRepository;
+    public static CONF: ConfigDTO;
+
     constructor(
         private _display: HTMLDivElement,
-        private repo: DocumentRepository,
+        // this could be something like "electron" or "android" in the future
+        private env: "browser",
     ) {
-        this.loadDocument(true);
+        switch (env) {
+            case "browser":
+                this.docRepo = DocumentRepositoryBrowserFiles.getInstance();
+                this.confRepo = ConfigRepositoryLocalStorage.getInstance();
+                break;
+            default:
+                throw new Error(`Trying to init invalid env: ${env}`)
+        };
+        this.init();
+    }
+
+    private async init() {
+        await this.loadConfig();
+        await this.loadDocument(true);
         this.createTestPages();
     }
+
+    public async loadConfig() { Wournal.CONF = await this.confRepo.load(); }
+    public async saveConfig() { return await this.confRepo.save(Wournal.CONF); }
 
     public async loadDocument(empty: boolean = false) {
         let disp = this.newDisplayEl();
         this._doc = empty
             ? WournalDocument.create(disp)
-            : await DocumentService.load(disp, this.repo, "");
+            : await DocumentService.load(disp, this.docRepo, "");
         this.clearDisplayEl();
         this._display.appendChild(disp);
     }
 
     public async saveDocument() {
-        DocumentService.save(this._doc, this.repo);
+        DocumentService.save(this._doc, this.docRepo);
     }
 
     private clearDisplayEl() {
