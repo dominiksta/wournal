@@ -308,6 +308,6 @@ export class CanvasSelection {
     }
 
     private notifySelectionAvailable() {
-        this.page.notifySelectionAvailable(this._selection.length !== 0);
+        this.page?.notifySelectionAvailable(this._selection.length !== 0);
     }
 }
