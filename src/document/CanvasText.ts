@@ -13,6 +13,7 @@ export class CanvasText extends CanvasElement {
     ) {
         super(_svgElem);
         this._fontSize = parseFloat(_svgElem.getAttribute("font-size"));
+        if (isNaN(this._fontSize)) this._fontSize = 17;
         this._lineHeight = _svgElem.children.length > 0
             ? parseFloat(_svgElem.children[0].getAttribute("dy"))
             : 15;
