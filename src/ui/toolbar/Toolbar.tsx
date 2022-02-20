@@ -18,7 +18,7 @@ function Toolbar({wournal}: {wournal: Wournal}) {
     const [undoAvailable, setUndoAvailable] = useState(false);
     const [redoAvailable, setRedoAvailable] = useState(false);
     const forceUpdate = useForceUpdate();
-    const [openSnackbar, closeSnackbar] = useSnackbar();
+    const openSnackbar = useSnackbar()[0];
 
     wournal.doc.notifyUndoAvailable = setUndoAvailable;
     wournal.doc.notifyRedoAvailable = setRedoAvailable;
@@ -72,29 +72,46 @@ function Toolbar({wournal}: {wournal: Wournal}) {
             <ToolbarGroup>
                 <ToolbarButton
                     img="res/custom/pen.svg"
-                    fun={() => wournal.doc.setTool(new CanvasToolPen())}
+                    fun={() => wournal.doc.setTool(CanvasToolPen)}
                     current={currentTool === "CanvasToolPen"}
                     alt="Pen"/>
                 <ToolbarButton
                     img="res/material/selection-drag.svg"
-                    fun={() => wournal.doc.setTool(new CanvasToolSelectRectangle())}
+                    fun={() => wournal.doc.setTool(CanvasToolSelectRectangle)}
                     current={currentTool === "CanvasToolSelectRectangle"}
                     alt="Select Rectangle"/>
                 <ToolbarButton
                     img="res/remix/text.svg"
-                    fun={() => wournal.doc.setTool(new CanvasToolText())}
+                    fun={() => wournal.doc.setTool(CanvasToolText)}
                     current={currentTool === "CanvasToolText"}
                     alt="Insert Textbox"/>
                 <ToolbarButton
                     img="res/remix/eraser-line.svg"
-                    fun={() => wournal.doc.setTool(new CanvasToolEraser(10))}
+                    fun={() => wournal.doc.setTool(CanvasToolEraser)}
                     current={currentTool === "CanvasToolEraser"}
                     alt="Eraser"/>
                 <ToolbarButton
                     img="res/material/rectangle-outline.svg"
-                    fun={() => wournal.doc.setTool(new CanvasToolRectangle())}
+                    fun={() => wournal.doc.setTool(CanvasToolRectangle)}
                     current={currentTool === "CanvasToolRectangle"}
                     alt="Draw Rectangle"/>
+            </ToolbarGroup>
+            <ToolbarGroup>
+                <ToolbarButton
+                    img="res/material/autorenew.svg"
+                    fun={() => {
+                        wournal.doc.resetCurrentTool();
+                        forceUpdate();
+                    }}
+                    alt="Default Tool Options"/>
+                <ToolbarButton
+                    img="res/custom/default-pen.svg"
+                    fun={() => {
+                        wournal.doc.setTool(CanvasToolPen);
+                        wournal.doc.resetCurrentTool();
+                        forceUpdate();
+                    }}
+                    alt="Default Pen"/>
             </ToolbarGroup>
             <ToolbarGroup>
                 <ToolbarButton

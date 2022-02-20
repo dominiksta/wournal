@@ -1,8 +1,8 @@
-import { WournalPage } from "./WournalPage";
 import { CanvasPath } from "./CanvasPath";
 import { CanvasTool } from "./CanvasTool";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
 import { Wournal } from "./Wournal";
+import { WournalPage } from "./WournalPage";
 
 export class CanvasToolPen extends CanvasTool {
 
@@ -26,6 +26,8 @@ export class CanvasToolPen extends CanvasTool {
         var pt = this.toolUseStartPage.globalCoordsToCanvas({x: e.x, y: e.y});
         this.appendToBuffer(pt);
         this.path.startAt(pt);
+        this.path.setColor(Wournal.currToolConf.CanvasToolPen.color);
+        this.path.setStrokeWidth(Wournal.currToolConf.CanvasToolPen.size);
         this.toolUseStartPage.getActivePaintLayer().appendChild(this.path.svgElem);
     }
 
@@ -50,7 +52,8 @@ export class CanvasToolPen extends CanvasTool {
     /** Calculate the average point, starting at offset in the buffer */
     private getAveragePoint(offset: number): {x: number, y: number} | null {
         var len = this.mouseBuffer.length;
-        if (len % 2 === 1 || len >= Wournal.CONF.pen.mouseBufferSize) {
+        if (len % 2 === 1 || len >=
+            Wournal.currToolConf.CanvasToolPen.mouseBufferSize) {
             var totalX = 0;
             var totalY = 0;
             var pt, i;
@@ -71,7 +74,8 @@ export class CanvasToolPen extends CanvasTool {
 
     private appendToBuffer(pt: {x: number, y: number}) {
         this.mouseBuffer.push(pt);
-        while (this.mouseBuffer.length > Wournal.CONF.pen.mouseBufferSize) {
+        while (this.mouseBuffer.length >
+            Wournal.currToolConf.CanvasToolPen.mouseBufferSize) {
             this.mouseBuffer.shift();
         }
     }

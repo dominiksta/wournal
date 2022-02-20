@@ -20,5 +20,21 @@ export const DSUtils = {
         let res: T[] = [];
         for (let el of arr) res.push(el);
         return res;
-    }
+    },
+
+    /** Return a deep copy of the given object. Might break some complex types. */
+    copyObj: function<T>(obj: T) {
+        // In the future, this could be updated to use the new
+        // https://developer.mozilla.org/en-US/docs/Web/API/structuredClone.
+        // For now, structuredClone is not available in my(dominiksta) main
+        // development Browser Waterfox (Firefox ESR).
+        return JSON.parse(JSON.stringify(obj));
+    },
+
+    // `PropertyKey` is short for "string | number | symbol"
+    // since an object key can be any of those types, our key can too
+    // in TS 3.0+, putting just "string" raises an error
+    hasKey: function<O>(obj: O, key: PropertyKey): key is keyof O {
+        return key in obj
+    },
 }

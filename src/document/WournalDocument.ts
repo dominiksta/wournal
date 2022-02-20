@@ -1,5 +1,6 @@
 import { DocumentDTO } from "../persistence/DocumentDTO";
 import { DSUtils } from "../util/DSUtils";
+import { Newable } from "../util/Newable";
 import { SVGUtils } from "../util/SVGUtils";
 import { CanvasElement } from "./CanvasElement";
 import { CanvasElementFactory } from "./CanvasElementFactory";
@@ -8,6 +9,7 @@ import { CanvasToolPen } from "./CanvasToolPen";
 import { CanvasSelection } from "./SelectionDisplay";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
 import { UndoStack } from "./UndoStack";
+import { Wournal } from "./Wournal";
 import { WournalPage } from "./WournalPage";
 import { computeZoomFactor, WournalPageSize } from "./WournalPageSize";
 
@@ -38,7 +40,7 @@ export class WournalDocument {
         this.initialZoomFactor = computeZoomFactor();
         this.undoStack = new UndoStack(this);
         this.selection = new CanvasSelection(this.undoStack);
-        this.setTool(new CanvasToolPen());
+        this.setTool(CanvasToolPen);
     }
 
     public defaultPageDimensions = WournalPageSize.DINA4_PORTRAIT;
@@ -178,16 +180,36 @@ export class WournalDocument {
     // tools and helpers
     // ------------------------------------------------------------
 
-    public setTool(tool: CanvasTool) {
+    public setTool(tool: Newable<CanvasTool>) {
         this._currentTool?.onDeselect();
-        this._currentTool = tool;
-        tool.setup(new CanvasToolSetupProps(
+        this._currentTool = new tool();
+        this._currentTool.setup(new CanvasToolSetupProps(
             this.getActivePage.bind(this), this.undoStack, this.selection
         ));
         for(let page of this.pages)
             page.toolLayer.style.cursor = this._currentTool.idleCursor;
 
         this.notifySetTool(tool.name);
+    }
+
+    /** Reset the config of the current tool to loaded global config */
+    public resetCurrentTool() {
+        if (!DSUtils.hasKey(Wournal.currToolConf, this._currentTool.name)
+            || !DSUtils.hasKey(Wournal.CONF.tools, this._currentTool.name))
+            throw new Error(`Could not get config for tool ${this._currentTool}`)
+
+        Wournal.currToolConf[this._currentTool.name] =
+            DSUtils.copyObj(Wournal.CONF.tools[this._currentTool.name])
+    }
+
+    /** Set the current tool configuration as the default config for that tool */
+    public setCurrentToolAsDefault() {
+        if (!DSUtils.hasKey(Wournal.currToolConf, this._currentTool.name)
+            || !DSUtils.hasKey(Wournal.CONF.tools, this._currentTool.name))
+            throw new Error(`Could not get config for tool ${this._currentTool}`)
+
+        Wournal.CONF.tools[this._currentTool.name] =
+            DSUtils.copyObj(Wournal.currToolConf[this._currentTool.name])
     }
 
     /** Called to update react state */

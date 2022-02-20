@@ -5,7 +5,8 @@ function ToolbarButton({fun, img, alt, current = false, disabled = false}: {
 }) {
     let className = "ToolbarButton" + (current ? " active" : "");
     return (
-        <button onClick={fun} className={className} disabled={disabled}>
+        <button onClick={fun} className={className} disabled={disabled}
+            title={alt}>
             <img src={img} alt={alt}/>
         </button>
     );

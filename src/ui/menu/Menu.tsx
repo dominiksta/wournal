@@ -5,6 +5,7 @@ import { CanvasToolRectangle } from "../../document/CanvasToolRectangle";
 import { CanvasToolSelectRectangle } from "../../document/CanvasToolSelectRectangle";
 import { CanvasToolText } from "../../document/CanvasToolText";
 import { Wournal } from "../../document/Wournal";
+import { useForceUpdate } from "../../useForceUpdate";
 import { useSnackbar } from "../snackbar/useSnackbar";
 import "./Menu.css";
 import MenuItem from "./MenuItem";
@@ -23,7 +24,8 @@ export default function Menu({
     selectionAvailable: boolean, undoAvailable: boolean, redoAvailable: boolean
 }
 ) {
-    const [eraseStrokes, setEraseStrokes] = useState(Wournal.CONF.eraser.eraseStrokes);
+    const forceUpdate = useForceUpdate();
+
     const [openSnackbar, closeSnackbar] = useSnackbar();
 
     return (
@@ -87,45 +89,65 @@ export default function Menu({
                 <SubMenu text="Tool">
                     <MenuItem
                         mark="res/custom/pen.svg"
-                        fun={() => wournal.doc.setTool(new CanvasToolPen())}
+                        fun={() => wournal.doc.setTool(CanvasToolPen)}
                         active={currentTool === "CanvasToolPen"}
                         text="Pen" />
                     <MenuItem
                         mark="res/material/selection-drag.svg"
-                        fun={() => wournal.doc.setTool(new CanvasToolSelectRectangle())}
+                        fun={() => wournal.doc.setTool(CanvasToolSelectRectangle)}
                         active={currentTool === "CanvasToolSelectRectangle"}
                         text="Select Rectangle" />
                     <MenuItem
                         mark="res/remix/text.svg"
-                        fun={() => wournal.doc.setTool(new CanvasToolText())}
+                        fun={() => wournal.doc.setTool(CanvasToolText)}
                         active={currentTool === "CanvasToolText"}
                         text="Insert Textbox" />
                     <MenuItem
                         mark="res/remix/eraser-line.svg"
-                        fun={() => wournal.doc.setTool(new CanvasToolEraser(10))}
+                        fun={() => wournal.doc.setTool(CanvasToolEraser)}
                         active={currentTool === "CanvasToolEraser"}
                         text="Eraser" />
                     <MenuItem
                         mark="res/material/rectangle-outline.svg"
-                        fun={() => wournal.doc.setTool(new CanvasToolRectangle())}
+                        fun={() => wournal.doc.setTool(CanvasToolRectangle)}
                         active={currentTool === "CanvasToolRectangle"}
                         text="Draw Rectangle" />
                     <SubMenu text="Eraser Options">
                         <MenuItem
-                            mark={eraseStrokes ? "dot" : ""}
+                            mark={Wournal.currToolConf.CanvasToolEraser.eraseStrokes
+                                ? "dot" : ""}
                             fun={() => {
-                                setEraseStrokes(true);
-                                Wournal.CONF.eraser.eraseStrokes = true;
+                                Wournal.currToolConf.CanvasToolEraser.eraseStrokes = true;
+                                forceUpdate();
                             }}
                             text="Erase Strokes"/>
                         <MenuItem
-                            mark={eraseStrokes ? "" : "dot"}
+                            mark={Wournal.currToolConf.CanvasToolEraser.eraseStrokes
+                                ? "" : "dot"}
                             fun={() => {
-                                setEraseStrokes(false);
-                                Wournal.CONF.eraser.eraseStrokes = false;
+                                Wournal.currToolConf.CanvasToolEraser.eraseStrokes = false;
+                                forceUpdate();
                             }}
                             text="Erase Points"/>
                     </SubMenu>
+                    <MenuItem
+                        mark="res/material/autorenew.svg"
+                        fun={() => {
+                            wournal.doc.resetCurrentTool();
+                            forceUpdate();
+                        }}
+                        text="Default Tool Options"/>
+                    <MenuItem
+                        mark="res/custom/default-pen.svg"
+                        fun={() => {
+                            wournal.doc.setTool(CanvasToolPen);
+                            wournal.doc.resetCurrentTool();
+                            forceUpdate();
+                        }}
+                        text="Default Pen"/>
+                    <MenuItem
+                        fun={() => wournal.doc.setCurrentToolAsDefault()}
+                        text="Set as Default"/>
                 </SubMenu>
                 <SubMenu text="Option">
                     <MenuItem
@@ -134,12 +156,6 @@ export default function Menu({
                             openSnackbar("Configuration Saved", 500);
                         }}
                         text="Save Configuration"/>
-                    <MenuItem
-                        fun={async () => {
-                            await wournal.loadConfig();
-                            openSnackbar("Configuration Restored", 500);
-                        }}
-                        text="Restore Configuration"/>
                 </SubMenu>
                 <SubMenu text="Test">
                     <SubMenu text="Deeper Nest 1">

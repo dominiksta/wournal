@@ -1,9 +1,9 @@
-import { WournalPage } from "./WournalPage";
+import { SVGUtils } from "../util/SVGUtils";
 import { CanvasPath } from "./CanvasPath";
 import { CanvasTool } from "./CanvasTool";
-import { SVGUtils } from "../util/SVGUtils";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
 import { Wournal } from "./Wournal";
+import { WournalPage } from "./WournalPage";
 
 export class CanvasToolEraser extends CanvasTool {
 
@@ -18,10 +18,7 @@ export class CanvasToolEraser extends CanvasTool {
 
     public idleCursor = "default";
 
-    constructor(
-        /** The (configurable) size of the rectangular eraser tip. */
-        private size: number = 10
-    ) {
+    constructor() {
         super();
 
         // To actually really reflect the area to be erased, we would have to
@@ -31,11 +28,15 @@ export class CanvasToolEraser extends CanvasTool {
         // this should be fine for now.
         this.idleCursor =
             `url('data:image/svg+xml;utf8,` +
-            `<svg height="${this.size}" width="${this.size}" ` +
+            `<svg height="${Wournal.currToolConf.CanvasToolEraser.size}" ` +
+            `     width="${Wournal.currToolConf.CanvasToolEraser.size}" ` +
             `     xmlns="http://www.w3.org/2000/svg">` +
-            `  <rect x="0" y="0" height="${this.size}" width="${this.size}" ` +
+            `  <rect x="0" y="0" ` +
+            `        height="${Wournal.currToolConf.CanvasToolEraser.size}" ` +
+            `        width="${Wournal.currToolConf.CanvasToolEraser.size}" ` +
             `        stroke="black" stroke-width="2" fill="white"></rect>` +
-            `</svg>') ${this.size / 2} ${this.size / 2}, auto`;
+            `</svg>') ${Wournal.currToolConf.CanvasToolEraser.size / 2} ` +
+            `${Wournal.currToolConf.CanvasToolEraser.size / 2}, auto`;
     }
 
     public onMouseDown(e: MouseEvent): void {
@@ -68,10 +69,10 @@ export class CanvasToolEraser extends CanvasTool {
         const mouse = this.toolUseStartPage.globalCoordsToCanvas(e);
 
         const eraserRect = DOMRect.fromRect({
-            x: mouse.x - this.size / 2,
-            y: mouse.y - this.size / 2,
-            height: this.size,
-            width: this.size,
+            x: mouse.x - Wournal.currToolConf.CanvasToolEraser.size / 2,
+            y: mouse.y - Wournal.currToolConf.CanvasToolEraser.size / 2,
+            height: Wournal.currToolConf.CanvasToolEraser.size,
+            width: Wournal.currToolConf.CanvasToolEraser.size,
         });
         for (let node of this.toolUseStartPage.activePaintLayer.children) {
             const elRect = this.toolUseStartPage.globalDOMRectToCanvas(
@@ -91,7 +92,7 @@ export class CanvasToolEraser extends CanvasTool {
                 // path.pulsePoints();
 
                 // check wether mouse is actually on path
-                if (Wournal.CONF.eraser.eraseStrokes) {
+                if (Wournal.currToolConf.CanvasToolEraser.eraseStrokes) {
                     if (path.isTouchingRect(eraserRect)) {
                         this.currentUndo.push(
                             new UndoActionCanvasElements([node], null, null)

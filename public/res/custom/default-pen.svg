@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   version="1.1"
+   width="24"
+   height="24"
+   viewBox="0 0 24 24"
+   id="svg4"
+   sodipodi:docname="default-pen.svg"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs8">
+    <linearGradient
+       id="linearGradient3891"
+       y2="-260.20999"
+       xlink:href="#linearGradient3863"
+       gradientUnits="userSpaceOnUse"
+       x2="-560.58002"
+       y1="-262.48999"
+       x1="-644.89001"
+       inkscape:collect="always" />
+    <linearGradient
+       id="linearGradient3863"
+       inkscape:collect="always">
+      <stop
+         id="stop3865"
+         style="stop-color:#000000"
+         offset="0" />
+      <stop
+         id="stop3867"
+         style="stop-color:#000000;stop-opacity:0"
+         offset="1" />
+    </linearGradient>
+  </defs>
+  <sodipodi:namedview
+     id="namedview6"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     showgrid="false"
+     inkscape:zoom="12.403831"
+     inkscape:cx="9.8759807"
+     inkscape:cy="5.9255884"
+     inkscape:window-width="1920"
+     inkscape:window-height="1027"
+     inkscape:window-x="1592"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg4" />
+  <path
+     d="M12,6V9L16,5L12,1V4A8,8 0 0,0 4,12C4,13.57 4.46,15.03 5.24,16.26L6.7,14.8C6.25,13.97 6,13 6,12A6,6 0 0,1 12,6M18.76,7.74L17.3,9.2C17.74,10.04 18,11 18,12A6,6 0 0,1 12,18V15L8,19L12,23V20A8,8 0 0,0 20,12C20,10.43 19.54,8.97 18.76,7.74Z"
+     id="path2" />
+  <g
+     id="g910"
+     transform="matrix(-0.5267366,-0.51848429,0.51848429,-0.5267366,-0.78138225,6.8513355)">
+    <g
+       id="g3835"
+       transform="matrix(-0.0182364,0.01800074,-0.01800074,-0.0182364,-25.169648,7.09502)">
+      <rect
+         id="rect3800"
+         style="fill:#1a1a1a"
+         height="742.85999"
+         width="111.43"
+         y="-653.38"
+         x="-627.90997" />
+      <path
+         id="rect3774"
+         sodipodi:nodetypes="ccccc"
+         style="fill:#1a1a1a"
+         inkscape:connector-curvature="0"
+         d="m -627.91,94.011 h 111.43 l -20,171.43 h -68.571 z" />
+      <path
+         id="path3777"
+         d="m -592.19,269.97 h 40 l -16.719,102.86 c 0,0 -16.702,-78.512 -23.281,-102.86 z"
+         sodipodi:nodetypes="cccc"
+         style="fill:#1a1a1a"
+         inkscape:connector-curvature="0" />
+      <path
+         id="rect3779"
+         sodipodi:nodetypes="ccccc"
+         style="fill:#1a1a1a"
+         inkscape:connector-curvature="0"
+         d="m -551.02,-797.01 c -15.668,-13.971 -29.383,-10.355 -42.348,0 v 137.93 h 42.348 z" />
+      <g
+         id="g3786"
+         style="fill:#1a1a1a"
+         transform="matrix(0.75036,0,0,1,-591.84,-340.1)">
+        <rect
+           id="rect3782"
+           style="fill:#1a1a1a"
+           height="285.14999"
+           width="28.514999"
+           y="-312.35001"
+           x="146.57001" />
+        <path
+           id="path3784"
+           sodipodi:r2="24.52602"
+           style="fill:#1a1a1a"
+           sodipodi:type="star"
+           sodipodi:r1="49.05204"
+           inkscape:transform-center-x="5.4416768"
+           inkscape:transform-center-y="0.092569673"
+           transform="matrix(-0.087878,-0.65147,0.43946,-0.13027,362.83,169.19)"
+           sodipodi:arg2="1.7738399"
+           sodipodi:arg1="0.72664234"
+           inkscape:randomized="0"
+           sodipodi:cy="-438.55719"
+           sodipodi:cx="435.86987"
+           inkscape:rounded="0"
+           inkscape:flatsided="true"
+           sodipodi:sides="3"
+           d="m 472.53182,-405.96879 -83.21531,-17.13242 56.44477,-63.50036 z" />
+      </g>
+      <rect
+         id="rect3792"
+         style="fill:#1a1a1a"
+         transform="matrix(0,-1,-1,0,0,0)"
+         height="23.473"
+         width="28.514999"
+         y="487.89999"
+         x="623.97998" />
+    </g>
+    <g
+       id="g3845"
+       style="fill:url(#linearGradient3891)"
+       transform="matrix(-0.0182364,0.01800074,-0.01800074,-0.0182364,-25.169648,7.09502)">
+      <rect
+         id="rect3847"
+         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:24.4024;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         height="742.85999"
+         width="111.43"
+         y="-653.38"
+         x="-627.90997"
+         inkscape:export-filename="C:\Users\dominik\Source\git\wournal\dist\res\cursor\pen.png"
+         inkscape:export-xdpi="9.0342035"
+         inkscape:export-ydpi="9.0342035" />
+      <path
+         id="path3849"
+         d="m -627.91,94.011 h 111.43 l -20,171.43 h -68.571 z"
+         sodipodi:nodetypes="ccccc"
+         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:24.4024;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         inkscape:connector-curvature="0"
+         inkscape:export-filename="C:\Users\dominik\Source\git\wournal\dist\res\cursor\pen.png"
+         inkscape:export-xdpi="9.0342035"
+         inkscape:export-ydpi="9.0342035" />
+      <path
+         id="path3851"
+         sodipodi:nodetypes="cccc"
+         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:24.4024;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         inkscape:connector-curvature="0"
+         d="m -592.19,269.97 h 40 l -16.719,102.86 c 0,0 -16.702,-78.512 -23.281,-102.86 z"
+         inkscape:export-filename="C:\Users\dominik\Source\git\wournal\dist\res\cursor\pen.png"
+         inkscape:export-xdpi="9.0342035"
+         inkscape:export-ydpi="9.0342035" />
+      <path
+         id="path3853"
+         d="m -551.02,-797.01 c -15.668,-13.971 -29.383,-10.355 -42.348,0 v 137.93 h 42.348 z"
+         sodipodi:nodetypes="ccccc"
+         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:24.4024;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         inkscape:connector-curvature="0"
+         inkscape:export-filename="C:\Users\dominik\Source\git\wournal\dist\res\cursor\pen.png"
+         inkscape:export-xdpi="9.0342035"
+         inkscape:export-ydpi="9.0342035" />
+      <g
+         id="g3855"
+         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:28.1707;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         transform="matrix(0.75036,0,0,1,-591.84,-340.1)"
+         inkscape:export-filename="C:\Users\dominik\Source\git\wournal\dist\res\cursor\pen.png"
+         inkscape:export-xdpi="9.0342035"
+         inkscape:export-ydpi="9.0342035">
+        <rect
+           id="rect3857"
+           style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:28.1707;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           height="285.14999"
+           width="28.514999"
+           y="-312.35001"
+           x="146.57001" />
+        <path
+           id="path3859"
+           style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:51.6271;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           sodipodi:type="star"
+           sodipodi:sides="3"
+           inkscape:transform-center-x="5.4416768"
+           sodipodi:r1="49.05204"
+           sodipodi:r2="24.52602"
+           inkscape:transform-center-y="0.092569673"
+           sodipodi:arg1="0.72664234"
+           sodipodi:arg2="1.7738399"
+           transform="matrix(-0.087878,-0.65147,0.43946,-0.13027,362.83,169.19)"
+           inkscape:randomized="0"
+           sodipodi:cy="-438.55719"
+           sodipodi:cx="435.86987"
+           inkscape:rounded="0"
+           inkscape:flatsided="true"
+           d="m 472.53182,-405.96879 -83.21531,-17.13242 56.44477,-63.50036 z" />
+      </g>
+      <rect
+         id="rect3861"
+         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:24.4024;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         transform="matrix(0,-1,-1,0,0,0)"
+         height="23.473"
+         width="28.514999"
+         y="487.89999"
+         x="623.97998"
+         inkscape:export-filename="C:\Users\dominik\Source\git\wournal\dist\res\cursor\pen.png"
+         inkscape:export-xdpi="9.0342035"
+         inkscape:export-ydpi="9.0342035" />
+    </g>
+  </g>
+</svg>

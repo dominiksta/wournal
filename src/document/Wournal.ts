@@ -1,9 +1,10 @@
-import { ConfigDTO } from "../persistence/ConfigDTO";
+import { CanvasToolConfig, ConfigDTO } from "../persistence/ConfigDTO";
 import { ConfigRepository } from "../persistence/ConfigRepository";
 import { ConfigRepositoryLocalStorage } from "../persistence/ConfigRepositoryLocalStorage";
 import { DocumentRepository } from "../persistence/DocumentRepository";
 import { DocumentRepositoryBrowserFiles } from "../persistence/DocumentRepositoryBrowserFiles";
 import { DocumentService } from "../persistence/DocumentService";
+import { DSUtils } from "../util/DSUtils";
 import { WournalDocument } from "./WournalDocument";
 import { WournalPageSize } from "./WournalPageSize";
 
@@ -15,7 +16,12 @@ export class Wournal {
 
     private docRepo: DocumentRepository;
     private confRepo: ConfigRepository;
+    /** Config as loaded from a ConfigRepository */
     public static CONF: ConfigDTO;
+    /** Current tool state/config. Should not be saved to main Config unless
+    requested explicitly by the user. */
+    public static currToolConf: CanvasToolConfig;
+
 
     constructor(
         private _display: HTMLDivElement,
@@ -38,7 +44,10 @@ export class Wournal {
         this.createTestPages();
     }
 
-    public async loadConfig() { Wournal.CONF = await this.confRepo.load(); }
+    public async loadConfig() {
+        Wournal.CONF = await this.confRepo.load();
+        Wournal.currToolConf = DSUtils.copyObj(Wournal.CONF.tools);
+    }
     public async saveConfig() { return await this.confRepo.save(Wournal.CONF); }
 
     public async loadDocument(empty: boolean = false) {

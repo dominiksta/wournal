@@ -1,8 +1,10 @@
+import { CanvasToolTextConfig } from "../persistence/ConfigDTO";
 import { SVGUtils } from "../util/SVGUtils";
 import { CanvasText, CanvasTextData } from "./CanvasText";
 import { CanvasTool } from "./CanvasTool";
 import { TextField } from "./TextField";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
+import { Wournal } from "./Wournal";
 import { WournalPage } from "./WournalPage";
 
 /** The offset from the svg text element to the ui text element */
@@ -17,12 +19,6 @@ export class CanvasToolText extends CanvasTool {
     protected toolUseStartPage: WournalPage;
 
     private state: "idle" | "writing" = "idle";
-
-    constructor(
-        private fontSize: number = 17,
-        private fontFamily: string = "sans-serif",
-        private color: string = "#000000",
-    ) { super(); }
 
     public onDeselect(): void { }
     public onMouseMove(e: MouseEvent): void { }
@@ -99,7 +95,9 @@ export class CanvasToolText extends CanvasTool {
                     x: svg_pos.x,
                     y: svg_pos.y
                 },
-                this.fontSize, this.fontFamily, this.color
+                Wournal.currToolConf.CanvasToolText.fontSize,
+                Wournal.currToolConf.CanvasToolText.fontFamily,
+                Wournal.currToolConf.CanvasToolText.color
             ),
         );
         this.toolUseStartPage.activePaintLayer.appendChild(
