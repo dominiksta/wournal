@@ -7,6 +7,7 @@ import { CanvasToolText } from '../../document/CanvasToolText';
 import { Wournal } from '../../document/Wournal';
 import { useForceUpdate } from '../../useForceUpdate';
 import Menu from '../menu/Menu';
+import { useSnackbar } from '../snackbar/useSnackbar';
 import './Toolbar.css';
 import ToolbarButton from './ToolbarButton';
 import ToolbarGroup from './ToolbarGroup';
@@ -17,6 +18,7 @@ function Toolbar({wournal}: {wournal: Wournal}) {
     const [undoAvailable, setUndoAvailable] = useState(false);
     const [redoAvailable, setRedoAvailable] = useState(false);
     const forceUpdate = useForceUpdate();
+    const [openSnackbar, closeSnackbar] = useSnackbar();
 
     wournal.doc.notifyUndoAvailable = setUndoAvailable;
     wournal.doc.notifyRedoAvailable = setRedoAvailable;
@@ -53,7 +55,10 @@ function Toolbar({wournal}: {wournal: Wournal}) {
             <ToolbarGroup>
                 <ToolbarButton
                     img="res/remix/save-3-line.svg"
-                    fun={() => wournal.saveDocument()}
+                    fun={async () => {
+                        await wournal.saveDocument();
+                        openSnackbar("Document Saved", 500);
+                    }}
                     alt="Save"/>
                 <ToolbarButton
                     img="res/remix/file-line.svg"

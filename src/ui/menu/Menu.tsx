@@ -5,6 +5,7 @@ import { CanvasToolRectangle } from "../../document/CanvasToolRectangle";
 import { CanvasToolSelectRectangle } from "../../document/CanvasToolSelectRectangle";
 import { CanvasToolText } from "../../document/CanvasToolText";
 import { Wournal } from "../../document/Wournal";
+import { useSnackbar } from "../snackbar/useSnackbar";
 import "./Menu.css";
 import MenuItem from "./MenuItem";
 import SubMenu from "./SubMenu";
@@ -23,6 +24,7 @@ export default function Menu({
 }
 ) {
     const [eraseStrokes, setEraseStrokes] = useState(Wournal.CONF.eraser.eraseStrokes);
+    const [openSnackbar, closeSnackbar] = useSnackbar();
 
     return (
         <div className="Menu" hidden={hidden}>
@@ -127,10 +129,16 @@ export default function Menu({
                 </SubMenu>
                 <SubMenu text="Option">
                     <MenuItem
-                        fun={() => wournal.saveConfig()}
+                        fun={async () => {
+                            await wournal.saveConfig();
+                            openSnackbar("Configuration Saved", 500);
+                        }}
                         text="Save Configuration"/>
                     <MenuItem
-                        fun={() => wournal.loadConfig()}
+                        fun={async () => {
+                            await wournal.loadConfig();
+                            openSnackbar("Configuration Restored", 500);
+                        }}
                         text="Restore Configuration"/>
                 </SubMenu>
                 <SubMenu text="Test">

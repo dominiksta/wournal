@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Wournal } from '../document/Wournal';
 import './App.css';
+import Snackbar from './snackbar/Snackbar';
 import Toolbar from './toolbar/Toolbar';
 
 /** Main React entrypoint */
@@ -12,10 +13,12 @@ function App({ wournal }: { wournal: Wournal }) {
     }, [])
 
     return (
-        <div className="App">
-            <Toolbar wournal={wournal}/>
-            <div id="wournal-container" ref={wournalContainer}></div>
-        </div>
+        <Snackbar>
+            <div className="App">
+                <Toolbar wournal={wournal} />
+                <div id="wournal-container" ref={wournalContainer}></div>
+            </div>
+        </Snackbar>
     );
 }
 
