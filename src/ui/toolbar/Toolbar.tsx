@@ -82,14 +82,9 @@ function Toolbar({wournal}: {wournal: Wournal}) {
                     alt="Insert Textbox"/>
                 <ToolbarButton
                     img="res/remix/eraser-line.svg"
-                    fun={() => wournal.doc.setTool(new CanvasToolEraser(10, false))}
+                    fun={() => wournal.doc.setTool(new CanvasToolEraser(10))}
                     current={currentTool === "CanvasToolEraser"}
-                    alt="Point Eraser"/>
-                <ToolbarButton
-                    img="res/remix/eraser-line.svg"
-                    fun={() => wournal.doc.setTool(new CanvasToolEraser(10, true))}
-                    current={currentTool === "CanvasToolEraser"}
-                    alt="Stroke Eraser"/>
+                    alt="Eraser"/>
                 <ToolbarButton
                     img="res/material/rectangle-outline.svg"
                     fun={() => wournal.doc.setTool(new CanvasToolRectangle())}

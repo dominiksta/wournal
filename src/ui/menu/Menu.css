@@ -45,14 +45,15 @@
     opacity: 0.4;
 }
 
-.MenuItem button .mark {
+.MenuItem button .text, .mark, .right {
     display: inline-block;
-    width: 15px;
-    margin-right: 5px;
     vertical-align: middle;
 }
 
-.MenuItem button .text {
+.MenuItem button .mark {
+    width: 15px;
+    margin-right: 5px;
+    text-align: center;
 }
 
 .MenuItem button .right {

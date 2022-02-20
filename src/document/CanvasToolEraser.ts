@@ -3,6 +3,7 @@ import { CanvasPath } from "./CanvasPath";
 import { CanvasTool } from "./CanvasTool";
 import { SVGUtils } from "../util/SVGUtils";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
+import { Wournal } from "./Wournal";
 
 export class CanvasToolEraser extends CanvasTool {
 
@@ -19,8 +20,7 @@ export class CanvasToolEraser extends CanvasTool {
 
     constructor(
         /** The (configurable) size of the rectangular eraser tip. */
-        private size: number = 10,
-        private eraseStrokes: boolean = false,
+        private size: number = 10
     ) {
         super();
 
@@ -91,7 +91,7 @@ export class CanvasToolEraser extends CanvasTool {
                 // path.pulsePoints();
 
                 // check wether mouse is actually on path
-                if (this.eraseStrokes) {
+                if (Wournal.CONF.eraser.eraseStrokes) {
                     if (path.isTouchingRect(eraserRect)) {
                         this.currentUndo.push(
                             new UndoActionCanvasElements([node], null, null)

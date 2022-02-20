@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { CanvasToolEraser } from "../../document/CanvasToolEraser";
 import { CanvasToolPen } from "../../document/CanvasToolPen";
 import { CanvasToolRectangle } from "../../document/CanvasToolRectangle";
@@ -21,6 +22,8 @@ export default function Menu({
     selectionAvailable: boolean, undoAvailable: boolean, redoAvailable: boolean
 }
 ) {
+    const [eraseStrokes, setEraseStrokes] = useState(Wournal.CONF.eraser.eraseStrokes);
+
     return (
         <div className="Menu" hidden={hidden}>
             {/* _ROOT_ is not a special symbol, it can be called anything really */}
@@ -97,19 +100,30 @@ export default function Menu({
                         text="Insert Textbox" />
                     <MenuItem
                         mark="res/remix/eraser-line.svg"
-                        fun={() => wournal.doc.setTool(new CanvasToolEraser(10, false))}
+                        fun={() => wournal.doc.setTool(new CanvasToolEraser(10))}
                         active={currentTool === "CanvasToolEraser"}
-                        text="Point Eraser" />
-                    <MenuItem
-                        mark="res/remix/eraser-line.svg"
-                        fun={() => wournal.doc.setTool(new CanvasToolEraser(10, true))}
-                        active={currentTool === "CanvasToolEraser"}
-                        text="Stroke Eraser" />
+                        text="Eraser" />
                     <MenuItem
                         mark="res/material/rectangle-outline.svg"
                         fun={() => wournal.doc.setTool(new CanvasToolRectangle())}
                         active={currentTool === "CanvasToolRectangle"}
                         text="Draw Rectangle" />
+                    <SubMenu text="Eraser Options">
+                        <MenuItem
+                            mark={eraseStrokes ? "dot" : ""}
+                            fun={() => {
+                                setEraseStrokes(true);
+                                Wournal.CONF.eraser.eraseStrokes = true;
+                            }}
+                            text="Erase Strokes"/>
+                        <MenuItem
+                            mark={eraseStrokes ? "" : "dot"}
+                            fun={() => {
+                                setEraseStrokes(false);
+                                Wournal.CONF.eraser.eraseStrokes = false;
+                            }}
+                            text="Erase Points"/>
+                    </SubMenu>
                 </SubMenu>
                 <SubMenu text="Option">
                     <MenuItem
