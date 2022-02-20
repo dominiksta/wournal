@@ -4,7 +4,8 @@ import { Newable } from "../util/Newable";
 import { SVGUtils } from "../util/SVGUtils";
 import { CanvasElement } from "./CanvasElement";
 import { CanvasElementFactory } from "./CanvasElementFactory";
-import { CanvasTool, CanvasToolSetupProps } from "./CanvasTool";
+import { CanvasTool, CanvasToolName, CanvasToolSetupProps } from "./CanvasTool";
+import { CanvasToolFactory } from "./CanvasToolFactory";
 import { CanvasToolPen } from "./CanvasToolPen";
 import { CanvasSelection } from "./SelectionDisplay";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
@@ -26,6 +27,8 @@ export class WournalDocument {
 
     private activePage: WournalPage = null;
 
+    /** Store tool set before right click */
+    private toolBeforeRightClick: CanvasToolName;
     private _currentTool: CanvasTool;
     get currentTool() { return this._currentTool; }
 
@@ -36,6 +39,7 @@ export class WournalDocument {
         this.display.addEventListener("mouseup", this.onMouseUp.bind(this));
         this.display.addEventListener("mousedown", this.onMouseDown.bind(this));
         this.display.addEventListener("mousemove", this.onMouseMove.bind(this));
+        this.display.addEventListener("contextmenu", (e) => { e.preventDefault() });
 
         this.initialZoomFactor = computeZoomFactor();
         this.undoStack = new UndoStack(this);
@@ -180,8 +184,8 @@ export class WournalDocument {
     // tools and helpers
     // ------------------------------------------------------------
 
-    public setTool(tool: Newable<CanvasTool>) {
-        this._currentTool?.onDeselect();
+    public setTool(tool: Newable<CanvasTool>, noDeselect: boolean = false)  {
+        if (!noDeselect) this._currentTool?.onDeselect();
         this._currentTool = new tool();
         this._currentTool.setup(new CanvasToolSetupProps(
             this.getActivePage.bind(this), this.undoStack, this.selection
@@ -248,15 +252,24 @@ export class WournalDocument {
                 this._currentTool.onMouseDown(e);
             }
         } else {
+            if (e.button === 2) { // right click
+                this.toolBeforeRightClick = this._currentTool.name;
+                this.setTool(CanvasToolFactory.forName(Wournal.CONF.binds.rightClick));
+            }
             this._currentTool.onMouseDown(e);
         }
     }
 
     private onMouseUp(e: MouseEvent) {
-        if (this.selection.currentlyInteracting)
+        if (this.selection.currentlyInteracting) {
             this.selection.onMouseUp(e)
-        else
+        } else {
             this._currentTool.onMouseUp(e);
+            if (e.button === 2) // right click
+                this.setTool(
+                    CanvasToolFactory.forName(this.toolBeforeRightClick), true
+                );
+        }
     }
 
     private onMouseMove(e: MouseEvent) {

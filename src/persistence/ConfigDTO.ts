@@ -1,3 +1,5 @@
+import { CanvasToolName } from "../document/CanvasTool"
+
 export type CanvasToolPenConfig = {
     color: string,
     size: number,
@@ -23,12 +25,18 @@ export type CanvasToolConfig = {
 
 export type ConfigDTO = {
     version: 0.01,
+    binds: {
+        rightClick: CanvasToolName,
+    },
     tools: CanvasToolConfig,
 }
 
 export function defaultConfig(): ConfigDTO {
     return {
         version: 0.01,
+        binds: {
+            rightClick: "CanvasToolEraser",
+        },
         tools: {
             CanvasToolPen: {
                 color: "#000000",

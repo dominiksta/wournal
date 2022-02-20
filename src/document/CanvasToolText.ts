@@ -1,4 +1,3 @@
-import { CanvasToolTextConfig } from "../persistence/ConfigDTO";
 import { SVGUtils } from "../util/SVGUtils";
 import { CanvasText, CanvasTextData } from "./CanvasText";
 import { CanvasTool } from "./CanvasTool";

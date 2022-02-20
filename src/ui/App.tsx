@@ -10,7 +10,7 @@ function App({ wournal }: { wournal: Wournal }) {
     const wournalContainer = useRef(null);
     useEffect(() => {
         wournalContainer.current.appendChild(wournal.display);
-    }, [])
+    }, [wournal.display])
 
     return (
         <Snackbar>

@@ -2,6 +2,17 @@ import { CanvasSelection } from "./SelectionDisplay";
 import { UndoStack } from "./UndoStack";
 import { WournalPage } from "./WournalPage";
 
+/** All available `CanvasTool`s */
+export const CanvasToolNames = [
+    "CanvasToolPen",
+    "CanvasToolEraser",
+    "CanvasToolRectangle",
+    "CanvasToolSelectRectangle",
+    "CanvasToolText"
+] as const;
+/** All available `CanvasTool`s */
+export type CanvasToolName = typeof CanvasToolNames[number];
+
 export class CanvasToolSetupProps {
     constructor(
         /** Get the page of the wournal document to draw on. */
@@ -14,7 +25,17 @@ export class CanvasToolSetupProps {
 }
 
 export abstract class CanvasTool {
-    get name(): string { return (this as any).constructor.name; }
+    get name(): CanvasToolName { return (this as any).constructor.name; }
+
+    static humanName(name: CanvasToolName) {
+        switch (name) {
+            case "CanvasToolPen": return "Pen";
+            case "CanvasToolEraser": return "Eraser";
+            case "CanvasToolRectangle": return "Rectangle";
+            case "CanvasToolSelectRectangle": return "Select Rectangle";
+            case "CanvasToolText": return "Text Box";
+        }
+    }
 
     /** This cursor should be displayed when the tool is selected */
     public abstract idleCursor: string;
