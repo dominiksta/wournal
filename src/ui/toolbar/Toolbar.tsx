@@ -23,8 +23,8 @@ function Toolbar({wournal}: {wournal: Wournal}) {
     wournal.doc.notifySelectionAvailable = setSelectionAvailable;
     wournal.doc.notifySetTool = setCurrentTool;
 
-    const loadDocument = (empty: boolean) => {
-        wournal.loadDocument(empty);
+    const loadDocument = async (empty: boolean) => {
+        await wournal.loadDocument(empty);
         setUndoAvailable(false);
         setRedoAvailable(false);
         setSelectionAvailable(false);
