@@ -1,3 +1,4 @@
+import { CanvasToolStrokeWidth } from "../persistence/ConfigDTO";
 import { CanvasElement, CanvasElementData } from "./CanvasElement";
 
 export class CanvasText extends CanvasElement {
@@ -154,6 +155,8 @@ export class CanvasText extends CanvasElement {
     public hide(hide: boolean) {
         this._svgElem.style.display = hide ? "none" : "";
     }
+
+    public override setStrokeWidth(width: CanvasToolStrokeWidth): void { }
 }
 
 export class CanvasTextData extends CanvasElementData {

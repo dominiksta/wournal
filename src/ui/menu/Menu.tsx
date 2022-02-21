@@ -5,6 +5,7 @@ import { CanvasToolRectangle } from "../../document/CanvasToolRectangle";
 import { CanvasToolSelectRectangle } from "../../document/CanvasToolSelectRectangle";
 import { CanvasToolText } from "../../document/CanvasToolText";
 import { Wournal } from "../../document/Wournal";
+import { CanvasToolStrokeWidth } from "../../persistence/ConfigDTO";
 import { useForceUpdate } from "../../useForceUpdate";
 import { useSnackbar } from "../snackbar/useSnackbar";
 import "./Menu.css";
@@ -18,10 +19,12 @@ import SubMenu from "./SubMenu";
  * usable on mobile while still providing the same functionality.
  */
 export default function Menu({
-    wournal, hidden, currentTool, selectionAvailable, undoAvailable, redoAvailable
+    wournal, hidden, currentTool, currStrokeWidth, selectionAvailable,
+    undoAvailable, redoAvailable
 }: {
     wournal: Wournal, hidden: boolean, currentTool: string,
-    selectionAvailable: boolean, undoAvailable: boolean, redoAvailable: boolean
+    currStrokeWidth: CanvasToolStrokeWidth, selectionAvailable: boolean,
+    undoAvailable: boolean, redoAvailable: boolean
 }
 ) {
     const forceUpdate = useForceUpdate();
@@ -124,6 +127,29 @@ export default function Menu({
                         fun={() => wournal.doc.setTool(CanvasToolRectangle)}
                         active={currentTool === "CanvasToolRectangle"}
                         text="Draw Rectangle" />
+                    <SubMenu text="Pen Options">
+                        <MenuItem
+                            mark={currStrokeWidth === "fine" ? "dot" : ""}
+                            fun={() => {
+                                wournal.doc.setStrokeWidth("fine");
+                                forceUpdate();
+                            }}
+                            text="Fine" />
+                        <MenuItem
+                            mark={currStrokeWidth === "medium" ? "dot" : ""}
+                            fun={() => {
+                                wournal.doc.setStrokeWidth("medium");
+                                forceUpdate();
+                            }}
+                            text="Medium" />
+                        <MenuItem
+                            mark={currStrokeWidth === "thick" ? "dot" : ""}
+                            fun={() => {
+                                wournal.doc.setStrokeWidth("thick");
+                                forceUpdate();
+                            }}
+                            text="Thick" />
+                    </SubMenu>
                     <SubMenu text="Eraser Options">
                         <MenuItem
                             mark={Wournal.currToolConf.CanvasToolEraser.eraseStrokes

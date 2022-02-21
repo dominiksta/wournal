@@ -2,6 +2,8 @@ import { WournalPage } from "./WournalPage";
 import { CanvasPath } from "./CanvasPath";
 import { CanvasTool } from "./CanvasTool";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
+import { Wournal } from "./Wournal";
+import { CanvasToolStrokeWidth } from "../persistence/ConfigDTO";
 
 const TOOL_RECTANGLE_POINT_DIFF_PX = 5;
 
@@ -12,11 +14,27 @@ export class CanvasToolRectangle extends CanvasTool {
     private path: CanvasPath = null;
     private pointStart: {x: number, y: number} = null;
 
+    public override setStrokeWidth(width: CanvasToolStrokeWidth): void {
+        Wournal.currToolConf.CanvasToolRectangle.strokeWidth = width;
+    }
+    public override getStrokeWidth(): CanvasToolStrokeWidth {
+        return Wournal.currToolConf.CanvasToolRectangle.strokeWidth;
+    }
+    private actualStrokeWidth(): number {
+        const confWidth = Wournal.currToolConf.CanvasToolRectangle.strokeWidth;
+        if (confWidth === "fine") return 1;
+        if (confWidth === "medium") return 2;
+        if (confWidth === "thick") return 5;
+        if (confWidth === "none") throw new Error("'none' strokeWidth for rect");
+    }
+
     public onMouseDown(e: MouseEvent): void {
         this.toolUseStartPage = this.getActivePage();
         if (this.toolUseStartPage === null) return;
 
         this.path = CanvasPath.fromNewPath(this.toolUseStartPage.display.ownerDocument);
+        this.path.setActualStrokeWidth(this.actualStrokeWidth());
+        this.path.setColor(Wournal.currToolConf.CanvasToolRectangle.color);
         this.pointStart = this.toolUseStartPage.globalCoordsToCanvas({x: e.x, y: e.y})
         this.toolUseStartPage.getActivePaintLayer().appendChild(this.path.svgElem);
     }

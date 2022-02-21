@@ -1,3 +1,4 @@
+import { CanvasToolStrokeWidth } from "../persistence/ConfigDTO";
 import { LOG } from "../util/Logging";
 import { CanvasTool } from "./CanvasTool";
 import { WournalPage } from "./WournalPage";
@@ -7,6 +8,9 @@ export class CanvasToolSelectRectangle extends CanvasTool {
     protected toolUseStartPage: WournalPage;
 
     private state: "idle" | "selecting" = "idle";
+
+    public override setStrokeWidth(width: CanvasToolStrokeWidth): void { }
+    public override getStrokeWidth(): CanvasToolStrokeWidth { return "none"; }
 
     /** Stores some mouse canvas coordinates needed for calculations */
     private savedMouse: {

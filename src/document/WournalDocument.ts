@@ -1,3 +1,4 @@
+import { CanvasToolStrokeWidth } from "../persistence/ConfigDTO";
 import { DocumentDTO } from "../persistence/DocumentDTO";
 import { DSUtils } from "../util/DSUtils";
 import { Newable } from "../util/Newable";
@@ -181,7 +182,7 @@ export class WournalDocument {
     public getZoom(): number { return this.zoom; }
 
     // ------------------------------------------------------------
-    // tools and helpers
+    // tools
     // ------------------------------------------------------------
 
     public setTool(tool: Newable<CanvasTool>, noDeselect: boolean = false)  {
@@ -218,6 +219,23 @@ export class WournalDocument {
 
     /** Called to update react state */
     public notifySetTool: (name: string) => void = (name: string) => null;
+
+    /** set stroke width for current tool or selection */
+    public setStrokeWidth(width: CanvasToolStrokeWidth): void {
+        if (this.selection.selection.length !== 0)
+            for (let el of this.selection.selection) el.setStrokeWidth(width);
+        else
+            this._currentTool.setStrokeWidth(width);
+    }
+
+    /** get current tool stroke width */
+    public getStrokeWidth(): CanvasToolStrokeWidth {
+        return this._currentTool.getStrokeWidth();
+    }
+
+    // ----------------------------------------------------------------------
+    // helpers
+    // ----------------------------------------------------------------------
 
     private pageAtPoint(pt: {x: number, y: number}) {
         // const start = performance.now();

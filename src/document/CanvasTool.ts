@@ -1,3 +1,4 @@
+import { CanvasToolStrokeWidth } from "../persistence/ConfigDTO";
 import { CanvasSelection } from "./SelectionDisplay";
 import { UndoStack } from "./UndoStack";
 import { WournalPage } from "./WournalPage";
@@ -41,6 +42,11 @@ export abstract class CanvasTool {
     public abstract idleCursor: string;
     /** The page where the first mousedown event for the tool was fired */
     protected abstract toolUseStartPage: WournalPage;
+
+    /** If applicable, set stroke width, else noop */
+    public abstract setStrokeWidth(width: CanvasToolStrokeWidth): void;
+    /** If applicable, return stroke width, else null */
+    public abstract getStrokeWidth(): CanvasToolStrokeWidth;
 
     /** Get the page of the wournal document to draw on. */
     protected getActivePage: () => WournalPage;

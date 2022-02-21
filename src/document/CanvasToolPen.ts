@@ -1,3 +1,4 @@
+import { CanvasToolStrokeWidth } from "../persistence/ConfigDTO";
 import { CanvasPath } from "./CanvasPath";
 import { CanvasTool } from "./CanvasTool";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
@@ -16,6 +17,20 @@ export class CanvasToolPen extends CanvasTool {
 
     public idleCursor = "url('res/custom/pen.svg'), auto";
 
+    public override setStrokeWidth(width: CanvasToolStrokeWidth): void {
+        Wournal.currToolConf.CanvasToolPen.strokeWidth = width;
+    }
+    public override getStrokeWidth(): CanvasToolStrokeWidth {
+        return Wournal.currToolConf.CanvasToolPen.strokeWidth;
+    }
+    private actualStrokeWidth(): number {
+        const confWidth = Wournal.currToolConf.CanvasToolPen.strokeWidth;
+        if (confWidth === "fine") return 1;
+        if (confWidth === "medium") return 2;
+        if (confWidth === "thick") return 5;
+        if (confWidth === "none") throw new Error("'none' strokeWidth for pen");
+    }
+
     public onMouseDown(e: MouseEvent): void {
         this.toolUseStartPage = this.getActivePage();
         if (this.toolUseStartPage === null) return;
@@ -27,7 +42,7 @@ export class CanvasToolPen extends CanvasTool {
         this.appendToBuffer(pt);
         this.path.startAt(pt);
         this.path.setColor(Wournal.currToolConf.CanvasToolPen.color);
-        this.path.setStrokeWidth(Wournal.currToolConf.CanvasToolPen.size);
+        this.path.setActualStrokeWidth(this.actualStrokeWidth());
         this.toolUseStartPage.getActivePaintLayer().appendChild(this.path.svgElem);
     }
 

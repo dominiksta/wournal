@@ -1,3 +1,4 @@
+import { CanvasToolStrokeWidth } from "../persistence/ConfigDTO";
 import { SVGUtils } from "../util/SVGUtils";
 import { CanvasText, CanvasTextData } from "./CanvasText";
 import { CanvasTool } from "./CanvasTool";
@@ -18,6 +19,9 @@ export class CanvasToolText extends CanvasTool {
     protected toolUseStartPage: WournalPage;
 
     private state: "idle" | "writing" = "idle";
+
+    public override setStrokeWidth(width: CanvasToolStrokeWidth): void { }
+    public override getStrokeWidth(): CanvasToolStrokeWidth { return "none"; }
 
     public onDeselect(): void { }
     public onMouseMove(e: MouseEvent): void { }

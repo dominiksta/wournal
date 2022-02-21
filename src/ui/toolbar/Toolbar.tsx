@@ -36,11 +36,14 @@ function Toolbar({wournal}: {wournal: Wournal}) {
         forceUpdate();
     };
 
+    const currStrokeWidth = wournal.doc.getStrokeWidth();
+
     const [hideMenu, setHideMenu] = useState(true);
     const menu = Menu({
         wournal: wournal, currentTool: currentTool,
         hidden: hideMenu, selectionAvailable: selectionAvailable,
-        undoAvailable: undoAvailable, redoAvailable: redoAvailable
+        currStrokeWidth: currStrokeWidth, undoAvailable: undoAvailable,
+        redoAvailable: redoAvailable
     });
 
     return (
@@ -112,6 +115,35 @@ function Toolbar({wournal}: {wournal: Wournal}) {
                         forceUpdate();
                     }}
                     alt="Default Pen"/>
+            </ToolbarGroup>
+            <ToolbarGroup>
+                <ToolbarButton
+                    img="res/custom/stroke-width-fine.svg"
+                    width="30px"
+                    current={ currStrokeWidth === "fine" }
+                    fun={() => {
+                        wournal.doc.setStrokeWidth("fine");
+                        forceUpdate();
+                    }}
+                    alt="Fine"/>
+                <ToolbarButton
+                    img="res/custom/stroke-width-medium.svg"
+                    width="30px"
+                    current={ currStrokeWidth === "medium" }
+                    fun={() => {
+                        wournal.doc.setStrokeWidth("medium");
+                        forceUpdate();
+                    }}
+                    alt="Medium"/>
+                <ToolbarButton
+                    img="res/custom/stroke-width-thick.svg"
+                    width="30px"
+                    current={ currStrokeWidth === "thick" }
+                    fun={() => {
+                        wournal.doc.setStrokeWidth("thick");
+                        forceUpdate();
+                    }}
+                    alt="Thick"/>
             </ToolbarGroup>
             <ToolbarGroup>
                 <ToolbarButton

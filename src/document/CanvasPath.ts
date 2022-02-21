@@ -4,6 +4,7 @@ import { LOG } from "../util/Logging";
 import { SVGUtils } from "../util/SVGUtils";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
 import { CanvasElement, CanvasElementData } from "./CanvasElement";
+import { CanvasToolStrokeWidth } from "../persistence/ConfigDTO";
 
 export class CanvasPathData extends CanvasElementData {
     constructor(
@@ -44,7 +45,7 @@ export class CanvasPath extends CanvasElement {
             doc.createElementNS('http://www.w3.org/2000/svg', 'path')
         );
         ret.setColor("#000000");
-        ret.setStrokeWidth(2);
+        ret.setActualStrokeWidth(2);
         return ret;
     }
 
@@ -130,7 +131,13 @@ export class CanvasPath extends CanvasElement {
         this._svgElem.setAttribute("stroke-linecap", lineCap);
     }
 
-    public setStrokeWidth(width: number): void {
+    public override setStrokeWidth(width: CanvasToolStrokeWidth): void {
+        if (width === "fine") this.setActualStrokeWidth(1);
+        if (width === "medium") this.setActualStrokeWidth(2);
+        if (width === "thick") this.setActualStrokeWidth(5);
+    }
+
+    public setActualStrokeWidth(width: number): void {
         this._svgElem.setAttribute("stroke-width", width.toString());
     }
 
@@ -151,7 +158,7 @@ export class CanvasPath extends CanvasElement {
             "d", CanvasPath.svgPathDataToString(pathData)
         );
 
-        this.setStrokeWidth(
+        this.setActualStrokeWidth(
             parseFloat(this._svgElem.getAttribute("stroke-width")) *
                 t.scaleX * t.scaleY
         )
@@ -268,7 +275,7 @@ export class CanvasPath extends CanvasElement {
             newPath._svgElem.setAttribute(
                 "d", CanvasPath.svgPathDataToString(paths[i])
             );
-            newPath.setStrokeWidth(this.getStrokeWidth());
+            newPath.setActualStrokeWidth(this.getStrokeWidth());
             this._svgElem.before(this._svgElem, newPath._svgElem);
             added.push(newPath._svgElem);
         }

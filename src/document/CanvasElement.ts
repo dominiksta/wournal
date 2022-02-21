@@ -1,3 +1,4 @@
+import { CanvasToolStrokeWidth } from "../persistence/ConfigDTO";
 import { LOG } from "../util/Logging";
 
 /**
@@ -37,6 +38,8 @@ export abstract class CanvasElement {
      * Style Colors").
      */
     abstract setColor(color: string): void;
+    /** If applicable, set stroke width, else noop */
+    abstract setStrokeWidth(width: CanvasToolStrokeWidth): void;
 
     abstract getData(): CanvasElementData;
     abstract setData(dto: CanvasElementData): void;

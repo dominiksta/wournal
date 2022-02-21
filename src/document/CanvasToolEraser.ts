@@ -1,3 +1,4 @@
+import { CanvasToolStrokeWidth } from "../persistence/ConfigDTO";
 import { SVGUtils } from "../util/SVGUtils";
 import { CanvasPath } from "./CanvasPath";
 import { CanvasTool } from "./CanvasTool";
@@ -21,27 +22,45 @@ export class CanvasToolEraser extends CanvasTool {
     constructor() {
         super();
 
+        this.computeActualStrokeWidth();
         // To actually really reflect the area to be erased, we would have to
         // somehow listen to zoom events and change the cursor size
         // accordingly. Considering that xournal, xournal++ and pdf annotator
         // all don't do that and have constant cursor sizes for their erasers,
         // this should be fine for now.
+        const cursorHeight = 10;
         this.idleCursor =
             `url('data:image/svg+xml;utf8,` +
-            `<svg height="${Wournal.currToolConf.CanvasToolEraser.size}" ` +
-            `     width="${Wournal.currToolConf.CanvasToolEraser.size}" ` +
+            `<svg height="${cursorHeight}" ` +
+            `     width="${cursorHeight}" ` +
             `     xmlns="http://www.w3.org/2000/svg">` +
             `  <rect x="0" y="0" ` +
-            `        height="${Wournal.currToolConf.CanvasToolEraser.size}" ` +
-            `        width="${Wournal.currToolConf.CanvasToolEraser.size}" ` +
+            `        height="${cursorHeight}" ` +
+            `        width="${cursorHeight}" ` +
             `        stroke="black" stroke-width="2" fill="white"></rect>` +
-            `</svg>') ${Wournal.currToolConf.CanvasToolEraser.size / 2} ` +
-            `${Wournal.currToolConf.CanvasToolEraser.size / 2}, auto`;
+            `</svg>') ${cursorHeight / 2} ` +
+            `${cursorHeight / 2}, auto`;
+    }
+
+    public override setStrokeWidth(width: CanvasToolStrokeWidth): void {
+        Wournal.currToolConf.CanvasToolEraser.strokeWidth = width;
+    }
+    public override getStrokeWidth(): CanvasToolStrokeWidth {
+        return Wournal.currToolConf.CanvasToolEraser.strokeWidth;
+    }
+    private actualStrokeWidth: number;
+    private computeActualStrokeWidth(): void {
+        const confWidth = Wournal.currToolConf.CanvasToolEraser.strokeWidth;
+        if (confWidth === "fine") this.actualStrokeWidth = 5;
+        if (confWidth === "medium") this.actualStrokeWidth = 10;
+        if (confWidth === "thick") this.actualStrokeWidth = 40;
+        if (confWidth === "none") throw new Error("'none' strokeWidth for eraser");
     }
 
     public onMouseDown(e: MouseEvent): void {
         this.toolUseStartPage = this.getActivePage();
         if (this.toolUseStartPage === null) return;
+        this.computeActualStrokeWidth();
         this.currentUndo = [];
         this.erasing = true;
         this.eraseTouched(e);
@@ -69,10 +88,10 @@ export class CanvasToolEraser extends CanvasTool {
         const mouse = this.toolUseStartPage.globalCoordsToCanvas(e);
 
         const eraserRect = DOMRect.fromRect({
-            x: mouse.x - Wournal.currToolConf.CanvasToolEraser.size / 2,
-            y: mouse.y - Wournal.currToolConf.CanvasToolEraser.size / 2,
-            height: Wournal.currToolConf.CanvasToolEraser.size,
-            width: Wournal.currToolConf.CanvasToolEraser.size,
+            x: mouse.x - this.actualStrokeWidth / 2,
+            y: mouse.y - this.actualStrokeWidth / 2,
+            height: this.actualStrokeWidth,
+            width: this.actualStrokeWidth,
         });
         for (let node of this.toolUseStartPage.activePaintLayer.children) {
             const elRect = this.toolUseStartPage.globalDOMRectToCanvas(

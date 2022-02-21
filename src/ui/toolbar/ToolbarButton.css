@@ -3,7 +3,6 @@ button.ToolbarButton {
     border: none;
     vertical-align: middle;
     height: 40px;
-    width: 40px;
 }
 
 button.ToolbarButton:hover {
@@ -21,4 +20,11 @@ button.ToolbarButton:disabled {
 button.ToolbarButton.active {
     border-bottom: 3px solid lightblue !important;
     border-top: 3px solid white !important;
+}
+
+button.ToolbarButton > img {
+    text-align: center;
+    /* center the img even if the containing element is too small for it. see
+    https://stackoverflow.com/questions/1344169/ */
+    margin: 0 -999% 0 -999%;
 }

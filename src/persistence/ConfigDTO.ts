@@ -1,13 +1,15 @@
 import { CanvasToolName } from "../document/CanvasTool"
 
+export type CanvasToolStrokeWidth = "fine" | "medium" | "thick" | "none";
+
 export type CanvasToolPenConfig = {
     color: string,
-    size: number,
+    strokeWidth: CanvasToolStrokeWidth,
     mouseBufferSize: number,
 }
 
 export type CanvasToolEraserConfig = {
-    size: number,
+    strokeWidth: CanvasToolStrokeWidth,
     eraseStrokes: boolean,
 }
 
@@ -17,10 +19,16 @@ export type CanvasToolTextConfig = {
     fontFamily: string,
 }
 
+export type CanvasToolRectangleConfig = {
+    color: string,
+    strokeWidth: CanvasToolStrokeWidth,
+}
+
 export type CanvasToolConfig = {
     CanvasToolPen: CanvasToolPenConfig,
     CanvasToolEraser: CanvasToolEraserConfig,
     CanvasToolText: CanvasToolTextConfig,
+    CanvasToolRectangle: CanvasToolRectangleConfig,
 }
 
 export type ConfigDTO = {
@@ -40,17 +48,21 @@ export function defaultConfig(): ConfigDTO {
         tools: {
             CanvasToolPen: {
                 color: "#000000",
-                size: 2,
+                strokeWidth: "medium",
                 mouseBufferSize: 4,
             },
             CanvasToolEraser: {
-                size: 10,
+                strokeWidth: "medium",
                 eraseStrokes: false,
             },
             CanvasToolText: {
                 color: "#000000",
                 fontFamily: "sans-serif",
                 fontSize: 17,
+            },
+            CanvasToolRectangle: {
+                color: "#000000",
+                strokeWidth: "medium",
             }
         }
     }
