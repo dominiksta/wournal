@@ -26,19 +26,18 @@ export default function MenuItem({
     active?: boolean,
 }) {
     let markItem;
-    switch(mark) {
-        case "check":
-            markItem = <span className="mark">✓</span>; // CHECK MARK
-            break;
-        case "dot":
-            markItem = <span className="mark">•</span>; // DOT
-            break;
-        case "":
-            markItem = <span className="mark"></span>;
-            break;
-        default:
-            markItem = <img className="mark" src={mark} alt={text}/>;
-            break;
+    if (mark === "check") {
+        markItem = <span className="mark">✓</span>; // CHECK MARK
+    } else if (mark === "dot") {
+        markItem = <span className="mark">•</span>; // DOT
+    } else if (mark === "") {
+        markItem = <span className="mark"></span>;
+    } else if (mark.startsWith("color:")) {
+        const color = mark.split("color:")[1];
+        markItem = <span className="mark colorMark"
+                       style={{"background": color}}></span>;
+    } else {
+        markItem = <img className="mark" src={mark} alt={text} />;
     }
 
     let rightItem;

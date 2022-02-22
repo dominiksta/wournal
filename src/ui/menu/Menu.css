@@ -50,6 +50,12 @@
     vertical-align: middle;
 }
 
+.MenuItem button .mark.colorMark {
+    height: 13px;
+    width: 13px;
+    border: 1px solid black;
+}
+
 .MenuItem button .mark {
     width: 15px;
     margin-right: 5px;

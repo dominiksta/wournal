@@ -9,6 +9,7 @@ import { CanvasToolStrokeWidth } from "../../persistence/ConfigDTO";
 import { useForceUpdate } from "../../useForceUpdate";
 import { useSnackbar } from "../snackbar/useSnackbar";
 import "./Menu.css";
+import MenuColorItems from "./MenuColorItem";
 import MenuItem from "./MenuItem";
 import SubMenu from "./SubMenu";
 
@@ -127,6 +128,15 @@ export default function Menu({
                         fun={() => wournal.doc.setTool(CanvasToolRectangle)}
                         active={currentTool === "CanvasToolRectangle"}
                         text="Draw Rectangle" />
+                    <SubMenu text="Color">
+                        <MenuColorItems
+                            colors={Wournal.CONF.colorPalette}
+                            currentColor={wournal.doc.getColor()}
+                            setColor={(color: string) => {
+                                wournal.doc.setColor(color);
+                                forceUpdate();
+                            }} />
+                    </SubMenu>
                     <SubMenu text="Pen Options">
                         <MenuItem
                             mark={currStrokeWidth === "fine" ? "dot" : ""}
