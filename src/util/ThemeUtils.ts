@@ -20,9 +20,9 @@ export const ThemeUtils = {
     registerThemeChangeHandler: function(
         fun: ((theme: "light" | "dark") => void)
     ) {
-        window.matchMedia('(prefers-color-scheme: dark)').
-        addEventListener('change', event => {
-            fun(event.matches ? "dark" : "light");
-        });
+        window.matchMedia('(prefers-color-scheme: dark)')
+            .addEventListener('change', event => {
+                fun(event.matches ? "dark" : "light");
+            });
     }
 }

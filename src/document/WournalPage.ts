@@ -1,6 +1,5 @@
 import { ThemeUtils } from "../util/ThemeUtils";
 import { BackgroundGenerator, BackgroundGeneratorColor } from "./BackgroundGenerators";
-import { Wournal } from "./Wournal";
 import { WournalDocument } from "./WournalDocument";
 import { xToPx } from "./WournalPageSize";
 

@@ -1,7 +1,6 @@
 import { CanvasToolStrokeWidth } from "../persistence/ConfigDTO";
 import { DocumentDTO } from "../persistence/DocumentDTO";
 import { DSUtils } from "../util/DSUtils";
-import { LOG } from "../util/Logging";
 import { Newable } from "../util/Newable";
 import { SVGUtils } from "../util/SVGUtils";
 import { CanvasElement } from "./CanvasElement";
