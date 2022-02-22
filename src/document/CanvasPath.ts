@@ -106,6 +106,10 @@ export class CanvasPath extends CanvasElement {
         this._svgElem.setAttribute("stroke", color);
     }
 
+    public getColor(): string {
+        return this._svgElem.getAttribute("stroke");
+    }
+
     public getData(): CanvasPathData {
         return new CanvasPathData(this.getAttributes());
     }
@@ -275,6 +279,7 @@ export class CanvasPath extends CanvasElement {
             newPath._svgElem.setAttribute(
                 "d", CanvasPath.svgPathDataToString(paths[i])
             );
+            newPath.setColor(this.getColor());
             newPath.setActualStrokeWidth(this.getStrokeWidth());
             this._svgElem.before(this._svgElem, newPath._svgElem);
             added.push(newPath._svgElem);
