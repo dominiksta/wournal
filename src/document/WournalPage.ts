@@ -1,4 +1,6 @@
+import { ThemeUtils } from "../util/ThemeUtils";
 import { BackgroundGenerator, BackgroundGeneratorColor } from "./BackgroundGenerators";
+import { Wournal } from "./Wournal";
 import { WournalDocument } from "./WournalDocument";
 import { xToPx } from "./WournalPageSize";
 
@@ -82,6 +84,8 @@ export class WournalPage {
         this.toolLayer.setAttribute("class", "wournal-page-toollayer");
         this.toolLayer.style.position = "absolute";
         this.svgWrapperEl.appendChild(this.toolLayer)
+
+        this.updateTheme();
     }
 
     // ------------------------------------------------------------
@@ -298,6 +302,14 @@ export class WournalPage {
             height: r.height * 1/this.zoom,
         });
     }
+
+    // ------------------------------------------------------------
+    // theme
+    // ------------------------------------------------------------
+
+     public updateTheme(): void {
+         this.canvasWrapper.style.filter = ThemeUtils.currDark() ? "invert(1)" : "";
+     }
 
     // ------------------------------------------------------------
     // notify react

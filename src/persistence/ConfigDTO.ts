@@ -33,6 +33,7 @@ export type CanvasToolConfig = {
 
 export type ConfigDTO = {
     version: 0.01,
+    theme: "dark" | "light" | "auto",
     colorPalette: {color: string, name: string}[],
     binds: {
         rightClick: CanvasToolName,
@@ -43,6 +44,11 @@ export type ConfigDTO = {
 export function defaultConfig(): ConfigDTO {
     return {
         version: 0.01,
+        // NOTE(dominiksta): While automatically inverting colors could be
+        // considered unintuitive and therefore bad default behaviour, I want
+        // this to be set for further development. Once wournal launches, the
+        // theme should likely be set to "light" by default.
+        theme: "auto",
         binds: {
             rightClick: "CanvasToolEraser",
         },

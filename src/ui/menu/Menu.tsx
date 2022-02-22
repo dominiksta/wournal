@@ -1,3 +1,4 @@
+import { useContext } from "react";
 import { CanvasTool, CanvasToolName } from "../../document/CanvasTool";
 import { CanvasToolEraser } from "../../document/CanvasToolEraser";
 import { CanvasToolPen } from "../../document/CanvasToolPen";
@@ -7,6 +8,7 @@ import { CanvasToolText } from "../../document/CanvasToolText";
 import { Wournal } from "../../document/Wournal";
 import { CanvasToolStrokeWidth } from "../../persistence/ConfigDTO";
 import { useForceUpdate } from "../../useForceUpdate";
+import { ThemeContext } from "../App";
 import { useSnackbar } from "../snackbar/useSnackbar";
 import "./Menu.css";
 import MenuColorItems from "./MenuColorItem";
@@ -30,6 +32,7 @@ export default function Menu({
 ) {
     const forceUpdate = useForceUpdate();
     const openSnackbar = useSnackbar()[0];
+    const themeCtx = useContext(ThemeContext);
 
     function btnMapping2(name: CanvasToolName) {
         return (
@@ -45,7 +48,8 @@ export default function Menu({
     }
 
     return (
-        <div className="Menu" hidden={hidden}>
+        <div className="Menu" hidden={hidden}
+            style={{filter: themeCtx.darkTheme ? "invert(1)" : ""}}>
             {/* _ROOT_ is not a special symbol, it can be called anything really */}
             <SubMenu text="_ROOT_" root={true}>
                 <SubMenu text="File">
@@ -209,6 +213,20 @@ export default function Menu({
                         {btnMapping2("CanvasToolSelectRectangle")}
                         {btnMapping2("CanvasToolEraser")}
                         {btnMapping2("CanvasToolRectangle")}
+                    </SubMenu>
+                    <SubMenu text="Theme">
+                        <MenuItem
+                            mark={Wournal.CONF.theme === "auto" ? "dot" : ""}
+                            fun={() => themeCtx.setTheme("auto")}
+                            text="Auto/System Invert"/>
+                        <MenuItem
+                            mark={Wournal.CONF.theme === "light" ? "dot" : ""}
+                            fun={() => themeCtx.setTheme("light")}
+                            text="Light"/>
+                        <MenuItem
+                            mark={Wournal.CONF.theme === "dark" ? "dot" : ""}
+                            fun={() => themeCtx.setTheme("dark")}
+                            text="Invert"/>
                     </SubMenu>
                 </SubMenu>
                 <SubMenu text="Test">

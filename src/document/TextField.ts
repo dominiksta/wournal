@@ -1,3 +1,4 @@
+import { ThemeUtils } from "../util/ThemeUtils";
 import { CanvasText } from "./CanvasText";
 import { WournalPage } from "./WournalPage";
 
@@ -73,6 +74,7 @@ export class TextField {
         this.textarea.cols = 1;
         this.textarea.rows = 1;
         this.textarea.style.color = fontColor;
+        this.textarea.style.filter = ThemeUtils.currDark() ? "invert(1)" : "";
         this.textarea.addEventListener("input", this.updateSize.bind(this));
         this.label.appendChild(this.textarea);
 
