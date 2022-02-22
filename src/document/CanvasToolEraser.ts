@@ -57,6 +57,9 @@ export class CanvasToolEraser extends CanvasTool {
         if (confWidth === "none") throw new Error("'none' strokeWidth for eraser");
     }
 
+    public override setColor(color: string): void { }
+    public override getColor(): string | "" { return "" }
+
     public onMouseDown(e: MouseEvent): void {
         this.toolUseStartPage = this.getActivePage();
         if (this.toolUseStartPage === null) return;

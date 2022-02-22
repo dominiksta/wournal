@@ -50,6 +50,7 @@ export class TextField {
         private _pos: {x: number, y: number},
         fontSize: number = 17,
         fontFamily: string = "sans-serif",
+        fontColor: string = "black",
         spellcheck: boolean = false
     ) {
         this.display = page.toolLayer.ownerDocument.createElement("div");
@@ -71,6 +72,7 @@ export class TextField {
         this.textarea.setAttribute("spellcheck", `${spellcheck}`);
         this.textarea.cols = 1;
         this.textarea.rows = 1;
+        this.textarea.style.color = fontColor;
         this.textarea.addEventListener("input", this.updateSize.bind(this));
         this.label.appendChild(this.textarea);
 
@@ -97,7 +99,8 @@ export class TextField {
             page, {
                 x: canvasPos.x + offset.x,
                 y: canvasPos.y + offset.y
-            }, canvasTxt.getFontSize(), canvasTxt.getFontFamily()
+            }, canvasTxt.getFontSize(), canvasTxt.getFontFamily(),
+            canvasTxt.getColor()
         );
     }
 

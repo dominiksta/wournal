@@ -11,6 +11,8 @@ export class CanvasToolSelectRectangle extends CanvasTool {
 
     public override setStrokeWidth(width: CanvasToolStrokeWidth): void { }
     public override getStrokeWidth(): CanvasToolStrokeWidth { return "none"; }
+    public override setColor(color: string): void { }
+    public override getColor(): string | "" { return "" }
 
     /** Stores some mouse canvas coordinates needed for calculations */
     private savedMouse: {

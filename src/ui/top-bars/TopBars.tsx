@@ -10,6 +10,7 @@ import Menu from '../menu/Menu';
 import { useSnackbar } from '../snackbar/useSnackbar';
 import Toolbar from '../toolbar/Toolbar';
 import ToolbarButton from '../toolbar/ToolbarButton';
+import ToolbarColorButtons from '../toolbar/ToolbarColorButtons';
 import ToolbarSeperator from '../toolbar/ToolbarSeperator';
 
 
@@ -193,6 +194,16 @@ export default function TopBars({ wournal }: { wournal: Wournal }) {
                         forceUpdate();
                     }}
                     alt="Thick" />
+
+                <ToolbarSeperator/>
+
+                <ToolbarColorButtons
+                    colors={Wournal.CONF.colorPalette}
+                    currentColor={wournal.doc.getColor()}
+                    setColor={(color: string) => {
+                        wournal.doc.setColor(color);
+                        forceUpdate();
+                    }}/>
             </Toolbar>
         </div>
     );

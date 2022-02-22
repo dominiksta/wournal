@@ -6,6 +6,11 @@ button.ToolbarButton {
     height: 40px;
 }
 
+button.ToolbarButton > .ToolbarButtonColor {
+    height: 18px;
+    width: 18px;
+    border: 1px solid black;
+}
 
 button.ToolbarButton:first-child {
     margin-left: 3px;

@@ -102,7 +102,7 @@ export class CanvasPath extends CanvasElement {
         this.render();
     }
 
-    public setColor(color: string): void {
+    public override setColor(color: string): void {
         this._svgElem.setAttribute("stroke", color);
     }
 

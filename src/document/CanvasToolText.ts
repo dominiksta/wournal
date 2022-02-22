@@ -23,6 +23,13 @@ export class CanvasToolText extends CanvasTool {
     public override setStrokeWidth(width: CanvasToolStrokeWidth): void { }
     public override getStrokeWidth(): CanvasToolStrokeWidth { return "none"; }
 
+    public override setColor(color: string): void {
+        Wournal.currToolConf.CanvasToolText.color = color;
+    }
+    public override getColor(): string | "" {
+        return Wournal.currToolConf.CanvasToolText.color;
+    }
+
     public onDeselect(): void { }
     public onMouseMove(e: MouseEvent): void { }
     public onMouseUp(e: MouseEvent): void { }

@@ -28,6 +28,13 @@ export class CanvasToolRectangle extends CanvasTool {
         if (confWidth === "none") throw new Error("'none' strokeWidth for rect");
     }
 
+    public override setColor(color: string): void {
+        Wournal.currToolConf.CanvasToolRectangle.color = color;
+    }
+    public override getColor(): string | "" {
+        return Wournal.currToolConf.CanvasToolRectangle.color;
+    }
+
     public onMouseDown(e: MouseEvent): void {
         this.toolUseStartPage = this.getActivePage();
         if (this.toolUseStartPage === null) return;

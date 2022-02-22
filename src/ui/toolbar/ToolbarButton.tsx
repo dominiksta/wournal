@@ -17,10 +17,20 @@ function ToolbarButton({
     width?: string
 }) {
     let className = "ToolbarButton" + (current ? " active" : "");
+
+    let imgOrColor;
+    if (img.startsWith("color:")) {
+        const color = img.split("color:")[1];
+        imgOrColor = <div className="ToolbarButtonColor"
+                         style={{"background": color}}> </div>;
+    } else {
+        imgOrColor = <img src={img} alt={alt}/>;
+    }
+
     return (
         <button onClick={fun} className={className} disabled={disabled}
             style={{"width": width}} title={alt}>
-            <img src={img} alt={alt}/>
+            {imgOrColor}
         </button>
     );
 }

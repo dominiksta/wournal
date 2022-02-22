@@ -33,6 +33,7 @@ export type CanvasToolConfig = {
 
 export type ConfigDTO = {
     version: 0.01,
+    colorPalette: {color: string, name: string}[],
     binds: {
         rightClick: CanvasToolName,
     },
@@ -45,6 +46,19 @@ export function defaultConfig(): ConfigDTO {
         binds: {
             rightClick: "CanvasToolEraser",
         },
+        colorPalette: [ // stolen from xournal
+            { name: "Black"       , color: "#000000" },
+            { name: "Blue"        , color: "#2F2FE7" },
+            { name: "Red"         , color: "#FF0000" },
+            { name: "Green"       , color: "#008A00" },
+            { name: "Gray"        , color: "#808080" },
+            { name: "Light Blue"  , color: "#00CAFF" },
+            { name: "Light Green" , color: "#00FF00" },
+            { name: "Magenta"     , color: "#FF00FF" },
+            { name: "Orange"      , color: "#FF7B00" },
+            { name: "Yellow"      , color: "#FFFF00" },
+            { name: "White"       , color: "#FFFFFF" },
+        ],
         tools: {
             CanvasToolPen: {
                 color: "#000000",

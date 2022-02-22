@@ -45,8 +45,13 @@ export abstract class CanvasTool {
 
     /** If applicable, set stroke width, else noop */
     public abstract setStrokeWidth(width: CanvasToolStrokeWidth): void;
-    /** If applicable, return stroke width, else null */
+    /** If applicable, return stroke width */
     public abstract getStrokeWidth(): CanvasToolStrokeWidth;
+
+    /** If applicable, set color, else noop */
+    public abstract setColor(color: string): void;
+    /** If applicable, return color, else "" */
+    public abstract getColor(): string | "" ;
 
     /** Get the page of the wournal document to draw on. */
     protected getActivePage: () => WournalPage;

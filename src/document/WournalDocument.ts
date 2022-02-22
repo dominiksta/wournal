@@ -233,6 +233,23 @@ export class WournalDocument {
         return this._currentTool.getStrokeWidth();
     }
 
+    /** set color for current tool or selection */
+    public setColor(color: string): void {
+        if (this.selection.selection.length !== 0) {
+            for (let el of this.selection.selection) el.setColor(color);
+        } else {
+            // if the current tool does not support color, fall back to pen -
+            // this mimics xournal behaviour
+            if (this._currentTool.getColor() === "") {
+                this.setTool(CanvasToolPen);
+            }
+            this._currentTool.setColor(color);
+        }
+    }
+
+    /** get current tool color */
+    public getColor(): string { return this._currentTool.getColor(); }
+
     // ----------------------------------------------------------------------
     // helpers
     // ----------------------------------------------------------------------

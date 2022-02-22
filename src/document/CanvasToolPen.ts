@@ -31,6 +31,13 @@ export class CanvasToolPen extends CanvasTool {
         if (confWidth === "none") throw new Error("'none' strokeWidth for pen");
     }
 
+    public override setColor(color: string): void {
+        Wournal.currToolConf.CanvasToolPen.color = color;
+    }
+    public override getColor(): string | "" {
+        return Wournal.currToolConf.CanvasToolPen.color;
+    }
+
     public onMouseDown(e: MouseEvent): void {
         this.toolUseStartPage = this.getActivePage();
         if (this.toolUseStartPage === null) return;
