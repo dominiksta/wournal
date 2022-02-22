@@ -1,10 +1,10 @@
-.Toolbar {
-    width: 100%;
-    background: white;
-    border: 1px solid gray;
-    color: black;
+.ToolbarWrapper {
+    overflow: hidden;
 }
 
-.ToolbarGroup:not(:first-child) {
-    border-left: 1px solid black;
+.Toolbar {
+    width: 9999px;
+    background: white;
+    border-bottom: 1px solid gray;
+    color: black;
 }

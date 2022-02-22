@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Wournal } from '../document/Wournal';
 import './App.css';
 import Snackbar from './snackbar/Snackbar';
-import Toolbar from './toolbar/Toolbar';
+import TopBars from './top-bars/TopBars';
 
 /** Main React entrypoint */
 function App({ wournal }: { wournal: Wournal }) {
@@ -15,7 +15,7 @@ function App({ wournal }: { wournal: Wournal }) {
     return (
         <Snackbar>
             <div className="App">
-                <Toolbar wournal={wournal} />
+                <TopBars wournal={wournal} />
                 <div id="wournal-container" ref={wournalContainer}></div>
             </div>
         </Snackbar>
