@@ -230,10 +230,10 @@ export class WournalDocument {
                 changed.push({
                     el: el.svgElem, dataBefore: dataBefore, dataAfter: el.getData()
                 });
-                this.undoStack.push(new UndoActionCanvasElements(
-                    null, changed, null
-                ));
             }
+            this.undoStack.push(new UndoActionCanvasElements(
+                null, changed, null
+            ));
         } else {
             this._currentTool.setStrokeWidth(width);
         }
