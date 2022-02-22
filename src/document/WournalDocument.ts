@@ -222,10 +222,21 @@ export class WournalDocument {
 
     /** set stroke width for current tool or selection */
     public setStrokeWidth(width: CanvasToolStrokeWidth): void {
-        if (this.selection.selection.length !== 0)
-            for (let el of this.selection.selection) el.setStrokeWidth(width);
-        else
+        if (this.selection.selection.length !== 0) {
+            let changed = [];
+            for (let el of this.selection.selection) {
+                const dataBefore = el.getData();
+                el.setStrokeWidth(width);
+                changed.push({
+                    el: el.svgElem, dataBefore: dataBefore, dataAfter: el.getData()
+                });
+                this.undoStack.push(new UndoActionCanvasElements(
+                    null, changed, null
+                ));
+            }
+        } else {
             this._currentTool.setStrokeWidth(width);
+        }
     }
 
     /** get current tool stroke width */
@@ -236,7 +247,17 @@ export class WournalDocument {
     /** set color for current tool or selection */
     public setColor(color: string): void {
         if (this.selection.selection.length !== 0) {
-            for (let el of this.selection.selection) el.setColor(color);
+            let changed = [];
+            for (let el of this.selection.selection) {
+                const dataBefore = el.getData();
+                el.setColor(color);
+                changed.push({
+                    el: el.svgElem, dataBefore: dataBefore, dataAfter: el.getData()
+                });
+            }
+            this.undoStack.push(new UndoActionCanvasElements(
+                null, changed, null
+            ));
         } else {
             // if the current tool does not support color, fall back to pen -
             // this mimics xournal behaviour
