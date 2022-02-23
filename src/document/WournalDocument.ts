@@ -151,11 +151,13 @@ export class WournalDocument {
 
     public undo(): void {
         this._currentTool?.onDeselect();
+        this.selection.clear();
         this.undoStack.undo();
     }
 
     public redo(): void {
         this._currentTool?.onDeselect();
+        this.selection.clear();
         this.undoStack.redo();
     }
 
@@ -202,6 +204,7 @@ export class WournalDocument {
 
     public setTool(tool: Newable<CanvasTool>, noDeselect: boolean = false)  {
         if (!noDeselect) this._currentTool?.onDeselect();
+        this.selection.clear();
         this._currentTool = new tool();
         this._currentTool.setup(new CanvasToolSetupProps(
             this.getActivePage.bind(this), this.undoStack, this.selection
