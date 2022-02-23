@@ -47,7 +47,7 @@ export class WournalDocument {
         this.display.addEventListener("contextmenu", (e) => { e.preventDefault() });
         ClipboardUtils.setPlainTextHandler(this.onPastePlainText.bind(this));
         ClipboardUtils.setImageHandler(this.onPasteImage.bind(this));
-        ClipboardUtils.enableHandlers(this.display);
+        ClipboardUtils.enableHandlers(this.display.ownerDocument);
 
         this.initialZoomFactor = computeZoomFactor();
         this.undoStack = new UndoStack(this);
