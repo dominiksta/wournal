@@ -25,7 +25,15 @@ export class WournalDocument {
 
     private undoStack: UndoStack;
     private selection: CanvasSelection;
-    private copyBuffer: CanvasElement[];
+    private copyBuffer: { content: CanvasElement[], time: Date } =
+        { content: [], time: new Date() };
+    /**  */
+    private systemClipboard: {
+        image: {content: string, time: Date}, text: {content: string, time: Date}
+    } = {
+        image: { content: "", time: new Date() },
+        text: { content: "", time: new Date() }
+    }
 
     private pages: WournalPage[] = [];
     private zoom: number = 1;
@@ -99,11 +107,12 @@ export class WournalDocument {
 
     public selectionCut(): void {
         if (this.selection.selection.length === 0) return;
-        this.copyBuffer = [];
-        for (let el of this.selection.selection) this.copyBuffer.push(el);
+        this.copyBuffer.content = [];
+        this.copyBuffer.time = new Date();
+        for (let el of this.selection.selection) this.copyBuffer.content.push(el);
 
         this.undoStack.push(new UndoActionCanvasElements(
-            DSUtils.copyArr(this.copyBuffer.map(e => e.svgElem)), null, null
+            DSUtils.copyArr(this.copyBuffer.content.map(e => e.svgElem)), null, null
         ));
 
         for (let el of this.selection.selection) el.destroy();
@@ -112,20 +121,31 @@ export class WournalDocument {
 
     public selectionCopy(): void {
         if (this.selection.selection.length === 0) return;
-        this.copyBuffer = [];
+        this.copyBuffer.content = [];
+        this.copyBuffer.time = new Date();
         // copy array instead of assigning ref
         for (let el of this.selection.selection) {
-            this.copyBuffer.push(el);
+            this.copyBuffer.content.push(el);
         }
     }
 
+    /** Paste either `copyBuffer` or `systemClipboard` by recency */
     public selectionOrClipboardPaste(): void {
-        // TODO: Clipboard (text & images)
+        if (this.copyBuffer.time < this.systemClipboard.image.time) {
+            this.pasteImage(this.systemClipboard.image.content);
+        } else if (this.copyBuffer.time < this.systemClipboard.text.time) {
+            this.pastePlainText(this.systemClipboard.text.content);
+        } else if (this.copyBuffer.content.length !== 0) {
+            this.selectionPaste();
+        }
+    }
 
+    /** Paste `copyBuffer` */
+    public selectionPaste(): void {
         const page = this.getActivePage();
         const layer = page.getActivePaintLayer();
         let newEls: CanvasElement[] = [];
-        for (let el of this.copyBuffer) {
+        for (let el of this.copyBuffer.content) {
             let newEl = CanvasElementFactory.fromData(
                 this.display.ownerDocument, el.getData()
             );
@@ -144,6 +164,81 @@ export class WournalDocument {
 
     /** Called to update react state */
     public notifySelectionAvailable: (avail: boolean) => void;
+
+    /** Remember pasted image and call `selectionOrClipboardPaste` */
+    private async onPasteImage(dataUrl: string): Promise<void> {
+        /*
+         * HACK: This check will result in an unintended behaviour/bug: When the
+         * user pastes an image from the clipboard and then proceeds to use the
+         * internal copy function, he can then not paste the same image again by
+         * putting it into the system clipboard again.
+         *
+         * There seem to be two possible solutions for this:
+         * - Write the internal `copyBuffer` to the system clipboard with the
+         *   'copy' event (and setting a custom mimetype to not interfere with
+         *   the clipboard of other applications) and then always paste from the
+         *   system clipboard. This is not exactly trivial because it would
+         *   require (de-)serializing `copyBuffer` as a string - but it should
+         *   be considered at a later point.
+         * - Use some clipboard api to bind a seperate shortcut like
+         *   Ctrl+Shift+V to explicitly paste from the system clipboard. However
+         *   this is also not really intuitive and it is also difficult (or even
+         *   impossible?) to implement cross-browser with the currently available
+         *   APIs.
+         */
+        if (dataUrl !== this.systemClipboard.image.content) {
+            this.systemClipboard.image.content = dataUrl;
+            this.systemClipboard.image.time = new Date();
+        }
+        this.selectionOrClipboardPaste();
+    }
+
+    /** Insert the given image on the current page */
+    private async pasteImage(dataUrl: string): Promise<void> {
+        if (!this.activePage) return;
+
+        let imageEl = CanvasImage.fromNewElement(this.display.ownerDocument);
+        const dimensions = await FileUtils.imageDimensionsForDataUrl(dataUrl);
+        imageEl.setData(new CanvasImageData(dataUrl, DOMRect.fromRect({
+            x: 10, y: 10, width: dimensions.width, height: dimensions.height
+        })));
+
+        this.activePage.activePaintLayer.appendChild(imageEl.svgElem);
+        this.selection.setSelectionFromElements(this.activePage, [imageEl]);
+        this.undoStack.push(new UndoActionCanvasElements(
+            null, null, [imageEl.svgElem]
+        ));
+    }
+
+    /** Remember pasted text and call `selectionOrClipboardPaste` */
+    private onPastePlainText(text: string): void {
+        // HACK: See `onPasteImage`
+        if (text !== this.systemClipboard.text.content) {
+            this.systemClipboard.text.content = text;
+            this.systemClipboard.text.time = new Date();
+        }
+        this.selectionOrClipboardPaste();
+    }
+
+    /** Insert the given text on the current page */
+    private pastePlainText(text: string): void {
+        if (!this.activePage) return;
+
+        const c = Wournal.currToolConf.CanvasToolText;
+        let textEl = CanvasText.fromData(
+            this.display.ownerDocument,
+            // TODO: find a more sane paste position then 10,10
+            new CanvasTextData(
+                text, { x: 10, y: 10 }, c.fontSize, c.fontFamily, c.color,
+        ));
+
+        this.activePage.activePaintLayer.appendChild(textEl.svgElem);
+        this.selection.setSelectionFromElements(this.activePage, [textEl]);
+        this.undoStack.push(new UndoActionCanvasElements(
+            null, null, [textEl.svgElem]
+        ));
+    }
+
 
     // ------------------------------------------------------------
     // undo
@@ -311,42 +406,6 @@ export class WournalDocument {
 
     public getActivePage() {
         return this.activePage;
-    }
-
-    /** Insert the pasted image on the current page */
-    private async onPasteImage(dataUrl: string): Promise<void> {
-        if (!this.activePage) return;
-
-        let imageEl = CanvasImage.fromNewElement(this.display.ownerDocument);
-        const dimensions = await FileUtils.imageDimensionsForDataUrl(dataUrl);
-        imageEl.setData(new CanvasImageData(dataUrl, DOMRect.fromRect({
-            x: 10, y: 10, width: dimensions.width, height: dimensions.height
-        })));
-
-        this.activePage.activePaintLayer.appendChild(imageEl.svgElem);
-        this.selection.setSelectionFromElements(this.activePage, [imageEl]);
-        this.undoStack.push(new UndoActionCanvasElements(
-            null, null, [imageEl.svgElem]
-        ));
-    }
-
-    /** Insert the pasted text on the current page */
-    private onPastePlainText(text: string): void {
-        if (!this.activePage) return;
-
-        const c = Wournal.currToolConf.CanvasToolText;
-        let textEl = CanvasText.fromData(
-            this.display.ownerDocument,
-            // TODO: find a more sane paste position then 10,10
-            new CanvasTextData(
-                text, { x: 10, y: 10 }, c.fontSize, c.fontFamily, c.color,
-        ));
-
-        this.activePage.activePaintLayer.appendChild(textEl.svgElem);
-        this.selection.setSelectionFromElements(this.activePage, [textEl]);
-        this.undoStack.push(new UndoActionCanvasElements(
-            null, null, [textEl.svgElem]
-        ));
     }
 
     private onMouseDown(e: MouseEvent) {

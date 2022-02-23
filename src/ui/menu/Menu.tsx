@@ -96,9 +96,14 @@ export default function Menu({
                         shortcut="Ctrl+C"
                         disabled={!selectionAvailable}
                         text="Copy"/>
+                    {/* This does not get an explicit Ctrl+V bind, because we
+                    use the `paste` event to capture the system
+                    clipboard. Technically, there is an api to access the system
+                    clipboard, but it seems like it isn't quite standardized and
+                    requires asking for permissions, so the paste event seems
+                    like a better option for now. See `ClipboardUtils`. */}
                     <MenuItem
                         mark="res/remix/clipboard-line.svg"
-                        shortcut="Ctrl+V"
                         fun={() => wournal.doc.selectionOrClipboardPaste()}
                         text="Paste" />
                 </SubMenu>
