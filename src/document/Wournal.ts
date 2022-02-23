@@ -4,6 +4,7 @@ import { ConfigRepositoryLocalStorage } from "../persistence/ConfigRepositoryLoc
 import { DocumentRepository } from "../persistence/DocumentRepository";
 import { DocumentRepositoryBrowserFiles } from "../persistence/DocumentRepositoryBrowserFiles";
 import { DocumentService } from "../persistence/DocumentService";
+import { ClipboardUtils } from "../util/ClipboardUtils";
 import { DSUtils } from "../util/DSUtils";
 import { WournalDocument } from "./WournalDocument";
 import { WournalPageSize } from "./WournalPageSize";

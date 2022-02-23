@@ -75,7 +75,8 @@ export class TextField {
         this.textarea.rows = 1;
         this.textarea.style.color = fontColor;
         this.textarea.style.filter = ThemeUtils.currDark() ? "invert(1)" : "";
-        this.textarea.addEventListener("input", this.updateSize.bind(this));
+        this.textarea.addEventListener("input", this.onInput.bind(this));
+        this.textarea.addEventListener("paste", this.onPaste.bind(this));
         this.label.appendChild(this.textarea);
 
         this.style = page.toolLayer.ownerDocument.createElement("style");
@@ -86,6 +87,15 @@ export class TextField {
         this.setFontSize(fontSize);
 
         page.toolLayerWrapper.appendChild(this.display);
+    }
+
+    private onInput(e: Event) {
+        e.stopPropagation(); // don't trigger any global shortcuts
+        this.updateSize();
+    }
+
+    private onPaste(e: Event) {
+        e.stopPropagation(); // don't trigger any global paste events
     }
 
     private updateSize() {

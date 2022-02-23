@@ -1,10 +1,14 @@
 import { CanvasToolStrokeWidth } from "../persistence/ConfigDTO";
 import { DocumentDTO } from "../persistence/DocumentDTO";
+import { ClipboardUtils } from "../util/ClipboardUtils";
 import { DSUtils } from "../util/DSUtils";
+import { FileUtils } from "../util/FileUtils";
 import { Newable } from "../util/Newable";
 import { SVGUtils } from "../util/SVGUtils";
 import { CanvasElement } from "./CanvasElement";
 import { CanvasElementFactory } from "./CanvasElementFactory";
+import { CanvasImage, CanvasImageData } from "./CanvasImage";
+import { CanvasText, CanvasTextData } from "./CanvasText";
 import { CanvasTool, CanvasToolName, CanvasToolSetupProps } from "./CanvasTool";
 import { CanvasToolFactory } from "./CanvasToolFactory";
 import { CanvasToolPen } from "./CanvasToolPen";
@@ -41,6 +45,9 @@ export class WournalDocument {
         this.display.addEventListener("mousedown", this.onMouseDown.bind(this));
         this.display.addEventListener("mousemove", this.onMouseMove.bind(this));
         this.display.addEventListener("contextmenu", (e) => { e.preventDefault() });
+        ClipboardUtils.setPlainTextHandler(this.onPastePlainText.bind(this));
+        ClipboardUtils.setImageHandler(this.onPasteImage.bind(this));
+        ClipboardUtils.enableHandlers(this.display);
 
         this.initialZoomFactor = computeZoomFactor();
         this.undoStack = new UndoStack(this);
@@ -301,6 +308,36 @@ export class WournalDocument {
 
     public getActivePage() {
         return this.activePage;
+    }
+
+    /** Insert the pasted image on the current page */
+    private async onPasteImage(dataUrl: string): Promise<void> {
+        if (!this.activePage) return;
+
+        let imageEl = CanvasImage.fromNewElement(this.display.ownerDocument);
+        const dimensions = await FileUtils.imageDimensionsForDataUrl(dataUrl);
+        imageEl.setData(new CanvasImageData(dataUrl, DOMRect.fromRect({
+            x: 10, y: 10, width: dimensions.width, height: dimensions.height
+        })));
+
+        this.activePage.activePaintLayer.appendChild(imageEl.svgElem);
+        this.selection.setSelectionFromElements(this.activePage, [imageEl]);
+    }
+
+    /** Insert the pasted text on the current page */
+    private onPastePlainText(text: string): void {
+        if (!this.activePage) return;
+
+        const c = Wournal.currToolConf.CanvasToolText;
+        let textEl = CanvasText.fromData(
+            this.display.ownerDocument,
+            // TODO: find a more sane paste position then 10,10
+            new CanvasTextData(
+                text, { x: 10, y: 10 }, c.fontSize, c.fontFamily, c.color,
+        ));
+
+        this.activePage.activePaintLayer.appendChild(textEl.svgElem);
+        this.selection.setSelectionFromElements(this.activePage, [textEl]);
     }
 
     private onMouseDown(e: MouseEvent) {
