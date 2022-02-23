@@ -57,14 +57,18 @@ export default function Menu({
                     <MenuItem
                         mark="res/remix/save-3-line.svg"
                         fun={() => wournal.saveDocument()}
+                        shortcut="Ctrl+S"
                         text="Save"/>
                     <MenuItem
                         mark="res/remix/file-line.svg"
                         fun={() => wournal.loadDocument(true)}
+                        shortcut="Alt+N"
                         text="New"/>
+                    {/* Ctrl+n is blocked by browser */}
                     <MenuItem
                         mark="res/remix/folder-open-line.svg"
                         fun={() => wournal.loadDocument()}
+                        shortcut="Ctrl+O"
                         text="Open"/>
                 </SubMenu>
                 <SubMenu text="Edit">
@@ -72,24 +76,29 @@ export default function Menu({
                         mark="res/remix/arrow-go-back-line.svg"
                         fun={() => wournal.doc.undo()}
                         disabled={!undoAvailable}
+                        shortcut="Ctrl+Z"
                         text="Undo"/>
                     <MenuItem
                         mark="res/remix/arrow-go-forward-line.svg"
                         fun={() => wournal.doc.redo()}
                         disabled={!redoAvailable}
+                        shortcut="Ctrl+Y"
                         text="Redo"/>
                     <MenuItem
                         mark="res/remix/scissors-2-line.svg"
                         fun={() => wournal.doc.selectionCut()}
+                        shortcut="Ctrl+X"
                         disabled={!selectionAvailable}
                         text="Cut"/>
                     <MenuItem
                         mark="res/remix/file-copy-line.svg"
                         fun={() => wournal.doc.selectionCopy()}
+                        shortcut="Ctrl+C"
                         disabled={!selectionAvailable}
                         text="Copy"/>
                     <MenuItem
                         mark="res/remix/clipboard-line.svg"
+                        shortcut="Ctrl+V"
                         fun={() => wournal.doc.selectionOrClipboardPaste()}
                         text="Paste" />
                 </SubMenu>
@@ -97,14 +106,17 @@ export default function Menu({
                     <MenuItem
                         mark="res/material/magnify-plus-outline.svg"
                         fun={() => wournal.doc.setZoom(wournal.doc.getZoom() + 0.1)}
+                        shortcut="Ctrl++"
                         text="Zoom In" />
                     <MenuItem
                         mark="res/material/magnify-zero-outline.svg"
                         fun={() => wournal.doc.setZoom(1)}
+                        shortcut="Ctrl+0"
                         text="Reset Zoom" />
                     <MenuItem
                         mark="res/material/magnify-minus-outline.svg"
                         fun={() => wournal.doc.setZoom(wournal.doc.getZoom() - 0.1)}
+                        shortcut="Ctrl+-"
                         text="Zoom Out" />
                 </SubMenu>
                 <SubMenu text="Tool">
@@ -112,16 +124,19 @@ export default function Menu({
                         mark="res/custom/pen.svg"
                         fun={() => wournal.doc.setTool(CanvasToolPen)}
                         active={currentTool === "CanvasToolPen"}
+                        shortcut="W"
                         text="Pen" />
                     <MenuItem
                         mark="res/material/selection-drag.svg"
                         fun={() => wournal.doc.setTool(CanvasToolSelectRectangle)}
                         active={currentTool === "CanvasToolSelectRectangle"}
+                        shortcut="S"
                         text="Select Rectangle" />
                     <MenuItem
                         mark="res/remix/text.svg"
                         fun={() => wournal.doc.setTool(CanvasToolText)}
                         active={currentTool === "CanvasToolText"}
+                        shortcut="T"
                         text="Insert Textbox" />
                     <MenuItem
                         mark="res/remix/image-add-line.svg"
@@ -132,11 +147,13 @@ export default function Menu({
                         mark="res/remix/eraser-line.svg"
                         fun={() => wournal.doc.setTool(CanvasToolEraser)}
                         active={currentTool === "CanvasToolEraser"}
+                        shortcut="E"
                         text="Eraser" />
                     <MenuItem
                         mark="res/material/rectangle-outline.svg"
                         fun={() => wournal.doc.setTool(CanvasToolRectangle)}
                         active={currentTool === "CanvasToolRectangle"}
+                        shortcut="R"
                         text="Draw Rectangle" />
                     <SubMenu text="Color">
                         <MenuColorItems

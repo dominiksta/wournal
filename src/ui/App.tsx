@@ -3,6 +3,7 @@ import { Wournal } from '../document/Wournal';
 import { useForceUpdate } from '../useForceUpdate';
 import { ThemeUtils } from '../util/ThemeUtils';
 import './App.css';
+import { ShortcutManager } from './shortcuts/Shortcuts';
 import Snackbar from './snackbar/Snackbar';
 import TopBars from './top-bars/TopBars';
 
@@ -15,8 +16,10 @@ export const ThemeContext = createContext<{
 function App({ wournal }: { wournal: Wournal }) {
     // get a reference to dom element down below for wournal
     const wournalContainer = useRef(null);
+    const appContainer = useRef(null);
     useEffect(() => {
         wournalContainer.current.appendChild(wournal.display);
+        ShortcutManager.setup(appContainer.current);
     }, [wournal.display])
 
     const forceUpdate = useForceUpdate();
@@ -36,12 +39,12 @@ function App({ wournal }: { wournal: Wournal }) {
                 forceUpdate();
             }
         }}>
-            <Snackbar>
-                <div className="App">
+            <div ref={appContainer} className="wournal-app">
+                <Snackbar>
                     <TopBars wournal={wournal} />
                     <div id="wournal-container" ref={wournalContainer}></div>
-                </div>
-            </Snackbar>
+                </Snackbar>
+            </div>
         </ThemeContext.Provider>
     );
 }

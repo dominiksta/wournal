@@ -2,7 +2,7 @@ body {
     font-family: sans-serif;
 }
 
-.App {
+.wournal-app {
     display: flex;
     flex-flow: column;
     height: 100vh

@@ -64,4 +64,9 @@
 
 .MenuItem button .right {
     float: right;
+    margin-left: 30px;
+}
+
+.MenuItem button .right.shortcut {
+    color: gray;
 }

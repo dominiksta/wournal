@@ -1,3 +1,4 @@
+import { ShortcutManager } from "../ui/shortcuts/Shortcuts";
 import { ThemeUtils } from "../util/ThemeUtils";
 import { CanvasText } from "./CanvasText";
 import { WournalPage } from "./WournalPage";
@@ -92,7 +93,10 @@ export class TextField {
 
     private onKeyDown(e: KeyboardEvent) {
         e.stopPropagation(); // don't trigger any global shortcuts
-        if (e.key == "Escape") (e.target as HTMLTextAreaElement).blur()
+        if (e.key == "Escape") {
+            (e.target as HTMLTextAreaElement).blur()
+            ShortcutManager.focus();
+        }
     }
 
     private onPaste(e: Event) {

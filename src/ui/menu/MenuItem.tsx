@@ -1,4 +1,5 @@
 import { useContext } from "react";
+import { Shortcut, ShortcutManager } from "../shortcuts/Shortcuts";
 import "./Menu.css";
 import { SubMenuContext } from "./SubMenu";
 
@@ -10,6 +11,7 @@ export default function MenuItem({
     right = "",
     disabled = false,
     active = false,
+    shortcut = "",
 }: {
     /** Call this function on click */
     fun: () => any,
@@ -24,7 +26,14 @@ export default function MenuItem({
     disabled?: boolean,
     /** Wether the function of this button is currently active */
     active?: boolean,
+    /** set a shortcut for `fun` */
+    shortcut?: string,
 }) {
+    if (shortcut !== "") {
+        ShortcutManager.addShortcut(Shortcut.fromId(shortcut, fun))
+        right = shortcut;
+    }
+
     let markItem;
     if (mark === "check") {
         markItem = <span className="mark">✓</span>; // CHECK MARK
@@ -40,13 +49,6 @@ export default function MenuItem({
         markItem = <img className="mark" src={mark} alt={text} />;
     }
 
-    let rightItem;
-    switch(right) {
-        default:
-            rightItem = <span className="right">{right}</span>;
-            break;
-    }
-
     const subMenuCtx = useContext(SubMenuContext);
 
     return (
@@ -55,7 +57,9 @@ export default function MenuItem({
             <button onClick={() => fun()} disabled={disabled}>
                 {markItem}
                 <span className="text">{text}</span>
-                {rightItem}
+                <span className={"right" + (shortcut !== "" ? " shortcut" : "")}>
+                    {right}
+                </span>
             </button>
         </div>
     )
