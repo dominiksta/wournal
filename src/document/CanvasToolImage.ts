@@ -2,6 +2,7 @@ import { CanvasToolStrokeWidth } from "../persistence/ConfigDTO";
 import { FileUtils } from "../util/FileUtils";
 import { CanvasImage, CanvasImageData } from "./CanvasImage";
 import { CanvasTool } from "./CanvasTool";
+import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
 import { WournalPage } from "./WournalPage";
 
 export class CanvasToolImage extends CanvasTool {
@@ -40,6 +41,9 @@ export class CanvasToolImage extends CanvasTool {
 
         this.toolUseStartPage.activePaintLayer.appendChild(newEl.svgElem);
         this.selection.setSelectionFromElements(this.toolUseStartPage, [newEl]);
+        this.undoStack.push(new UndoActionCanvasElements(
+            null, null, [newEl.svgElem]
+        ));
     }
 
 }
