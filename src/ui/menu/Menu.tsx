@@ -23,10 +23,11 @@ import SubMenu from "./SubMenu";
  * usable on mobile while still providing the same functionality.
  */
 export default function Menu({
-    wournal, hidden, currentTool, currStrokeWidth, selectionAvailable,
-    undoAvailable, redoAvailable
+    wournal, loadDocument, hidden, currentTool, currStrokeWidth,
+    selectionAvailable, undoAvailable, redoAvailable
 }: {
-    wournal: Wournal, hidden: boolean, currentTool: string,
+    wournal: Wournal, loadDocument: (emtpy: boolean) => void,
+    hidden: boolean, currentTool: string,
     currStrokeWidth: CanvasToolStrokeWidth, selectionAvailable: boolean,
     undoAvailable: boolean, redoAvailable: boolean
 }
@@ -61,13 +62,13 @@ export default function Menu({
                         text="Save"/>
                     <MenuItem
                         mark="res/remix/file-line.svg"
-                        fun={() => wournal.loadDocument(true)}
+                        fun={() => loadDocument(true)}
                         shortcut="Alt+N"
                         text="New"/>
                     {/* Ctrl+n is blocked by browser */}
                     <MenuItem
                         mark="res/remix/folder-open-line.svg"
-                        fun={() => wournal.loadDocument()}
+                        fun={() => loadDocument(false)}
                         shortcut="Ctrl+O"
                         text="Open"/>
                 </SubMenu>

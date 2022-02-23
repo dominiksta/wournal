@@ -43,7 +43,7 @@ export default function TopBars({ wournal }: { wournal: Wournal }) {
 
     const [hideMenu, setHideMenu] = useState(true);
     const menu = Menu({
-        wournal: wournal, currentTool: currentTool,
+        wournal: wournal, loadDocument: loadDocument, currentTool: currentTool,
         hidden: hideMenu, selectionAvailable: selectionAvailable,
         currStrokeWidth: currStrokeWidth, undoAvailable: undoAvailable,
         redoAvailable: redoAvailable
