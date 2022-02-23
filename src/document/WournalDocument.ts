@@ -130,8 +130,10 @@ export class WournalDocument {
     }
 
     /** Paste either `copyBuffer` or `systemClipboard` by recency */
-    public selectionOrClipboardPaste(): void {
-        if (this.copyBuffer.time < this.systemClipboard.image.time) {
+    public selectionOrClipboardPaste(first: boolean = false): void {
+        if (first && this.copyBuffer.content.length !== 0) {
+            this.selectionPaste();
+        } else if (this.copyBuffer.time < this.systemClipboard.image.time) {
             this.pasteImage(this.systemClipboard.image.content);
         } else if (this.copyBuffer.time < this.systemClipboard.text.time) {
             this.pastePlainText(this.systemClipboard.text.content);
@@ -186,11 +188,13 @@ export class WournalDocument {
          *   impossible?) to implement cross-browser with the currently available
          *   APIs.
          */
+        const first = (this.systemClipboard.image.content  === ""
+                    && this.systemClipboard.text.content === "");
         if (dataUrl !== this.systemClipboard.image.content) {
             this.systemClipboard.image.content = dataUrl;
             this.systemClipboard.image.time = new Date();
         }
-        this.selectionOrClipboardPaste();
+        this.selectionOrClipboardPaste(first);
     }
 
     /** Insert the given image on the current page */
@@ -213,11 +217,13 @@ export class WournalDocument {
     /** Remember pasted text and call `selectionOrClipboardPaste` */
     private onPastePlainText(text: string): void {
         // HACK: See `onPasteImage`
+        const first = (this.systemClipboard.image.content  === ""
+                    && this.systemClipboard.text.content === "");
         if (text !== this.systemClipboard.text.content) {
             this.systemClipboard.text.content = text;
             this.systemClipboard.text.time = new Date();
         }
-        this.selectionOrClipboardPaste();
+        this.selectionOrClipboardPaste(first);
     }
 
     /** Insert the given text on the current page */
