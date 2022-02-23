@@ -22,7 +22,9 @@ export class DocumentRepositoryBrowserFiles extends DocumentRepository {
      * browser. `identification` will be ignored.
      */
     override async load(identification: string): Promise<DocumentDTO> {
-        let file = await FileUtils.promptReadTextFile();
+        let file = await FileUtils.promptReadFile(
+            "string", ["svg"], ["image/svg+xml"]
+        );
         LOG.info(`Loading file from browser: ${file.name}`);
         return new DocumentDTO(
             file.name, [

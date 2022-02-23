@@ -18,59 +18,83 @@ export const FileUtils = {
     },
 
     /**
-     * Prompts the user for an .svg file. If the mimetype of the chosen file is
-     * not 'image/svg+xml', throws an Error. Otherwise rerturns a Promise that
-     * resolves to the contents of the chosen file.
+     * Prompts the user for a file with one of `extensions`. If the mimetype of
+     * the chosen file is not one of `mimeTypes`, throws an Error. Otherwise
+     * rerturns a Promise that resolves to the contents of the chosen file.
      *
-     * Only supports files encoded with UTF-8.
+     * The contents of the file will be returned as either a string or dataUrl
+     * depending on the value of `ret`.
+     *
+     * Text files will be decoded as UTF-8.
      */
-    promptReadTextFile: async function(
-    ): Promise<{name: string, content: string}> {
+    promptReadFile: async function(
+        ret: "string" | "dataUrl",
+        extensions: string[] | "any" = "any",
+        mimeTypes: string[] | "any" = "any",
+    ) {
         let input = document.createElement("input");
         input.hidden = true;
         input.multiple = false;
-        input.accept = ".svg,.txt";
+        if (extensions !== "any")
+            input.accept = extensions.map(e => "." + e).join(",")
         input.setAttribute("type", "file");
 
         // wait for input to come in
         await new Promise<void>((resolve) => {
             input.click();
-            input.onchange = () => {
-                resolve();
-            }
+            input.onchange = () => resolve();
         });
 
-        // Check for invalid files. The `accept` attribute is not guaranteed to
-        // work on all browsers.
-        let ftype = input.files[0].type;
-        if (!input.files[0].name.endsWith(".svg")
-            && ftype !== "image/svg+xml") {
+        const ftype = input.files[0].type;
+        const fname = input.files[0].name;
+
+        const err = () => {
             throw new Error(
-                "Invalid MimeType: " +
-                    + " Type was " + input.files[0].type
-                    + ". Filename was" + input.files[0].name + "."
+                "Invalid MimeType: Type was " + ftype
+                + ". Filename was " + fname + "."
             );
         }
 
+        // Check for invalid files. The `accept` attribute is not guaranteed to
+        // work on all browsers.
+        if (extensions !== "any" &&
+            extensions.filter(ext => fname.endsWith("." + ext)).length === 0)
+            err();
+
+        if (mimeTypes !== "any" &&
+            mimeTypes.filter(t => ftype === t).length === 0)
+            err();
+
         return new Promise<{name: string, content: string}>(
             async (resolve) => {
-                let read = await new Promise<{name: string, content: string}>(
-                    (resolve) => {
-                        let reader = new FileReader();
-                        reader.onload = () => {
-                            resolve({
-                                name: input.files[0].name,
-                                content: reader.result as string,
-                            });
-                        }
-                        reader.readAsText(
-                            input.files[0], "UTF-8"
-                        );
-                    }
-                );
-                resolve(read);
+                let reader = new FileReader();
+                reader.onload = () => {
+                    resolve({
+                        name: input.files[0].name,
+                        content: reader.result as string,
+                    });
+                }
+                if (ret == "string")
+                    reader.readAsText(input.files[0], "UTF-8");
+                else if (ret === "dataUrl")
+                    reader.readAsDataURL(input.files[0]);
             }
         );
+    },
+
+    /** return computed with for dataUrl image in px */
+    imageDimensionsForDataUrl: async function(
+        dataUrl: string
+    ): Promise<{width: number, height: number}> {
+        return new Promise<{width: number, height: number}>(
+            async (resolve) => {
+                let i = new Image();
+                i.onload = () => {
+                    resolve({width: i.width, height: i.height})
+                };
+                i.src = dataUrl;
+            }
+        )
     },
 
     /** Return the first <svg> element from the xml file string `s` */

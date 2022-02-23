@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { CanvasTool, CanvasToolName } from "../../document/CanvasTool";
 import { CanvasToolEraser } from "../../document/CanvasToolEraser";
+import { CanvasToolImage } from "../../document/CanvasToolImage";
 import { CanvasToolPen } from "../../document/CanvasToolPen";
 import { CanvasToolRectangle } from "../../document/CanvasToolRectangle";
 import { CanvasToolSelectRectangle } from "../../document/CanvasToolSelectRectangle";
@@ -123,6 +124,11 @@ export default function Menu({
                         active={currentTool === "CanvasToolText"}
                         text="Insert Textbox" />
                     <MenuItem
+                        mark="res/remix/image-add-line.svg"
+                        fun={() => wournal.doc.setTool(CanvasToolImage)}
+                        active={currentTool === "CanvasToolImage"}
+                        text="Insert Image File" />
+                    <MenuItem
                         mark="res/remix/eraser-line.svg"
                         fun={() => wournal.doc.setTool(CanvasToolEraser)}
                         active={currentTool === "CanvasToolEraser"}
@@ -205,7 +211,7 @@ export default function Menu({
                     <MenuItem
                         fun={async () => {
                             await wournal.saveConfig();
-                            openSnackbar("Configuration Saved", 500);
+                            openSnackbar("Configuration Saved", 1000);
                         }}
                         text="Save Configuration"/>
                     <SubMenu text="Button 2 Mapping">

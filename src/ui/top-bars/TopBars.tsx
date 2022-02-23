@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { CanvasToolEraser } from '../../document/CanvasToolEraser';
+import { CanvasToolImage } from '../../document/CanvasToolImage';
 import { CanvasToolPen } from '../../document/CanvasToolPen';
 import { CanvasToolRectangle } from '../../document/CanvasToolRectangle';
 import { CanvasToolSelectRectangle } from '../../document/CanvasToolSelectRectangle';
@@ -136,6 +137,11 @@ export default function TopBars({ wournal }: { wournal: Wournal }) {
                     fun={() => wournal.doc.setTool(CanvasToolText)}
                     current={currentTool === "CanvasToolText"}
                     alt="Insert Textbox" />
+                <ToolbarButton
+                    img="res/remix/image-add-line.svg"
+                    fun={() => wournal.doc.setTool(CanvasToolImage)}
+                    current={currentTool === "CanvasToolImage"}
+                    alt="Insert Image File" />
                 <ToolbarButton
                     img="res/remix/eraser-line.svg"
                     fun={() => wournal.doc.setTool(CanvasToolEraser)}

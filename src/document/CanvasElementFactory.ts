@@ -1,4 +1,5 @@
 import { CanvasElement, CanvasElementData } from "./CanvasElement";
+import { CanvasImage, CanvasImageData } from "./CanvasImage";
 import { CanvasPath, CanvasPathData } from "./CanvasPath";
 import { CanvasText, CanvasTextData } from "./CanvasText";
 
@@ -12,6 +13,8 @@ export class CanvasElementFactory {
             return new CanvasText(svg);
         } else if (svg instanceof SVGPathElement) {
             return new CanvasPath(svg);
+        } else if (svg instanceof SVGImageElement) {
+            return new CanvasImage(svg);
         } else {
             throw new Error("unsupported svg element!");
         }
@@ -28,6 +31,9 @@ export class CanvasElementFactory {
         } else if (data instanceof CanvasPathData) {
             let svg = doc.createElementNS("http://www.w3.org/2000/svg", "path");
             canvasEl = new CanvasPath(svg);
+        } else if (data instanceof CanvasImageData) {
+            let svg = doc.createElementNS("http://www.w3.org/2000/svg", "image");
+            canvasEl = new CanvasImage(svg);
         } else {
             throw new Error("unsupported svg element!");
         }
