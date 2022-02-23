@@ -75,7 +75,8 @@ export class TextField {
         this.textarea.rows = 1;
         this.textarea.style.color = fontColor;
         this.textarea.style.filter = ThemeUtils.currDark() ? "invert(1)" : "";
-        this.textarea.addEventListener("input", this.onInput.bind(this));
+        this.textarea.addEventListener("keydown", this.onKeyDown.bind(this));
+        this.textarea.addEventListener("input", this.updateSize.bind(this));
         this.textarea.addEventListener("paste", this.onPaste.bind(this));
         this.label.appendChild(this.textarea);
 
@@ -89,9 +90,9 @@ export class TextField {
         page.toolLayerWrapper.appendChild(this.display);
     }
 
-    private onInput(e: Event) {
+    private onKeyDown(e: KeyboardEvent) {
         e.stopPropagation(); // don't trigger any global shortcuts
-        this.updateSize();
+        if (e.key == "Escape") (e.target as HTMLTextAreaElement).blur()
     }
 
     private onPaste(e: Event) {
