@@ -97,6 +97,11 @@ export default function Menu({
                         shortcut="Ctrl+C"
                         disabled={!selectionAvailable}
                         text="Copy"/>
+                    <MenuItem
+                        fun={() => wournal.doc.selectionCut(true)}
+                        shortcut="Delete"
+                        disabled={!selectionAvailable}
+                        text="Delete"/>
                     {/* This does not get an explicit Ctrl+V bind, because we
                     use the `paste` event to capture the system
                     clipboard. Technically, there is an api to access the system

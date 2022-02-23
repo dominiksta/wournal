@@ -105,18 +105,22 @@ export class WournalDocument {
     // selection
     // ------------------------------------------------------------
 
-    public selectionCut(): void {
+    public selectionCut(noCopy: boolean = false): void {
         if (this.selection.selection.length === 0) return;
-        this.copyBuffer.content = [];
-        this.copyBuffer.time = new Date();
-        for (let el of this.selection.selection) this.copyBuffer.content.push(el);
+        let deleted = [];
+        for (let el of this.selection.selection) deleted.push(el);
 
         this.undoStack.push(new UndoActionCanvasElements(
-            DSUtils.copyArr(this.copyBuffer.content.map(e => e.svgElem)), null, null
+            DSUtils.copyArr(deleted.map(e => e.svgElem)), null, null
         ));
 
         for (let el of this.selection.selection) el.destroy();
         this.selection.clear();
+
+        if (!noCopy) {
+            this.copyBuffer.content = deleted;
+            this.copyBuffer.time = new Date();
+        }
     }
 
     public selectionCopy(): void {
