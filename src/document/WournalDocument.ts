@@ -322,6 +322,9 @@ export class WournalDocument {
 
         this.activePage.activePaintLayer.appendChild(imageEl.svgElem);
         this.selection.setSelectionFromElements(this.activePage, [imageEl]);
+        this.undoStack.push(new UndoActionCanvasElements(
+            null, null, [imageEl.svgElem]
+        ));
     }
 
     /** Insert the pasted text on the current page */
@@ -338,6 +341,9 @@ export class WournalDocument {
 
         this.activePage.activePaintLayer.appendChild(textEl.svgElem);
         this.selection.setSelectionFromElements(this.activePage, [textEl]);
+        this.undoStack.push(new UndoActionCanvasElements(
+            null, null, [textEl.svgElem]
+        ));
     }
 
     private onMouseDown(e: MouseEvent) {
