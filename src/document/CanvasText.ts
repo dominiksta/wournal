@@ -18,6 +18,12 @@ export class CanvasText extends CanvasElement {
         this._lineHeight = _svgElem.children.length > 0
             ? parseFloat(_svgElem.children[0].getAttribute("dy"))
             : 15;
+
+        // display whitespace characters (including newlines)
+        this._svgElem.setAttribute("xml:space", "preserve");
+        // although this should not be needed in svg viewer applications, it
+        // does seem to be needed to render properly in the browser
+        this._svgElem.style.whiteSpace = "pre";
     }
 
     public static fromData(
@@ -43,15 +49,15 @@ export class CanvasText extends CanvasElement {
                 throw new Error("non-tspan element in text field!");
 
             // see `setText()`
-            result += tspan.innerHTML === " "
+            result += tspan.textContent === " "
                 ? "\n"
-                : tspan.innerHTML + "\n";
+                : tspan.textContent + "\n";
         }
         return result.slice(0, -1);
     }
 
     public setText(text: string) {
-        this._svgElem.innerHTML = "";
+        this._svgElem.textContent = "";
         for (let line of text.split("\n")) {
             let tspan = this._svgElem.ownerDocument.createElementNS(
                 "http://www.w3.org/2000/svg", "tspan"
@@ -60,7 +66,7 @@ export class CanvasText extends CanvasElement {
             // insert some whitespace into blank lines here. It would be
             // possible to play around with variable dy attributes, but for now
             // this is good enough.
-            tspan.innerHTML = line !== "" ? line : " ";
+            tspan.textContent = line !== "" ? line : " ";
             this._svgElem.appendChild(tspan);
         }
         this.setLineHeight(this._lineHeight);
