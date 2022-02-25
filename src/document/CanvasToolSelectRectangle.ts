@@ -74,7 +74,7 @@ export class CanvasToolSelectRectangle extends CanvasTool {
                     width: Math.abs(mouse.x - this.savedMouse.beforeSelect.x),
                     height: Math.abs(mouse.y - this.savedMouse.beforeSelect.y),
                 });
-                this.selection.setDimension(s);
+                this.selection.selectionDisplay.setDimension(s);
                 break;
         }
     }

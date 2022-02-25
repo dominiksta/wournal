@@ -31,6 +31,12 @@ export const SVGUtils = {
         );
     },
 
+    /** Compute scale factor for font and stroke width */
+    scaleFactor: function(scaleX: number, scaleY: number) {
+        return (scaleX === 1 && scaleY === 1) ?
+            scaleX * scaleY : Math.sqrt(scaleX * scaleY);
+    },
+
     /** Return a bounding rectangle encompassing both `r1` and `r2` */
     boundingRectForTwo(r1: DOMRect, r2: DOMRect): DOMRect {
         return DOMRect.fromRect({

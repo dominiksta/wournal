@@ -1,4 +1,5 @@
 import { CanvasToolStrokeWidth } from "../persistence/ConfigDTO";
+import { SVGUtils } from "../util/SVGUtils";
 import { CanvasElement, CanvasElementData } from "./CanvasElement";
 
 export class CanvasText extends CanvasElement {
@@ -130,7 +131,14 @@ export class CanvasText extends CanvasElement {
     public override writeTransform(): void {
         const curr = this.getPos();
         const t = this.currentTransform;
-        this.setFontSize(this._fontSize * t.scaleX * t.scaleY);
+        /* While we can actually use floating point font sizes in the browser,
+        those would likely not export to pdf correctly once we implement
+        that. Causing a bit of "wiggle" of fonts immediatly upon resizing a text
+        element should be preferable to having the same wiggle occur "invisibly"
+        on export. */
+        this.setFontSize(Math.round(this._fontSize *
+            SVGUtils.scaleFactor(t.scaleX, t.scaleY))
+        );
 
         const newT = {
             x: (curr.x * t.scaleX) + t.translateX,

@@ -12,7 +12,7 @@ import { CanvasText, CanvasTextData } from "./CanvasText";
 import { CanvasTool, CanvasToolName, CanvasToolSetupProps } from "./CanvasTool";
 import { CanvasToolFactory } from "./CanvasToolFactory";
 import { CanvasToolPen } from "./CanvasToolPen";
-import { CanvasSelection } from "./SelectionDisplay";
+import { CanvasSelection } from "./CanvasSelection";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
 import { UndoStack } from "./UndoStack";
 import { Wournal } from "./Wournal";
@@ -424,7 +424,7 @@ export class WournalDocument {
 
         if (this.activePage && this.selection.selection.length !== 0) {
             const mouse = this.activePage.globalCoordsToCanvas(e);
-            if (SVGUtils.pointInRect(mouse, this.selection.hitbox())) {
+            if (SVGUtils.pointInRect(mouse, this.selection.selectionDisplay.hitbox())) {
                 this.selection.onMouseDown(e);
             } else {
                 this.selection.clear();

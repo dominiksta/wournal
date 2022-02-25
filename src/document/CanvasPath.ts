@@ -164,7 +164,7 @@ export class CanvasPath extends CanvasElement {
 
         this.setActualStrokeWidth(
             parseFloat(this._svgElem.getAttribute("stroke-width")) *
-                t.scaleX * t.scaleY
+            SVGUtils.scaleFactor(t.scaleX, t.scaleY)
         )
         this.resetTransform();
     }

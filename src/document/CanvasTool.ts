@@ -1,5 +1,5 @@
 import { CanvasToolStrokeWidth } from "../persistence/ConfigDTO";
-import { CanvasSelection } from "./SelectionDisplay";
+import { CanvasSelection } from "./CanvasSelection";
 import { UndoStack } from "./UndoStack";
 import { WournalPage } from "./WournalPage";
 
