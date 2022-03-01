@@ -1,4 +1,5 @@
-import React, { createContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { ThemeContext } from '../App';
 import { ShortcutManager } from '../shortcuts/Shortcuts';
 import './ModalManager.css';
 
@@ -71,11 +72,13 @@ function Modal({
         btns.push(closeBtn);
     }
 
+    const themeCtx = useContext(ThemeContext);
 
     return (
         <div tabIndex={1} ref={mainEl} className="wournal-modal-overlay">
             <div className="wournal-modal-wrapper">
-                <div className="wournal-modal" key={num}>
+                <div className="wournal-modal" key={num}
+                    style={{ filter: themeCtx.darkTheme ? "invert(1)" : "" }}>
                     <h3 className="wournal-modal-heading">{heading}</h3>
                     <section className="wournal-modal-content">{children}</section>
                     <section className="wournal-modal-buttons">{btns}</section>
