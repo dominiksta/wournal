@@ -327,7 +327,7 @@ export class WournalDocument {
             throw new Error(`Could not get config for tool ${this._currentTool}`)
 
         Wournal.currToolConf[this._currentTool.name] =
-            DSUtils.copyObj(Wournal.CONF.tools[this._currentTool.name])
+            DSUtils.copyObj(Wournal.CONF.tools[this._currentTool.name]) as any
     }
 
     /** Set the current tool configuration as the default config for that tool */
@@ -337,7 +337,7 @@ export class WournalDocument {
             throw new Error(`Could not get config for tool ${this._currentTool}`)
 
         Wournal.CONF.tools[this._currentTool.name] =
-            DSUtils.copyObj(Wournal.currToolConf[this._currentTool.name])
+            DSUtils.copyObj(Wournal.currToolConf[this._currentTool.name]) as any
     }
 
     /** Called to update react state */

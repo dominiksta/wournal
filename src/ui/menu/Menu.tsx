@@ -7,10 +7,11 @@ import { CanvasToolRectangle } from "../../document/CanvasToolRectangle";
 import { CanvasToolSelectRectangle } from "../../document/CanvasToolSelectRectangle";
 import { CanvasToolText } from "../../document/CanvasToolText";
 import { Wournal } from "../../document/Wournal";
-import { CanvasToolStrokeWidth } from "../../persistence/ConfigDTO";
-import { useForceUpdate } from "../../useForceUpdate";
+import { CanvasToolStrokeWidth, ConfigDTO } from "../../persistence/ConfigDTO";
 import { ThemeContext } from "../App";
+import { useSettingsEditor } from "../settings/useSettingsEditor";
 import { useSnackbar } from "../snackbar/useSnackbar";
+import { useForceUpdate } from "../util/useForceUpdate";
 import "./Menu.css";
 import MenuColorItems from "./MenuColorItem";
 import MenuItem from "./MenuItem";
@@ -34,6 +35,13 @@ export default function Menu({
 ) {
     const forceUpdate = useForceUpdate();
     const openSnackbar = useSnackbar()[0];
+    const openSettingsEditor = useSettingsEditor(
+        Wournal.CONF,
+        (async (dto: ConfigDTO) => {
+            await wournal.saveConfig(dto);
+            await wournal.loadConfig();
+        }).bind(wournal)
+    );
     const themeCtx = useContext(ThemeContext);
 
     function btnMapping2(name: CanvasToolName) {
@@ -112,6 +120,10 @@ export default function Menu({
                         mark="res/remix/clipboard-line.svg"
                         fun={() => wournal.doc.selectionOrClipboardPaste()}
                         text="Paste" />
+                    <MenuItem
+                        fun={() => openSettingsEditor()}
+                        shortcut="Ctrl+,"
+                        text="Preferences"/>
                 </SubMenu>
                 <SubMenu text="View">
                     <MenuItem
@@ -238,7 +250,7 @@ export default function Menu({
                 <SubMenu text="Option">
                     <MenuItem
                         fun={async () => {
-                            await wournal.saveConfig();
+                            await wournal.saveConfig(Wournal.CONF);
                             openSnackbar("Configuration Saved", 1000);
                         }}
                         text="Save Configuration"/>

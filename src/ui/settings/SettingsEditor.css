@@ -1,0 +1,20 @@
+
+.wournal-settings-color table {
+    border-collapse: separate;
+    border-spacing: 5px;
+}
+
+.wournal-settings-color table td {
+    /* padding-right: 10px; */
+    min-width: 20px;
+}
+
+.wournal-settings-color table td button.wournal-color-remove {
+    color: red;
+    background: white;
+    border: none;
+}
+
+.wournal-settings-color table td.wournal-color-display {
+    border: 1px solid black;
+}

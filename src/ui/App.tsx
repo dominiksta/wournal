@@ -1,8 +1,9 @@
 import { createContext, useEffect, useRef } from 'react';
 import { Wournal } from '../document/Wournal';
-import { useForceUpdate } from '../useForceUpdate';
+import { useForceUpdate } from './util/useForceUpdate';
 import { ThemeUtils } from '../util/ThemeUtils';
 import './App.css';
+import ModalManager from './modal/ModalManager';
 import { ShortcutManager } from './shortcuts/Shortcuts';
 import Snackbar from './snackbar/Snackbar';
 import TopBars from './top-bars/TopBars';
@@ -41,8 +42,10 @@ function App({ wournal }: { wournal: Wournal }) {
         }}>
             <div ref={appContainer} className="wournal-app">
                 <Snackbar>
-                    <TopBars wournal={wournal} />
-                    <div id="wournal-container" ref={wournalContainer}></div>
+                    <ModalManager>
+                        <TopBars wournal={wournal} />
+                        <div className="wournal-container" ref={wournalContainer}></div>
+                    </ModalManager>
                 </Snackbar>
             </div>
         </ThemeContext.Provider>

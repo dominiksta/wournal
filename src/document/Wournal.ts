@@ -45,11 +45,14 @@ export class Wournal {
         this.createTestPages();
     }
 
-    public async loadConfig() {
+    public async loadConfig(): Promise<ConfigDTO> {
         Wournal.CONF = await this.confRepo.load();
         Wournal.currToolConf = DSUtils.copyObj(Wournal.CONF.tools);
+        return Wournal.CONF;
     }
-    public async saveConfig() { return await this.confRepo.save(Wournal.CONF); }
+    public async saveConfig(dto: ConfigDTO) {
+        await this.confRepo.save(dto);
+    }
 
     public async loadDocument(empty: boolean = false) {
         let disp = this.newDisplayEl();

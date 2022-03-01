@@ -6,7 +6,7 @@ import { CanvasToolRectangle } from '../../document/CanvasToolRectangle';
 import { CanvasToolSelectRectangle } from '../../document/CanvasToolSelectRectangle';
 import { CanvasToolText } from '../../document/CanvasToolText';
 import { Wournal } from '../../document/Wournal';
-import { useForceUpdate } from '../../useForceUpdate';
+import { useForceUpdate } from '../util/useForceUpdate';
 import Menu from '../menu/Menu';
 import { useSnackbar } from '../snackbar/useSnackbar';
 import Toolbar from '../toolbar/Toolbar';

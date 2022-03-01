@@ -1,3 +1,5 @@
+import { DOMUtils } from "../../util/DOMUtils";
+
 export class ShortcutManager {
     private static shortcuts = new Map<string, Shortcut>();
     private static el: HTMLElement;
@@ -28,7 +30,10 @@ export class ShortcutManager {
     }
 
     private static eventHandler(e: KeyboardEvent): void {
-        // console.log(e);
+        if (e.target instanceof Element &&
+            DOMUtils.checkParentClassList(e.target, "wournal-modal-overlay")) return;
+        if (e.target instanceof HTMLInputElement ||
+            e.target instanceof HTMLTextAreaElement) return;
         for (let [_, shortcut] of ShortcutManager.shortcuts) {
             if (e.key.toLowerCase() === shortcut.key.toLowerCase() &&
                 e.shiftKey === shortcut.shift &&

@@ -28,7 +28,7 @@ export const DSUtils = {
         // https://developer.mozilla.org/en-US/docs/Web/API/structuredClone.
         // For now, structuredClone is not available in my(dominiksta) main
         // development Browser Waterfox (Firefox ESR).
-        return JSON.parse(JSON.stringify(obj));
+        return JSON.parse(JSON.stringify(obj)) as T;
     },
 
     // `PropertyKey` is short for "string | number | symbol"

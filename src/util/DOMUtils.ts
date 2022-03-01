@@ -5,6 +5,11 @@ export const DOMUtils = {
         });
     },
 
+    checkParentClassList: function (e: Element, className: string) : boolean {
+        if (e.className.split(' ').indexOf(className) >= 0) return true;
+        return e.parentElement && DOMUtils.checkParentClassList(e.parentElement, className);
+    },
+
     createElementFromHTML: function<T>(htmlString: string) {
         var div = document.createElement('div');
         div.innerHTML = htmlString.trim();

@@ -1,0 +1,12 @@
+.wournal-settings-color-add {
+    text-align: right;
+}
+
+.wournal-settings-color-add button {
+    color: green;
+    font-weight: bold;
+    font-size: 120%;
+    background: none;
+    border: none;
+    padding: 0;
+}

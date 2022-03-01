@@ -92,7 +92,6 @@ export class TextField {
     }
 
     private onKeyDown(e: KeyboardEvent) {
-        e.stopPropagation(); // don't trigger any global shortcuts
         if (e.key == "Escape") {
             (e.target as HTMLTextAreaElement).blur()
             ShortcutManager.focus();
