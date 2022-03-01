@@ -1,5 +1,7 @@
+import { useContext } from "react";
 import { ConfigDTO } from "../../persistence/ConfigDTO";
 import { DSUtils } from "../../util/DSUtils";
+import { ThemeContext } from "../App";
 import useModal from "../modal/useModal";
 import { useSnackbar } from "../snackbar/useSnackbar";
 import { ObjWithSetter } from "../util/ObjWithSetter";
@@ -11,6 +13,8 @@ export function useSettingsEditor(
 ) {
     let openSnackBar = useSnackbar()[0];
     let openModal = useModal();
+
+    const themeCtx = useContext(ThemeContext);
 
     return () => {
         const conf: ObjWithSetter<ConfigDTO> = {
@@ -27,6 +31,7 @@ export function useSettingsEditor(
             {
                 name: "Save", close: true, action: async () => {
                     await saveConfig(conf.value);
+                    themeCtx.setTheme(conf.value.theme);
                     openSnackBar("Configuration Saved");
                 }, style: "primary"
             }, {

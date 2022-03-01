@@ -260,20 +260,6 @@ export default function Menu({
                         {btnMapping2("CanvasToolEraser")}
                         {btnMapping2("CanvasToolRectangle")}
                     </SubMenu>
-                    <SubMenu text="Theme">
-                        <MenuItem
-                            mark={Wournal.CONF.theme === "auto" ? "dot" : ""}
-                            fun={() => themeCtx.setTheme("auto")}
-                            text="Auto/System Invert"/>
-                        <MenuItem
-                            mark={Wournal.CONF.theme === "light" ? "dot" : ""}
-                            fun={() => themeCtx.setTheme("light")}
-                            text="Light"/>
-                        <MenuItem
-                            mark={Wournal.CONF.theme === "dark" ? "dot" : ""}
-                            fun={() => themeCtx.setTheme("dark")}
-                            text="Invert"/>
-                    </SubMenu>
                 </SubMenu>
                 <SubMenu text="Test">
                     <SubMenu text="Deeper Nest 1">

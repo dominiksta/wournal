@@ -2,6 +2,7 @@ import { ConfigDTO } from "../../persistence/ConfigDTO";
 import { ObjWithSetter } from "../util/ObjWithSetter";
 import ColorPaletteEditor from "./ColorPaletteEditor";
 import "./SettingsEditor.css";
+import ThemeSettingsEditor from "./ThemeSettingsEditor";
 
 export function SettingsEditor({
     config,
@@ -24,9 +25,18 @@ export function SettingsEditor({
         }
     };
 
+    const theme = {
+        value: config.value.theme,
+        setValue: (t: "dark" | "light" | "auto") => {
+            config.value.theme = t;
+            config.setValue(config.value);
+        }
+    };
+
     return (
         <div className="wournal-settings">
             <ColorPaletteEditor colors={colors}/>
+            <ThemeSettingsEditor theme={theme}/>
         </div>
     );
 }
