@@ -5,7 +5,8 @@ body {
 .wournal-app {
     display: flex;
     flex-flow: column;
-    height: 100vh
+    height: 100vh;
+    outline: none;
 }
 
 .Toolbar {
@@ -63,4 +64,13 @@ body {
 
 .wournal-btn:active, .wournal-btn-warn:active {
 	box-shadow: inset 0 2px 2px rgba(0,0,0,.3);
+}
+
+/* ----------------------------------------------------------------------
+ * inputs
+ * ---------------------------------------------------------------------- */
+
+.wournal-app input.wournal-input-invalid {
+    border-color: red;
+    outline: red;
 }

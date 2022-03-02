@@ -2,13 +2,8 @@
     width: 90%;
 }
 
-.wournal-settings-color .wournal-color-input {
-    font-family: monospace;
-}
-
 .wournal-settings-color table {
     border-collapse: separate;
-    border-spacing: 5px;
     width: 100%;
 }
 

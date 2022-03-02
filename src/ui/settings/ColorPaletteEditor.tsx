@@ -1,4 +1,5 @@
 import { DSUtils } from "../../util/DSUtils";
+import ColorPicker from "../color-picker/ColorPicker";
 import { ObjWithSetter } from "../util/ObjWithSetter";
 import { useStateWithSetter } from "../util/useStateWithSetter";
 import "./ColorPaletteEditor.css";
@@ -41,22 +42,19 @@ export default function ColorPaletteEditor({
                     <input
                         onChange={(e) => {
                             let tmpColors = DSUtils.copyObj(colorsInternal);
-                            tmpColors.find(colCompare).name = e.target.value;
+                            tmpColors.find(colCompare).name =
+                                e.target.value.toUpperCase();
                             commitColors(tmpColors);
                         }}
                         value={c.name} />
                 </td>
-                <td className="wournal-color-display"
-                    style={{ background: c.color }}> </td>
                 <td>
-                    <input
-                        className="wournal-color-input"
-                        onChange={(e) => {
+                    <ColorPicker color={c.color}
+                        onChange={(color: string) => {
                             let tmpColors = DSUtils.copyObj(colorsInternal);
-                            tmpColors.find(colCompare).color = e.target.value;
+                            tmpColors.find(colCompare).color = color;
                             commitColors(tmpColors);
-                        }}
-                        value={c.color} />
+                        }} />
                 </td>
             </tr>
         );
@@ -69,7 +67,6 @@ export default function ColorPaletteEditor({
                 <tbody>
                     {colorEls}
                     <tr>
-                        <td> </td>
                         <td> </td>
                         <td> </td>
                         <td className="wournal-settings-color-add">
@@ -85,5 +82,4 @@ export default function ColorPaletteEditor({
             </table>
         </section>
     );
-
 }
