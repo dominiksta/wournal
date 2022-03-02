@@ -74,3 +74,18 @@ body {
     border-color: red;
     outline: red;
 }
+
+/* ----------------------------------------------------------------------
+ * selects
+ * ---------------------------------------------------------------------- */
+
+.wournal-app select {
+    border: 1px solid #bbb;
+    border-radius: 3px;
+    width: 150px;
+    height: 30px;
+    appearance: none;
+    background: url(../../public/res/material/chevron-down.svg)
+                99% / 20px no-repeat white;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, .3);
+}
