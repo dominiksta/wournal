@@ -1,0 +1,47 @@
+.wournal-collapsible {
+    border: 1px solid black;
+    padding: 5px;
+    margin: 5px;
+}
+
+.wournal-collapsible-title {
+    /* padding: 10px; */
+    width: 100%;
+    height: 21px;
+}
+
+.wournal-collapsible-title:hover {
+    /* padding: 10px; */
+    /* background: #efefef; */
+}
+
+.wournal-collapsible-title button {
+    float: right;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    background: lightblue;
+}
+
+.wournal-collapsible-title button > * {
+    vertical-align: middle;
+}
+
+.wournal-collapsible-title button:hover {
+    background: #CFF3FF;
+}
+
+.wournal-collapsible-title h5 {
+    display: inline;
+    margin: 0px;
+}
+
+.wournal-collapsible-content {
+    /* padding: 10px; */
+    /* border-left: 1px solid black; */
+    /* border-right: 1px solid black; */
+    /* border-bottom: 1px solid black; */
+}

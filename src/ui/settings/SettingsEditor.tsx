@@ -1,4 +1,5 @@
 import { ConfigDTO } from "../../persistence/ConfigDTO";
+import Collapsible from "../collabsible/Collapsible";
 import { ObjWithSetter } from "../util/ObjWithSetter";
 import ColorPaletteEditor from "./ColorPaletteEditor";
 import "./SettingsEditor.css";
@@ -35,8 +36,16 @@ export function SettingsEditor({
 
     return (
         <div className="wournal-settings">
-            <ColorPaletteEditor colors={colors}/>
-            <ThemeSettingsEditor theme={theme}/>
+            <div className="wournal-settings-row">
+                <Collapsible title="Color Palette">
+                    <ColorPaletteEditor colors={colors} />
+                </Collapsible>
+            </div>
+            <div className="wournal-settings-row">
+                <Collapsible title="Theme">
+                    <ThemeSettingsEditor theme={theme} />
+                </Collapsible>
+            </div>
         </div>
     );
 }

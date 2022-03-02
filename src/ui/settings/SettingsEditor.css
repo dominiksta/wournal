@@ -1,20 +1,16 @@
-
-.wournal-settings-color table {
-    border-collapse: separate;
-    border-spacing: 5px;
+@media only screen and (min-width: 1000px) {
+    .wournal-settings {
+        display: flex;
+        width: 650px;
+    }
 }
 
-.wournal-settings-color table td {
-    /* padding-right: 10px; */
-    min-width: 20px;
+@media only screen and (max-width: 1000px) {
+    .wournal-settings {
+        width: 100%;
+    }
 }
 
-.wournal-settings-color table td button.wournal-color-remove {
-    color: red;
-    background: white;
-    border: none;
-}
-
-.wournal-settings-color table td.wournal-color-display {
-    border: 1px solid black;
+.wournal-settings .wournal-collapsible {
+    width: 300px;
 }

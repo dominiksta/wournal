@@ -50,6 +50,7 @@ export default function ColorPaletteEditor({
                     style={{ background: c.color }}> </td>
                 <td>
                     <input
+                        className="wournal-color-input"
                         onChange={(e) => {
                             let tmpColors = DSUtils.copyObj(colorsInternal);
                             tmpColors.find(colCompare).color = e.target.value;
@@ -64,7 +65,6 @@ export default function ColorPaletteEditor({
 
     return (
         <section className="wournal-settings-section wournal-settings-color">
-            <h3> Color Palette </h3>
             <table>
                 <tbody>
                     {colorEls}

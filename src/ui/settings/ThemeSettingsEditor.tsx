@@ -14,7 +14,6 @@ export default function ThemeSettingsEditor({
 
     return (
         <section className="wournal-settings-section wournal-settings-color">
-            <h3> Theme </h3>
             <select value={themeInternal} onChange={(e) => {
                 commitTheme(e.target.value as "dark" | "light" | "auto");
             }}>

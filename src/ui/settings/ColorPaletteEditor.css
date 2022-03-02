@@ -1,3 +1,31 @@
+.wournal-settings-color input {
+    width: 90%;
+}
+
+.wournal-settings-color .wournal-color-input {
+    font-family: monospace;
+}
+
+.wournal-settings-color table {
+    border-collapse: separate;
+    border-spacing: 5px;
+    width: 100%;
+}
+
+.wournal-settings-color table td {
+    min-width: 20px;
+}
+
+.wournal-settings-color table td button.wournal-color-remove {
+    color: red;
+    background: white;
+    border: none;
+}
+
+.wournal-settings-color table td.wournal-color-display {
+    border: 1px solid black;
+}
+
 .wournal-settings-color-add {
     text-align: right;
 }

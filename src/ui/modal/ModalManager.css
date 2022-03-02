@@ -19,7 +19,7 @@
 .wournal-modal {
     /* --- center horizontically and vertically --- */
     min-width: 200px;
-    max-width: 800px;
+    max-width: 1000px;
 
     background: white;
     border: 1px solid gray;
