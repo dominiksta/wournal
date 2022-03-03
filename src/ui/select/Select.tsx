@@ -41,6 +41,7 @@ export default function Select({
     imgSpace?: boolean,
 }) {
     const [showDropdown, setShowDropdown] = useState(false);
+    const [dropDownPos, setDropDownPos] = useState({x: 0, y: 0});
     const selectContainerRef = useRef(null);
 
     useOnClickOutside(selectContainerRef, () => setShowDropdown(false));
@@ -50,6 +51,12 @@ export default function Select({
         children.find(c => c.props.value === value).props.children;
     else if (placeHolder.length > 0) selectText = placeHolder;
     else selectText = "Choose an option";
+
+    const moveDropdown = () => {
+        const r = (selectContainerRef.current as HTMLDivElement).
+            getBoundingClientRect();
+        setDropDownPos({y: r.bottom, x: r.left});
+    }
 
     return (
         <SelectContext.Provider
@@ -62,7 +69,10 @@ export default function Select({
             <div className="select-container" ref={selectContainerRef}
                 style={{width: width}}>
                 <div className={"selected-text" + (showDropdown ? " active" : "")}
-                    onClick={() => setShowDropdown(!showDropdown)}>
+                    onClick={() => {
+                        moveDropdown();
+                        setShowDropdown(!showDropdown);
+                    }}>
                     {
                         typeof selectText === "string" ?
                             <TextOption>{selectText}</TextOption> : selectText
@@ -71,7 +81,8 @@ export default function Select({
                         src={showDropdown ? "res/material/chevron-up.svg" :
                             "res/material/chevron-down.svg"} />
                 </div>
-                <ul className="select-options" hidden={!showDropdown}>
+                <ul className="select-options" hidden={!showDropdown}
+                    style={{ top: dropDownPos.y, left: dropDownPos.x }}>
                     {children}
                 </ul>
             </div>
