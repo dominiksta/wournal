@@ -44,19 +44,6 @@ export default function Menu({
     );
     const themeCtx = useContext(ThemeContext);
 
-    function btnMapping2(name: CanvasToolName) {
-        return (
-            <MenuItem
-                mark={Wournal.CONF.binds.rightClick === name ? "dot" : ""}
-                fun={() => {
-                    Wournal.CONF.binds.rightClick = name;
-                    forceUpdate();
-                }}
-                text={CanvasTool.humanName(name)}
-            />
-        );
-    }
-
     return (
         <div className="Menu" hidden={hidden}
             style={{filter: themeCtx.darkTheme ? "invert(1)" : ""}}>
@@ -254,12 +241,6 @@ export default function Menu({
                             openSnackbar("Configuration Saved", 1000);
                         }}
                         text="Save Configuration"/>
-                    <SubMenu text="Button 2 Mapping">
-                        {btnMapping2("CanvasToolPen")}
-                        {btnMapping2("CanvasToolSelectRectangle")}
-                        {btnMapping2("CanvasToolEraser")}
-                        {btnMapping2("CanvasToolRectangle")}
-                    </SubMenu>
                 </SubMenu>
                 <SubMenu text="Test">
                     <SubMenu text="Deeper Nest 1">

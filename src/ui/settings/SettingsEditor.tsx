@@ -1,7 +1,9 @@
+import { CanvasToolName } from "../../document/CanvasTool";
 import { ConfigDTO } from "../../persistence/ConfigDTO";
 import Collapsible from "../collabsible/Collapsible";
 import { ObjWithSetter } from "../util/ObjWithSetter";
 import ColorPaletteEditor from "./ColorPaletteEditor";
+import MouseButtonEditor from "./MouseButtonEditor";
 import "./SettingsEditor.css";
 import ThemeSettingsEditor from "./ThemeSettingsEditor";
 
@@ -34,6 +36,14 @@ export function SettingsEditor({
         }
     };
 
+    const rightClick = {
+        value: config.value.binds.rightClick,
+        setValue: (r: CanvasToolName) => {
+            config.value.binds.rightClick = r;
+            config.setValue(config.value);
+        }
+    };
+
     return (
         <div className="wournal-settings">
             <div className="wournal-settings-row">
@@ -44,6 +54,9 @@ export function SettingsEditor({
             <div className="wournal-settings-row">
                 <Collapsible title="Theme">
                     <ThemeSettingsEditor theme={theme} />
+                </Collapsible>
+                <Collapsible title="Mouse Buttons">
+                    <MouseButtonEditor rightClick={rightClick}/>
                 </Collapsible>
             </div>
         </div>
