@@ -1,0 +1,17 @@
+.wournal-app .select-image-option {
+    display: inline-block;
+    padding: 6px 20px 6px 4px;
+    height: 16px;
+}
+
+.wournal-app .select-image-option > span {
+    vertical-align: top;
+    padding-left: 5px;
+}
+
+.wournal-app .select-image-option > img {
+    position:relative;
+    top:50%;
+    /* left:50%; */
+    transform:translateY(-50%);
+}
