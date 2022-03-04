@@ -1,8 +1,9 @@
 import { CanvasToolName } from "../../document/CanvasTool";
-import { ConfigDTO } from "../../persistence/ConfigDTO";
+import { CanvasToolConfig, ConfigDTO } from "../../persistence/ConfigDTO";
 import Collapsible from "../collabsible/Collapsible";
 import { ObjWithSetter } from "../util/ObjWithSetter";
 import ColorPaletteEditor from "./ColorPaletteEditor";
+import DefaultToolSettingsEditor from "./DefaultToolSettingsEditor";
 import MouseButtonEditor from "./MouseButtonEditor";
 import "./SettingsEditor.css";
 import ThemeSettingsEditor from "./ThemeSettingsEditor";
@@ -19,6 +20,10 @@ export function SettingsEditor({
     to avoid re-rendering the entire settings editor when only one setting
     changes. Therefore, individual sub-components are necessary to edit
     individual settings. */
+
+
+    // HACK: The state management in this component seems like it could/should
+    // be simplified.
 
     const colors = {
         value: config.value.colorPalette,
@@ -44,6 +49,14 @@ export function SettingsEditor({
         }
     };
 
+    const toolConfig = {
+        value: config.value.tools,
+        setValue: (d: CanvasToolConfig) => {
+            config.value.tools = d;
+            config.setValue(config.value);
+        }
+    };
+
     return (
         <div className="wournal-settings">
             <div className="wournal-settings-row">
@@ -57,6 +70,9 @@ export function SettingsEditor({
                 </Collapsible>
                 <Collapsible title="Mouse Buttons">
                     <MouseButtonEditor rightClick={rightClick}/>
+                </Collapsible>
+                <Collapsible title="Default Tool Options">
+                    <DefaultToolSettingsEditor toolConfig={toolConfig}/>
                 </Collapsible>
             </div>
         </div>

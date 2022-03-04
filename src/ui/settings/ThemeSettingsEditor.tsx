@@ -12,7 +12,7 @@ export default function ThemeSettingsEditor({
 
     return (
         <section className="wournal-settings-section wournal-settings-color">
-            <Select value={themeInternal} width="200px" imgSpace={false}
+            <Select value={themeInternal} width="180px" imgSpace={false}
                 onChange={(t) => {
                     commitTheme(t as "dark" | "light" | "auto");
                 }}>

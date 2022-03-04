@@ -2,14 +2,6 @@
     font-size: 10pt;
 }
 
-.wournal-settings-mouse-buttons ul {
-    padding-left: 15px;
-}
-
-.wournal-settings-mouse-buttons ul li span {
-    margin-right: 5px;
-}
-
-.wournal-settings-mouse-buttons ul li * {
-    vertical-align: middle;
+.wournal-settings-mouse-buttons table {
+    width: 100%;
 }

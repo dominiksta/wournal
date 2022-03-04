@@ -174,7 +174,7 @@ export default function Menu({
                                 forceUpdate();
                             }} />
                     </SubMenu>
-                    <SubMenu text="Pen Options">
+                    <SubMenu text="Thickness">
                         <MenuItem
                             mark={currStrokeWidth === "fine" ? "dot" : ""}
                             fun={() => {
@@ -230,47 +230,6 @@ export default function Menu({
                             forceUpdate();
                         }}
                         text="Default Pen"/>
-                    <MenuItem
-                        fun={() => wournal.doc.setCurrentToolAsDefault()}
-                        text="Set as Default"/>
-                </SubMenu>
-                <SubMenu text="Option">
-                    <MenuItem
-                        fun={async () => {
-                            await wournal.saveConfig(Wournal.CONF);
-                            openSnackbar("Configuration Saved", 1000);
-                        }}
-                        text="Save Configuration"/>
-                </SubMenu>
-                <SubMenu text="Test">
-                    <SubMenu text="Deeper Nest 1">
-                        <MenuItem
-                            mark="res/remix/save-3-line.svg"
-                            fun={() => null}
-                            text="Test 1" />
-                        <MenuItem
-                            mark="res/remix/save-3-line.svg"
-                            fun={() => null}
-                            text="Test 2" />
-                        <MenuItem
-                            mark="res/remix/save-3-line.svg"
-                            fun={() => null}
-                            text="Test 3" />
-                    </SubMenu>
-                    <SubMenu text="Deeper Nest 2">
-                        <MenuItem
-                            mark="res/remix/save-3-line.svg"
-                            fun={() => null}
-                            text="Test 3" />
-                        <MenuItem
-                            mark="res/remix/save-3-line.svg"
-                            fun={() => null}
-                            text="Test 4" />
-                        <MenuItem
-                            mark="res/remix/save-3-line.svg"
-                            fun={() => null}
-                            text="Test 5" />
-                    </SubMenu>
                 </SubMenu>
             </SubMenu>
         </div>
