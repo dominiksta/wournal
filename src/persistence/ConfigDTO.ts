@@ -77,7 +77,7 @@ export function defaultConfig(): ConfigDTO {
             },
             CanvasToolText: {
                 color: "#000000",
-                fontFamily: "sans-serif",
+                fontFamily: "Roboto Mono",
                 fontSize: 17,
             },
             CanvasToolRectangle: {

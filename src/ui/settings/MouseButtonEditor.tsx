@@ -1,5 +1,4 @@
 import { CanvasToolName } from "../../document/CanvasTool";
-import { ImgOption, Option, Select } from "../select";
 import { ObjWithSetter } from "../util/ObjWithSetter";
 import { useStateWithSetter } from "../util/useStateWithSetter";
 import "./MouseButtonEditor.css";

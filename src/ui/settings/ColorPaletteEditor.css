@@ -1,5 +1,5 @@
 .wournal-settings-color input {
-    width: 90%;
+    width: 95%;
 }
 
 .wournal-settings-color table {
@@ -9,6 +9,7 @@
 
 .wournal-settings-color table td {
     min-width: 20px;
+    max-width: 140px;
 }
 
 .wournal-settings-color table td button.wournal-color-remove {

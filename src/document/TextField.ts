@@ -51,7 +51,7 @@ export class TextField {
         page: WournalPage,
         private _pos: {x: number, y: number},
         fontSize: number = 17,
-        fontFamily: string = "sans-serif",
+        fontFamily: string,
         fontColor: string = "black",
         spellcheck: boolean = false
     ) {

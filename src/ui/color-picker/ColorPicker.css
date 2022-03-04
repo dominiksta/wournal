@@ -3,7 +3,7 @@
 }
 
 .wournal-color-picker input[type="text"]{
-    font-family: monospace;
+    font-family: Roboto Mono;
     width: 7ch;
     margin-left: 5px;
     text-transform: uppercase;

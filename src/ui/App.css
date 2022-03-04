@@ -1,5 +1,5 @@
-body {
-    font-family: sans-serif;
+body, button, input {
+    font-family: Roboto;
 }
 
 .wournal-app {
