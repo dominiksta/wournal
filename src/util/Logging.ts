@@ -18,48 +18,45 @@ class Logger {
         return Logger.instance;
     }
 
-    private log(level: LogLevel, obj: Object) {
+    private log(level: LogLevel, ...args: any[]) {
         if (level < this.level) return;
 
         let date = (new Date()).toISOString();
 
-        // Dealing with objects in the browser console window is a decent way of
-        // debugging and I don't want to lose that.
-        const objType = (obj: Object): boolean => {
-            return typeof(obj) !== "string" && typeof(obj) !== "number"
+        let argsWithNewLine = [];
+        for (let i = 0; i < args.length - 1; i++) {
+            argsWithNewLine.push(args[i]);
+            argsWithNewLine.push("\n");
         }
+        argsWithNewLine.push(args[args.length - 1]);
 
         switch(level) {
             case LogLevel.DEBUG:
-                console.debug(`${date} DEBUG: ${obj}`);
-                if (objType(obj)) console.debug(obj);
+                console.debug(`${date} DEBUG:`, ...argsWithNewLine);
                 break;
             case LogLevel.INFO:
-                console.log(`${date} INFO: ${obj}`);
-                if (objType(obj)) console.log(obj);
+                console.log(`${date} INFO:`, ...argsWithNewLine);
                 break;
             case LogLevel.WARN:
-                console.warn(`${date} WARN: ${obj}`);
-                if (objType(obj)) console.warn(obj);
+                console.warn(`${date} WARN:`, ...argsWithNewLine);
                 break;
             case LogLevel.ERROR:
-                console.error(`${date} ERROR: ${obj}`);
-                if (objType(obj)) console.error(obj);
+                console.error(`${date} ERROR:`, ...argsWithNewLine);
                 break;
         }
     }
 
-    public debug(obj: Object) {
-        this.log(LogLevel.DEBUG, obj);
+    public debug(...args: any[]) {
+        this.log(LogLevel.DEBUG, ...args);
     }
-    public info(obj: Object) {
-        this.log(LogLevel.INFO, obj);
+    public info(...args: any[]) {
+        this.log(LogLevel.INFO, ...args);
     }
-    public warn(obj: Object) {
-        this.log(LogLevel.WARN, obj);
+    public warn(...args: any[]) {
+        this.log(LogLevel.WARN, ...args);
     }
-    public error(obj: Object) {
-        this.log(LogLevel.ERROR, obj);
+    public error(...args: any[]) {
+        this.log(LogLevel.ERROR, ...args);
     }
 }
 

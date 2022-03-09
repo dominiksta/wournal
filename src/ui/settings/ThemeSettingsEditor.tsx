@@ -1,20 +1,20 @@
+import { ConfigStoreCtx, ConfigStore_SetTheme } from "../global-state/ConfigStore";
 import { Option, Select } from "../select";
-import { ObjWithSetter } from "../util/ObjWithSetter";
-import { useStateWithSetter } from "../util/useStateWithSetter";
+import useDispatch from "../util/redux/useDispatch";
+import useSelector from "../util/redux/useSelector";
 import "./ColorPaletteEditor.css";
 
-export default function ThemeSettingsEditor({
-    theme,
-}: {
-    theme: ObjWithSetter<"dark" | "light" | "auto">
-}) {
-    const [themeInternal, commitTheme] = useStateWithSetter(theme);
+export default function ThemeSettingsEditor() {
+    const theme = useSelector(ConfigStoreCtx, s => s.tmp.theme);
+    const dispatch = useDispatch(ConfigStoreCtx);
 
     return (
         <section className="wournal-settings-section wournal-settings-color">
-            <Select value={themeInternal} width="180px" imgSpace={false}
+            <Select value={theme} width="180px" imgSpace={false}
                 onChange={(t) => {
-                    commitTheme(t as "dark" | "light" | "auto");
+                    dispatch(ConfigStore_SetTheme(
+                        {theme: t as "dark" | "light" | "auto"})
+                    );
                 }}>
                 <Option value="light">Light</Option>
                 <Option value="dark">Invert</Option>

@@ -1,30 +1,25 @@
 import { useState } from "react";
-import { CanvasToolName, CanvasToolNames } from "../../document/CanvasTool";
-import { CanvasToolConfig } from "../../persistence/ConfigDTO";
-import { DSUtils } from "../../util/DSUtils";
 import ColorPicker from "../color-picker/ColorPicker";
+import { ConfigStoreCtx, ConfigStore_SetCanvasToolConfig } from "../global-state/ConfigStore";
 import { Option, Select } from "../select";
-import { ObjWithSetter } from "../util/ObjWithSetter";
-import { useStateWithSetter } from "../util/useStateWithSetter";
+import useDispatch from "../util/redux/useDispatch";
+import useSelector from "../util/redux/useSelector";
+import "./DefaultToolSettingsEditor.css";
 import SelectCanvasTool from "./SelectCanvasTool";
-import "./DefaultToolSettingsEditor.css"
 
 type ConfigurableCanvasTool = "CanvasToolPen" | "CanvasToolEraser" |
                               "CanvasToolText" | "CanvasToolRectangle";
 
-export default function DefaultToolSettingsEditor({
-    toolConfig,
-}: {
-    toolConfig: ObjWithSetter<CanvasToolConfig>,
-}) {
-    const [toolConfigInternal, commitToolConfig] = useStateWithSetter(toolConfig);
+export default function DefaultToolSettingsEditor() {
+    const toolConfig = useSelector(ConfigStoreCtx, s => s.tmp.tools);
+    const dispatch = useDispatch(ConfigStoreCtx);
+
     const [currTool, setCurrTool] = useState<ConfigurableCanvasTool>("CanvasToolPen");
 
-    const toolOpt = (opt: string) => (toolConfigInternal[currTool] as any)[opt];
+    const toolOpt = (opt: string) => (toolConfig[currTool] as any)[opt];
     const setToolOpt = (opt: string, to: any) => {
-        let tmpConfig = DSUtils.copyObj(toolConfigInternal);
-        (tmpConfig[currTool] as any)[opt] = to;
-        return tmpConfig;
+        (toolConfig[currTool] as any)[opt] = to;
+        return toolConfig;
     }
 
     return (
@@ -42,7 +37,8 @@ export default function DefaultToolSettingsEditor({
                             <td>
                                 <Select value={toolOpt("strokeWidth")} imgSpace={false}
                                     onChange={(v) => {
-                                        commitToolConfig(setToolOpt("strokeWidth", v));
+                                        dispatch(ConfigStore_SetCanvasToolConfig(
+                                            setToolOpt("strokeWidth", v)))
                                     }}>
                                     <Option value="fine">Fine</Option>
                                     <Option value="medium">Medium</Option>
@@ -57,7 +53,8 @@ export default function DefaultToolSettingsEditor({
                             <td> Color: </td>
                             <td>
                                 <ColorPicker color={toolOpt("color")} onChange={(v) =>
-                                    commitToolConfig(setToolOpt("color", v))
+                                    dispatch(ConfigStore_SetCanvasToolConfig(
+                                        setToolOpt("color", v)))
                                 } />
                             </td>
                         </tr>
@@ -70,9 +67,8 @@ export default function DefaultToolSettingsEditor({
                                 <Select value={toolOpt("eraseStrokes").toString()}
                                     width="150px"
                                     imgSpace={false} onChange={(v) => {
-                                        commitToolConfig(
-                                            setToolOpt("eraseStrokes", v === "true")
-                                        );
+                                        dispatch(ConfigStore_SetCanvasToolConfig(
+                                            setToolOpt("eraseStrokes", v === "true")))
                                     }}>
                                     <Option value="true">Erase Strokes</Option>
                                     <Option value="false">Erase Points</Option>

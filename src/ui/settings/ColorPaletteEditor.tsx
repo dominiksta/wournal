@@ -1,20 +1,17 @@
 import { DSUtils } from "../../util/DSUtils";
 import ColorPicker from "../color-picker/ColorPicker";
-import { ObjWithSetter } from "../util/ObjWithSetter";
-import { useStateWithSetter } from "../util/useStateWithSetter";
+import { ConfigStoreCtx, ConfigStore_SetColorConfig } from "../global-state/ConfigStore";
+import useDispatch from "../util/redux/useDispatch";
+import useSelector from "../util/redux/useSelector";
 import "./ColorPaletteEditor.css";
 
-export default function ColorPaletteEditor({
-    colors,
-}: {
-    /** The colors to display. */
-    colors: ObjWithSetter<{color: string, name: string}[]>
-}) {
-    const [colorsInternal, commitColors] = useStateWithSetter(colors);
+export default function ColorPaletteEditor() {
+    const colors = useSelector(ConfigStoreCtx, s => s.tmp.colorPalette);
+    const dispatch = useDispatch(ConfigStoreCtx);
 
     let colorEls = [];
     let colorI = 0;
-    for (let c of colorsInternal) {
+    for (let c of colors) {
 
         /* Note: Implementing the comparison this way means that no two colors
         can have the same name and value, otherwise this component will get
@@ -30,9 +27,8 @@ export default function ColorPaletteEditor({
                 <td>
                     <button
                         onClick={() => {
-                            let tmpColors = DSUtils.copyObj(
-                                colorsInternal.filter(col => !colCompare(col)));
-                            commitColors(tmpColors);
+                            dispatch(ConfigStore_SetColorConfig(
+                                colors.filter(col => !colCompare(col))));
                         }}
                         className="wournal-color-remove">
                         × {/* MULTIPLICATION SIGN */}
@@ -41,19 +37,17 @@ export default function ColorPaletteEditor({
                 <td>
                     <input
                         onChange={(e) => {
-                            let tmpColors = DSUtils.copyObj(colorsInternal);
-                            tmpColors.find(colCompare).name =
-                                e.target.value.toUpperCase();
-                            commitColors(tmpColors);
+                            colors.find(colCompare).name = e.target.value;
+                            dispatch(ConfigStore_SetColorConfig(colors));
                         }}
                         value={c.name} />
                 </td>
                 <td>
                     <ColorPicker color={c.color}
                         onChange={(color: string) => {
-                            let tmpColors = DSUtils.copyObj(colorsInternal);
+                            let tmpColors = DSUtils.copyObj(colors);
                             tmpColors.find(colCompare).color = color;
-                            commitColors(tmpColors);
+                            dispatch(ConfigStore_SetColorConfig(tmpColors));
                         }} />
                 </td>
             </tr>
@@ -71,10 +65,10 @@ export default function ColorPaletteEditor({
                         <td> </td>
                         <td className="wournal-settings-color-add">
                             <button onClick={() => {
-                                let tmpColors = DSUtils.copyObj(colorsInternal);
+                                let tmpColors = DSUtils.copyObj(colors);
                                 tmpColors.push({color: "#FFFFFF",
-                                                name: `Color ${colorsInternal.length}`});
-                                commitColors(tmpColors);
+                                                name: `Color ${colors.length}`});
+                                dispatch(ConfigStore_SetColorConfig(tmpColors));
                             }}>+</button>
                         </td>
                     </tr>

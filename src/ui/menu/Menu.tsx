@@ -35,13 +35,7 @@ export default function Menu({
 ) {
     const forceUpdate = useForceUpdate();
     const openSnackbar = useSnackbar()[0];
-    const openSettingsEditor = useSettingsEditor(
-        Wournal.CONF,
-        (async (dto: ConfigDTO) => {
-            await wournal.saveConfig(dto);
-            await wournal.loadConfig();
-        }).bind(wournal)
-    );
+    const openSettingsEditor = useSettingsEditor(wournal);
     const themeCtx = useContext(ThemeContext);
 
     return (

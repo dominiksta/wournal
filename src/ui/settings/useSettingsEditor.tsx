@@ -1,37 +1,29 @@
 import { useContext } from "react";
-import { ConfigDTO } from "../../persistence/ConfigDTO";
-import { DSUtils } from "../../util/DSUtils";
+import { Wournal } from "../../document/Wournal";
 import { ThemeContext } from "../App";
+import { ConfigStoreCtx, ConfigStore_SaveConfig, ConfigStore_SetTmp } from "../global-state/ConfigStore";
 import useModal from "../modal/useModal";
 import { useSnackbar } from "../snackbar/useSnackbar";
-import { ObjWithSetter } from "../util/ObjWithSetter";
+import useDispatch from "../util/redux/useDispatch";
 import { SettingsEditor } from "./SettingsEditor";
 
-export function useSettingsEditor(
-    config: ConfigDTO,
-    saveConfig: (dto: ConfigDTO) => Promise<void>
-) {
+export function useSettingsEditor(wournal: Wournal) {
     let openSnackBar = useSnackbar()[0];
     let openModal = useModal();
 
     const themeCtx = useContext(ThemeContext);
+    const dispatch = useDispatch(ConfigStoreCtx);
 
     return () => {
-        const conf: ObjWithSetter<ConfigDTO> = {
-            /* save a copy of the current config so that closing the settings
-             editor is equivalent to cancellying in that it does not save the
-             config */
-            value: DSUtils.copyObj(config),
-            setValue: (c: ConfigDTO) => { conf.value = c; }
-        }
+        dispatch(ConfigStore_SetTmp(Wournal.CONF));
 
         openModal(
-            <SettingsEditor config={conf} />,
+            <SettingsEditor/>,
             "Settings", [
             {
                 name: "Save", close: true, action: async () => {
-                    await saveConfig(conf.value);
-                    themeCtx.setTheme(conf.value.theme);
+                    dispatch(ConfigStore_SaveConfig({wournal}));
+                    themeCtx.setTheme(Wournal.CONF.theme);
                     openSnackBar("Configuration Saved");
                 }, style: "primary"
             }, {
