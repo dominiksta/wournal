@@ -16,6 +16,8 @@ export type CanvasToolEraserConfig = {
 export type CanvasToolTextConfig = {
     color: string,
     fontSize: number,
+    fontStyle: "normal" | "italic",
+    fontWeight: "normal" | "bold",
     fontFamily: string,
 }
 
@@ -77,6 +79,8 @@ export function defaultConfig(): ConfigDTO {
             },
             CanvasToolText: {
                 color: "#000000",
+                fontStyle: "normal",
+                fontWeight: "normal",
                 fontFamily: "Roboto Mono",
                 fontSize: 17,
             },

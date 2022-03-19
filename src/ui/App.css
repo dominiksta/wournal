@@ -70,6 +70,13 @@ body, button, input {
  * inputs
  * ---------------------------------------------------------------------- */
 
+.wournal-app input {
+    height: 26px;
+    padding: 1px 10px;
+    border-radius: 3px;
+    border: 1px solid black;
+}
+
 .wournal-app input.wournal-input-invalid {
     border-color: red;
     outline: red;

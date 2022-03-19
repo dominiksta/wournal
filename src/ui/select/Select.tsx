@@ -1,4 +1,4 @@
-import { createContext, useRef, useState } from "react";
+import { createContext, CSSProperties, useRef, useState } from "react";
 import useOnClickOutside from "../util/useOnClickOutside";
 import { TextOption } from "./Option";
 import "./Select.css";
@@ -26,6 +26,7 @@ export default function Select({
     onChange = () => null,
     width = "100px",
     imgSpace = true,
+    style = {},
 }: {
     /** Multiple <Option> elements */
     children: JSX.Element[],
@@ -39,6 +40,8 @@ export default function Select({
     width?: string,
     /** Wether to leave some additional space for images in <ImgOption>s */
     imgSpace?: boolean,
+    /** Additional CSS properties */
+    style?: CSSProperties,
 }) {
     const [showDropdown, setShowDropdown] = useState(false);
     const [dropDownPos, setDropDownPos] = useState({x: 0, y: 0});
@@ -67,7 +70,7 @@ export default function Select({
                 }
             }}>
             <div className="select-container" ref={selectContainerRef}
-                style={{width: width}}>
+                style={{...style, width: width}}>
                 <div className={"selected-text" + (showDropdown ? " active" : "")}
                     onClick={() => {
                         moveDropdown();

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Store from "../util/redux/Store";
 import { ConfigStore, ConfigStoreCtx } from "./ConfigStore";
+import { CurrentToolConfigStore, CurrentToolConfigStoreCtx } from "./CurrentToolConfigStore";
 
 /**
  * This compoennt registers the state of every `Store` as a react context, so
@@ -14,7 +15,10 @@ export default function StoresProvider({
 
     return (
         <StoreProvider context={ConfigStoreCtx} store={ConfigStore}>
-            {children}
+            <StoreProvider context={CurrentToolConfigStoreCtx}
+                store={CurrentToolConfigStore}>
+                {children}
+            </StoreProvider>
         </StoreProvider>
     );
 }

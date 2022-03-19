@@ -1,0 +1,11 @@
+.wournal-font-picker > table td {
+    width: 100%;
+}
+
+.wournal-font-picker > table tr {
+    height: 36px;
+}
+
+.wournal-font-picker input {
+    width: 80px;
+}

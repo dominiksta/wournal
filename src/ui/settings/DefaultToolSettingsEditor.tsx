@@ -1,5 +1,6 @@
 import { useState } from "react";
 import ColorPicker from "../color-picker/ColorPicker";
+import useFontPickerModal from "../font-picker/useFontPickerModal";
 import { ConfigStoreCtx, ConfigStore_SetCanvasToolConfig } from "../global-state/ConfigStore";
 import { Option, Select } from "../select";
 import useDispatch from "../util/redux/useDispatch";
@@ -21,6 +22,8 @@ export default function DefaultToolSettingsEditor() {
         (toolConfig[currTool] as any)[opt] = to;
         return toolConfig;
     }
+
+    const openFontPicker = useFontPickerModal("config");
 
     return (
         <section className="wournal-settings-section
@@ -73,6 +76,17 @@ export default function DefaultToolSettingsEditor() {
                                     <Option value="true">Erase Strokes</Option>
                                     <Option value="false">Erase Points</Option>
                                 </Select>
+                            </td>
+                        </tr>
+                }
+                {
+                    toolOpt("fontFamily") === undefined ? null :
+                        <tr>
+                            <td> Font: </td>
+                            <td>
+                                <button className="wournal-btn" onClick={openFontPicker}>
+                                    {toolOpt("fontFamily")}
+                                </button>
                             </td>
                         </tr>
                 }

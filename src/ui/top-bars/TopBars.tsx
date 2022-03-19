@@ -13,6 +13,7 @@ import Toolbar from '../toolbar/Toolbar';
 import ToolbarButton from '../toolbar/ToolbarButton';
 import ToolbarColorButtons from '../toolbar/ToolbarColorButtons';
 import ToolbarSeperator from '../toolbar/ToolbarSeperator';
+import useFontPickerModal from '../font-picker/useFontPickerModal';
 
 
 export default function TopBars({ wournal }: { wournal: Wournal }) {
@@ -22,6 +23,8 @@ export default function TopBars({ wournal }: { wournal: Wournal }) {
     const [redoAvailable, setRedoAvailable] = useState(false);
     const forceUpdate = useForceUpdate();
     const openSnackbar = useSnackbar()[0];
+    const openFontPicker = useFontPickerModal("current");
+
 
     wournal.doc.notifyUndoAvailable = setUndoAvailable;
     wournal.doc.notifyRedoAvailable = setRedoAvailable;
@@ -210,6 +213,21 @@ export default function TopBars({ wournal }: { wournal: Wournal }) {
                         wournal.doc.setColor(color);
                         forceUpdate();
                     }}/>
+
+                <ToolbarSeperator/>
+
+                {/* HACK: Centering like this should not be necessary, but I
+                cannot figure out a more proper way currently. */}
+                <button className="wournal-btn"
+                    style={{
+                        marginBottom: "4px", verticalAlign: "bottom",
+                        height: "32px",
+                        fontFamily: Wournal.currToolConf.CanvasToolText.fontFamily
+                    }}
+                    onClick={openFontPicker}>
+                    <span>{Wournal.currToolConf.CanvasToolText.fontFamily} </span>
+                    <span>{Wournal.currToolConf.CanvasToolText.fontSize}</span>
+                </button>
             </Toolbar>
         </div>
     );

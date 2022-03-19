@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { CSSProperties, useContext } from "react";
 import { SelectContext } from "./Select";
 import "./Option.css";
 
@@ -24,16 +24,18 @@ export function TextOption({
 /** See <Select> Component */
 export default function Option({
     children,
-    value
+    value,
+    style = {}
 }: {
     children: string | JSX.Element,
     value: string,
+    style?: CSSProperties,
 }) {
     const selectCtx = useContext(SelectContext);
 
     return (
         <li className="select-option"
-            style={{width: selectCtx.width}}
+            style={{...style, width: selectCtx.width}}
             onClick={() => selectCtx.changeSelectedOption(value)}>
             {
                 typeof children === "string" ?

@@ -1,9 +1,7 @@
 import { CanvasToolName } from "../../document/CanvasTool";
 import { ConfigStoreCtx, ConfigStore_SetRightClick } from "../global-state/ConfigStore";
-import { ObjWithSetter } from "../util/ObjWithSetter";
 import useDispatch from "../util/redux/useDispatch";
 import useSelector from "../util/redux/useSelector";
-import { useStateWithSetter } from "../util/useStateWithSetter";
 import "./MouseButtonEditor.css";
 import SelectCanvasTool from "./SelectCanvasTool";
 

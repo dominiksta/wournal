@@ -9,6 +9,7 @@ import { CanvasToolText } from "../../document/CanvasToolText";
 import { Wournal } from "../../document/Wournal";
 import { CanvasToolStrokeWidth, ConfigDTO } from "../../persistence/ConfigDTO";
 import { ThemeContext } from "../App";
+import useFontPickerModal from "../font-picker/useFontPickerModal";
 import { useSettingsEditor } from "../settings/useSettingsEditor";
 import { useSnackbar } from "../snackbar/useSnackbar";
 import { useForceUpdate } from "../util/useForceUpdate";
@@ -34,8 +35,8 @@ export default function Menu({
 }
 ) {
     const forceUpdate = useForceUpdate();
-    const openSnackbar = useSnackbar()[0];
     const openSettingsEditor = useSettingsEditor(wournal);
+    const openFontPicker = useFontPickerModal("current");
     const themeCtx = useContext(ThemeContext);
 
     return (
@@ -209,6 +210,11 @@ export default function Menu({
                             }}
                             text="Erase Points"/>
                     </SubMenu>
+                    <MenuItem
+                        mark="res/remix/text.svg"
+                        fun={() => openFontPicker()}
+                        shortcut="Ctrl+Shift+T"
+                        text="Select Text Font" />
                     <MenuItem
                         mark="res/material/autorenew.svg"
                         fun={() => {
