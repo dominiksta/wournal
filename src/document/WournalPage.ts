@@ -60,6 +60,7 @@ export class WournalPage {
 
         this.display.style.border = "2px solid gray";
         this.display.style.margin = "10px auto 10px auto";
+        this.display.style.userSelect = "none";
 
         this.svgWrapperEl = doc.display.ownerDocument.createElement("div");
         this.svgWrapperEl.style.transformOrigin = "0 0";
