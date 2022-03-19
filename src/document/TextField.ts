@@ -50,7 +50,9 @@ export class TextField {
     constructor(
         page: WournalPage,
         private _pos: {x: number, y: number},
-        fontSize: number = 17,
+        fontSize: number,
+        fontStyle: "normal" | "italic",
+        fontWeight: "normal" | "bold",
         fontFamily: string,
         fontColor: string = "black",
         spellcheck: boolean = false
@@ -62,6 +64,8 @@ export class TextField {
         this.label = page.toolLayer.ownerDocument.createElement("label");
         this.label.setAttribute("class", "wournal-text-field-label");
         this.label.style.fontFamily = fontFamily;
+        this.label.style.fontWeight = fontWeight;
+        this.label.style.fontStyle = fontStyle;
         this.label.style.display = "inline-grid";
         this.label.style.border = "1px solid blue";
         this.label.style.borderRadius = "2px";
@@ -115,7 +119,8 @@ export class TextField {
             page, {
                 x: canvasPos.x + offset.x,
                 y: canvasPos.y + offset.y
-            }, canvasTxt.getFontSize(), canvasTxt.getFontFamily(),
+            }, canvasTxt.getFontSize(), canvasTxt.getFontStyle(),
+            canvasTxt.getFontWeight(), canvasTxt.getFontFamily(),
             canvasTxt.getColor()
         );
     }

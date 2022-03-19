@@ -239,7 +239,8 @@ export class WournalDocument {
             this.display.ownerDocument,
             // TODO: find a more sane paste position then 10,10
             new CanvasTextData(
-                text, { x: 10, y: 10 }, c.fontSize, c.fontFamily, c.color,
+                text, { x: 10, y: 10 }, c.fontSize, c.fontStyle, c.fontWeight,
+                c.fontFamily, c.color,
         ));
 
         this.activePage.activePaintLayer.appendChild(textEl.svgElem);

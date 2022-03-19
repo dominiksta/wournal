@@ -89,6 +89,7 @@ export class CanvasText extends CanvasElement {
     public override getData(): CanvasTextData {
         return new CanvasTextData(
             this.getText(), this.getPos(), this.getFontSize(),
+            this.getFontStyle(), this.getFontWeight(),
             this.getFontFamily(), this.getColor()
         );
     }
@@ -98,6 +99,8 @@ export class CanvasText extends CanvasElement {
         this.setText(dto.text);
         this.setFontFamily(dto.fontFamily);
         this.setFontSize(dto.fontSize);
+        this.setFontStyle(dto.fontStyle);
+        this.setFontWeight(dto.fontWeight);
         this.setColor(dto.color);
     }
 
@@ -107,6 +110,28 @@ export class CanvasText extends CanvasElement {
 
     public getFontFamily(): string {
         return this._svgElem.getAttribute("font-family");
+    }
+
+    public setFontWeight(weight: "normal" | "bold"): void {
+        return this._svgElem.setAttribute("font-weight", weight);
+    }
+
+    public getFontWeight(): "normal" | "bold" {
+        const w = this._svgElem.getAttribute("font-weight")
+        if (w !== "normal" && w !== "bold")
+            throw new Error(`Invalid font-weight: ${w}`)
+        return w;
+    }
+
+    public setFontStyle(style: "normal" | "italic"): void {
+        return this._svgElem.setAttribute("font-style", style);
+    }
+
+    public getFontStyle(): "normal" | "italic" {
+        const s = this._svgElem.getAttribute("font-style")
+        if (s !== "normal" && s !== "italic")
+            throw new Error(`Invalid font-style: ${s}`)
+        return s;
     }
 
     public setFontSize(size: number) {
@@ -178,6 +203,8 @@ export class CanvasTextData extends CanvasElementData {
         public text: string,
         public pos: {x: number, y: number},
         public fontSize: number,
+        public fontStyle: "normal" | "italic",
+        public fontWeight: "normal" | "bold",
         public fontFamily: string,
         public color: string,
     ) { super(); }

@@ -98,6 +98,7 @@ export class CanvasToolText extends CanvasTool {
             y: pos.y - 12
         };
 
+        const c = Wournal.currToolConf.CanvasToolText;
         let canvasText = CanvasText.fromData(
             this.toolUseStartPage.toolLayer.ownerDocument,
             new CanvasTextData(
@@ -105,9 +106,7 @@ export class CanvasToolText extends CanvasTool {
                     x: svg_pos.x,
                     y: svg_pos.y
                 },
-                Wournal.currToolConf.CanvasToolText.fontSize,
-                Wournal.currToolConf.CanvasToolText.fontFamily,
-                Wournal.currToolConf.CanvasToolText.color
+                c.fontSize, c.fontStyle, c.fontWeight, c.fontFamily, c.color
             ),
         );
         this.toolUseStartPage.activePaintLayer.appendChild(
