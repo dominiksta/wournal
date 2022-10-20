@@ -24,7 +24,7 @@ export class CanvasToolImage extends CanvasTool {
         if (this.toolUseStartPage === null) return;
 
         const mouse = this.toolUseStartPage.globalCoordsToCanvas(e);
-        const file = await FileUtils.promptReadFile(
+        const file = await FileUtils.promptReadFileAsUtf8String(
             "dataUrl", ["png", "jpg", "jpeg"],
             ["image/png", "image/jpg", "image/jpeg"]
         );

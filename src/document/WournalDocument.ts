@@ -47,7 +47,7 @@ export class WournalDocument {
 
     private constructor(
         public display: HTMLDivElement,
-        public identification: string = "wournaldoc.svg",
+        public identification: string = "wournaldoc.woj",
     ) {
         this.display.addEventListener("mouseup", this.onMouseUp.bind(this));
         this.display.addEventListener("mousedown", this.onMouseDown.bind(this));

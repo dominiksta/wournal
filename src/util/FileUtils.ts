@@ -17,21 +17,32 @@ export const FileUtils = {
         document.body.removeChild(element);
     },
 
+    /** 'Download' a given blob object with filename `name` */
+    downloadBlob: function(blob: Blob, name: string) {
+        // Create a link pointing to the ObjectURL containing the blob.
+        const data = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = data;
+        link.download = name;
+
+        link.click();
+
+        setTimeout(() => {
+            window.URL.revokeObjectURL(data);
+            link.remove();
+        }, 100);
+    },
+
     /**
      * Prompts the user for a file with one of `extensions`. If the mimetype of
      * the chosen file is not one of `mimeTypes`, throws an Error. Otherwise
-     * rerturns a Promise that resolves to the contents of the chosen file.
-     *
-     * The contents of the file will be returned as either a string or dataUrl
-     * depending on the value of `ret`.
-     *
-     * Text files will be decoded as UTF-8.
+     * rerturns a Promise that resolves to the raw contents of the chosen file.
      */
     promptReadFile: async function(
-        ret: "string" | "dataUrl",
         extensions: string[] | "any" = "any",
         mimeTypes: string[] | "any" = "any",
-    ) {
+    ): Promise<File> {
         let input = document.createElement("input");
         input.hidden = true;
         input.multiple = false;
@@ -65,21 +76,48 @@ export const FileUtils = {
             mimeTypes.filter(t => ftype === t).length === 0)
             err();
 
-        return new Promise<{name: string, content: string}>(
+
+        return input.files[0];
+    },
+
+    blobToUtf8String: async function(
+        blob: Blob,
+        ret: "string" | "dataUrl",
+    ) {
+        return new Promise<string>(
             async (resolve) => {
                 let reader = new FileReader();
                 reader.onload = () => {
-                    resolve({
-                        name: input.files[0].name,
-                        content: reader.result as string,
-                    });
+                    resolve(reader.result as string);
                 }
-                if (ret == "string")
-                    reader.readAsText(input.files[0], "UTF-8");
+                if (ret === "string")
+                    reader.readAsText(blob, "UTF-8");
                 else if (ret === "dataUrl")
-                    reader.readAsDataURL(input.files[0]);
+                    reader.readAsDataURL(blob);
             }
         );
+    },
+
+    /**
+     * Prompts the user for a file with one of `extensions`. If the mimetype of
+     * the chosen file is not one of `mimeTypes`, throws an Error. Otherwise
+     * rerturns a Promise that resolves to the contents of the chosen file.
+     *
+     * The contents of the file will be returned as either a string or dataUrl
+     * depending on the value of `ret`.
+     *
+     * Text files will be decoded as UTF-8.
+     */
+    promptReadFileAsUtf8String: async function(
+        ret: "string" | "dataUrl",
+        extensions: string[] | "any" = "any",
+        mimeTypes: string[] | "any" = "any",
+    ) {
+        const file = await this.promptReadFile(extensions, mimeTypes);
+        return {
+            name: file.name,
+            content: await this.blobToUtf8String(file, ret),
+        }
     },
 
     /** return computed with for dataUrl image in px */

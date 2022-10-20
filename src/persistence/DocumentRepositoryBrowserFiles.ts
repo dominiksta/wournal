@@ -2,11 +2,8 @@ import { FileUtils } from "../util/FileUtils";
 import { LOG } from "../util/Logging";
 import { DocumentRepository } from "./DocumentRepository";
 import { DocumentDTO } from "./DocumentDTO";
+import ZipFile from "../util/ZipFile";
 
-/**
- * TODO: This currently only implements saving/loading single svg files. In the
- * future, files containing multiple pages ('.woj' maybe?) should be possible;
- */
 export class DocumentRepositoryBrowserFiles extends DocumentRepository {
 
     private static instance: DocumentRepository = null;
@@ -22,15 +19,21 @@ export class DocumentRepositoryBrowserFiles extends DocumentRepository {
      * browser. `identification` will be ignored.
      */
     override async load(identification: string): Promise<DocumentDTO> {
-        let file = await FileUtils.promptReadFile(
-            "string", ["svg"], ["image/svg+xml"]
+        const file = await FileUtils.promptReadFile(
+            ["woj"]
         );
-        LOG.info(`Loading file from browser: ${file.name}`);
-        return new DocumentDTO(
-            file.name, [
-                FileUtils.firstSvgElFromXmlFileString(file.content).outerHTML
-            ]
-        );;
+
+        if (file.name.endsWith(".svg")) {
+            return new DocumentDTO(file.name, [
+                await FileUtils.blobToUtf8String(file, "string")
+            ]);
+        } else {
+            const zipFile = await ZipFile.fromBlob(file);
+            const pages = await Promise.all((await zipFile.allFiles())
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map(async f => await FileUtils.blobToUtf8String(f.blob, "string")));
+            return new DocumentDTO(file.name, pages);
+        }
     }
 
     /**
@@ -38,9 +41,14 @@ export class DocumentRepositoryBrowserFiles extends DocumentRepository {
      * identification.
      */
     override async save(doc: DocumentDTO): Promise<void> {
-        FileUtils.downloadStringAsUtf8File(
-            doc.identification,
-            FileUtils.addXmlHeaderToSvgString(doc.pagesSvg[0])
-        );
+        const zipFile = new ZipFile();
+
+        for (let i = 0; i < doc.pagesSvg.length; i++) {
+            zipFile.addFile(
+                String(String(i).padStart(4, '0')) + '-page.svg', doc.pagesSvg[i]
+            );
+        }
+
+        FileUtils.downloadBlob(await zipFile.asBlob(), doc.identification);
     }
 }
