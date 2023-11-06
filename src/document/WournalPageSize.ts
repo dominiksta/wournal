@@ -12,16 +12,16 @@ const MM_TO_PIXEL = 4;
  * https://stackoverflow.com/a/56549861.
  */
 export function xToPx(x: string) {
-    // if no measurement is provided, assume pixels
-    if (!x.match(/[\d.]+(m|cm|mm|rem|px)/)) x = x + "px"
+  // if no measurement is provided, assume pixels
+  if (!x.match(/[\d.]+(m|cm|mm|rem|px)/)) x = x + "px"
 
-    let div = document.createElement('div');
-    div.style.display = 'block';
-    div.style.height = x;
-    document.body.appendChild(div);
-    let px = parseFloat(window.getComputedStyle(div, null).height);
-    div.parentNode.removeChild(div);
-    return px;
+  let div = document.createElement('div');
+  div.style.display = 'block';
+  div.style.height = x;
+  document.body.appendChild(div);
+  let px = parseFloat(window.getComputedStyle(div, null).height);
+  div.parentNode.removeChild(div);
+  return px;
 }
 
 /**
@@ -30,14 +30,14 @@ export function xToPx(x: string) {
  * Word, Sumatra PDF and other applications.
  */
 export function computeZoomFactor() {
-    return xToPx(1000 + "mm") / (1000 * MM_TO_PIXEL);
+  return xToPx(1000 + "mm") / (1000 * MM_TO_PIXEL);
 }
 
 /** A collection of page sizes in px. */
 export const WournalPageSize = {
-    // real dimensions: 297 mm x 210 mm
-    DINA4_PORTRAIT:  {height: 297 * MM_TO_PIXEL, width: 210 * MM_TO_PIXEL},
-    DINA4_LANDSCAPE: {height: 210 * MM_TO_PIXEL, width: 297 * MM_TO_PIXEL},
-    DINA5_PORTRAIT:  {height: 210 * MM_TO_PIXEL, width: 148 * MM_TO_PIXEL},
-    DINA5_LANDSCAPE: {height: 148 * MM_TO_PIXEL, width: 210 * MM_TO_PIXEL},
+  // real dimensions: 297 mm x 210 mm
+  DINA4_PORTRAIT: { height: 297 * MM_TO_PIXEL, width: 210 * MM_TO_PIXEL },
+  DINA4_LANDSCAPE: { height: 210 * MM_TO_PIXEL, width: 297 * MM_TO_PIXEL },
+  DINA5_PORTRAIT: { height: 210 * MM_TO_PIXEL, width: 148 * MM_TO_PIXEL },
+  DINA5_LANDSCAPE: { height: 148 * MM_TO_PIXEL, width: 210 * MM_TO_PIXEL },
 }

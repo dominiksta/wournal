@@ -1,6 +1,6 @@
 export class DocumentDTO {
-    constructor(
-        public identification: string,
-        public pagesSvg: string[]
-    ) { }
+  constructor(
+    public identification: string,
+    public pagesSvg: string[]
+  ) { }
 }

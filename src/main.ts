@@ -15,8 +15,8 @@ class AppNew extends Component {
 
   render() {
     return [
-        TopBars.t({ props: { wournal: this.wournal } }),
-        h.div(this.wournal.display),
+      TopBars.t({ props: { wournal: this.wournal } }),
+      h.div(this.wournal.display),
     ]
   }
 }
