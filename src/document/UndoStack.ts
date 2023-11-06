@@ -19,8 +19,8 @@ export class UndoStack {
     get redoAvailable(): boolean { return this.redoable.length > 0; }
 
     private notifyAvailable() {
-        this.doc.notifyUndoAvailable(this.undoAvailable);
-        this.doc.notifyRedoAvailable(this.redoAvailable);
+        this.doc.undoAvailable.next(this.undoAvailable);
+        this.doc.redoAvailable.next(this.redoAvailable);
     }
 
     public push(action: UndoAction): void {

@@ -53,7 +53,7 @@ export class WournalPage {
      *   dimensions for a new, blank page.
      */
     private constructor(
-        private doc: WournalDocument
+        public doc: WournalDocument
     ) {
         this.display = doc.display.ownerDocument.createElement("div");
         this.display.setAttribute("class", "wournal-page");
@@ -310,12 +310,4 @@ export class WournalPage {
      public updateTheme(): void {
          this.canvasWrapper.style.filter = ThemeUtils.currDark() ? "invert(1)" : "";
      }
-
-    // ------------------------------------------------------------
-    // notify react
-    // ------------------------------------------------------------
-
-    public notifySelectionAvailable(avail: boolean) {
-        this.doc.notifySelectionAvailable(avail);
-    }
 }

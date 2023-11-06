@@ -1,27 +1,22 @@
 {
   "compilerOptions": {
-    "target": "es2016",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
+    "incremental": true,
+    "sourceMap": true,
     "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
+
+    // these are because the project sadly started without them, but only for now
+    "strictPropertyInitialization": false,
     "strictNullChecks": false,
-    "noEmit": true,
-    "jsx": "react-jsx"
+
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "target": "es2015",
+    "lib": [ "esnext", "dom", "dom.iterable" ],
+    "baseUrl": "./src",
+    "outDir": "./dist/esm2015"
   },
   "include": [
-    "src"
+    "src",
+    "test"
   ]
 }

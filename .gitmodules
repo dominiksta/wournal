@@ -1,0 +1,3 @@
+[submodule "vendor/mvui"]
+	path = vendor/mvui
+	url = git@github.com:dominiksta/mvui.git

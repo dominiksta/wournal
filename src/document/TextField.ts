@@ -1,4 +1,4 @@
-import { ShortcutManager } from "../ui/shortcuts/Shortcuts";
+import { ShortcutManager } from "app/shortcuts";
 import { ThemeUtils } from "../util/ThemeUtils";
 import { CanvasText } from "./CanvasText";
 import { WournalPage } from "./WournalPage";

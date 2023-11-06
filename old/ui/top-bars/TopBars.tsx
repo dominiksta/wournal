@@ -25,11 +25,10 @@ export default function TopBars({ wournal }: { wournal: Wournal }) {
     const openSnackbar = useSnackbar()[0];
     const openFontPicker = useFontPickerModal("current");
 
-
-    wournal.doc.notifyUndoAvailable = setUndoAvailable;
-    wournal.doc.notifyRedoAvailable = setRedoAvailable;
-    wournal.doc.notifySelectionAvailable = setSelectionAvailable;
-    wournal.doc.notifySetTool = setCurrentTool;
+    /* wournal.doc.notifyUndoAvailable = setUndoAvailable;
+     * wournal.doc.notifyRedoAvailable = setRedoAvailable;
+     * wournal.doc.notifySelectionAvailable = setSelectionAvailable;
+     * wournal.doc.notifySetTool = setCurrentTool; */
 
     const loadDocument = async (empty: boolean) => {
         await wournal.loadDocument(empty);

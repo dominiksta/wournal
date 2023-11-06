@@ -42,7 +42,7 @@ export class CanvasSelection {
     /** Remove all elements from given `page` */
     public clear() {
         this._selection = [];
-        this.notifySelectionAvailable();
+        this.page?.doc.selectionAvailable.next(true);
         this._selectionDisplay?.destroy(true);
     }
 
@@ -166,7 +166,7 @@ export class CanvasSelection {
         this._selectionDisplay.setDimension(page.globalDOMRectToCanvas(boundingRect));
         this._selection = els.map(e => { return { el: e, savedData: e.getData() } });
         this._selectionDisplay.setCursorState("idle");
-        this.notifySelectionAvailable();
+        this.page?.doc.selectionAvailable.next(true);
     }
 
     public setSelectionFromCurrentRect() {
@@ -183,10 +183,6 @@ export class CanvasSelection {
                 );
             }
         }
-        this.notifySelectionAvailable();
-    }
-
-    private notifySelectionAvailable() {
-        this.page?.notifySelectionAvailable(this._selection.length !== 0);
+        this.page?.doc.selectionAvailable.next(true);
     }
 }
