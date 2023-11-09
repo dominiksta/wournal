@@ -19,11 +19,15 @@ module.exports = {
         test: /\.js$/,
         enforce: "pre",
         use: ["source-map-loader"],
-      }
-      ,{
+      },
+      {
         test: /\.ts$/,
         exclude: /node-modules/,
         use: 'ts-loader'
+      },
+      {
+        test: /\.css$/i,
+        use: ["style-loader", "css-loader"],
       },
     ],
   },
