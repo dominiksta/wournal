@@ -1,4 +1,4 @@
-import { ThemeUtils } from "../util/ThemeUtils";
+import { theme } from "global-styles";
 import { BackgroundGenerator, BackgroundGeneratorColor } from "./BackgroundGenerators";
 import { WournalDocument } from "./WournalDocument";
 import { xToPx } from "./WournalPageSize";
@@ -61,6 +61,7 @@ export class WournalPage {
     this.display.style.border = "2px solid gray";
     this.display.style.margin = "10px auto 10px auto";
     this.display.style.userSelect = "none";
+    this.display.style.filter = theme.invert;
 
     this.svgWrapperEl = doc.display.ownerDocument.createElement("div");
     this.svgWrapperEl.style.transformOrigin = "0 0";
@@ -84,8 +85,6 @@ export class WournalPage {
     this.toolLayer.setAttribute("class", "wournal-page-toollayer");
     this.toolLayer.style.position = "absolute";
     this.svgWrapperEl.appendChild(this.toolLayer)
-
-    this.updateTheme();
   }
 
   // ------------------------------------------------------------
@@ -301,13 +300,5 @@ export class WournalPage {
       width: r.width * 1 / this.zoom,
       height: r.height * 1 / this.zoom,
     });
-  }
-
-  // ------------------------------------------------------------
-  // theme
-  // ------------------------------------------------------------
-
-  public updateTheme(): void {
-    this.canvasWrapper.style.filter = ThemeUtils.currDark() ? "invert(1)" : "";
   }
 }

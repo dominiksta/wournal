@@ -1,4 +1,6 @@
-import { Component, h, rx, style } from "@mvui/core";
+import { Component, h, http, rx, style, TemplateElementChild } from "@mvui/core";
+import * as ui5 from "@mvui/ui5";
+import { theme } from "global-styles";
 
 @Component.register
 export class ToolbarButton extends Component<{
@@ -22,16 +24,33 @@ export class ToolbarButton extends Component<{
   render() {
     const p = this.props;
 
-    const imgOrColor = p.img.derive(
-      img => img.startsWith('color:')
-        ? h.div({ fields: { className: 'colorbtn' }, style: { background: '' } })
-        : h.img({ fields: { src: p.img, alt: p.alt } })
-    );
+    const imgOrColor = p.img.pipe(
+      rx.switchMap<string, TemplateElementChild>(img => {
+        if (img.startsWith('color:'))
+          return rx.of(h.span({
+            fields: { className: 'colorbtn' },
+            style: { background: img.split('color:')[1] }
+          }));
+
+        if (img.startsWith('icon:'))
+          return rx.of(ui5.icon({
+            fields: { name: img.split('icon:')[1] },
+          }));
+
+        return http.get(img, { parseBody: false }).map(res => {
+          let outerSvg = document.createElementNS(
+            "http://www.w3.org/2000/svg", "svg"
+          );
+          outerSvg.innerHTML = res.body;
+          return outerSvg;
+        })
+      }),
+    )
 
     return [
       h.button({
         fields: {
-          className: p.current.derive(c => c ? 'active' : ''),
+          className: p.current.derive(c => c ? 'current' : ''),
           disabled: p.disabled,
           title: p.alt,
         },
@@ -47,38 +66,51 @@ export class ToolbarButton extends Component<{
 
   static styles = style.sheet({
     'button': {
-      background: 'white',
+      background: ui5.Theme.BackgroundColor,
       margin: '0px',
       border: 'none',
       verticalAlign: 'middle',
-      height: '40px'
+      height: '36px',
+      width: '36px',
+      borderRadius: '5px',
     },
     'button:hover': {
-      background: '#efefef',
+      background: ui5.Theme.Button_Hover_Background,
+      border: `1px solid ${ui5.Theme.Button_BorderColor}`,
     },
     'button:active:not(:disabled)': {
-      background: 'lightblue',
+      background: ui5.Theme.Button_Active_Background,
     },
     'button:disabled': {
       opacity: '0.4',
     },
     'button:active': {
-      borderBottom: '3px solid lightblue !important',
-      borderTop: '3px solid white !important',
+      border: `2px solid ${ui5.Theme.Button_BorderColor}`,
     },
     'button:first-child': {
       marginLeft: '3px',
     },
-    'button > colorbtn': {
+    'button.current': {
+      border: `1px solid ${ui5.Theme.Button_BorderColor}`,
+      background: ui5.Theme.Button_Active_Background,
+    },
+    'button > .colorbtn': {
+      display: 'inline-block',
       height: '18px',
       width: '18px',
-      border: '1px solid black',
+      border: `1px solid ${ui5.Theme.Button_BorderColor}`,
+      filter: theme.invert,
+      textAlign: 'center',
     },
     'button > img': {
       textAlign: 'center',
       // center the img even if the containing element is too small for
       // it. see https://stackoverflow.com/questions/1344169/
-      margin: '0 -999% 0 -999%'
+      margin: '0 -999% 0 -999%',
+      filter: theme.invert,
+    },
+    'button > ui5-icon': {
+      color: ui5.Theme.TextColor,
     }
   })
 }
@@ -92,7 +124,7 @@ export class ToolbarSeperator extends Component {
   static styles = style.sheet({
     'span': {
       width: '2px',
-      borderLeft: '2px solid lightgray',
+      borderLeft: `1px solid ${ui5.Theme.Button_BorderColor}`,
       margin: '0px 1px 0px 3px',
       height: '35px',
       display: 'inline-block',
@@ -114,14 +146,14 @@ export default class Toolbar extends Component {
   }
 
   static styles = style.sheet({
-    'wrapper': {
+    '.wrapper': {
       overflow: 'hidden',
     },
-    'toolbar': {
+    '.toolbar': {
       width: '9999px',
-      background: 'white',
-      borderBottom: '1px solid gray',
-      color: 'black',
+      background: theme.background,
+      borderBottom: `1px solid ${ui5.Theme.Button_BorderColor}`,
+      padding: '3px',
     }
   })
 }

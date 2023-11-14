@@ -19,6 +19,7 @@ import { Wournal } from "./Wournal";
 import { WournalPage } from "./WournalPage";
 import { computeZoomFactor, WournalPageSize } from "./WournalPageSize";
 import { rx } from "@mvui/core";
+import { theme } from "global-styles";
 
 export class WournalDocument {
   /** An initial zoom factor, invisible to the user. */
@@ -52,6 +53,7 @@ export class WournalDocument {
     this.display.addEventListener("mousedown", this.onMouseDown.bind(this));
     this.display.addEventListener("mousemove", this.onMouseMove.bind(this));
     this.display.addEventListener("contextmenu", (e) => { e.preventDefault() });
+    this.display.style.background = theme.background;
     ClipboardUtils.setPlainTextHandler(this.onPastePlainText.bind(this));
     ClipboardUtils.setImageHandler(this.onPasteImage.bind(this));
     ClipboardUtils.enableHandlers(this.display.ownerDocument);
@@ -90,14 +92,6 @@ export class WournalDocument {
       this.identification,
       this.pages.map((p) => p.asSvgString()),
     );
-  }
-
-  // ------------------------------------------------------------
-  // theme
-  // ------------------------------------------------------------
-
-  public updateTheme(): void {
-    for (let page of this.pages) page.updateTheme();
   }
 
   // ------------------------------------------------------------

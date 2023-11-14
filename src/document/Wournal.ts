@@ -1,3 +1,4 @@
+import { rx } from "@mvui/core";
 import { CanvasToolConfig, ConfigDTO } from "../persistence/ConfigDTO";
 import { ConfigRepository } from "../persistence/ConfigRepository";
 import { ConfigRepositoryLocalStorage } from "../persistence/ConfigRepositoryLocalStorage";
@@ -9,10 +10,8 @@ import { DSUtils } from "../util/DSUtils";
 import { WournalDocument } from "./WournalDocument";
 import { WournalPageSize } from "./WournalPageSize";
 
-
 export class Wournal {
-  private _doc: WournalDocument;
-  get doc() { return this._doc; }
+  public doc = new rx.State<WournalDocument | undefined>(undefined);
   get display() { return this._display; }
 
   private docRepo: DocumentRepository;
@@ -56,33 +55,34 @@ export class Wournal {
 
   public async loadDocument(empty: boolean = false) {
     let disp = this.newDisplayEl();
-    this._doc = empty
-      ? WournalDocument.create(disp)
-      : await DocumentService.load(disp, this.docRepo, "");
+    this.doc.next(
+      empty
+        ? WournalDocument.create(disp)
+        : await DocumentService.load(disp, this.docRepo, ""))
+    ;
     this.clearDisplayEl();
     this._display.appendChild(disp);
   }
 
   public async saveDocument() {
-    DocumentService.save(this._doc, this.docRepo);
+    DocumentService.save(this.doc.value, this.docRepo);
   }
 
   private clearDisplayEl() {
-    let docEl = this._display.ownerDocument.getElementById(
-      "wournal-document"
-    ) as HTMLDivElement;
+    let docEl = this._display.querySelector<HTMLDivElement>("#wournal-document");
     if (docEl) this._display.removeChild(docEl);
   }
 
   private newDisplayEl(): HTMLDivElement {
     let docEl = this._display.ownerDocument.createElement("div");
     docEl.id = "wournal-document";
+    docEl.style.margin = "10px";
     return docEl;
   }
 
   private createTestPages() {
-    this.doc.addNewPage(WournalPageSize.DINA4_LANDSCAPE);
-    this.doc.addNewPage(WournalPageSize.DINA5_PORTRAIT);
-    this.doc.addNewPage(WournalPageSize.DINA5_LANDSCAPE);
+    this.doc.value.addNewPage(WournalPageSize.DINA4_LANDSCAPE);
+    this.doc.value.addNewPage(WournalPageSize.DINA5_PORTRAIT);
+    this.doc.value.addNewPage(WournalPageSize.DINA5_LANDSCAPE);
   }
 }

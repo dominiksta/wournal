@@ -1,11 +1,13 @@
-import { Component, h } from '@mvui/core';
-import TopBars from 'app/topbars';
+import { Component, h, rx, style } from '@mvui/core';
+import './global-styles';
+import * as ui5 from "@mvui/ui5";
+import Toolbars from 'app/toolbars';
 import { Wournal } from 'document/Wournal';
+import { darkTheme, lightTheme, theme } from "./global-styles";
+import { WournalDocument } from "document/WournalDocument";
 
 @Component.register
-class AppNew extends Component {
-  static useShadow = false;
-
+class App extends Component {
   private wournal = new Wournal(document.createElement('div'), 'browser');
 
   constructor() {
@@ -14,11 +16,49 @@ class AppNew extends Component {
   }
 
   render() {
+    this.subscribe(style.currentTheme$, theme => {
+      ui5.config.setTheme(theme === 'light' ? 'sap_horizon' : 'sap_horizon_dark');
+      style.setTheme('wournal', theme === 'light' ? lightTheme : darkTheme);
+    });
+
     return [
-      TopBars.t({ props: { wournal: this.wournal } }),
-      h.div(this.wournal.display),
+      Toolbars.t({ props: { wournal: this.wournal } }),
+      h.div({
+        fields: { id: 'document' },
+      },
+        this.wournal.display
+      ),
     ]
   }
+
+  static styles = style.sheet({
+    ':host': {
+      background: theme.background,
+      display: 'block',
+      height: '100%',
+    },
+    [Toolbars.tagName]: {
+      position: 'fixed',
+      top: '0',
+      width: '100%',
+      zIndex: '1000',
+      background: theme.background,
+    },
+    '#document': {
+      position: 'relative',
+      top: '87px',
+      background: theme.background,
+      height: 'calc(100% - 87px)',
+      width: '100%',
+    },
+    '#document > div': {
+      overflow: 'auto',
+      height: '100%',
+      width: '100%',
+    }
+  });
 }
 
-document.body.appendChild(new AppNew());
+
+
+document.body.appendChild(new App());
