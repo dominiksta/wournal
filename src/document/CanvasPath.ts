@@ -40,9 +40,9 @@ export class CanvasPath extends CanvasElement {
   }
 
   /** Create a new SVGCanvasPath in the given doc and return it */
-  public static fromNewPath(doc: Document): CanvasPath {
+  public static fromNewPath(): CanvasPath {
     let ret = new CanvasPath(
-      doc.createElementNS('http://www.w3.org/2000/svg', 'path')
+      document.createElementNS('http://www.w3.org/2000/svg', 'path')
     );
     ret.setColor("#000000");
     ret.setActualStrokeWidth(2);
@@ -277,7 +277,7 @@ export class CanvasPath extends CanvasElement {
     for (let i = 1; i < paths.length; i++) {
       if (paths[i] === null) continue;
 
-      let newPath = CanvasPath.fromNewPath(this._svgElem.ownerDocument);
+      let newPath = CanvasPath.fromNewPath();
       newPath._svgElem.setAttribute(
         "d", CanvasPath.svgPathDataToString(paths[i])
       );

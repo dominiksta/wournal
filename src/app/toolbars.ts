@@ -3,18 +3,18 @@ import * as ui5 from "@mvui/ui5";
 import { CanvasToolEraser } from "document/CanvasToolEraser";
 import { CanvasToolPen } from "document/CanvasToolPen";
 import { CanvasToolText } from "document/CanvasToolText";
-import { Wournal } from "../document/Wournal";
 import { Newable } from "util/Newable";
 import { CanvasTool } from "document/CanvasTool";
 import Toolbar, { ToolbarSeperator } from "common/toolbar";
 import { ToolbarButton } from "common/toolbar";
 import { CanvasToolRectangle } from "document/CanvasToolRectangle";
 import { CanvasToolSelectRectangle } from "document/CanvasToolSelectRectangle";
+import { WournalDocument } from "document/WournalDocument";
 
 @Component.register
 export default class Toolbars extends Component {
   props = {
-    wournal: rx.prop<Wournal>(),
+    doc: rx.prop<WournalDocument>(),
   }
 
   static styles = style.sheet({
@@ -40,18 +40,15 @@ export default class Toolbars extends Component {
 
 
   render() {
-    const w = this.props.wournal.value;
+    const d = this.props.doc;
 
-    const noSelection = w.doc.pipe(
-      rx.switchMap(doc => doc === undefined ? rx.of(false) : doc.selectionAvailable),
-      rx.startWith(false),
+    const noSelection = d.pipe(
+      rx.switchMap(doc => doc.selectionAvailable),
       rx.map(v => !v)
     );
 
-    const currentTool: rx.Stream<CanvasTool> = w.doc.pipe(
-      rx.switchMap(
-        doc => doc === undefined ? rx.of(new CanvasToolPen()) : doc.currentTool
-      ),
+    const currentTool: rx.Stream<CanvasTool> = d.pipe(
+      rx.switchMap(doc => doc.currentTool),
     );
 
     const canvasToolButtonStyle = (tool: Newable<CanvasTool>) =>
@@ -74,42 +71,42 @@ export default class Toolbars extends Component {
             props: {
               img: 'icon:save', alt: 'Save',
             },
-            events: { click: _ => w.saveDocument() }
+            // events: { click: _ => w.saveDocument() }
           }),
           ToolbarButton.t({
             props: {
               img: 'icon:document', alt: 'New',
             },
-            events: { click: _ => w.loadDocument(true) }
+            // events: { click: _ => w.loadDocument(true) }
           }),
           ToolbarButton.t({
             props: {
               img: 'icon:open-folder', alt: 'Load',
             },
-            events: { click: _ => w.loadDocument(false) }
+            // events: { click: _ => w.loadDocument(false) }
           }),
           ToolbarSeperator.t(),
           ToolbarButton.t({
             props: {
               img: 'icon:undo', alt: 'Undo',
-              disabled: w.doc.pipe(
+              disabled: d.pipe(
                 rx.switchMap(doc => doc === undefined ? rx.of(false) : doc.undoAvailable),
                 rx.map(v => !v),
                 rx.startWith(true),
               ),
             },
-            events: { click: _ => w.doc.value.undo() }
+            events: { click: _ => d.value.undo() }
           }),
           ToolbarButton.t({
             props: {
               img: 'icon:redo', alt: 'Redo',
-              disabled: w.doc.pipe(
+              disabled: d.pipe(
                 rx.switchMap(doc => doc === undefined ? rx.of(false) : doc.redoAvailable),
                 rx.map(v => !v),
                 rx.startWith(true),
               ),
             },
-            events: { click: _ => w.doc.value.redo() }
+            events: { click: _ => d.value.redo() }
           }),
           ToolbarSeperator.t(),
           ToolbarButton.t({
@@ -117,20 +114,20 @@ export default class Toolbars extends Component {
               img: 'icon:scissors', alt: 'Cut Selection',
               disabled: noSelection,
             },
-            events: { click: _ => w.doc.value.selectionCut() }
+            events: { click: _ => d.value.selectionCut() }
           }),
           ToolbarButton.t({
             props: {
               img: 'icon:copy', alt: 'Copy Selection',
               disabled: noSelection,
             },
-            events: { click: _ => w.doc.value.selectionCopy() }
+            events: { click: _ => d.value.selectionCopy() }
           }),
           ToolbarButton.t({
             props: {
               img: 'icon:paste', alt: 'Paste Selection/Clipboard',
             },
-            events: { click: _ => w.doc.value.selectionOrClipboardPaste() }
+            events: { click: _ => d.value.selectionOrClipboardPaste() }
           }),
 
           ToolbarSeperator.t(),
@@ -138,19 +135,19 @@ export default class Toolbars extends Component {
             props: {
               img: 'icon:zoom-in', alt: 'Zoom In',
             },
-            events: { click: _ => w.doc.value.setZoom(w.doc.value.getZoom() + 0.1) }
+            events: { click: _ => d.value.setZoom(d.value.getZoom() + 0.1) }
           }),
           ToolbarButton.t({
             props: {
               img: 'icon:reset', alt: 'Reset Zoom',
             },
-            events: { click: _ => w.doc.value.setZoom(1) }
+            events: { click: _ => d.value.setZoom(1) }
           }),
           ToolbarButton.t({
             props: {
               img: 'icon:zoom-out', alt: 'Zoom Out',
             },
-            events: { click: _ => w.doc.value.setZoom(w.doc.value.getZoom() - 0.1) }
+            events: { click: _ => d.value.setZoom(d.value.getZoom() - 0.1) }
           }),
         ]),
 
@@ -163,28 +160,28 @@ export default class Toolbars extends Component {
               img: 'icon:edit', alt: 'Pen',
               current: canvasToolButtonStyle(CanvasToolPen),
             },
-            events: { click: _ => w.doc.value.setTool(CanvasToolPen) }
+            events: { click: _ => d.value.setTool(CanvasToolPen) }
           }),
           ToolbarButton.t({
             props: {
               img: 'icon:eraser', alt: 'Eraser',
               current: canvasToolButtonStyle(CanvasToolEraser),
             },
-            events: { click: _ => w.doc.value.setTool(CanvasToolEraser) }
+            events: { click: _ => d.value.setTool(CanvasToolEraser) }
           }),
           ToolbarButton.t({
             props: {
               img: 'icon:text', alt: 'Text',
               current: canvasToolButtonStyle(CanvasToolText),
             },
-            events: { click: _ => w.doc.value.setTool(CanvasToolText) }
+            events: { click: _ => d.value.setTool(CanvasToolText) }
           }),
           ToolbarButton.t({
             props: {
               img: 'icon:draw-rectangle', alt: 'Rectangle',
               current: canvasToolButtonStyle(CanvasToolRectangle),
             },
-            events: { click: _ => w.doc.value.setTool(CanvasToolRectangle) }
+            events: { click: _ => d.value.setTool(CanvasToolRectangle) }
           }),
 
           ToolbarSeperator.t(),
@@ -194,7 +191,7 @@ export default class Toolbars extends Component {
               img: 'icon:cursor-arrow', alt: 'Select Rectangle',
               current: canvasToolButtonStyle(CanvasToolSelectRectangle),
             },
-            events: { click: _ => w.doc.value.setTool(CanvasToolSelectRectangle) }
+            events: { click: _ => d.value.setTool(CanvasToolSelectRectangle) }
           }),
 
           ToolbarSeperator.t(),
@@ -203,19 +200,19 @@ export default class Toolbars extends Component {
             props: {
               img: 'icon:wournal/size-modifier-large', alt: 'Thick Size',
             },
-            events: { click: _ => w.doc.value.setStrokeWidth('thick') }
+            events: { click: _ => d.value.setStrokeWidth('thick') }
           }),
           ToolbarButton.t({
             props: {
               img: 'icon:wournal/size-modifier-medium', alt: 'Medium Size',
             },
-            events: { click: _ => w.doc.value.setStrokeWidth('medium') }
+            events: { click: _ => d.value.setStrokeWidth('medium') }
           }),
           ToolbarButton.t({
             props: {
               img: 'icon:wournal/size-modifier-small', alt: 'Fine Size',
             },
-            events: { click: _ => w.doc.value.setStrokeWidth('fine') }
+            events: { click: _ => d.value.setStrokeWidth('fine') }
           }),
 
           ToolbarSeperator.t(),
@@ -224,19 +221,19 @@ export default class Toolbars extends Component {
             props: {
               img: 'color:black', alt: 'Black',
             },
-            events: { click: _ => w.doc.value.setColor('black') }
+            events: { click: _ => d.value.setColor('black') }
           }),
           ToolbarButton.t({
             props: {
               img: 'color:blue', alt: 'Blue',
             },
-            events: { click: _ => w.doc.value.setColor('blue') }
+            events: { click: _ => d.value.setColor('blue') }
           }),
           ToolbarButton.t({
             props: {
               img: 'color:red', alt: 'Red',
             },
-            events: { click: _ => w.doc.value.setColor('red') }
+            events: { click: _ => d.value.setColor('red') }
           })
 
         ]),

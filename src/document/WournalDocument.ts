@@ -1,4 +1,4 @@
-import { CanvasToolStrokeWidth } from "../persistence/ConfigDTO";
+import { CanvasToolConfig, CanvasToolStrokeWidth, ConfigDTO } from "../persistence/ConfigDTO";
 import { DocumentDTO } from "../persistence/DocumentDTO";
 import { ClipboardUtils } from "../util/ClipboardUtils";
 import { DSUtils } from "../util/DSUtils";
@@ -9,24 +9,37 @@ import { CanvasElement } from "./CanvasElement";
 import { CanvasElementFactory } from "./CanvasElementFactory";
 import { CanvasImage, CanvasImageData } from "./CanvasImage";
 import { CanvasText, CanvasTextData } from "./CanvasText";
-import { CanvasTool, CanvasToolName, CanvasToolSetupProps } from "./CanvasTool";
+import { CanvasTool, CanvasToolName } from "./CanvasTool";
 import { CanvasToolFactory } from "./CanvasToolFactory";
 import { CanvasToolPen } from "./CanvasToolPen";
 import { CanvasSelection } from "./CanvasSelection";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
 import { UndoStack } from "./UndoStack";
-import { Wournal } from "./Wournal";
 import { WournalPage } from "./WournalPage";
 import { computeZoomFactor, WournalPageSize } from "./WournalPageSize";
-import { rx } from "@mvui/core";
+import { Component, h, rx, style } from "@mvui/core";
 import { theme } from "global-styles";
 
-export class WournalDocument {
+@Component.register
+export class WournalDocument extends Component<{
+  events: {
+    selectionAvailable: CustomEvent,
+    undoStateChange: CustomEvent<{ undoAvailable: boolean, redoAvailable: boolean }>,
+    toolChange: CustomEvent<Newable<CanvasTool>>,
+  }
+}> {
+  static useShadow = false;
+
+  private _config: rx.State<ConfigDTO>;
+  get config() { return this._config };
+  private _toolConfig: rx.State<CanvasToolConfig>;
+  get toolConfig() { return this._toolConfig };
+
   /** An initial zoom factor, invisible to the user. */
   private initialZoomFactor: number;
 
-  private undoStack: UndoStack;
-  private selection: CanvasSelection;
+  private undoStack = new UndoStack(this);
+  private selection = new CanvasSelection(this.undoStack);
   private copyBuffer: { content: CanvasElement[], time: Date } =
     { content: [], time: new Date() };
   /**  */
@@ -45,10 +58,12 @@ export class WournalDocument {
   /** Store tool set before right click */
   private toolBeforeRightClick: CanvasToolName;
 
-  private constructor(
-    public display: HTMLDivElement,
-    public identification: string = "wournaldoc.woj",
-  ) {
+  private display = document.createElement('div');
+
+  public identification: string = "wournaldoc.woj";
+
+  private constructor() {
+    super();
     this.display.addEventListener("mouseup", this.onMouseUp.bind(this));
     this.display.addEventListener("mousedown", this.onMouseDown.bind(this));
     this.display.addEventListener("mousemove", this.onMouseMove.bind(this));
@@ -56,13 +71,19 @@ export class WournalDocument {
     this.display.style.background = theme.background;
     ClipboardUtils.setPlainTextHandler(this.onPastePlainText.bind(this));
     ClipboardUtils.setImageHandler(this.onPasteImage.bind(this));
-    ClipboardUtils.enableHandlers(this.display.ownerDocument);
+    ClipboardUtils.enableHandlers();
 
     this.initialZoomFactor = computeZoomFactor();
-    this.undoStack = new UndoStack(this);
-    this.selection = new CanvasSelection(this.undoStack);
     this.setTool(CanvasToolPen);
   }
+
+  render() { return [ h.div(this.display) ] }
+
+  static styles = style.sheet({
+    '.wournal-page.active': {
+      borderColor: 'darkred !important',
+    }
+  })
 
   public defaultPageDimensions = WournalPageSize.DINA4_PORTRAIT;
 
@@ -70,17 +91,21 @@ export class WournalDocument {
   // initialization and serialization
   // ------------------------------------------------------------
 
-  public static create(display: HTMLDivElement): WournalDocument {
-    let doc = new WournalDocument(display);
+  public static create(config: rx.State<ConfigDTO>): WournalDocument {
+    let doc = new WournalDocument();
     doc.addNewPage(WournalPageSize.DINA4_PORTRAIT);
+    doc._config = config;
+    doc._toolConfig = new rx.State(DSUtils.copyObj(config.value.tools));
     return doc;
   }
 
   public static fromDto(
-    display: HTMLDivElement, dto: DocumentDTO
+    config: rx.State<ConfigDTO>, dto: DocumentDTO
   ): WournalDocument {
-    let doc = new WournalDocument(display);
+    let doc = new WournalDocument();
     doc.identification = dto.identification;
+    doc._config = config;
+    doc._toolConfig = new rx.State(DSUtils.copyObj(config.value.tools));
     for (let page of dto.pagesSvg) {
       doc.addPageFromSvg(page);
     }
@@ -197,7 +222,7 @@ export class WournalDocument {
   private async pasteImage(dataUrl: string): Promise<void> {
     if (!this.activePage) return;
 
-    let imageEl = CanvasImage.fromNewElement(this.display.ownerDocument);
+    let imageEl = CanvasImage.fromNewElement();
     const dimensions = await FileUtils.imageDimensionsForDataUrl(dataUrl);
     imageEl.setData(new CanvasImageData(dataUrl, DOMRect.fromRect({
       x: 10, y: 10, width: dimensions.width, height: dimensions.height
@@ -226,7 +251,7 @@ export class WournalDocument {
   private pastePlainText(text: string): void {
     if (!this.activePage) return;
 
-    const c = Wournal.currToolConf.CanvasToolText;
+    const c = this.toolConfig.value.CanvasToolText;
     let textEl = CanvasText.fromData(
       this.display.ownerDocument,
       // TODO: find a more sane paste position then 10,10
@@ -281,6 +306,7 @@ export class WournalDocument {
     this.display.appendChild(page.display);
     this.pages.push(page);
     page.toolLayer.style.cursor = this.currentTool.value.idleCursor;
+    if (this.pages.length === 1) this.setActivePage(page);
   }
 
   // ------------------------------------------------------------
@@ -301,8 +327,7 @@ export class WournalDocument {
   public setTool(tool: Newable<CanvasTool>, noDeselect: boolean = false) {
     if (!noDeselect) this.currentTool.value.onDeselect();
     this.selection.clear();
-    this.currentTool.next(new tool());
-    this.currentTool.value.setup(new CanvasToolSetupProps(
+    this.currentTool.next(new tool(
       this.getActivePage.bind(this), this.undoStack, this.selection
     ));
     for (let page of this.pages)
@@ -311,16 +336,24 @@ export class WournalDocument {
 
   /** Reset the config of the current tool to loaded global config */
   public resetCurrentTool() {
-    if (!DSUtils.hasKey(Wournal.currToolConf, this.currentTool.value.name)
-      || !DSUtils.hasKey(Wournal.CONF.tools, this.currentTool.value.name))
+    if (!DSUtils.hasKey(this._toolConfig.value, this.currentTool.value.name)
+      || !DSUtils.hasKey(this._config.value.tools, this.currentTool.value.name))
       throw new Error(`Could not get config for tool ${this.currentTool.value}`)
 
-    Wournal.currToolConf[this.currentTool.value.name] =
-      DSUtils.copyObj(Wournal.CONF.tools[this.currentTool.value.name]) as any
+    this._toolConfig.next(v => ({
+      ...v,
+      [this.currentTool.value.name]: DSUtils.copyObj(
+        this._config.value.tools[
+          this.currentTool.value.name as keyof CanvasToolConfig
+        ]
+      )
+    }));
   }
 
   /** Called to update react state */
-  public currentTool = new rx.State<CanvasTool>(new CanvasToolPen());
+  public currentTool = new rx.State<CanvasTool>(new CanvasToolPen(
+    this.getActivePage.bind(this), this.undoStack, this.selection
+  ));
 
   /** set stroke width for current tool or selection */
   public setStrokeWidth(width: CanvasToolStrokeWidth): void {
@@ -337,13 +370,13 @@ export class WournalDocument {
         null, changed, null
       ));
     } else {
-      this.currentTool.value.setStrokeWidth(width);
+      if (this.currentTool.value.canSetStrokeWidth)
+        this.toolConfig.next(v => {
+          const n = DSUtils.copyObj(v);
+          (n as any)[this.currentTool.value.name].strokeWidth = width;
+          return n;
+        })
     }
-  }
-
-  /** get current tool stroke width */
-  public getStrokeWidth(): CanvasToolStrokeWidth {
-    return this.currentTool.value.getStrokeWidth();
   }
 
   /** set color for current tool or selection */
@@ -363,21 +396,28 @@ export class WournalDocument {
     } else {
       // if the current tool does not support color, fall back to pen -
       // this mimics xournal behaviour
-      if (this.currentTool.value.getColor() === "") {
+      if (!this.currentTool.value.canSetColor) {
         this.setTool(CanvasToolPen);
       }
-      this.currentTool.value.setColor(color);
+      this.toolConfig.next(v => {
+        const n = DSUtils.copyObj(v);
+        (n as any)[this.currentTool.value.name].color = color;
+        return n;
+      })
     }
   }
-
-  /** get current tool color */
-  public getColor(): string { return this.currentTool.value.getColor(); }
 
   // ----------------------------------------------------------------------
   // helpers
   // ----------------------------------------------------------------------
 
-  private pageAtPoint(pt: { x: number, y: number }) {
+  private setActivePage(page: WournalPage) {
+    this.pages.forEach(p => p.display.classList.remove('active'));
+    page.display.classList.add('active');
+    this.activePage = page;
+  }
+
+  private setPageAtPoint(pt: { x: number, y: number }) {
     // const start = performance.now();
     let result: WournalPage = null;
     for (let page of this.pages) {
@@ -390,7 +430,12 @@ export class WournalDocument {
     // NOTE(dominiksta): This is actually suprisingly fast. I would not have
     // thought that over 2000 pages can be checked this way in under 1ms.
     // LOG.info(`took ${start - performance.now()}ms`);
-    return result;
+    if (this.activePage !== result && result !== null) {
+      this.pages.forEach(p => p.display.classList.remove('active'));
+      result.display.classList.add('active');
+      this.setActivePage(result)
+      this.activePage = result;
+    }
   }
 
   public getActivePage() {
@@ -398,7 +443,7 @@ export class WournalDocument {
   }
 
   private onMouseDown(e: MouseEvent) {
-    this.activePage = this.pageAtPoint(e);
+    this.setPageAtPoint(e);
     if (this.activePage) this.activePage.onMouseDown(e);
 
     if (this.activePage && this.selection.selection.length !== 0) {
@@ -412,7 +457,7 @@ export class WournalDocument {
     } else {
       if (e.button === 2) { // right click
         this.toolBeforeRightClick = this.currentTool.value.name;
-        this.setTool(CanvasToolFactory.forName(Wournal.CONF.binds.rightClick));
+        this.setTool(CanvasToolFactory.forName(this._config.value.binds.rightClick));
       }
       this.currentTool.value.onMouseDown(e);
     }

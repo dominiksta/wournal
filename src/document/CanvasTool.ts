@@ -43,30 +43,17 @@ export abstract class CanvasTool {
   /** The page where the first mousedown event for the tool was fired */
   protected abstract toolUseStartPage: WournalPage;
 
-  /** If applicable, set stroke width, else noop */
-  public abstract setStrokeWidth(width: CanvasToolStrokeWidth): void;
-  /** If applicable, return stroke width */
-  public abstract getStrokeWidth(): CanvasToolStrokeWidth;
+  public abstract canSetStrokeWidth: boolean;
+  public abstract canSetColor: boolean;
 
-  /** If applicable, set color, else noop */
-  public abstract setColor(color: string): void;
-  /** If applicable, return color, else "" */
-  public abstract getColor(): string | "";
-
-  /** Get the page of the wournal document to draw on. */
-  protected getActivePage: () => WournalPage;
-
-  /** The undo stack to push undoable actions to. */
-  protected undoStack: UndoStack;
-
-  /** The current selection. */
-  protected selection: CanvasSelection;
-
-  setup(props: CanvasToolSetupProps): void {
-    this.getActivePage = props.getActivePage;
-    this.undoStack = props.undoStack;
-    this.selection = props.selection;
-  }
+  constructor(
+    /** Get the page of the wournal document to draw on. */
+    protected getActivePage: () => WournalPage,
+    /** The undo stack to push undoable actions to. */
+    protected undoStack: UndoStack,
+    /** The current selection. */
+    protected selection: CanvasSelection,
+  ) { }
 
   /**
    * When the tool is deselected (from e.g. the toolbar), it might have to do

@@ -21,9 +21,9 @@ export class CanvasImage extends CanvasElement {
     this._svgElem.setAttribute("preserveAspectRatio", "none");
   }
 
-  public static fromNewElement(doc: Document): CanvasImage {
+  public static fromNewElement(): CanvasImage {
     return new CanvasImage(
-      doc.createElementNS("http://www.w3.org/2000/svg", "image")
+      document.createElementNS("http://www.w3.org/2000/svg", "image")
     );
   }
 

@@ -53,9 +53,9 @@ export class WournalPage {
    *   dimensions for a new, blank page.
    */
   private constructor(
-    public doc: WournalDocument
+    public doc: WournalDocument,
   ) {
-    this.display = doc.display.ownerDocument.createElement("div");
+    this.display = document.createElement("div");
     this.display.setAttribute("class", "wournal-page");
 
     this.display.style.border = "2px solid gray";
@@ -63,15 +63,15 @@ export class WournalPage {
     this.display.style.userSelect = "none";
     this.display.style.filter = theme.invert;
 
-    this.svgWrapperEl = doc.display.ownerDocument.createElement("div");
+    this.svgWrapperEl = document.createElement("div");
     this.svgWrapperEl.style.transformOrigin = "0 0";
     this.display.appendChild(this.svgWrapperEl);
 
-    this.canvasWrapper = this.doc.display.ownerDocument.createElement("div");
+    this.canvasWrapper = document.createElement("div");
     this.canvasWrapper.setAttribute("class", "wournal-canvas-wrapper");
     this.svgWrapperEl.appendChild(this.canvasWrapper);
 
-    this.canvas = this.doc.display.ownerDocument.createElementNS(
+    this.canvas = document.createElementNS(
       "http://www.w3.org/2000/svg", "svg"
     );
     this.canvas.setAttribute("class", "wournal-page-canvas");
@@ -79,7 +79,7 @@ export class WournalPage {
     this.canvas.style.position = "absolute";
     this.canvasWrapper.appendChild(this.canvas);
 
-    this.toolLayer = this.doc.display.ownerDocument.createElementNS(
+    this.toolLayer = document.createElementNS(
       "http://www.w3.org/2000/svg", "svg"
     );
     this.toolLayer.setAttribute("class", "wournal-page-toollayer");
@@ -106,10 +106,10 @@ export class WournalPage {
 
   /** Return a page parsed from the <svg> element string `svg` */
   public static fromSvgString(
-    doc: WournalDocument, svg: string
+    doc: WournalDocument,  svg: string
   ): WournalPage {
     let page = new WournalPage(doc);
-    let outerSvg = doc.display.ownerDocument.createElementNS(
+    let outerSvg = document.createElementNS(
       "http://www.w3.org/2000/svg", "svg"
     );
     outerSvg.innerHTML = svg;
@@ -182,7 +182,7 @@ export class WournalPage {
     if (this.getLayer(n) !== undefined)
       throw new Error(`Layer with name '${n}' already exists!`);
 
-    let g = this.doc.display.ownerDocument.createElementNS(
+    let g = document.createElementNS(
       "http://www.w3.org/2000/svg", "g"
     );
     g.setAttribute(WOURNAL_SVG_LAYER_NAME_ATTR, n);

@@ -2,17 +2,23 @@ import { Component, h, rx, style } from '@mvui/core';
 import './global-styles';
 import * as ui5 from "@mvui/ui5";
 import Toolbars from 'app/toolbars';
-import { Wournal } from 'document/Wournal';
 import { darkTheme, lightTheme, theme } from "./global-styles";
 import { WournalDocument } from "document/WournalDocument";
+import { ConfigRepositoryLocalStorage } from 'persistence/ConfigRepositoryLocalStorage';
+import { DocumentRepositoryBrowserFiles } from 'persistence/DocumentRepositoryBrowserFiles';
+import { WournalPageSize } from 'document/WournalPageSize';
 
 @Component.register
 class App extends Component {
-  private wournal = new Wournal(document.createElement('div'), 'browser');
+
+  private docRepo = DocumentRepositoryBrowserFiles.getInstance();
+  private configRepo = ConfigRepositoryLocalStorage.getInstance();
+  private appConfig = new rx.State(this.configRepo.load());
+
+  private doc = new rx.State(WournalDocument.create(this.appConfig));
 
   constructor() {
     super();
-    this.wournal.init();
   }
 
   render() {
@@ -21,14 +27,34 @@ class App extends Component {
       style.setTheme('wournal', theme === 'light' ? lightTheme : darkTheme);
     });
 
+    this.createTestPages();
+
     return [
-      Toolbars.t({ props: { wournal: this.wournal } }),
+      Toolbars.t({ props: { doc: this.doc } }),
       h.div({
         fields: { id: 'document' },
       },
-        this.wournal.display
+        this.doc
       ),
     ]
+  }
+
+  async loadDocument(empty: boolean = false) {
+    this.doc.next(
+      empty
+        ? WournalDocument.create(this.appConfig)
+        : WournalDocument.fromDto(this.appConfig, await this.docRepo.load(""))
+    );
+  }
+
+  saveDocument() {
+    this.docRepo.save(this.doc.value.toDto());
+  }
+
+  private createTestPages() {
+    this.doc.value.addNewPage(WournalPageSize.DINA4_LANDSCAPE);
+    this.doc.value.addNewPage(WournalPageSize.DINA5_PORTRAIT);
+    this.doc.value.addNewPage(WournalPageSize.DINA5_LANDSCAPE);
   }
 
   static styles = style.sheet({
@@ -50,6 +76,7 @@ class App extends Component {
       background: theme.background,
       height: 'calc(100% - 87px)',
       width: '100%',
+      overflow: 'auto',
     },
     '#document > div': {
       overflow: 'auto',

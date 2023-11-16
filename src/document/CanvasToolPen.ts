@@ -2,10 +2,12 @@ import { CanvasToolStrokeWidth } from "../persistence/ConfigDTO";
 import { CanvasPath } from "./CanvasPath";
 import { CanvasTool } from "./CanvasTool";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
-import { Wournal } from "./Wournal";
 import { WournalPage } from "./WournalPage";
 
 export class CanvasToolPen extends CanvasTool {
+  private get conf() {
+    return this.getActivePage().doc.toolConfig.value.CanvasToolPen;
+  };
 
   /** Buffer for smoothing. Contains the last positions of the mouse cursor */
   private mouseBuffer: { x: number, y: number }[] = [];
@@ -17,38 +19,28 @@ export class CanvasToolPen extends CanvasTool {
 
   public idleCursor = "url('res/custom/pen.svg'), auto";
 
-  public override setStrokeWidth(width: CanvasToolStrokeWidth): void {
-    Wournal.currToolConf.CanvasToolPen.strokeWidth = width;
-  }
-  public override getStrokeWidth(): CanvasToolStrokeWidth {
-    return Wournal.currToolConf.CanvasToolPen.strokeWidth;
-  }
+  public override canSetStrokeWidth = true;
+  public override canSetColor = true;
+
   private actualStrokeWidth(): number {
-    const confWidth = Wournal.currToolConf.CanvasToolPen.strokeWidth;
+    const confWidth = this.conf.strokeWidth;
     if (confWidth === "fine") return 1;
     if (confWidth === "medium") return 2;
     if (confWidth === "thick") return 5;
     if (confWidth === "none") throw new Error("'none' strokeWidth for pen");
   }
 
-  public override setColor(color: string): void {
-    Wournal.currToolConf.CanvasToolPen.color = color;
-  }
-  public override getColor(): string | "" {
-    return Wournal.currToolConf.CanvasToolPen.color;
-  }
-
   public onMouseDown(e: MouseEvent): void {
     this.toolUseStartPage = this.getActivePage();
     if (this.toolUseStartPage === null) return;
 
-    this.path = CanvasPath.fromNewPath(this.toolUseStartPage.display.ownerDocument);
+    this.path = CanvasPath.fromNewPath();
     this.path.setLineCap("round");
     this.mouseBuffer = [];
     var pt = this.toolUseStartPage.globalCoordsToCanvas({ x: e.x, y: e.y });
     this.appendToBuffer(pt);
     this.path.startAt(pt);
-    this.path.setColor(Wournal.currToolConf.CanvasToolPen.color);
+    this.path.setColor(this.conf.color);
     this.path.setActualStrokeWidth(this.actualStrokeWidth());
     this.toolUseStartPage.getActivePaintLayer().appendChild(this.path.svgElem);
   }
@@ -75,7 +67,7 @@ export class CanvasToolPen extends CanvasTool {
   private getAveragePoint(offset: number): { x: number, y: number } | null {
     var len = this.mouseBuffer.length;
     if (len % 2 === 1 || len >=
-      Wournal.currToolConf.CanvasToolPen.mouseBufferSize) {
+      this.conf.mouseBufferSize) {
       var totalX = 0;
       var totalY = 0;
       var pt, i;
@@ -97,7 +89,7 @@ export class CanvasToolPen extends CanvasTool {
   private appendToBuffer(pt: { x: number, y: number }) {
     this.mouseBuffer.push(pt);
     while (this.mouseBuffer.length >
-      Wournal.currToolConf.CanvasToolPen.mouseBufferSize) {
+      this.conf.mouseBufferSize) {
       this.mouseBuffer.shift();
     }
   }

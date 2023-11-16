@@ -10,10 +10,8 @@ export class CanvasToolImage extends CanvasTool {
   public override idleCursor = "default";
   protected override toolUseStartPage: WournalPage;
 
-  public override setColor(color: string): void { }
-  public override getColor(): string | "" { return "" }
-  public override setStrokeWidth(width: CanvasToolStrokeWidth): void { }
-  public override getStrokeWidth(): CanvasToolStrokeWidth { return "none" }
+  public override canSetStrokeWidth = false;
+  public override canSetColor = false;
 
   public override onDeselect(): void { }
   public override onMouseMove(e: MouseEvent) { }
@@ -30,8 +28,7 @@ export class CanvasToolImage extends CanvasTool {
     );
     const dimensions = await FileUtils.imageDimensionsForDataUrl(file.content);
 
-    let newEl = CanvasImage.fromNewElement(
-      this.toolUseStartPage.toolLayer.ownerDocument);
+    let newEl = CanvasImage.fromNewElement();
     newEl.setData(new CanvasImageData(
       file.content, DOMRect.fromRect({
         x: mouse.x, y: mouse.y,

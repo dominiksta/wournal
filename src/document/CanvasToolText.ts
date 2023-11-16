@@ -1,10 +1,8 @@
-import { CanvasToolStrokeWidth } from "../persistence/ConfigDTO";
 import { SVGUtils } from "../util/SVGUtils";
 import { CanvasText, CanvasTextData } from "./CanvasText";
 import { CanvasTool } from "./CanvasTool";
 import { TextField } from "./TextField";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
-import { Wournal } from "./Wournal";
 import { WournalPage } from "./WournalPage";
 
 /** The offset from the svg text element to the ui text element */
@@ -14,21 +12,17 @@ const diff_svg_vs_ui = {
 };
 
 export class CanvasToolText extends CanvasTool {
+  private get conf() {
+    return this.getActivePage().doc.toolConfig.value.CanvasToolText;
+  };
 
   public idleCursor = "text";
   protected toolUseStartPage: WournalPage;
 
   private state: "idle" | "writing" = "idle";
 
-  public override setStrokeWidth(width: CanvasToolStrokeWidth): void { }
-  public override getStrokeWidth(): CanvasToolStrokeWidth { return "none"; }
-
-  public override setColor(color: string): void {
-    Wournal.currToolConf.CanvasToolText.color = color;
-  }
-  public override getColor(): string | "" {
-    return Wournal.currToolConf.CanvasToolText.color;
-  }
+  public override canSetStrokeWidth = false;
+  public override canSetColor = true;
 
   public onDeselect(): void { }
   public onMouseMove(e: MouseEvent): void { }
@@ -98,7 +92,7 @@ export class CanvasToolText extends CanvasTool {
       y: pos.y - 12
     };
 
-    const c = Wournal.currToolConf.CanvasToolText;
+    const c = this.conf;
     let canvasText = CanvasText.fromData(
       this.toolUseStartPage.toolLayer.ownerDocument,
       new CanvasTextData(

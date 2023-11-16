@@ -1,12 +1,16 @@
 import { CanvasToolStrokeWidth } from "../persistence/ConfigDTO";
 import { SVGUtils } from "../util/SVGUtils";
 import { CanvasPath } from "./CanvasPath";
+import { CanvasSelection } from "./CanvasSelection";
 import { CanvasTool } from "./CanvasTool";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
-import { Wournal } from "./Wournal";
+import { UndoStack } from "./UndoStack";
 import { WournalPage } from "./WournalPage";
 
 export class CanvasToolEraser extends CanvasTool {
+  private get conf() {
+    return this.getActivePage().doc.toolConfig.value.CanvasToolEraser;
+  };
 
 
   private erasing: boolean = false;
@@ -19,8 +23,12 @@ export class CanvasToolEraser extends CanvasTool {
 
   public idleCursor = "default";
 
-  constructor() {
-    super();
+  constructor(
+    protected getActivePage: () => WournalPage,
+    protected undoStack: UndoStack,
+    protected selection: CanvasSelection,
+  ) {
+    super(getActivePage, undoStack, selection);
 
     this.computeActualStrokeWidth();
     // To actually really reflect the area to be erased, we would have to
@@ -42,23 +50,17 @@ export class CanvasToolEraser extends CanvasTool {
       `${cursorHeight / 2}, auto`;
   }
 
-  public override setStrokeWidth(width: CanvasToolStrokeWidth): void {
-    Wournal.currToolConf.CanvasToolEraser.strokeWidth = width;
-  }
-  public override getStrokeWidth(): CanvasToolStrokeWidth {
-    return Wournal.currToolConf.CanvasToolEraser.strokeWidth;
-  }
+  public override canSetStrokeWidth = true;
+  public override canSetColor = false;
+
   private actualStrokeWidth: number;
   private computeActualStrokeWidth(): void {
-    const confWidth = Wournal.currToolConf.CanvasToolEraser.strokeWidth;
+    const confWidth = this.conf.strokeWidth;
     if (confWidth === "fine") this.actualStrokeWidth = 5;
     if (confWidth === "medium") this.actualStrokeWidth = 10;
     if (confWidth === "thick") this.actualStrokeWidth = 40;
     if (confWidth === "none") throw new Error("'none' strokeWidth for eraser");
   }
-
-  public override setColor(color: string): void { }
-  public override getColor(): string | "" { return "" }
 
   public onMouseDown(e: MouseEvent): void {
     this.toolUseStartPage = this.getActivePage();
@@ -114,7 +116,7 @@ export class CanvasToolEraser extends CanvasTool {
         // path.pulsePoints();
 
         // check wether mouse is actually on path
-        if (Wournal.currToolConf.CanvasToolEraser.eraseStrokes) {
+        if (this.conf.eraseStrokes) {
           if (path.isTouchingRect(eraserRect)) {
             this.currentUndo.push(
               new UndoActionCanvasElements([node], null, null)

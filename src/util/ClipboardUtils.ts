@@ -27,13 +27,13 @@ const pasteEventHandler = (p: ClipboardEvent) => {
 
 export const ClipboardUtils = {
   /** Enable `plainTextHandler` and `imageHandler` on `el` */
-  enableHandlers: function(doc: Document): void {
-    doc.body.addEventListener("paste", pasteEventHandler);
+  enableHandlers: function(): void {
+    document.body.addEventListener("paste", pasteEventHandler);
   },
 
   /** Disable `plainTextHandler` and `imageHandler` on `el` */
-  disableHandlers: function(doc: Document): void {
-    doc.body.removeEventListener("paste", pasteEventHandler);
+  disableHandlers: function(): void {
+    document.body.removeEventListener("paste", pasteEventHandler);
   },
 
   /** Set a function to be called with the pasted text as string */

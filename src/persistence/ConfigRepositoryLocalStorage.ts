@@ -13,14 +13,14 @@ export class ConfigRepositoryLocalStorage extends ConfigRepository {
     return ConfigRepositoryLocalStorage.instance;
   }
 
-  public async load(): Promise<ConfigDTO> {
+  public load(): ConfigDTO {
     // HACK: In the future, this should be verified using something
     // like json or xml schema
     const inStorage = localStorage.getItem(CONFIG_LOCALSTORAGE_KEY);
     return (inStorage !== null) ? JSON.parse(inStorage) : defaultConfig();
   }
 
-  public async save(dto: ConfigDTO) {
+  public save(dto: ConfigDTO) {
     localStorage.setItem(CONFIG_LOCALSTORAGE_KEY, JSON.stringify(dto));
   }
 }

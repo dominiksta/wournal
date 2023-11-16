@@ -1,5 +1,5 @@
 import { ShortcutManager } from "app/shortcuts";
-import { ThemeUtils } from "../util/ThemeUtils";
+import { theme } from "global-styles";
 import { CanvasText } from "./CanvasText";
 import { WournalPage } from "./WournalPage";
 
@@ -79,7 +79,7 @@ export class TextField {
     this.textarea.cols = 1;
     this.textarea.rows = 1;
     this.textarea.style.color = fontColor;
-    this.textarea.style.filter = ThemeUtils.currDark() ? "invert(1)" : "";
+    this.textarea.style.filter = theme.invert;
     this.textarea.addEventListener("keydown", this.onKeyDown.bind(this));
     this.textarea.addEventListener("input", this.updateSize.bind(this));
     this.textarea.addEventListener("paste", this.onPaste.bind(this));
