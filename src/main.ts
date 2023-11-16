@@ -7,21 +7,26 @@ import { WournalDocument } from "document/WournalDocument";
 import { ConfigRepositoryLocalStorage } from 'persistence/ConfigRepositoryLocalStorage';
 import { DocumentRepositoryBrowserFiles } from 'persistence/DocumentRepositoryBrowserFiles';
 import { WournalPageSize } from 'document/WournalPageSize';
+import { defaultConfig } from 'persistence/ConfigDTO';
+
+export const ConfigCtx = new rx.Context(() => new rx.State(defaultConfig()));
 
 @Component.register
 class App extends Component {
 
   private docRepo = DocumentRepositoryBrowserFiles.getInstance();
-  private configRepo = ConfigRepositoryLocalStorage.getInstance();
-  private appConfig = new rx.State(this.configRepo.load());
+  private confRepo = ConfigRepositoryLocalStorage.getInstance();
 
-  private doc = new rx.State(WournalDocument.create(this.appConfig));
+  private configCtx = this.provideContext(ConfigCtx);
+  private doc = new rx.State(WournalDocument.create(this.configCtx));
 
   constructor() {
     super();
   }
 
   render() {
+    this.configCtx.next(this.confRepo.load());
+
     this.subscribe(style.currentTheme$, theme => {
       ui5.config.setTheme(theme === 'light' ? 'sap_horizon' : 'sap_horizon_dark');
       style.setTheme('wournal', theme === 'light' ? lightTheme : darkTheme);
@@ -42,8 +47,8 @@ class App extends Component {
   async loadDocument(empty: boolean = false) {
     this.doc.next(
       empty
-        ? WournalDocument.create(this.appConfig)
-        : WournalDocument.fromDto(this.appConfig, await this.docRepo.load(""))
+        ? WournalDocument.create(this.configCtx)
+        : WournalDocument.fromDto(this.configCtx, await this.docRepo.load(""))
     );
   }
 

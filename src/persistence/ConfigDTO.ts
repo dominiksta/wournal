@@ -33,6 +33,8 @@ export type CanvasToolConfig = {
   CanvasToolRectangle: CanvasToolRectangleConfig,
 }
 
+export type CanvasToolConfigData = CanvasToolConfig[keyof CanvasToolConfig];
+
 export type ConfigDTO = {
   version: 0.01,
   theme: "dark" | "light" | "auto",

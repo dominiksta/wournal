@@ -10,6 +10,8 @@ import { ToolbarButton } from "common/toolbar";
 import { CanvasToolRectangle } from "document/CanvasToolRectangle";
 import { CanvasToolSelectRectangle } from "document/CanvasToolSelectRectangle";
 import { WournalDocument } from "document/WournalDocument";
+import { CanvasToolConfigData, CanvasToolStrokeWidth } from "persistence/ConfigDTO";
+import { DSUtils } from "util/DSUtils";
 
 @Component.register
 export default class Toolbars extends Component {
@@ -21,16 +23,31 @@ export default class Toolbars extends Component {
     const d = this.props.doc;
 
     const noSelection = d.pipe(
-      rx.switchMap(doc => doc.selectionAvailable),
+      rx.switchMap(doc => doc.selection.available),
       rx.map(v => !v)
     );
 
-    const currentTool: rx.Stream<CanvasTool> = d.pipe(
-      rx.switchMap(doc => doc.currentTool),
-    );
+    const currentTool = d.pipe(rx.switchMap(doc => doc.currentTool));
+    const toolConfig = d.pipe(rx.switchMap(doc => doc.toolConfig));
+    const currentToolConfig: rx.Stream<CanvasToolConfigData | undefined> =
+      rx.combineLatest(currentTool, toolConfig).pipe(
+        rx.map(([tool, config]) =>
+          DSUtils.hasKey(config, tool.name) ? config[tool.name] : undefined)
+      );
 
     const canvasToolButtonStyle = (tool: Newable<CanvasTool>) =>
       currentTool.map(t => t instanceof tool);
+
+    const strokeWidth: rx.Stream<CanvasToolStrokeWidth | undefined> =
+      currentToolConfig.map(
+        config => (config && 'strokeWidth' in config)
+                ? config.strokeWidth : undefined
+      );
+
+    const strokeColor: rx.Stream<string | undefined> =
+      currentToolConfig.map(
+        config => (config && 'color' in config) ? config.color : undefined
+      );
 
     return [
       h.div({ fields: { className: 'topbar' } }, [
@@ -68,9 +85,8 @@ export default class Toolbars extends Component {
             props: {
               img: 'icon:undo', alt: 'Undo',
               disabled: d.pipe(
-                rx.switchMap(doc => doc === undefined ? rx.of(false) : doc.undoAvailable),
+                rx.switchMap(doc => doc.undoStack.undoAvailable),
                 rx.map(v => !v),
-                rx.startWith(true),
               ),
             },
             events: { click: _ => d.value.undo() }
@@ -79,9 +95,8 @@ export default class Toolbars extends Component {
             props: {
               img: 'icon:redo', alt: 'Redo',
               disabled: d.pipe(
-                rx.switchMap(doc => doc === undefined ? rx.of(false) : doc.redoAvailable),
+                rx.switchMap(doc => doc.undoStack.redoAvailable),
                 rx.map(v => !v),
-                rx.startWith(true),
               ),
             },
             events: { click: _ => d.value.redo() }
@@ -177,18 +192,21 @@ export default class Toolbars extends Component {
           ToolbarButton.t({
             props: {
               img: 'icon:wournal/size-modifier-large', alt: 'Thick Size',
+              current: strokeWidth.map(w => w === 'thick'),
             },
             events: { click: _ => d.value.setStrokeWidth('thick') }
           }),
           ToolbarButton.t({
             props: {
               img: 'icon:wournal/size-modifier-medium', alt: 'Medium Size',
+              current: strokeWidth.map(w => w === 'medium'),
             },
             events: { click: _ => d.value.setStrokeWidth('medium') }
           }),
           ToolbarButton.t({
             props: {
               img: 'icon:wournal/size-modifier-small', alt: 'Fine Size',
+              current: strokeWidth.map(w => w === 'fine'),
             },
             events: { click: _ => d.value.setStrokeWidth('fine') }
           }),
@@ -197,21 +215,24 @@ export default class Toolbars extends Component {
 
           ToolbarButton.t({
             props: {
-              img: 'color:black', alt: 'Black',
+              img: 'color:#000000', alt: 'Black',
+              current: strokeColor.map(c => c === '#000000'),
             },
-            events: { click: _ => d.value.setColor('black') }
+            events: { click: _ => d.value.setColor('#000000') }
           }),
           ToolbarButton.t({
             props: {
-              img: 'color:blue', alt: 'Blue',
+              img: 'color:#2F2FE7', alt: 'Blue',
+              current: strokeColor.map(c => c === '#2F2FE7'),
             },
-            events: { click: _ => d.value.setColor('blue') }
+            events: { click: _ => d.value.setColor('#2F2FE7') }
           }),
           ToolbarButton.t({
             props: {
-              img: 'color:red', alt: 'Red',
+              img: 'color:#FF0000', alt: 'Red',
+              current: strokeColor.map(c => c === '#FF0000'),
             },
-            events: { click: _ => d.value.setColor('red') }
+            events: { click: _ => d.value.setColor('#FF0000') }
           })
 
         ]),

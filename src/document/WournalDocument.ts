@@ -21,13 +21,7 @@ import { Component, h, rx, style } from "@mvui/core";
 import { theme } from "global-styles";
 
 @Component.register
-export class WournalDocument extends Component<{
-  events: {
-    selectionAvailable: CustomEvent,
-    undoStateChange: CustomEvent<{ undoAvailable: boolean, redoAvailable: boolean }>,
-    toolChange: CustomEvent<Newable<CanvasTool>>,
-  }
-}> {
+export class WournalDocument extends Component {
   static useShadow = false;
 
   private _config: rx.State<ConfigDTO>;
@@ -38,8 +32,6 @@ export class WournalDocument extends Component<{
   /** An initial zoom factor, invisible to the user. */
   private initialZoomFactor: number;
 
-  private undoStack = new UndoStack(this);
-  private selection = new CanvasSelection(this.undoStack);
   private copyBuffer: { content: CanvasElement[], time: Date } =
     { content: [], time: new Date() };
   /**  */
@@ -120,15 +112,36 @@ export class WournalDocument extends Component<{
   }
 
   // ------------------------------------------------------------
+  // undo
+  // ------------------------------------------------------------
+
+  private _undoStack = new UndoStack(this);
+  public get undoStack() { return this._undoStack; }
+
+  public undo(): void {
+    this.currentTool.value.onDeselect();
+    this.selection.clear();
+    this._undoStack.undo();
+  }
+
+  public redo(): void {
+    this.currentTool.value.onDeselect();
+    this.selection.clear();
+    this._undoStack.redo();
+  }
+
+  // ------------------------------------------------------------
   // selection
   // ------------------------------------------------------------
+
+  public selection = new CanvasSelection(this._undoStack);
 
   public selectionCut(noCopy: boolean = false): void {
     if (this.selection.selection.length === 0) return;
     let deleted = [];
     for (let el of this.selection.selection) deleted.push(el);
 
-    this.undoStack.push(new UndoActionCanvasElements(
+    this._undoStack.push(new UndoActionCanvasElements(
       DSUtils.copyArr(deleted.map(e => e.svgElem)), null, null
     ));
 
@@ -181,12 +194,10 @@ export class WournalDocument extends Component<{
     this.selection.init(page);
     this.selection.setSelectionFromElements(page, newEls);
 
-    this.undoStack.push(new UndoActionCanvasElements(
+    this._undoStack.push(new UndoActionCanvasElements(
       null, null, DSUtils.copyArr(newEls.map(e => e.svgElem))
     ));
   }
-
-  public selectionAvailable = new rx.State(false);
 
   /** Remember pasted image and call `selectionOrClipboardPaste` */
   private async onPasteImage(dataUrl: string): Promise<void> {
@@ -230,7 +241,7 @@ export class WournalDocument extends Component<{
 
     this.activePage.activePaintLayer.appendChild(imageEl.svgElem);
     this.selection.setSelectionFromElements(this.activePage, [imageEl]);
-    this.undoStack.push(new UndoActionCanvasElements(
+    this._undoStack.push(new UndoActionCanvasElements(
       null, null, [imageEl.svgElem]
     ));
   }
@@ -262,30 +273,10 @@ export class WournalDocument extends Component<{
 
     this.activePage.activePaintLayer.appendChild(textEl.svgElem);
     this.selection.setSelectionFromElements(this.activePage, [textEl]);
-    this.undoStack.push(new UndoActionCanvasElements(
+    this._undoStack.push(new UndoActionCanvasElements(
       null, null, [textEl.svgElem]
     ));
   }
-
-
-  // ------------------------------------------------------------
-  // undo
-  // ------------------------------------------------------------
-
-  public undo(): void {
-    this.currentTool.value.onDeselect();
-    this.selection.clear();
-    this.undoStack.undo();
-  }
-
-  public redo(): void {
-    this.currentTool.value.onDeselect();
-    this.selection.clear();
-    this.undoStack.redo();
-  }
-
-  public undoAvailable = new rx.State(false);
-  public redoAvailable = new rx.State(false);
 
   // ------------------------------------------------------------
   // adding pages
@@ -328,7 +319,7 @@ export class WournalDocument extends Component<{
     if (!noDeselect) this.currentTool.value.onDeselect();
     this.selection.clear();
     this.currentTool.next(new tool(
-      this.getActivePage.bind(this), this.undoStack, this.selection
+      this.getActivePage.bind(this), this._undoStack, this.selection
     ));
     for (let page of this.pages)
       page.toolLayer.style.cursor = this.currentTool.value.idleCursor;
@@ -352,7 +343,7 @@ export class WournalDocument extends Component<{
 
   /** Called to update react state */
   public currentTool = new rx.State<CanvasTool>(new CanvasToolPen(
-    this.getActivePage.bind(this), this.undoStack, this.selection
+    this.getActivePage.bind(this), this._undoStack, this.selection
   ));
 
   /** set stroke width for current tool or selection */
@@ -366,7 +357,7 @@ export class WournalDocument extends Component<{
           el: el.svgElem, dataBefore: dataBefore, dataAfter: el.getData()
         });
       }
-      this.undoStack.push(new UndoActionCanvasElements(
+      this._undoStack.push(new UndoActionCanvasElements(
         null, changed, null
       ));
     } else {
@@ -390,7 +381,7 @@ export class WournalDocument extends Component<{
           el: el.svgElem, dataBefore: dataBefore, dataAfter: el.getData()
         });
       }
-      this.undoStack.push(new UndoActionCanvasElements(
+      this._undoStack.push(new UndoActionCanvasElements(
         null, changed, null
       ));
     } else {

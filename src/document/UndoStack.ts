@@ -1,3 +1,4 @@
+import { rx } from "@mvui/core";
 import { WournalDocument } from "./WournalDocument";
 
 export interface UndoAction {
@@ -15,12 +16,12 @@ export class UndoStack {
     private doc: WournalDocument
   ) { }
 
-  get undoAvailable(): boolean { return this.undoable.length > 0; }
-  get redoAvailable(): boolean { return this.redoable.length > 0; }
+  public redoAvailable = new rx.State(false);
+  public undoAvailable = new rx.State(false);
 
   private notifyAvailable() {
-    this.doc.undoAvailable.next(this.undoAvailable);
-    this.doc.redoAvailable.next(this.redoAvailable);
+    this.undoAvailable.next(this.undoable.length > 0);
+    this.redoAvailable.next(this.redoable.length > 0);
   }
 
   public push(action: UndoAction): void {
@@ -34,7 +35,7 @@ export class UndoStack {
   }
 
   public undo(): void {
-    if (!this.undoAvailable) return;
+    if (this.undoable.length === 0) return;
     let action = this.undoable.pop();
     action.undo(this.doc);
     this.redoable.push(action);
@@ -44,7 +45,7 @@ export class UndoStack {
   }
 
   public redo(): void {
-    if (!this.redoAvailable) return;
+    if (this.redoable.length === 0) return;
     let action = this.redoable.pop();
     action.redo(this.doc);
     this.undoable.push(action);

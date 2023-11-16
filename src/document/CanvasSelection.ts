@@ -1,3 +1,4 @@
+import { rx } from "@mvui/core";
 import { LOG } from "../util/Logging";
 import { SVGUtils } from "../util/SVGUtils";
 import { CanvasElement, CanvasElementData } from "./CanvasElement";
@@ -10,6 +11,9 @@ import { WournalPage } from "./WournalPage";
 export class CanvasSelection {
   private _page: WournalPage;
   get page() { return this._page; }
+
+  private _available = new rx.State(false);
+  public available = this._available.asReadonly();
 
   private mouseBeforeMove: { x: number, y: number };
   private rectBeforeResize: DOMRect;
@@ -42,7 +46,7 @@ export class CanvasSelection {
   /** Remove all elements from given `page` */
   public clear() {
     this._selection = [];
-    // this.page?.doc.selectionAvailable.next(true);
+    this._available.next(false);
     this._selectionDisplay?.destroy(true);
   }
 
@@ -166,7 +170,7 @@ export class CanvasSelection {
     this._selectionDisplay.setDimension(page.globalDOMRectToCanvas(boundingRect));
     this._selection = els.map(e => { return { el: e, savedData: e.getData() } });
     this._selectionDisplay.setCursorState("idle");
-    // this.page?.doc.selectionAvailable.next(true);
+    this._available.next(true);
   }
 
   public setSelectionFromCurrentRect() {
@@ -183,6 +187,6 @@ export class CanvasSelection {
         );
       }
     }
-    // this.page?.doc.selectionAvailable.next(true);
+    this._available.next(true);
   }
 }
