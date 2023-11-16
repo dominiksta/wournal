@@ -17,28 +17,6 @@ export default class Toolbars extends Component {
     doc: rx.prop<WournalDocument>(),
   }
 
-  static styles = style.sheet({
-    '#size-modifier-medium::part(button)': {
-      width: '10px',
-      background: 'red !important',
-    },
-    '#size-modifier-medium::part(icon)': {
-      width: '10px',
-      background: 'red !important',
-    },
-    '#size-modifier-medium': {
-      width: '10px !important',
-      background: 'red !important',
-    },
-  })
-
-  pierceShadow = style.sheet({
-    // 'ui5-icon': {
-    //   width: '10px',
-    // }
-  })
-
-
   render() {
     const d = this.props.doc;
 

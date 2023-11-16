@@ -59,7 +59,7 @@ class App extends Component {
 
   static styles = style.sheet({
     ':host': {
-      background: theme.background,
+      background: ui5.Theme.BackgroundColor,
       display: 'block',
       height: '100%',
     },
@@ -68,12 +68,12 @@ class App extends Component {
       top: '0',
       width: '100%',
       zIndex: '1000',
-      background: theme.background,
+      background: ui5.Theme.BackgroundColor,
     },
     '#document': {
       position: 'relative',
       top: '87px',
-      background: theme.background,
+      background: theme.documentBackground,
       height: 'calc(100% - 87px)',
       width: '100%',
       overflow: 'auto',
@@ -82,7 +82,26 @@ class App extends Component {
       overflow: 'auto',
       height: '100%',
       width: '100%',
-    }
+    },
+    '*::-webkit-scrollbar': {
+      // background: ui5.Theme.ScrollBar_TrackColor,
+      background: 'transparent',
+      // width: ui5.Theme.ScrollBar_Dimension,
+      // height: ui5.Theme.ScrollBar_Dimension,
+      width: '8px',
+      height: '8px',
+    },
+    '*::-webkit-scrollbar-thumb': {
+      background: theme.scrollbar,
+      borderRadius: '10px',
+    },
+    '*::-webkit-scrollbar-thumb:hover': {
+      background: theme.scrollbarHover,
+    },
+    '*::-webkit-scrollbar-corner': {
+      // background: ui5.Theme.ScrollBar_TrackColor,
+      background: 'transparent',
+    },
   });
 }
 

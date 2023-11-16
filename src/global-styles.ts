@@ -13,20 +13,26 @@ style.util.applySheetAsStyleTag(document.body, style.sheet({
 }), 'global-styles');
 
 type WournalTheme = {
-  background: string,
-  color: string,
+  documentBackground: string,
+  documentActive: string,
+  scrollbar: string,
+  scrollbarHover: string,
   invert: string,
 }
 
 export const lightTheme: WournalTheme = {
-  background: '#F5F6F7',
-  color: 'black',
+  scrollbar: '#888888',
+  scrollbarHover: '#666666',
+  documentBackground: '#a1a1a1',
+  documentActive: '#666666',
   invert: ''
 }
 
 export const darkTheme: WournalTheme = {
-  background: '#12171C',
-  color: 'white',
+  scrollbar: '#555555',
+  scrollbarHover: '#777777',
+  documentBackground: '#191B1D',
+  documentActive: '#888888',
   invert: 'invert(1)',
 }
 

@@ -68,7 +68,7 @@ export class WournalDocument extends Component<{
     this.display.addEventListener("mousedown", this.onMouseDown.bind(this));
     this.display.addEventListener("mousemove", this.onMouseMove.bind(this));
     this.display.addEventListener("contextmenu", (e) => { e.preventDefault() });
-    this.display.style.background = theme.background;
+    this.display.style.background = theme.documentBackground;
     ClipboardUtils.setPlainTextHandler(this.onPastePlainText.bind(this));
     ClipboardUtils.setImageHandler(this.onPasteImage.bind(this));
     ClipboardUtils.enableHandlers();
@@ -81,7 +81,7 @@ export class WournalDocument extends Component<{
 
   static styles = style.sheet({
     '.wournal-page.active': {
-      borderColor: 'darkred !important',
+      borderColor: `${theme.documentActive} !important`,
     }
   })
 

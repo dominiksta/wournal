@@ -151,7 +151,7 @@ export default class Toolbar extends Component {
     },
     '.toolbar': {
       width: '9999px',
-      background: theme.background,
+      background: ui5.Theme.BackgroundColor,
       borderBottom: `1px solid ${ui5.Theme.Button_BorderColor}`,
       padding: '3px',
     }

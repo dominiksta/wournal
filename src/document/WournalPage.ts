@@ -58,7 +58,7 @@ export class WournalPage {
     this.display = document.createElement("div");
     this.display.setAttribute("class", "wournal-page");
 
-    this.display.style.border = "2px solid gray";
+    this.display.style.border = "3px solid white";
     this.display.style.margin = "10px auto 10px auto";
     this.display.style.userSelect = "none";
     this.display.style.filter = theme.invert;
