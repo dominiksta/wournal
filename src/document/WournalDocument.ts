@@ -61,9 +61,9 @@ export class WournalDocument extends Component {
     this.display.addEventListener("mousemove", this.onMouseMove.bind(this));
     this.display.addEventListener("contextmenu", (e) => { e.preventDefault() });
     this.display.style.background = theme.documentBackground;
-    ClipboardUtils.setPlainTextHandler(this.onPastePlainText.bind(this));
-    ClipboardUtils.setImageHandler(this.onPasteImage.bind(this));
-    ClipboardUtils.enableHandlers();
+    // ClipboardUtils.setPlainTextHandler(this.onPastePlainText.bind(this));
+    // ClipboardUtils.setImageHandler(this.onPasteImage.bind(this));
+    // ClipboardUtils.enableHandlers();
 
     this.initialZoomFactor = computeZoomFactor();
     this.setTool(CanvasToolPen);

@@ -5,7 +5,7 @@ import { theme } from "global-styles";
 @Component.register
 export class ToolbarButton extends Component<{
   events: {
-    click: CustomEvent<ToolbarButton>,
+    click: MouseEvent,
   }
 }> {
   props = {
@@ -55,9 +55,6 @@ export class ToolbarButton extends Component<{
           title: p.alt,
         },
         style: { width: p.width },
-        events: {
-          click: _ => this.dispatch('click', this),
-        }
       },
         imgOrColor
       )

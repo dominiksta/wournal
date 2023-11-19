@@ -7,9 +7,9 @@ import { WournalDocument } from "document/WournalDocument";
 import { ConfigRepositoryLocalStorage } from 'persistence/ConfigRepositoryLocalStorage';
 import { DocumentRepositoryBrowserFiles } from 'persistence/DocumentRepositoryBrowserFiles';
 import { WournalPageSize } from 'document/WournalPageSize';
-import { defaultConfig } from 'persistence/ConfigDTO';
-
-export const ConfigCtx = new rx.Context(() => new rx.State(defaultConfig()));
+import { ConfigCtx } from 'app/config-context';
+import { Settings } from 'app/settings';
+import { ToastCtx } from 'app/toast-context';
 
 @Component.register
 class App extends Component {
@@ -17,7 +17,9 @@ class App extends Component {
   private docRepo = DocumentRepositoryBrowserFiles.getInstance();
   private confRepo = ConfigRepositoryLocalStorage.getInstance();
 
-  private configCtx = this.provideContext(ConfigCtx);
+  private configCtx = this.provideContext(
+    ConfigCtx, new rx.State(this.confRepo.load())
+  );
   private doc = new rx.State(WournalDocument.create(this.configCtx));
 
   constructor() {
@@ -25,7 +27,16 @@ class App extends Component {
   }
 
   render() {
-    this.configCtx.next(this.confRepo.load());
+    this.setAttribute('data-ui5-compact-size', 'true');
+
+    this.provideContext(ToastCtx, {
+      open: async (msg: string) => {
+        const toast = await this.query<ui5.types.Toast>('#toast');
+        console.log(toast);
+        toast.innerText = msg;
+        toast.show();
+      }
+    });
 
     this.subscribe(style.currentTheme$, theme => {
       ui5.config.setTheme(theme === 'light' ? 'sap_horizon' : 'sap_horizon_dark');
@@ -34,13 +45,18 @@ class App extends Component {
 
     this.createTestPages();
 
+    const settingsOpen = new rx.State(false);
+
     return [
-      Toolbars.t({ props: { doc: this.doc } }),
-      h.div({
-        fields: { id: 'document' },
-      },
-        this.doc
-      ),
+      Toolbars.t({
+        props: { doc: this.doc },
+        events: {
+          'settings-open': () => settingsOpen.next(true),
+        }
+      }),
+      Settings.t({ props: { open: rx.bind(settingsOpen) } }),
+      ui5.toast({ fields: { id: 'toast', placement: 'BottomEnd' }}),
+      h.div({ fields: { id: 'document' }}, this.doc),
     ]
   }
 
@@ -72,7 +88,7 @@ class App extends Component {
       position: 'fixed',
       top: '0',
       width: '100%',
-      zIndex: '1000',
+      zIndex: '2',
       background: ui5.Theme.BackgroundColor,
     },
     '#document': {

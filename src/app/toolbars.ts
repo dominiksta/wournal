@@ -12,9 +12,14 @@ import { CanvasToolSelectRectangle } from "document/CanvasToolSelectRectangle";
 import { WournalDocument } from "document/WournalDocument";
 import { CanvasToolConfigData, CanvasToolStrokeWidth } from "persistence/ConfigDTO";
 import { DSUtils } from "util/DSUtils";
+import { Settings } from "./settings";
 
 @Component.register
-export default class Toolbars extends Component {
+export default class Toolbars extends Component<{
+  events: {
+    'settings-open': CustomEvent,
+  }
+}> {
   props = {
     doc: rx.prop<WournalDocument>(),
   }
@@ -51,15 +56,71 @@ export default class Toolbars extends Component {
 
     return [
       h.div({ fields: { className: 'topbar' } }, [
+        // menu
+        // ----------------------------------------------------------------------
+        ui5.menu({
+          fields: { id: 'menu' },
+          events: {
+            'item-click': e => {
+              const item = e.detail.item;
+              ({
+                'Preferences': () => {
+                  this.dispatch('settings-open', undefined);
+                }
+              } as any)[item.text]();
+            }
+          }
+        }, [
+          ui5.menuItem({ fields: { text: 'File' } }, [
+            ui5.menuItem({ fields: { icon: 'save', text: 'Save' }}),
+            ui5.menuItem({ fields: { icon: 'document', text: 'New' }}),
+            ui5.menuItem({ fields: { icon: 'open-folder', text: 'Load' }}),
+          ]),
+
+          ui5.menuItem({ fields: { text: 'Edit' } }, [
+            ui5.menuItem({ fields: { icon: 'undo', text: 'Undo' }}),
+            ui5.menuItem({ fields: { icon: 'redo', text: 'Redo' }}),
+            ui5.menuItem({ fields: {
+              icon: 'scissors', text: 'Cut Selection',
+              startsSection: true,
+            }}),
+            ui5.menuItem({ fields: { icon: 'copy', text: 'Copy Selection' }}),
+            ui5.menuItem({ fields: { icon: 'paste', text: 'Paste Selection/Clipboard' }}),
+            ui5.menuItem({
+              fields: { icon: 'settings', text: 'Preferences' },
+            }),
+          ]),
+
+          ui5.menuItem({ fields: { text: 'File' } }),
+          ui5.menuItem({ fields: { text: 'File' } }),
+          ui5.menuItem({ fields: { text: 'File' } }),
+          ui5.menuItem({ fields: { text: 'File' } }),
+          ui5.menuItem({ fields: { text: 'File' } }),
+          ui5.menuItem({ fields: { text: 'File' } }),
+          ui5.menuItem({ fields: { text: 'File' } }),
+        ]),
+
 
         // upper
         // ----------------------------------------------------------------------
         Toolbar.t({}, [
           ToolbarButton.t({
             props: {
+              img: 'icon:settings', alt: 'Settings',
+            },
+            events: { click: e => {
+              this.dispatch('settings-open', undefined);
+            }}
+          }),
+          ToolbarButton.t({
+            props: {
               img: 'icon:menu2', alt: 'Menu',
             },
-            events: { click: e => { console.log(e); } }
+            events: { click: async e => {
+              const menu = await this.query<ui5.types.Menu>('#menu');
+              if (menu.open) menu.close();
+              else menu.showAt(e.target as HTMLElement);
+            }}
           }),
           ToolbarSeperator.t(),
           ToolbarButton.t({
