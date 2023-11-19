@@ -13,6 +13,7 @@ import { WournalDocument } from "document/WournalDocument";
 import { CanvasToolConfigData, CanvasToolStrokeWidth } from "persistence/ConfigDTO";
 import { DSUtils } from "util/DSUtils";
 import { Settings } from "./settings";
+import { ConfigCtx } from "./config-context";
 
 @Component.register
 export default class Toolbars extends Component<{
@@ -26,6 +27,7 @@ export default class Toolbars extends Component<{
 
   render() {
     const d = this.props.doc;
+    const configCtx = this.getContext(ConfigCtx);
 
     const noSelection = d.pipe(
       rx.switchMap(doc => doc.selection.available),
@@ -274,28 +276,15 @@ export default class Toolbars extends Component<{
 
           ToolbarSeperator.t(),
 
-          ToolbarButton.t({
-            props: {
-              img: 'color:#000000', alt: 'Black',
-              current: strokeColor.map(c => c === '#000000'),
-            },
-            events: { click: _ => d.value.setColor('#000000') }
-          }),
-          ToolbarButton.t({
-            props: {
-              img: 'color:#2F2FE7', alt: 'Blue',
-              current: strokeColor.map(c => c === '#2F2FE7'),
-            },
-            events: { click: _ => d.value.setColor('#2F2FE7') }
-          }),
-          ToolbarButton.t({
-            props: {
-              img: 'color:#FF0000', alt: 'Red',
-              current: strokeColor.map(c => c === '#FF0000'),
-            },
-            events: { click: _ => d.value.setColor('#FF0000') }
-          })
-
+          h.fragment(configCtx, config => config.colorPalette.map(col =>
+            ToolbarButton.t({
+              props: {
+                img: `color:${col.color}`, alt: col.name,
+                current: strokeColor.map(c => c === col.color),
+              },
+              events: { click: _ => d.value.setColor(col.color) }
+            })
+          )),
         ]),
 
       ])
