@@ -138,6 +138,7 @@ export class CanvasSelection {
 
   public onMouseUp(e: MouseEvent): void {
     if (this.state === "idle") return;
+    this.page.doc.shortcuts.focus();
     e.stopPropagation();
     switch (this.state) {
       case "moving":

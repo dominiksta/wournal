@@ -11,8 +11,14 @@ import { WournalPageSize } from 'document/WournalPageSize';
 import { ConfigCtx } from 'app/config-context';
 import { Settings } from 'app/settings';
 import { ToastCtx } from 'app/toast-context';
-import { ShortcutManager } from 'app/shortcuts';
+import { Shortcut, ShortcutManager } from 'app/shortcuts';
 import { ShortcutsCtx } from 'app/shortcuts-context';
+import { CanvasToolStrokeWidth } from 'persistence/ConfigDTO';
+import { WournalApi } from 'api';
+import { ApiCtx } from 'app/api-context';
+import { GlobalCommandsCtx } from 'app/global-commands';
+import { CanvasToolName } from 'document/CanvasTool';
+import { CanvasToolFactory } from 'document/CanvasToolFactory';
 
 @Component.register
 class App extends Component {
@@ -28,9 +34,7 @@ class App extends Component {
     this.configCtx, this.shortcutsCtx)
   );
 
-  constructor() {
-    super();
-  }
+  private settingsOpen = new rx.State(false);
 
   render() {
     this.setAttribute('data-ui5-compact-size', 'true');
@@ -44,6 +48,17 @@ class App extends Component {
       }
     });
 
+    this.provideContext(ApiCtx, this.api);
+
+    const globalCmds = this.#globalCmds;
+    for (const cmd in globalCmds) {
+      const k = cmd as keyof typeof globalCmds;
+      if (!globalCmds[k].shortcut) continue;
+      this.shortcutsCtx.addShortcut(Shortcut.fromId(
+        globalCmds[k].shortcut, globalCmds[k].func
+      ));
+    }
+
     this.onRendered(async () => {
       this.shortcutsCtx.addEl(await this.query('#toolbar'));
       this.shortcutsCtx.addEl(await this.query('#document'));
@@ -54,44 +69,188 @@ class App extends Component {
       style.setTheme('wournal', theme === 'light' ? lightTheme : darkTheme);
     });
 
-    this.createTestPages();
-
-    const settingsOpen = new rx.State(false);
+    // this.document.createTestPages();
 
     return [
       Toolbars.t({
         fields: { id: 'toolbar' },
         props: { doc: this.doc },
-        events: {
-          'settings-open': () => settingsOpen.next(true),
-        }
       }),
       h.div(this.shortcutsCtx),
-      Settings.t({ props: { open: rx.bind(settingsOpen) } }),
+      Settings.t({ props: { open: rx.bind(this.settingsOpen) } }),
       ui5.toast({ fields: { id: 'toast', placement: 'BottomEnd' }}),
       h.div({ fields: { id: 'document' }}, this.doc),
     ]
   }
 
-  async loadDocument(empty: boolean = false) {
-    this.doc.next(
-      empty
-        ? WournalDocument.create(this.configCtx, this.shortcutsCtx)
-        : WournalDocument.fromDto(
-          this.configCtx, this.shortcutsCtx, await this.docRepo.load("")
+  api: WournalApi = {
+    // document
+    // ----------------------------------------------------------------------
+    saveDocumentPrompt: () => {
+      this.docRepo.save(this.doc.value.toDto());
+    },
+    loadDocumentPrompt: async () => {
+      this.doc.next(
+        WournalDocument.fromDto(
+          this.configCtx, this.shortcutsCtx, await this.docRepo.load(""),
         )
-    );
+      )
+    },
+    newDocument: () => {
+      this.doc.next(WournalDocument.create(this.configCtx, this.shortcutsCtx));
+    },
+    createTestPages: () => {
+      this.doc.value.addNewPage(WournalPageSize.DINA4_LANDSCAPE);
+      this.doc.value.addNewPage(WournalPageSize.DINA5_PORTRAIT);
+      this.doc.value.addNewPage(WournalPageSize.DINA5_LANDSCAPE);
+    },
+
+    // history
+    // ----------------------------------------------------------------------
+    undo: () => { this.doc.value.undo() },
+    redo: () => { this.doc.value.redo() },
+
+    // clipboard/selection
+    // ----------------------------------------------------------------------
+    pasteClipboardOrSelection: () => { this.doc.value.selectionOrClipboardPaste() },
+    cutSelection: () => { this.doc.value.selectionCut() },
+    copySelection: () => { this.doc.value.selectionCopy() },
+    deleteSelection: () => { this.doc.value.selectionCut(true) },
+
+    // zoom
+    // ----------------------------------------------------------------------
+    setZoom: (zoom) => { this.doc.value.setZoom(zoom) },
+    getZoom: () => { return this.doc.value.getZoom(); },
+
+    // tools
+    // ----------------------------------------------------------------------
+    setTool: (tool: CanvasToolName) => {
+      this.doc.value.setTool(CanvasToolFactory.forName(tool));
+    },
+    getTool: () => {
+      return this.doc.value.currentTool.value.name;
+    },
+    setStrokeWidth: (width) => { this.doc.value.setStrokeWidth(width) },
+    setColorByName: (name: string) => {
+      this.doc.value.setColor(
+        this.configCtx.value.colorPalette.find(c => c.name === name).color
+      );
+    },
+    setColorByHex: (color: string) => {
+      this.doc.value.setColor(color);
+    },
   }
 
-  saveDocument() {
-    this.docRepo.save(this.doc.value.toDto());
-  }
 
-  private createTestPages() {
-    this.doc.value.addNewPage(WournalPageSize.DINA4_LANDSCAPE);
-    this.doc.value.addNewPage(WournalPageSize.DINA5_PORTRAIT);
-    this.doc.value.addNewPage(WournalPageSize.DINA5_LANDSCAPE);
-  }
+  #globalCmds = this.provideContext(GlobalCommandsCtx, {
+    'file_new': {
+      human_name: 'New File',
+      func: this.api.newDocument,
+      shortcut: 'Ctrl+N',
+    },
+    'file_save': {
+      human_name: 'Save File',
+      func: this.api.saveDocumentPrompt,
+      shortcut: 'Ctrl+S',
+    },
+    'file_load': {
+      human_name: 'Load File',
+      func: this.api.loadDocumentPrompt,
+      shortcut: 'Ctrl+O',
+    },
+
+    'history_undo': {
+      human_name: 'Undo',
+      func: this.api.undo,
+      shortcut: 'Ctrl+Z',
+    },
+    'history_redo': {
+      human_name: 'Redo',
+      func: this.api.redo,
+      shortcut: 'Ctrl+Y',
+    },
+
+    'selection_or_clipboard_paste': {
+      human_name: 'Paste Clipboard/Selection',
+      func: this.api.pasteClipboardOrSelection,
+      shortcut: 'Ctrl+V',
+    },
+    'selection_copy': {
+      human_name: 'Copy Selection',
+      func: this.api.copySelection,
+      shortcut: 'Ctrl+C',
+    },
+    'selection_cut': {
+      human_name: 'Cut Selection',
+      func: this.api.cutSelection,
+      shortcut: 'Ctrl+X',
+    },
+    'selection_delete': {
+      human_name: 'Delete Selection',
+      func: this.api.deleteSelection,
+      shortcut: 'Delete',
+    },
+
+    'preferences_open': {
+      human_name: 'Open Preferences',
+      func: () => this.settingsOpen.next(true),
+      shortcut: 'Ctrl+,'
+    },
+
+    'zoom_in': {
+      human_name: 'Zoom In',
+      func: () => this.api.setZoom(this.api.getZoom() + 0.1),
+      shortcut: 'Ctrl++'
+    },
+    'zoom_reset': {
+      human_name: 'Zoom Reset',
+      func: () => this.api.setZoom(1),
+      shortcut: 'Ctrl+0'
+    },
+    'zoom_out': {
+      human_name: 'Zoom Out',
+      func: () => this.api.setZoom(this.api.getZoom() - 0.1),
+      shortcut: 'Ctrl+-'
+    },
+
+    'tool_pen': {
+      human_name: 'Pen',
+      func: () => this.api.setTool('CanvasToolPen'),
+      shortcut: 'W',
+    },
+    'tool_eraser': {
+      human_name: 'Eraser',
+      func: () => this.api.setTool('CanvasToolEraser'),
+      shortcut: 'E',
+    },
+    'tool_rectangle': {
+      human_name: 'Rectangle',
+      func: () => this.api.setTool('CanvasToolRectangle'),
+      shortcut: 'R',
+    },
+    'tool_select_rectangle': {
+      human_name: 'Select Rectangle',
+      func: () => this.api.setTool('CanvasToolSelectRectangle'),
+      shortcut: 'S',
+    },
+    'tool_text': {
+      human_name: 'Text',
+      func: () => this.api.setTool('CanvasToolText'),
+      shortcut: 'T',
+    },
+    'tool_stroke_width_fine': {
+      human_name: 'Set Stroke Width: Fine',
+      func: () => this.api.setStrokeWidth('fine'),
+    },
+    'tool_stroke_width_medium': {
+      human_name: 'Set Stroke Width: Medium',
+      func: () => this.api.setStrokeWidth('medium'),
+    },
+    'tool_stroke_width_thick': {
+      human_name: 'Set Stroke Width: Thick',
+      func: () => this.api.setStrokeWidth('thick'),
+    },
+  });
 
   static styles = style.sheet({
     ':host': {

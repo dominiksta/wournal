@@ -13,15 +13,11 @@ import { WournalDocument } from "document/WournalDocument";
 import { CanvasToolConfigData, CanvasToolStrokeWidth } from "persistence/ConfigDTO";
 import { DSUtils } from "util/DSUtils";
 import { ConfigCtx } from "./config-context";
-import { Shortcut, ShortcutManager } from "./shortcuts";
-import { ShortcutsCtx } from "./shortcuts-context";
+import { ApiCtx } from "./api-context";
+import { GlobalCommandId, GlobalCommandIdT, GlobalCommandsCtx } from "./global-commands";
 
 @Component.register
-export default class Toolbars extends Component<{
-  events: {
-    'settings-open': CustomEvent,
-  }
-}> {
+export default class Toolbars extends Component {
   props = {
     doc: rx.prop<WournalDocument>(),
   }
@@ -43,8 +39,11 @@ export default class Toolbars extends Component<{
           DSUtils.hasKey(config, tool.name) ? config[tool.name] : undefined)
       );
 
-    const canvasToolButtonStyle = (tool: Newable<CanvasTool>) =>
+    const isCurrentTool = (tool: Newable<CanvasTool>) =>
       currentTool.map(t => t instanceof tool);
+
+    const currentToolMenuIcon = (tool: Newable<CanvasTool>) =>
+      currentTool.map(t => t instanceof tool ? 'wournal/menu-selected' : '');
 
     const strokeWidth: rx.Stream<CanvasToolStrokeWidth | undefined> =
       currentToolConfig.map(
@@ -57,11 +56,14 @@ export default class Toolbars extends Component<{
         config => (config && 'color' in config) ? config.color : undefined
       );
 
-    const shortcutsCtx = this.getContext(ShortcutsCtx);
-    const shortcut = (id: string, action: () => any) => {
-      shortcutsCtx.addShortcut(Shortcut.fromId(id, action));
-      return id;
-    };
+    const api = this.getContext(ApiCtx);
+    const globalCmnds = this.getContext(GlobalCommandsCtx);
+
+    const globalCmdMenuItem = (id: GlobalCommandIdT) => ({
+      id,
+      text: globalCmnds[id].human_name,
+      additionalText: globalCmnds[id].shortcut ?? '',
+    });
 
     return [
       h.div({ fields: { className: 'topbar' } }, [
@@ -71,68 +73,171 @@ export default class Toolbars extends Component<{
           fields: { id: 'menu' },
           events: {
             'item-click': e => {
-              const item = e.detail.item;
-              ({
-                'Preferences': () => {
-                  this.dispatch('settings-open', undefined);
-                }
-              } as any)[item.text]();
+              const id = e.detail.item.id as GlobalCommandIdT | '';
+              if (id.startsWith('color:')) {
+                api.setColorByHex(id.split('color:')[1]);
+                return;
+              }
+              if (id === '') return;
+              console.assert(GlobalCommandId.indexOf(id) !== -1);
+              globalCmnds[id].func();
             }
           }
         }, [
           ui5.menuItem({ fields: { text: 'File' } }, [
-            ui5.menuItem({ fields: { icon: 'save', text: 'Save' }}),
             ui5.menuItem({
               fields: {
-                icon: 'document', text: 'New',
-                additionalText: shortcut('Ctrl+N', () => null)
+                icon: 'save', ...globalCmdMenuItem('file_save'),
               }
             }),
-            ui5.menuItem({ fields: { icon: 'open-folder', text: 'Load' }}),
+            ui5.menuItem({
+              fields: {
+                icon: 'document', ...globalCmdMenuItem('file_new'),
+              }
+            }),
+            ui5.menuItem({
+              fields: {
+                icon: 'open-folder', ...globalCmdMenuItem('file_load'),
+              }
+            }),
           ]),
 
           ui5.menuItem({ fields: { text: 'Edit' } }, [
             ui5.menuItem({
               fields: {
-                icon: 'undo', text: 'Undo',
-                additionalText: shortcut('Ctrl+Z', () => d.value.undo())
+                icon: 'undo', ...globalCmdMenuItem('history_undo')
               }
             }),
             ui5.menuItem({
               fields: {
-                icon: 'redo', text: 'Redo',
-                additionalText: shortcut('Ctrl+Y', () => d.value.redo())
+                icon: 'redo', ...globalCmdMenuItem('history_redo')
               }
             }),
             ui5.menuItem({
               fields: {
-                icon: 'scissors', text: 'Cut Selection',
-                startsSection: true, additionalText: shortcut(
-                  'Ctrl+X', () => d.value.selectionCut()
-                )
+                icon: 'scissors', startsSection: true,
+                ...globalCmdMenuItem('selection_cut')
+              },
+              events: {
+                click: console.log,
               }
             }),
             ui5.menuItem({
               fields: {
-                icon: 'copy', text: 'Copy Selection',
-                additionalText: shortcut(
-                  'Ctrl+C', () => d.value.selectionCopy()
-                )
+                icon: 'copy', ...globalCmdMenuItem('selection_copy')
               }
             }),
             ui5.menuItem({
               fields: {
-                icon: 'paste', text: 'Paste Selection/Clipboard',
-                additionalText: 'Ctrl+V'
+                icon: 'paste',
+                ...globalCmdMenuItem('selection_or_clipboard_paste')
               }
             }),
             ui5.menuItem({
               fields: {
-                icon: 'settings', text: 'Preferences', additionalText: shortcut(
-                  'Ctrl+,', () => this.dispatch('settings-open', undefined)
-                )
+                icon: 'delete',
+                ...globalCmdMenuItem('selection_delete')
+              }
+            }),
+            ui5.menuItem({
+              fields: {
+                icon: 'settings', ...globalCmdMenuItem('preferences_open'),
+                startsSection: true
               },
             }),
+          ]),
+
+          ui5.menuItem({ fields: { text: 'View' } }, [
+            ui5.menuItem({
+              fields: {
+                icon: 'zoom-in', ...globalCmdMenuItem('zoom_in')
+              }
+            }),
+            ui5.menuItem({
+              fields: {
+                icon: 'reset', ...globalCmdMenuItem('zoom_reset')
+              }
+            }),
+            ui5.menuItem({
+              fields: {
+                icon: 'zoom-out', ...globalCmdMenuItem('zoom_out')
+              }
+            }),
+          ]),
+
+          ui5.menuItem({ fields: { text: 'Tool' } }, [
+            ui5.menuItem({
+              fields: {
+                icon: currentToolMenuIcon(CanvasToolPen),
+                ...globalCmdMenuItem('tool_pen')
+              }
+            }),
+            ui5.menuItem({
+              fields: {
+                icon: currentToolMenuIcon(CanvasToolEraser),
+                ...globalCmdMenuItem('tool_eraser')
+              }
+            }),
+            ui5.menuItem({
+              fields: {
+                icon: currentToolMenuIcon(CanvasToolText),
+                ...globalCmdMenuItem('tool_text')
+              }
+            }),
+            ui5.menuItem({
+              fields: {
+                icon: currentToolMenuIcon(CanvasToolRectangle),
+                ...globalCmdMenuItem('tool_rectangle')
+              }
+            }),
+            ui5.menuItem({
+              fields: {
+                icon: currentToolMenuIcon(CanvasToolSelectRectangle),
+                ...globalCmdMenuItem('tool_select_rectangle'),
+                startsSection: true
+              }
+            }),
+            ui5.menuItem({
+              fields: {text: 'Color', icon: 'palette', startsSection: true }
+            }, [
+              h.fragment(configCtx, config => config.colorPalette.map(col =>
+                ui5.menuItem({
+                  fields: {
+                    text: col.name,
+                    id: `color:${col.color}`,
+                    icon: strokeColor.map(
+                      c => c === col.color ? 'wournal/menu-selected' : ''
+                    ),
+                  }
+                })
+              ))
+            ]),
+            ui5.menuItem({ fields: { text: 'Stroke Width' } }, [
+              ui5.menuItem({
+                fields: {
+                  icon: strokeWidth.map(
+                    s => s === 'fine' ? 'wournal/menu-selected' : ''
+                  ),
+                  ...globalCmdMenuItem('tool_stroke_width_fine'),
+                }
+              }),
+              ui5.menuItem({
+                fields: {
+                  icon: strokeWidth.map(
+                    s => s === 'medium' ? 'wournal/menu-selected' : ''
+                  ),
+                  ...globalCmdMenuItem('tool_stroke_width_medium'),
+                }
+              }),
+              ui5.menuItem({
+                fields: {
+                  icon: strokeWidth.map(
+                    s => s === 'thick' ? 'wournal/menu-selected' : ''
+                  ),
+                  ...globalCmdMenuItem('tool_stroke_width_thick'),
+                }
+              }),
+            ]),
           ]),
         ]),
 
@@ -140,14 +245,6 @@ export default class Toolbars extends Component<{
         // upper
         // ----------------------------------------------------------------------
         Toolbar.t({}, [
-          ToolbarButton.t({
-            props: {
-              img: 'icon:settings', alt: 'Settings',
-            },
-            events: { click: e => {
-              this.dispatch('settings-open', undefined);
-            }}
-          }),
           ToolbarButton.t({
             props: {
               img: 'icon:menu2', alt: 'Menu',
@@ -163,19 +260,19 @@ export default class Toolbars extends Component<{
             props: {
               img: 'icon:save', alt: 'Save',
             },
-            // events: { click: _ => w.saveDocument() }
+            events: { click: api.saveDocumentPrompt }
           }),
           ToolbarButton.t({
             props: {
               img: 'icon:document', alt: 'New',
             },
-            // events: { click: _ => w.loadDocument(true) }
+            events: { click: api.newDocument }
           }),
           ToolbarButton.t({
             props: {
               img: 'icon:open-folder', alt: 'Load',
             },
-            // events: { click: _ => w.loadDocument(false) }
+            events: { click: api.loadDocumentPrompt }
           }),
           ToolbarSeperator.t(),
           ToolbarButton.t({
@@ -186,7 +283,7 @@ export default class Toolbars extends Component<{
                 rx.map(v => !v),
               ),
             },
-            events: { click: _ => d.value.undo() }
+            events: { click: api.undo }
           }),
           ToolbarButton.t({
             props: {
@@ -196,7 +293,7 @@ export default class Toolbars extends Component<{
                 rx.map(v => !v),
               ),
             },
-            events: { click: _ => d.value.redo() }
+            events: { click: api.redo }
           }),
           ToolbarSeperator.t(),
           ToolbarButton.t({
@@ -204,20 +301,20 @@ export default class Toolbars extends Component<{
               img: 'icon:scissors', alt: 'Cut Selection',
               disabled: noSelection,
             },
-            events: { click: _ => d.value.selectionCut() }
+            events: { click: api.cutSelection }
           }),
           ToolbarButton.t({
             props: {
               img: 'icon:copy', alt: 'Copy Selection',
               disabled: noSelection,
             },
-            events: { click: _ => d.value.selectionCopy() }
+            events: { click: api.copySelection }
           }),
           ToolbarButton.t({
             props: {
               img: 'icon:paste', alt: 'Paste Selection/Clipboard',
             },
-            events: { click: _ => d.value.selectionOrClipboardPaste() }
+            events: { click: api.pasteClipboardOrSelection }
           }),
 
           ToolbarSeperator.t(),
@@ -225,19 +322,19 @@ export default class Toolbars extends Component<{
             props: {
               img: 'icon:zoom-in', alt: 'Zoom In',
             },
-            events: { click: _ => d.value.setZoom(d.value.getZoom() + 0.1) }
+            events: { click: _ => api.setZoom(api.getZoom() + 0.1) }
           }),
           ToolbarButton.t({
             props: {
               img: 'icon:reset', alt: 'Reset Zoom',
             },
-            events: { click: _ => d.value.setZoom(1) }
+            events: { click: _ => api.setZoom(1) }
           }),
           ToolbarButton.t({
             props: {
               img: 'icon:zoom-out', alt: 'Zoom Out',
             },
-            events: { click: _ => d.value.setZoom(d.value.getZoom() - 0.1) }
+            events: { click: _ => api.setZoom(api.getZoom() - 0.1) }
           }),
         ]),
 
@@ -248,30 +345,30 @@ export default class Toolbars extends Component<{
           ToolbarButton.t({
             props: {
               img: 'icon:edit', alt: 'Pen',
-              current: canvasToolButtonStyle(CanvasToolPen),
+              current: isCurrentTool(CanvasToolPen),
             },
-            events: { click: _ => d.value.setTool(CanvasToolPen) }
+            events: { click: _ => api.setTool('CanvasToolPen') }
           }),
           ToolbarButton.t({
             props: {
               img: 'icon:eraser', alt: 'Eraser',
-              current: canvasToolButtonStyle(CanvasToolEraser),
+              current: isCurrentTool(CanvasToolEraser),
             },
-            events: { click: _ => d.value.setTool(CanvasToolEraser) }
+            events: { click: _ => api.setTool('CanvasToolEraser') }
           }),
           ToolbarButton.t({
             props: {
               img: 'icon:text', alt: 'Text',
-              current: canvasToolButtonStyle(CanvasToolText),
+              current: isCurrentTool(CanvasToolText),
             },
-            events: { click: _ => d.value.setTool(CanvasToolText) }
+            events: { click: _ => api.setTool('CanvasToolText') }
           }),
           ToolbarButton.t({
             props: {
               img: 'icon:draw-rectangle', alt: 'Rectangle',
-              current: canvasToolButtonStyle(CanvasToolRectangle),
+              current: isCurrentTool(CanvasToolRectangle),
             },
-            events: { click: _ => d.value.setTool(CanvasToolRectangle) }
+            events: { click: _ => api.setTool('CanvasToolRectangle') }
           }),
 
           ToolbarSeperator.t(),
@@ -279,9 +376,9 @@ export default class Toolbars extends Component<{
           ToolbarButton.t({
             props: {
               img: 'icon:cursor-arrow', alt: 'Select Rectangle',
-              current: canvasToolButtonStyle(CanvasToolSelectRectangle),
+              current: isCurrentTool(CanvasToolSelectRectangle),
             },
-            events: { click: _ => d.value.setTool(CanvasToolSelectRectangle) }
+            events: { click: _ => api.setTool('CanvasToolSelectRectangle') }
           }),
 
           ToolbarSeperator.t(),
@@ -291,21 +388,21 @@ export default class Toolbars extends Component<{
               img: 'icon:wournal/size-modifier-large', alt: 'Thick Size',
               current: strokeWidth.map(w => w === 'thick'),
             },
-            events: { click: _ => d.value.setStrokeWidth('thick') }
+            events: { click: _ => api.setStrokeWidth('thick') }
           }),
           ToolbarButton.t({
             props: {
               img: 'icon:wournal/size-modifier-medium', alt: 'Medium Size',
               current: strokeWidth.map(w => w === 'medium'),
             },
-            events: { click: _ => d.value.setStrokeWidth('medium') }
+            events: { click: _ => api.setStrokeWidth('medium') }
           }),
           ToolbarButton.t({
             props: {
               img: 'icon:wournal/size-modifier-small', alt: 'Fine Size',
               current: strokeWidth.map(w => w === 'fine'),
             },
-            events: { click: _ => d.value.setStrokeWidth('fine') }
+            events: { click: _ => api.setStrokeWidth('fine') }
           }),
 
           ToolbarSeperator.t(),
@@ -316,7 +413,7 @@ export default class Toolbars extends Component<{
                 img: `color:${col.color}`, alt: col.name,
                 current: strokeColor.map(c => c === col.color),
               },
-              events: { click: _ => d.value.setColor(col.color) }
+              events: { click: _ => api.setColorByHex(col.color) }
             })
           )),
         ]),
