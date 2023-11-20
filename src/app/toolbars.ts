@@ -12,8 +12,9 @@ import { CanvasToolSelectRectangle } from "document/CanvasToolSelectRectangle";
 import { WournalDocument } from "document/WournalDocument";
 import { CanvasToolConfigData, CanvasToolStrokeWidth } from "persistence/ConfigDTO";
 import { DSUtils } from "util/DSUtils";
-import { Settings } from "./settings";
 import { ConfigCtx } from "./config-context";
+import { Shortcut, ShortcutManager } from "./shortcuts";
+import { ShortcutsCtx } from "./shortcuts-context";
 
 @Component.register
 export default class Toolbars extends Component<{
@@ -56,6 +57,12 @@ export default class Toolbars extends Component<{
         config => (config && 'color' in config) ? config.color : undefined
       );
 
+    const shortcutsCtx = this.getContext(ShortcutsCtx);
+    const shortcut = (id: string, action: () => any) => {
+      shortcutsCtx.addShortcut(Shortcut.fromId(id, action));
+      return id;
+    };
+
     return [
       h.div({ fields: { className: 'topbar' } }, [
         // menu
@@ -75,31 +82,58 @@ export default class Toolbars extends Component<{
         }, [
           ui5.menuItem({ fields: { text: 'File' } }, [
             ui5.menuItem({ fields: { icon: 'save', text: 'Save' }}),
-            ui5.menuItem({ fields: { icon: 'document', text: 'New' }}),
+            ui5.menuItem({
+              fields: {
+                icon: 'document', text: 'New',
+                additionalText: shortcut('Ctrl+N', () => null)
+              }
+            }),
             ui5.menuItem({ fields: { icon: 'open-folder', text: 'Load' }}),
           ]),
 
           ui5.menuItem({ fields: { text: 'Edit' } }, [
-            ui5.menuItem({ fields: { icon: 'undo', text: 'Undo' }}),
-            ui5.menuItem({ fields: { icon: 'redo', text: 'Redo' }}),
-            ui5.menuItem({ fields: {
-              icon: 'scissors', text: 'Cut Selection',
-              startsSection: true,
-            }}),
-            ui5.menuItem({ fields: { icon: 'copy', text: 'Copy Selection' }}),
-            ui5.menuItem({ fields: { icon: 'paste', text: 'Paste Selection/Clipboard' }}),
             ui5.menuItem({
-              fields: { icon: 'settings', text: 'Preferences' },
+              fields: {
+                icon: 'undo', text: 'Undo',
+                additionalText: shortcut('Ctrl+Z', () => d.value.undo())
+              }
+            }),
+            ui5.menuItem({
+              fields: {
+                icon: 'redo', text: 'Redo',
+                additionalText: shortcut('Ctrl+Y', () => d.value.redo())
+              }
+            }),
+            ui5.menuItem({
+              fields: {
+                icon: 'scissors', text: 'Cut Selection',
+                startsSection: true, additionalText: shortcut(
+                  'Ctrl+X', () => d.value.selectionCut()
+                )
+              }
+            }),
+            ui5.menuItem({
+              fields: {
+                icon: 'copy', text: 'Copy Selection',
+                additionalText: shortcut(
+                  'Ctrl+C', () => d.value.selectionCopy()
+                )
+              }
+            }),
+            ui5.menuItem({
+              fields: {
+                icon: 'paste', text: 'Paste Selection/Clipboard',
+                additionalText: 'Ctrl+V'
+              }
+            }),
+            ui5.menuItem({
+              fields: {
+                icon: 'settings', text: 'Preferences', additionalText: shortcut(
+                  'Ctrl+,', () => this.dispatch('settings-open', undefined)
+                )
+              },
             }),
           ]),
-
-          ui5.menuItem({ fields: { text: 'File' } }),
-          ui5.menuItem({ fields: { text: 'File' } }),
-          ui5.menuItem({ fields: { text: 'File' } }),
-          ui5.menuItem({ fields: { text: 'File' } }),
-          ui5.menuItem({ fields: { text: 'File' } }),
-          ui5.menuItem({ fields: { text: 'File' } }),
-          ui5.menuItem({ fields: { text: 'File' } }),
         ]),
 
 
@@ -290,4 +324,10 @@ export default class Toolbars extends Component<{
       ])
     ]
   }
+
+  static styles = style.sheet({
+    ':host': {
+      outline: 'none',
+    }
+  })
 }

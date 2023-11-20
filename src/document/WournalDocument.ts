@@ -19,6 +19,7 @@ import { WournalPage } from "./WournalPage";
 import { computeZoomFactor, WournalPageSize } from "./WournalPageSize";
 import { Component, h, rx, style } from "@mvui/core";
 import { theme } from "global-styles";
+import { ShortcutManager } from "app/shortcuts";
 
 @Component.register
 export class WournalDocument extends Component {
@@ -26,6 +27,8 @@ export class WournalDocument extends Component {
 
   private _config: rx.State<ConfigDTO>;
   get config() { return this._config };
+  private _shortcuts: ShortcutManager;
+  get shortcuts() { return this._shortcuts };
   private _toolConfig: rx.State<CanvasToolConfig>;
   get toolConfig() { return this._toolConfig };
 
@@ -54,16 +57,20 @@ export class WournalDocument extends Component {
 
   public identification: string = "wournaldoc.woj";
 
-  private constructor() {
+  private constructor(
+    config: rx.State<ConfigDTO>,
+    shortcuts: ShortcutManager,
+  ) {
     super();
     this.display.addEventListener("mouseup", this.onMouseUp.bind(this));
     this.display.addEventListener("mousedown", this.onMouseDown.bind(this));
     this.display.addEventListener("mousemove", this.onMouseMove.bind(this));
     this.display.addEventListener("contextmenu", (e) => { e.preventDefault() });
     this.display.style.background = theme.documentBackground;
-    // ClipboardUtils.setPlainTextHandler(this.onPastePlainText.bind(this));
-    // ClipboardUtils.setImageHandler(this.onPasteImage.bind(this));
-    // ClipboardUtils.enableHandlers();
+    shortcuts.pasteImageHandler = this.onPasteImage.bind(this);
+    shortcuts.pastePlainTextHandler = this.onPastePlainText.bind(this);
+    this._config = config;
+    this._shortcuts = shortcuts;
 
     this.initialZoomFactor = computeZoomFactor();
     this.setTool(CanvasToolPen);
@@ -83,20 +90,20 @@ export class WournalDocument extends Component {
   // initialization and serialization
   // ------------------------------------------------------------
 
-  public static create(config: rx.State<ConfigDTO>): WournalDocument {
-    let doc = new WournalDocument();
+  public static create(
+    config: rx.State<ConfigDTO>, shortcuts: ShortcutManager,
+  ): WournalDocument {
+    let doc = new WournalDocument(config, shortcuts);
     doc.addNewPage(WournalPageSize.DINA4_PORTRAIT);
-    doc._config = config;
     doc._toolConfig = new rx.State(DSUtils.copyObj(config.value.tools));
     return doc;
   }
 
   public static fromDto(
-    config: rx.State<ConfigDTO>, dto: DocumentDTO
+    config: rx.State<ConfigDTO>, shortcuts: ShortcutManager, dto: DocumentDTO
   ): WournalDocument {
-    let doc = new WournalDocument();
+    let doc = new WournalDocument(config, shortcuts);
     doc.identification = dto.identification;
-    doc._config = config;
     doc._toolConfig = new rx.State(DSUtils.copyObj(config.value.tools));
     for (let page of dto.pagesSvg) {
       doc.addPageFromSvg(page);

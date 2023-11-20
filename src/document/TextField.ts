@@ -48,7 +48,7 @@ export class TextField {
 `;
 
   constructor(
-    page: WournalPage,
+    private page: WournalPage,
     private _pos: { x: number, y: number },
     fontSize: number,
     fontStyle: "normal" | "italic",
@@ -80,9 +80,10 @@ export class TextField {
     this.textarea.rows = 1;
     this.textarea.style.color = fontColor;
     this.textarea.style.filter = theme.invert;
-    this.textarea.addEventListener("keydown", this.onKeyDown.bind(this));
+    this.textarea.addEventListener("blur", this.onBlur.bind(this));
     this.textarea.addEventListener("input", this.updateSize.bind(this));
     this.textarea.addEventListener("paste", this.onPaste.bind(this));
+    this.textarea.addEventListener("mouseup", this.onMouseup.bind(this));
     this.label.appendChild(this.textarea);
 
     this.style = page.toolLayer.ownerDocument.createElement("style");
@@ -95,11 +96,13 @@ export class TextField {
     page.toolLayerWrapper.appendChild(this.display);
   }
 
-  private onKeyDown(e: KeyboardEvent) {
-    if (e.key == "Escape") {
-      (e.target as HTMLTextAreaElement).blur()
-      ShortcutManager.focus();
-    }
+  private onMouseup(e: MouseEvent) {
+    e.stopPropagation();
+  }
+
+  private onBlur(e: FocusEvent) {
+    (e.target as HTMLTextAreaElement).blur();
+    this.page.doc.shortcuts.focus();
   }
 
   private onPaste(e: Event) {

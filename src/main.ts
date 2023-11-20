@@ -1,5 +1,6 @@
 import { Component, h, rx, style } from '@mvui/core';
 import './global-styles';
+import './app/debugger';
 import * as ui5 from "@mvui/ui5";
 import Toolbars from 'app/toolbars';
 import { darkTheme, lightTheme, theme } from "./global-styles";
@@ -10,6 +11,8 @@ import { WournalPageSize } from 'document/WournalPageSize';
 import { ConfigCtx } from 'app/config-context';
 import { Settings } from 'app/settings';
 import { ToastCtx } from 'app/toast-context';
+import { ShortcutManager } from 'app/shortcuts';
+import { ShortcutsCtx } from 'app/shortcuts-context';
 
 @Component.register
 class App extends Component {
@@ -20,7 +23,10 @@ class App extends Component {
   private configCtx = this.provideContext(
     ConfigCtx, new rx.State(this.confRepo.load())
   );
-  private doc = new rx.State(WournalDocument.create(this.configCtx));
+  private shortcutsCtx = this.provideContext(ShortcutsCtx, new ShortcutManager());
+  private doc = new rx.State(WournalDocument.create(
+    this.configCtx, this.shortcutsCtx)
+  );
 
   constructor() {
     super();
@@ -38,6 +44,11 @@ class App extends Component {
       }
     });
 
+    this.onRendered(async () => {
+      this.shortcutsCtx.addEl(await this.query('#toolbar'));
+      this.shortcutsCtx.addEl(await this.query('#document'));
+    });
+
     this.subscribe(style.currentTheme$, theme => {
       ui5.config.setTheme(theme === 'light' ? 'sap_horizon' : 'sap_horizon_dark');
       style.setTheme('wournal', theme === 'light' ? lightTheme : darkTheme);
@@ -49,11 +60,13 @@ class App extends Component {
 
     return [
       Toolbars.t({
+        fields: { id: 'toolbar' },
         props: { doc: this.doc },
         events: {
           'settings-open': () => settingsOpen.next(true),
         }
       }),
+      h.div(this.shortcutsCtx),
       Settings.t({ props: { open: rx.bind(settingsOpen) } }),
       ui5.toast({ fields: { id: 'toast', placement: 'BottomEnd' }}),
       h.div({ fields: { id: 'document' }}, this.doc),
@@ -63,8 +76,10 @@ class App extends Component {
   async loadDocument(empty: boolean = false) {
     this.doc.next(
       empty
-        ? WournalDocument.create(this.configCtx)
-        : WournalDocument.fromDto(this.configCtx, await this.docRepo.load(""))
+        ? WournalDocument.create(this.configCtx, this.shortcutsCtx)
+        : WournalDocument.fromDto(
+          this.configCtx, this.shortcutsCtx, await this.docRepo.load("")
+        )
     );
   }
 
