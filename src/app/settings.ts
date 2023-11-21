@@ -1,6 +1,7 @@
 import { Component, h, rx, style } from "@mvui/core";
 import * as ui5 from "@mvui/ui5";
 import { ConfigCtx } from "app/config-context";
+import { CanvasToolName, CanvasToolNames } from "document/CanvasTool";
 import { defaultConfig } from "persistence/ConfigDTO";
 import { DSUtils } from "util/DSUtils";
 import ColorPaletteEditor from "./color-palette-editor";
@@ -55,6 +56,9 @@ export class Settings extends Component {
           ColorPaletteEditor.t({
             props: { palette: rx.bind(conf.partial('colorPalette')) }
           }),
+        ]),
+        ui5.panel({ fields: { headerText: 'Right Click Binding', fixed: true }}, [
+          ToolSelect.t({ props: { tool: rx.bind(conf.partial('binds', 'rightClick')) } }),
         ])
       ])
     ]
@@ -63,6 +67,9 @@ export class Settings extends Component {
   static styles = style.sheet({
     'ui5-dialog': {
       background: ui5.Theme.BackgroundColor,
+    },
+    'ui5-panel': {
+      marginBottom: '10px',
     },
     '#footer': {
       width: '100%',
@@ -75,4 +82,48 @@ export class Settings extends Component {
     }
   })
 
+}
+
+@Component.register
+class ToolSelect extends Component {
+  props = {
+    tool: rx.prop<CanvasToolName>(),
+    allowed: rx.prop<CanvasToolName[]>({
+      defaultValue: CanvasToolNames as unknown as CanvasToolName[]
+    })
+  }
+
+  #humanNames: { [K in CanvasToolName]: string } = {
+    'CanvasToolEraser': 'Eraser',
+    'CanvasToolPen': 'Pen',
+    'CanvasToolRectangle': 'Rectangle',
+    'CanvasToolSelectRectangle': 'Select Rectangle',
+    'CanvasToolText': 'Text',
+  }
+
+  render() {
+    const { allowed, tool } = this.props;
+
+    return [
+      ui5.select(
+        {
+          events: {
+            'change': o => {
+              tool.next(o.detail.selectedOption.value as any);
+            }
+          }
+        },
+        [
+          h.fragment(allowed, a => a.map(a => ui5.option(
+            {
+              fields: {
+                value: a,
+                selected: tool.derive(t => t === a),
+              },
+            },
+            this.#humanNames[a]
+          )))
+        ])
+    ]
+  }
 }
