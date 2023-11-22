@@ -19,6 +19,7 @@ import { ApiCtx } from 'app/api-context';
 import { GlobalCommandsCtx } from 'app/global-commands';
 import { CanvasToolName } from 'document/CanvasTool';
 import { CanvasToolFactory } from 'document/CanvasToolFactory';
+import { StatusBar } from 'app/status-bar';
 
 @Component.register
 class App extends Component {
@@ -69,17 +70,28 @@ class App extends Component {
       style.setTheme('wournal', theme === 'light' ? lightTheme : darkTheme);
     });
 
-    // this.document.createTestPages();
+    // for (let i = 0; i < 100; i++) this.api.createTestPages();
+    this.api.createTestPages();
 
     return [
       Toolbars.t({
         fields: { id: 'toolbar' },
         props: { doc: this.doc },
       }),
+      StatusBar.t({
+        props: { doc: this.doc },
+      }),
       h.div(this.shortcutsCtx),
       Settings.t({ props: { open: rx.bind(this.settingsOpen) } }),
       ui5.toast({ fields: { id: 'toast', placement: 'BottomEnd' }}),
-      h.div({ fields: { id: 'document' }}, this.doc),
+      h.div({
+        fields: { id: 'document' },
+        events: {
+          scroll: () => {
+            this.doc.value.setActivePageForCurrentScroll();
+          }
+        }
+      }, this.doc),
     ]
   }
 
@@ -139,6 +151,22 @@ class App extends Component {
     setColorByHex: (color: string) => {
       this.doc.value.setColor(color);
     },
+
+    // scroll
+    // ----------------------------------------------------------------------
+    scrollPage: page => {
+      page -= 1;
+      const doc = this.doc.value; const pages = doc.pages.value;
+      if (page < 0 || page >= pages.length) return;
+      doc.activePage.next(pages[page]);
+      doc.activePage.value.display.scrollIntoView();
+    },
+    getPageNr: () => {
+      return this.doc.value.pages.value.indexOf(this.doc.value.activePage.value) + 1;
+    },
+    getPageCount: () => {
+      return this.doc.value.pages.value.length;
+    }
   }
 
 
@@ -250,6 +278,32 @@ class App extends Component {
       human_name: 'Set Stroke Width: Thick',
       func: () => this.api.setStrokeWidth('thick'),
     },
+
+    'scroll_page_next': {
+      human_name: 'Scroll to Next Page',
+      func: () => this.api.scrollPage(this.api.getPageNr() + 1),
+      shortcut: 'Ctrl+ArrowRight',
+    },
+    'scroll_page_previous': {
+      human_name: 'Scroll to Previous Page',
+      func: () => this.api.scrollPage(this.api.getPageNr() - 1),
+      shortcut: 'Ctrl+ArrowLeft',
+    },
+    'scroll_page_focus_goto': {
+      human_name: 'Go to Page',
+      func: async () => (await this.query<StatusBar>(StatusBar.tagName)).focusGotoPage(),
+      shortcut: 'Ctrl+G',
+    },
+    'scroll_page_last': {
+      human_name: 'Scroll to Last Page',
+      func: () => this.api.scrollPage(this.api.getPageCount()),
+      shortcut: 'End',
+    },
+    'scroll_page_first': {
+      human_name: 'Scroll to First Page',
+      func: () => this.api.scrollPage(1),
+      shortcut: 'Home',
+    },
   });
 
   static styles = style.sheet({
@@ -258,18 +312,12 @@ class App extends Component {
       display: 'block',
       height: '100%',
     },
-    [Toolbars.tagName]: {
-      position: 'fixed',
-      top: '0',
-      width: '100%',
-      zIndex: '2',
-      background: ui5.Theme.BackgroundColor,
-    },
     '#document': {
       position: 'relative',
       top: '87px',
+      marginBottom: '100px',
       background: theme.documentBackground,
-      height: 'calc(100% - 87px)',
+      height: 'calc(100% - 87px - 35px)',
       width: '100%',
       overflow: 'auto',
     },

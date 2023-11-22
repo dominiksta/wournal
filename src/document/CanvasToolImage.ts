@@ -18,7 +18,7 @@ export class CanvasToolImage extends CanvasTool {
   public override onMouseUp(e: MouseEvent) { }
 
   public override async onMouseDown(e: MouseEvent) {
-    this.toolUseStartPage = this.getActivePage();
+    this.toolUseStartPage = this.activePage.value;
     if (this.toolUseStartPage === null) return;
 
     const mouse = this.toolUseStartPage.globalCoordsToCanvas(e);

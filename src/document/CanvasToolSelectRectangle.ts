@@ -21,15 +21,16 @@ export class CanvasToolSelectRectangle extends CanvasTool {
     }
 
   public onMouseDown(e: MouseEvent): void {
-    if (this.getActivePage() === null) {
+    if (this.activePage.value === null) {
       this.selection?.clear();
       this.state = "idle";
       return;
     }
-    const mouse = this.getActivePage().globalCoordsToCanvas({ x: e.x, y: e.y });
+    const mouse =
+      this.activePage.value.globalCoordsToCanvas({ x: e.x, y: e.y });
     switch (this.state) {
       case "idle":
-        this.toolUseStartPage = this.getActivePage();
+        this.toolUseStartPage = this.activePage.value;
         this.state = "selecting";
         this.savedMouse.beforeSelect = { x: mouse.x, y: mouse.y }
         this.selection.init(this.toolUseStartPage);
@@ -43,8 +44,8 @@ export class CanvasToolSelectRectangle extends CanvasTool {
   }
 
   public onMouseUp(e: MouseEvent): void {
-    if (this.getActivePage() === null) return;
-    this.getActivePage().toolLayer.style.cursor = this.idleCursor;
+    if (this.activePage.value === null) return;
+    this.activePage.value.toolLayer.style.cursor = this.idleCursor;
     switch (this.state) {
       case "idle":
         break;
@@ -60,7 +61,7 @@ export class CanvasToolSelectRectangle extends CanvasTool {
 
   public onMouseMove(e: MouseEvent): void {
     if (this.state === "idle") return;
-    if (this.getActivePage() === null) return;
+    if (this.activePage.value === null) return;
 
     const mouse = this.toolUseStartPage.globalCoordsToCanvas({ x: e.x, y: e.y });
 

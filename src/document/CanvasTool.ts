@@ -1,3 +1,4 @@
+import { rx } from "@mvui/core";
 import { CanvasToolStrokeWidth } from "../persistence/ConfigDTO";
 import { CanvasSelection } from "./CanvasSelection";
 import { UndoStack } from "./UndoStack";
@@ -48,7 +49,7 @@ export abstract class CanvasTool {
 
   constructor(
     /** Get the page of the wournal document to draw on. */
-    protected getActivePage: () => WournalPage,
+    protected activePage: rx.State<WournalPage>,
     /** The undo stack to push undoable actions to. */
     protected undoStack: UndoStack,
     /** The current selection. */

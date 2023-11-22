@@ -7,7 +7,7 @@ const TOOL_RECTANGLE_POINT_DIFF_PX = 5;
 
 export class CanvasToolRectangle extends CanvasTool {
   private get conf() {
-    return this.getActivePage().doc.toolConfig.value.CanvasToolRectangle
+    return this.activePage.value.doc.toolConfig.value.CanvasToolRectangle
   };
 
   public idleCursor = "crosshair";
@@ -28,7 +28,7 @@ export class CanvasToolRectangle extends CanvasTool {
   }
 
   public onMouseDown(e: MouseEvent): void {
-    this.toolUseStartPage = this.getActivePage();
+    this.toolUseStartPage = this.activePage.value;
     if (this.toolUseStartPage === null) return;
 
     this.path = CanvasPath.fromNewPath();

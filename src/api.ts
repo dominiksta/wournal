@@ -35,4 +35,10 @@ export interface WournalApi {
   setColorByName(name: string): void;
   setColorByHex(color: string): void;
 
+  // scroll
+  // ----------------------------------------------------------------------
+  scrollPage(pageNr: number): void;
+  getPageNr(): number;
+  getPageCount(): number;
+
 }

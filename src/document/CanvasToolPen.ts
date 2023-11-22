@@ -6,7 +6,7 @@ import { WournalPage } from "./WournalPage";
 
 export class CanvasToolPen extends CanvasTool {
   private get conf() {
-    return this.getActivePage().doc.toolConfig.value.CanvasToolPen;
+    return this.activePage.value.doc.toolConfig.value.CanvasToolPen;
   };
 
   /** Buffer for smoothing. Contains the last positions of the mouse cursor */
@@ -31,7 +31,7 @@ export class CanvasToolPen extends CanvasTool {
   }
 
   public onMouseDown(e: MouseEvent): void {
-    this.toolUseStartPage = this.getActivePage();
+    this.toolUseStartPage = this.activePage.value;
     if (this.toolUseStartPage === null) return;
 
     this.path = CanvasPath.fromNewPath();

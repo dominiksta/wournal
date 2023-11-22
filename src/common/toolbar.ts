@@ -63,7 +63,7 @@ export class ToolbarButton extends Component<{
 
   static styles = style.sheet({
     'button': {
-      background: ui5.Theme.Button_Background,
+      background: ui5.Theme.BackgroundColor,
       margin: '0px',
       border: 'none',
       verticalAlign: 'middle',
@@ -148,7 +148,7 @@ export default class Toolbar extends Component {
     },
     '.toolbar': {
       width: '9999px',
-      background: ui5.Theme.Button_Background,
+      background: ui5.Theme.BackgroundColor,
       borderBottom: `1px solid ${ui5.Theme.Button_BorderColor}`,
       padding: '3px',
     }

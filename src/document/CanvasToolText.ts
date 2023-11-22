@@ -13,7 +13,7 @@ const diff_svg_vs_ui = {
 
 export class CanvasToolText extends CanvasTool {
   private get conf() {
-    return this.getActivePage().doc.toolConfig.value.CanvasToolText;
+    return this.activePage.value.doc.toolConfig.value.CanvasToolText;
   };
 
   public idleCursor = "text";
@@ -29,7 +29,7 @@ export class CanvasToolText extends CanvasTool {
   public onMouseUp(e: MouseEvent): void { }
 
   public onMouseDown(e: MouseEvent): void {
-    this.toolUseStartPage = this.getActivePage();
+    this.toolUseStartPage = this.activePage.value;
     if (this.toolUseStartPage === null) return;
 
     const mouse = this.toolUseStartPage.globalCoordsToCanvas(e)

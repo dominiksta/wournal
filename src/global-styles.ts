@@ -1,4 +1,5 @@
 import { style } from "@mvui/core";
+import * as ui5 from "@mvui/ui5";
 import "./icons";
 
 style.util.applySheetAsStyleTag(document.body, style.sheet({
@@ -9,6 +10,11 @@ style.util.applySheetAsStyleTag(document.body, style.sheet({
   },
   'html': {
     overflow: 'hidden',
+  },
+  ':root': {
+    fontFamily: ui5.Theme.FontFamily,
+    color: ui5.Theme.TextColor,
+    background: ui5.Theme.BackgroundColor,
   }
 }), 'global-styles');
 

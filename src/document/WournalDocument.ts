@@ -45,10 +45,14 @@ export class WournalDocument extends Component {
       text: { content: "", time: new Date() }
     }
 
-  private pages: WournalPage[] = [];
+  public pages = new rx.State<WournalPage[]>([]);
   private zoom: number = 1;
 
-  private activePage: WournalPage = null;
+  public activePage = new rx.State(
+    // dummy page, is immediatly replaced on construction
+    WournalPage.createNew(this, { width: 0, height: 0})
+  );
+
 
   /** Store tool set before right click */
   private toolBeforeRightClick: CanvasToolName;
@@ -74,6 +78,23 @@ export class WournalDocument extends Component {
 
     this.initialZoomFactor = computeZoomFactor();
     this.setTool(CanvasToolPen);
+    this.subscribe(this.activePage, p => {
+      this.pages.value.forEach(p => p.display.classList.remove('active'));
+      p.display.classList.add('active');
+    })
+  }
+
+  public setActivePageForCurrentScroll() {
+    const outer = this.parentElement.getBoundingClientRect();
+    let minDiff = Infinity; let bestPage = this.pages.value[0];
+    for (const page of this.pages.value) {
+      const rect = page.display.getBoundingClientRect();
+      const curr = Math.abs(rect.top - outer.top) + Math.abs(outer.bottom - rect.bottom);
+      if (curr < minDiff) {
+        minDiff = curr; bestPage = page;
+      }
+    }
+    if (bestPage !== this.activePage.value) this.activePage.next(bestPage);
   }
 
   render() { return [ h.div(this.display) ] }
@@ -94,7 +115,8 @@ export class WournalDocument extends Component {
     config: rx.State<ConfigDTO>, shortcuts: ShortcutManager,
   ): WournalDocument {
     let doc = new WournalDocument(config, shortcuts);
-    doc.addNewPage(WournalPageSize.DINA4_PORTRAIT);
+    const firstPage = WournalPage.createNew(doc, WournalPageSize.DINA4_PORTRAIT);
+    doc.addPage(firstPage);
     doc._toolConfig = new rx.State(DSUtils.copyObj(config.value.tools));
     return doc;
   }
@@ -114,7 +136,7 @@ export class WournalDocument extends Component {
   public toDto(): DocumentDTO {
     return new DocumentDTO(
       this.identification,
-      this.pages.map((p) => p.asSvgString()),
+      this.pages.value.map((p) => p.asSvgString()),
     );
   }
 
@@ -186,7 +208,7 @@ export class WournalDocument extends Component {
 
   /** Paste `copyBuffer` */
   public selectionPaste(): void {
-    const page = this.getActivePage();
+    const page = this.activePage.value;
     const layer = page.getActivePaintLayer();
     let newEls: CanvasElement[] = [];
     for (let el of this.copyBuffer.content) {
@@ -238,7 +260,7 @@ export class WournalDocument extends Component {
 
   /** Insert the given image on the current page */
   private async pasteImage(dataUrl: string): Promise<void> {
-    if (!this.activePage) return;
+    if (!this.activePage.value) return;
 
     let imageEl = CanvasImage.fromNewElement();
     const dimensions = await FileUtils.imageDimensionsForDataUrl(dataUrl);
@@ -246,8 +268,8 @@ export class WournalDocument extends Component {
       x: 10, y: 10, width: dimensions.width, height: dimensions.height
     })));
 
-    this.activePage.activePaintLayer.appendChild(imageEl.svgElem);
-    this.selection.setSelectionFromElements(this.activePage, [imageEl]);
+    this.activePage.value.activePaintLayer.appendChild(imageEl.svgElem);
+    this.selection.setSelectionFromElements(this.activePage.value, [imageEl]);
     this._undoStack.push(new UndoActionCanvasElements(
       null, null, [imageEl.svgElem]
     ));
@@ -278,8 +300,8 @@ export class WournalDocument extends Component {
         c.fontFamily, c.color,
       ));
 
-    this.activePage.activePaintLayer.appendChild(textEl.svgElem);
-    this.selection.setSelectionFromElements(this.activePage, [textEl]);
+    this.activePage.value.activePaintLayer.appendChild(textEl.svgElem);
+    this.selection.setSelectionFromElements(this.activePage.value, [textEl]);
     this._undoStack.push(new UndoActionCanvasElements(
       null, null, [textEl.svgElem]
     ));
@@ -302,9 +324,9 @@ export class WournalDocument extends Component {
   private addPage(page: WournalPage) {
     page.setZoom(this.zoom * this.initialZoomFactor);
     this.display.appendChild(page.display);
-    this.pages.push(page);
+    this.pages.next(v => [...v, page]);
     page.toolLayer.style.cursor = this.currentTool.value.idleCursor;
-    if (this.pages.length === 1) this.setActivePage(page);
+    if (this.pages.value.length === 1) this.activePage.next(page);
   }
 
   // ------------------------------------------------------------
@@ -314,7 +336,7 @@ export class WournalDocument extends Component {
   /** Set the zoom level of all pages. [0-inf[ */
   public setZoom(zoom: number) {
     this.zoom = zoom;
-    for (let page of this.pages) page.setZoom(zoom * this.initialZoomFactor);
+    for (let page of this.pages.value) page.setZoom(zoom * this.initialZoomFactor);
   }
   public getZoom(): number { return this.zoom; }
 
@@ -326,9 +348,9 @@ export class WournalDocument extends Component {
     if (!noDeselect) this.currentTool.value.onDeselect();
     this.selection.clear();
     this.currentTool.next(new tool(
-      this.getActivePage.bind(this), this._undoStack, this.selection
+      this.activePage, this._undoStack, this.selection
     ));
-    for (let page of this.pages)
+    for (let page of this.pages.value)
       page.toolLayer.style.cursor = this.currentTool.value.idleCursor;
   }
 
@@ -350,7 +372,7 @@ export class WournalDocument extends Component {
 
   /** Called to update react state */
   public currentTool = new rx.State<CanvasTool>(new CanvasToolPen(
-    this.getActivePage.bind(this), this._undoStack, this.selection
+    this.activePage, this._undoStack, this.selection
   ));
 
   /** set stroke width for current tool or selection */
@@ -409,16 +431,10 @@ export class WournalDocument extends Component {
   // helpers
   // ----------------------------------------------------------------------
 
-  private setActivePage(page: WournalPage) {
-    this.pages.forEach(p => p.display.classList.remove('active'));
-    page.display.classList.add('active');
-    this.activePage = page;
-  }
-
   private setPageAtPoint(pt: { x: number, y: number }) {
     // const start = performance.now();
     let result: WournalPage = null;
-    for (let page of this.pages) {
+    for (let page of this.pages.value) {
       if (SVGUtils.pointInRect(
         pt, page.toolLayer.getBoundingClientRect()
       )) {
@@ -428,24 +444,19 @@ export class WournalDocument extends Component {
     // NOTE(dominiksta): This is actually suprisingly fast. I would not have
     // thought that over 2000 pages can be checked this way in under 1ms.
     // LOG.info(`took ${start - performance.now()}ms`);
-    if (this.activePage !== result && result !== null) {
-      this.pages.forEach(p => p.display.classList.remove('active'));
+    if (this.activePage.value !== result && result !== null) {
+      this.pages.value.forEach(p => p.display.classList.remove('active'));
       result.display.classList.add('active');
-      this.setActivePage(result)
-      this.activePage = result;
+      this.activePage.next(result)
     }
-  }
-
-  public getActivePage() {
-    return this.activePage;
   }
 
   private onMouseDown(e: MouseEvent) {
     this.setPageAtPoint(e);
-    if (this.activePage) this.activePage.onMouseDown(e);
+    if (this.activePage) this.activePage.value.onMouseDown(e);
 
     if (this.activePage && this.selection.selection.length !== 0) {
-      const mouse = this.activePage.globalCoordsToCanvas(e);
+      const mouse = this.activePage.value.globalCoordsToCanvas(e);
       if (SVGUtils.pointInRect(mouse, this.selection.selectionDisplay.hitbox())) {
         this.selection.onMouseDown(e);
       } else {

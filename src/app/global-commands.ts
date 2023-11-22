@@ -33,6 +33,12 @@ export const GlobalCommandId = [
   'tool_stroke_width_fine',
   'tool_stroke_width_medium',
   'tool_stroke_width_thick',
+
+  'scroll_page_next',
+  'scroll_page_previous',
+  'scroll_page_focus_goto',
+  'scroll_page_last',
+  'scroll_page_first',
 ] as const;
 
 export type GlobalCommandIdT = typeof GlobalCommandId[number];

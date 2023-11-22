@@ -1,3 +1,4 @@
+import { rx } from "@mvui/core";
 import { CanvasToolStrokeWidth } from "../persistence/ConfigDTO";
 import { SVGUtils } from "../util/SVGUtils";
 import { CanvasPath } from "./CanvasPath";
@@ -9,7 +10,7 @@ import { WournalPage } from "./WournalPage";
 
 export class CanvasToolEraser extends CanvasTool {
   private get conf() {
-    return this.getActivePage().doc.toolConfig.value.CanvasToolEraser;
+    return this.activePage.value.doc.toolConfig.value.CanvasToolEraser;
   };
 
 
@@ -24,11 +25,11 @@ export class CanvasToolEraser extends CanvasTool {
   public idleCursor = "default";
 
   constructor(
-    protected getActivePage: () => WournalPage,
+    protected activePage: rx.State<WournalPage>,
     protected undoStack: UndoStack,
     protected selection: CanvasSelection,
   ) {
-    super(getActivePage, undoStack, selection);
+    super(activePage, undoStack, selection);
 
     this.computeActualStrokeWidth();
     // To actually really reflect the area to be erased, we would have to
@@ -63,7 +64,7 @@ export class CanvasToolEraser extends CanvasTool {
   }
 
   public onMouseDown(e: MouseEvent): void {
-    this.toolUseStartPage = this.getActivePage();
+    this.toolUseStartPage = this.activePage.value;
     if (this.toolUseStartPage === null) return;
     this.computeActualStrokeWidth();
     this.currentUndo = [];
