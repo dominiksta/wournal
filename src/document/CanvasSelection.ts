@@ -177,7 +177,7 @@ export class CanvasSelection {
   public setSelectionFromCurrentRect() {
     this._selectionDisplay.setCursorState("idle");
     const selRect = this.selectionDisplay.getMainRect();
-    for (let el of this.page.getActivePaintLayer().children) {
+    for (let el of this.page.activePaintLayer.children) {
       if (!(el instanceof SVGGraphicsElement)) continue;
       if (SVGUtils.rectInRect(
         selRect, this.page.globalDOMRectToCanvas(el.getBoundingClientRect())

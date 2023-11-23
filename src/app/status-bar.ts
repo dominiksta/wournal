@@ -1,6 +1,7 @@
 import { Component, rx, h, style } from "@mvui/core";
 import * as ui5 from "@mvui/ui5";
 import { WournalDocument } from "document/WournalDocument";
+import { WournalPage } from "document/WournalPage";
 import { ApiCtx } from "./api-context";
 import { GlobalCommand, GlobalCommandIdT, GlobalCommandsCtx } from "./global-commands";
 import { ShortcutsCtx } from "./shortcuts-context";
@@ -32,6 +33,12 @@ export class StatusBar extends Component {
 
     const btnTitle = (cmd: GlobalCommandIdT) =>
       `${globalCmds[cmd].human_name} (${globalCmds[cmd].shortcut})`;
+
+    const layerEditor = this.ref<LayerEditor>();
+    const currentLayer = activePage.pipe(
+      rx.switchMap(p => p.layers),
+      rx.map(layers => layers.find(l => l.current).name)
+    );
 
     return [
       ui5.button({
@@ -84,6 +91,22 @@ export class StatusBar extends Component {
         },
         events: { click: globalCmds.scroll_page_last.func }
       }),
+      h.span({ fields: { className: 'separator' }}),
+      h.span(currentLayer),
+      ui5.button({
+        fields: {
+          icon: 'slim-arrow-up', design: 'Transparent',
+        },
+        events: {
+          click: e => {
+            if (layerEditor.current.open)
+              layerEditor.current.close();
+            else
+              layerEditor.current.showAt(e.target as ui5.types.Button);
+          }
+        }
+      }),
+      LayerEditor.t({ ref: layerEditor, props: { page: activePage }}),
     ]
   }
 
@@ -97,10 +120,113 @@ export class StatusBar extends Component {
       width: '100%',
       zIndex: '2',
       borderTop: `1px solid ${ui5.Theme.PageFooter_BorderColor}`,
-      background: ui5.Theme.BackgroundColor,
+      background: ui5.Theme.PageFooter_Background,
     },
     ':host > *': {
       marginLeft: '3px',
+    },
+    'span': {
+      verticalAlign: 'middle',
+    },
+    '.separator': {
+      borderLeft: `1px solid ${ui5.Theme.Button_BorderColor}`,
+      marginRight: '.4em',
     }
   })
+}
+
+
+@Component.register
+class LayerEditor extends Component {
+  props = {
+    page: rx.prop<WournalPage>(),
+  }
+
+  #popover = this.ref<ui5.types.Popover>();
+  get open() { return this.#popover.current.open }
+  showAt(el: HTMLElement) { this.#popover.current.showAt(el); }
+  close() { this.#popover.current.close(); }
+
+  render() {
+    const { page } = this.props;
+
+    const layers = page.pipe(rx.switchMap(p => p.layers));
+    const api = this.getContext(ApiCtx);
+
+    // const layers = new rx.State<any>([]);
+    // layers.subscribe(l => console.log(l.map(l => l.name)));
+    // setInterval(() => {
+    //   console.log(page.value.layers.value);
+    // }, 1000)
+    //
+    return [
+      ui5.popover({
+        ref: this.#popover,
+        fields: {
+          headerText: 'Layers', allowTargetOverlap: true,
+          placementType: 'Top',
+        }
+      }, [
+        h.table(layers.map(layers => layers.slice().reverse().map(layer => h.tr([
+          h.td(layer.name),
+          h.td([
+            ui5.checkbox({
+              fields: { text: 'Show', checked: layer.visible },
+              events: {
+                change: _ => {
+                  const visible = api.getLayerStatus().find(
+                    l => l.name === layer.name
+                  ).visible;
+                  api.setLayerVisible(layer.name, !visible);
+                },
+              }
+            }),
+          ]),
+          h.td([
+            ui5.radioButton({
+              fields: {
+                text: 'Current', checked: layer.current,
+                name: 'Radio ' + layer.name,
+                disabled: layer.name === 'Background',
+              },
+              events: {
+                change: _ => api.setActiveLayer(layer.name),
+              }
+            }),
+          ]),
+          h.td([
+            ui5.button({
+              fields: { icon: 'arrow-top', design: 'Transparent' },
+              events: {
+                click: _ => api.moveLayer(layer.name, 'up')
+              }
+            }),
+            ui5.button({
+              fields: { icon: 'arrow-bottom', design: 'Transparent' },
+              events: {
+                click: _ => api.moveLayer(layer.name, 'down')
+              }
+            }),
+            ui5.button({
+              fields: {
+                icon: 'delete', design: 'Transparent',
+                disabled: layers.length <= 2 || layer.name === 'Background',
+              },
+              events: {
+                click: _ => api.deleteLayer(layer.name)
+              }
+            })
+          ])
+        ])))),
+        ui5.button({
+          events: {
+            click: _ => api.newLayer(),
+          }
+        }, 'New Layer'),
+        // ui5.button('Show All'),
+        // ui5.button('Hide All'),
+      ])
+    ]
+  }
+
 }

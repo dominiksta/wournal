@@ -39,6 +39,13 @@ export const GlobalCommandId = [
   'scroll_page_focus_goto',
   'scroll_page_last',
   'scroll_page_first',
+
+  // 'layer_new',
+  // 'layer_current_delete',
+  // 'layer_current_move_up',
+  // 'layer_current_move_down',
+  // 'layer_current_toggle_visbility',
+
 ] as const;
 
 export type GlobalCommandIdT = typeof GlobalCommandId[number];

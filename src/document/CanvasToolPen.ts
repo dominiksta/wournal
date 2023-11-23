@@ -42,7 +42,7 @@ export class CanvasToolPen extends CanvasTool {
     this.path.startAt(pt);
     this.path.setColor(this.conf.color);
     this.path.setActualStrokeWidth(this.actualStrokeWidth());
-    this.toolUseStartPage.getActivePaintLayer().appendChild(this.path.svgElem);
+    this.toolUseStartPage.activePaintLayer.appendChild(this.path.svgElem);
   }
 
   public onMouseUp(e: MouseEvent): void {

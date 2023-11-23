@@ -48,11 +48,6 @@ export class WournalDocument extends Component {
   public pages = new rx.State<WournalPage[]>([]);
   private zoom: number = 1;
 
-  public activePage = new rx.State(
-    // dummy page, is immediatly replaced on construction
-    WournalPage.createNew(this, { width: 0, height: 0})
-  );
-
 
   /** Store tool set before right click */
   private toolBeforeRightClick: CanvasToolName;
@@ -118,6 +113,7 @@ export class WournalDocument extends Component {
     const firstPage = WournalPage.createNew(doc, WournalPageSize.DINA4_PORTRAIT);
     doc.addPage(firstPage);
     doc._toolConfig = new rx.State(DSUtils.copyObj(config.value.tools));
+    doc.undoStack.clear();
     return doc;
   }
 
@@ -130,6 +126,7 @@ export class WournalDocument extends Component {
     for (let page of dto.pagesSvg) {
       doc.addPageFromSvg(page);
     }
+    doc.undoStack.clear();
     return doc;
   }
 
@@ -209,7 +206,7 @@ export class WournalDocument extends Component {
   /** Paste `copyBuffer` */
   public selectionPaste(): void {
     const page = this.activePage.value;
-    const layer = page.getActivePaintLayer();
+    const layer = page.activePaintLayer;
     let newEls: CanvasElement[] = [];
     for (let el of this.copyBuffer.content) {
       let newEl = CanvasElementFactory.fromData(
@@ -310,6 +307,11 @@ export class WournalDocument extends Component {
   // ------------------------------------------------------------
   // adding pages
   // ------------------------------------------------------------
+
+  public activePage = new rx.State(
+    // dummy page, is immediatly replaced on construction
+    WournalPage.createNew(this, { width: 0, height: 0})
+  );
 
   public addNewPage(
     init: { height: number, width: number } = this.defaultPageDimensions

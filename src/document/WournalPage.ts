@@ -1,5 +1,8 @@
+import { rx } from "@mvui/core";
 import { theme } from "global-styles";
+import { DSUtils } from "util/DSUtils";
 import { BackgroundGenerator, BackgroundGeneratorColor } from "./BackgroundGenerators";
+import { UndoActionLayer } from "./UndoActionCanvasElements";
 import { WournalDocument } from "./WournalDocument";
 import { xToPx } from "./WournalPageSize";
 
@@ -7,7 +10,8 @@ import { xToPx } from "./WournalPageSize";
  * The attribute defining a "layer" element for wournal. Really they are just
  * svg groups ("g" elements), but they are marked with this attribute.
  */
-const WOURNAL_SVG_LAYER_NAME_ATTR = "wournal-layer-name";
+export const WOURNAL_SVG_LAYER_NAME_ATTR = "wournal-layer-name";
+export const WOURNAL_SVG_LAYER_CURRENT_ATTR = "wournal-layer-current";
 
 /**
  * An SVG Canvas to draw on.
@@ -97,8 +101,9 @@ export class WournalPage {
   ): WournalPage {
     let page = new WournalPage(doc);
     page.setPageSize(init);
-    page.setBackgroundLayer(new BackgroundGeneratorColor("white"));
-    page.addLayer("", true);
+    page.setBackgroundGenerator(new BackgroundGeneratorColor("white"));
+    page.addLayer('Layer 1');
+    page.setActivePaintLayer('Layer 1');
 
     page.updateDisplaySize();
     return page;
@@ -138,9 +143,10 @@ export class WournalPage {
       wrappingLayer.appendChild(svgEl);
       page.canvas.appendChild(wrappingLayer);
 
-      page.setBackgroundLayer(new BackgroundGeneratorColor("white"));
+      page.setBackgroundGenerator(new BackgroundGeneratorColor("white"));
       // add a new layer to paint on instead of the foreign svg
-      page.addLayer("", true);
+      page.addLayer('Layer 1');
+      page.setActivePaintLayer('Layer 1');
 
       layers = page.getLayers();
     } else {
@@ -166,19 +172,32 @@ export class WournalPage {
   // layers
   // ------------------------------------------------------------
 
-  public setBackgroundLayer(generator: BackgroundGenerator) {
-    let bg = this.getLayer("background");
-    if (!bg) {
-      bg = this.addLayer("background", false, true);
-    }
-    generator.generate(this.width, this.height, bg);
+  public layers = new rx.State<{
+    name: string, visible: boolean, current: boolean
+  }[]>([]);
+
+  private updateLayerList() {
+    this.layers.next(this.getLayers().map(l => ({
+      current: l.getAttribute(WOURNAL_SVG_LAYER_CURRENT_ATTR) === 'true',
+      visible: l.getAttribute('visibility') !== 'hidden',
+      name: l.getAttribute(WOURNAL_SVG_LAYER_NAME_ATTR),
+    })));
   }
 
   public addLayer(
-    name: string = "", makeActive: boolean = false, prepend: boolean = false
+    name: string = ""
   ): SVGGElement {
-    const existing = this.getLayers();
-    const n = name === "" ? `Layer ${existing.length}` : name;
+    const getNewName = () => {
+      let i = this.layers.value.length;
+      const existing = this.layers.value.map(l => l.name);
+      while (true) {
+        const attempt = `Layer ${i}`;
+        if (existing.indexOf(attempt) === -1) return attempt;
+        i++;
+      }
+    }
+
+    const n = name === "" ? getNewName() : name;
     if (this.getLayer(n) !== undefined)
       throw new Error(`Layer with name '${n}' already exists!`);
 
@@ -187,42 +206,118 @@ export class WournalPage {
     );
     g.setAttribute(WOURNAL_SVG_LAYER_NAME_ATTR, n);
 
-    if (prepend && this.canvas.firstChild) this.canvas.firstChild.before(g)
-    else this.canvas.appendChild(g);
-
-    if (makeActive) this.setActivePaintLayer(n);
+    this.canvas.appendChild(g);
+    const listBefore = this.layers.value;
+    this.updateLayerList();
+    this.doc.undoStack.push(new UndoActionLayer(
+      this.canvas, this.updateLayerList.bind(this),
+      [], [g], listBefore, this.layers.value
+    ));
     return g;
   }
 
+  public moveLayer(name: string, direction: 'up' | 'down') {
+    const l = this.getLayer(name);
+    const parent = l.parentElement;
+
+    const sibling = direction === 'up' ? l.nextSibling : l.previousSibling;
+    if (!sibling) return;
+    parent.removeChild(l);
+
+    if (direction === 'up') sibling.after(l);
+    else sibling.before(l);
+
+    const listBefore = this.layers.value;
+    this.updateLayerList();
+    this.doc.undoStack.push(new UndoActionLayer(
+      this.canvas, this.updateLayerList.bind(this),
+      [], [], listBefore, this.layers.value
+    ));
+  }
+
+  public setLayerVisible(name: string, visible: boolean): void {
+    this.getLayer(name).setAttribute(
+      'visibility', visible ? 'visible' : 'hidden'
+    );
+    const listBefore = this.layers.value;
+    this.updateLayerList();
+    this.doc.undoStack.push(new UndoActionLayer(
+      this.canvas, this.updateLayerList.bind(this),
+      [], [], listBefore, this.layers.value
+    ));
+  }
+
   /** Get a layer by its name */
-  public getLayer(name: string): SVGGElement {
+  private getLayer(name: string): SVGGElement {
     return this.getLayers().find(
       l => l.getAttribute(WOURNAL_SVG_LAYER_NAME_ATTR) === name
     );
   }
 
   private static getLayers(svgEl: SVGSVGElement) {
-    let layers = [];
-    for (let el of svgEl.getElementsByTagName("g")) {
-      if (el.getAttribute(WOURNAL_SVG_LAYER_NAME_ATTR) !== null) {
-        layers.push(el);
-      }
-    }
-    return layers;
+    return Array.from(svgEl.getElementsByTagName("g")).filter(
+      el => el.getAttribute(WOURNAL_SVG_LAYER_NAME_ATTR) !== null
+    )
   }
 
-  /** Get all layers */
-  public getLayers(): SVGGElement[] {
-    return WournalPage.getLayers(this.canvas);
-  }
+  private getLayers = () => WournalPage.getLayers(this.canvas);
 
   public setActivePaintLayer(name: string) {
-    this.activePaintLayer = this.getLayers().find(
-      (layer) => layer.getAttribute(WOURNAL_SVG_LAYER_NAME_ATTR) === name
+    const l = this.getLayer(name);
+    this.activePaintLayer = l;
+    this.getLayers().map(
+      l => l.removeAttribute(WOURNAL_SVG_LAYER_CURRENT_ATTR)
     );
+    l.setAttribute(WOURNAL_SVG_LAYER_CURRENT_ATTR, 'true');
+
+    const listBefore = this.layers.value;
+    this.updateLayerList();
+    this.doc.undoStack.push(new UndoActionLayer(
+      this.canvas, this.updateLayerList.bind(this),
+      [], [], listBefore, this.layers.value
+    ));
   }
 
-  public getActivePaintLayer() { return this.activePaintLayer; }
+  public deleteLayer(name: string) {
+    const l = this.getLayer(name);
+    l.parentNode.removeChild(l);
+
+    const listBefore = this.layers.value;
+
+    const inListBefore = listBefore.findIndex(l => l.name === name);
+    if (listBefore[inListBefore].current) {
+      const nonBg = this.getLayers().filter(
+        l => l.getAttribute(WOURNAL_SVG_LAYER_NAME_ATTR) !== 'Background'
+      );
+      nonBg[0].setAttribute(WOURNAL_SVG_LAYER_CURRENT_ATTR, 'true');
+    }
+
+    this.updateLayerList();
+    this.doc.undoStack.push(new UndoActionLayer(
+      this.canvas, this.updateLayerList.bind(this),
+      [l], [], listBefore, this.layers.value
+    ));
+  }
+
+  public renameLayer(name: string, newName: string) {
+    this.getLayer(name).setAttribute(WOURNAL_SVG_LAYER_NAME_ATTR, newName);
+    const listBefore = this.layers.value;
+    this.updateLayerList();
+    this.doc.undoStack.push(new UndoActionLayer(
+      this.canvas, this.updateLayerList.bind(this),
+      [], [], listBefore, this.layers.value
+    ));
+  }
+
+  // ----------------------------------------------------------------------
+  // background generators
+  // ----------------------------------------------------------------------
+
+  public setBackgroundGenerator(generator: BackgroundGenerator) {
+    if (this.getLayer('Background')) this.deleteLayer('Background');
+    const newBg = this.addLayer('Background');
+    generator.generate(this.width, this.height, newBg);
+  }
 
   // ------------------------------------------------------------
   // dimensions

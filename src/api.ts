@@ -41,4 +41,14 @@ export interface WournalApi {
   getPageNr(): number;
   getPageCount(): number;
 
+  // layers
+  // ----------------------------------------------------------------------
+  newLayer(name?: string): void;
+  setActiveLayer(layer: string): void;
+  getLayerStatus(): { name: string, current: boolean, visible: boolean }[];
+  setLayerVisible(layer: string, visible: boolean): void;
+  deleteLayer(layer: string): void;
+  moveLayer(name: string, direction: 'up' | 'down'): void;
+  renameLayer(name: string, newName: string): void;
+
 }

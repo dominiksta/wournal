@@ -35,7 +35,7 @@ export class CanvasToolRectangle extends CanvasTool {
     this.path.setActualStrokeWidth(this.actualStrokeWidth());
     this.path.setColor(this.conf.color);
     this.pointStart = this.toolUseStartPage.globalCoordsToCanvas({ x: e.x, y: e.y })
-    this.toolUseStartPage.getActivePaintLayer().appendChild(this.path.svgElem);
+    this.toolUseStartPage.activePaintLayer.appendChild(this.path.svgElem);
   }
 
   public onMouseUp(e: MouseEvent): void {

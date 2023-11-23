@@ -53,4 +53,10 @@ export class UndoStack {
     // LOG.debug(action);
     this.notifyAvailable();
   }
+
+  public clear(): void {
+    this.redoable = [];
+    this.undoable = [];
+    this.notifyAvailable();
+  }
 }

@@ -72,6 +72,7 @@ class App extends Component {
 
     // for (let i = 0; i < 100; i++) this.api.createTestPages();
     this.api.createTestPages();
+    this.doc.value.undoStack.clear();
 
     return [
       Toolbars.t({
@@ -166,6 +167,30 @@ class App extends Component {
     },
     getPageCount: () => {
       return this.doc.value.pages.value.length;
+    },
+
+    // layers
+    // ----------------------------------------------------------------------
+    newLayer: (name) => {
+      this.doc.value.activePage.value.addLayer(name);
+    },
+    setActiveLayer: (name) => {
+      this.doc.value.activePage.value.setActivePaintLayer(name);
+    },
+    getLayerStatus: () => {
+      return this.doc.value.activePage.value.layers.value;
+    },
+    setLayerVisible: (name, visible) => {
+      return this.doc.value.activePage.value.setLayerVisible(name, visible);
+    },
+    deleteLayer: (name) => {
+      return this.doc.value.activePage.value.deleteLayer(name);
+    },
+    moveLayer: (name, direction) => {
+      return this.doc.value.activePage.value.moveLayer(name, direction);
+    },
+    renameLayer: (name, newName) => {
+      this.doc.value.activePage.value.renameLayer(name, newName);
     }
   }
 
