@@ -54,6 +54,8 @@ export default class Wournal extends Component {
       }
     }).open;
 
+    this.subscribe(this.configCtx, v => this.confRepo.save(v));
+
     this.provideContext(ApiCtx, this.api);
 
     const globalCmds = this.#globalCmds;
