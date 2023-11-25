@@ -2,7 +2,7 @@ import { Component, h, rx, style } from "@mvui/core";
 import * as ui5 from "@mvui/ui5";
 import { ConfigCtx } from "app/config-context";
 import { CanvasToolName, CanvasToolNames } from "document/CanvasTool";
-import { defaultConfig } from "persistence/ConfigDTO";
+import { ConfigDTO, defaultConfig } from "persistence/ConfigDTO";
 import { DSUtils } from "util/DSUtils";
 import ColorPaletteEditor from "./color-palette-editor";
 import { ToastCtx } from "./toast-context";
@@ -52,14 +52,20 @@ export class Settings extends Component {
           ]
         }
       }, [
+        ui5.panel({ fields: { headerText: 'Theme', fixed: true }}, [
+          ThemeSettings.t({ props: {
+            invert: rx.bind(conf.partial('invertDocument')),
+            theme: rx.bind(conf.partial('theme')),
+          }})
+        ]),
+        ui5.panel({ fields: { headerText: 'Right Click Binding', fixed: true }}, [
+          ToolSelect.t({ props: { tool: rx.bind(conf.partial('binds', 'rightClick')) } }),
+        ]),
         ui5.panel({ fields: { headerText: 'Color Palette', fixed: true }}, [
           ColorPaletteEditor.t({
             props: { palette: rx.bind(conf.partial('colorPalette')) }
           }),
         ]),
-        ui5.panel({ fields: { headerText: 'Right Click Binding', fixed: true }}, [
-          ToolSelect.t({ props: { tool: rx.bind(conf.partial('binds', 'rightClick')) } }),
-        ])
       ])
     ]
   }
@@ -124,6 +130,49 @@ class ToolSelect extends Component {
             this.#humanNames[a]
           )))
         ])
+    ]
+  }
+}
+
+@Component.register
+class ThemeSettings extends Component {
+  props = {
+    invert: rx.prop<boolean>(),
+    theme: rx.prop<ConfigDTO['theme']>(),
+  }
+
+  render() {
+    const themeNames: { [K in ConfigDTO['theme']]: string } = {
+      dark                : 'Dark',
+      light               : 'Light',
+      auto                : 'Auto',
+      dark_high_contrast  : 'Dark (High Contrast)',
+      light_high_contrast : 'Light (High Contrast)',
+      auto_high_contrast  : 'Auto (High Contrast)',
+    }
+
+    return [
+      ui5.select({
+        events: {
+          change: e => {
+            const t = e.detail.selectedOption.value as ConfigDTO['theme'];
+            this.props.theme.next(t);
+          }
+        }
+      }, [
+        ...DSUtils.objKeys(themeNames).map(k => ui5.option({
+          fields: {
+            value: k,
+            selected: this.props.theme.derive(t => t === k),
+          }
+        }, themeNames[k]))
+      ]),
+      h.div(ui5.checkbox({
+        fields: {
+          checked: rx.bind(this.props.invert),
+          text: 'Invert Document Colors for Dark Themes',
+        }
+      })),
     ]
   }
 }

@@ -1,5 +1,6 @@
 import { Component, h, rx, style } from "@mvui/core";
 import * as ui5 from "@mvui/ui5";
+import { ConfigCtx } from "./config-context";
 
 @Component.register
 export default class ColorPaletteEditor extends Component {
@@ -10,6 +11,16 @@ export default class ColorPaletteEditor extends Component {
   render() {
     const { palette } = this.props;
 
+    const cfg = this.getContext(ConfigCtx);
+    const darkInverts = rx.derive(cfg, style.currentTheme$, (cfg, curr) =>
+      cfg.invertDocument && (
+        (
+          cfg.theme.startsWith('auto') &&
+          curr === 'dark'
+        )
+        || cfg.theme.startsWith('dark')
+      )
+    );
 
     function arrayPatch<T>(arr: T[], idx: int, val: T): T[] {
       const ret = [...arr];
@@ -20,9 +31,10 @@ export default class ColorPaletteEditor extends Component {
     return [
       ui5.messageStrip({
         style: {
-          display: style.currentTheme$.derive(
-            t => t === 'dark' ? 'inline-block' : 'none'
-          )
+          display: darkInverts.ifelse({
+            if: 'inline-block',
+            else: 'none',
+          })
         },
         fields: {
           hideCloseButton: true,

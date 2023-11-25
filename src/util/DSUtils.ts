@@ -37,4 +37,8 @@ export const DSUtils = {
   hasKey: function <O extends object>(obj: O, key: PropertyKey): key is keyof O {
     return key in obj
   },
+
+  objKeys: function <T extends { [key: string]: any }>(obj: T): (keyof T)[] {
+    return Object.keys(obj);
+  }
 }

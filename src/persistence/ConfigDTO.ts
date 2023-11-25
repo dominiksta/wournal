@@ -37,7 +37,11 @@ export type CanvasToolConfigData = CanvasToolConfig[keyof CanvasToolConfig];
 
 export type ConfigDTO = {
   version: 0.01,
-  theme: "dark" | "light" | "auto",
+  theme: (
+    'light' | 'dark' | 'light_high_contrast' | 'dark_high_contrast' |
+    'auto' | 'auto_high_contrast'
+  ),
+  invertDocument: boolean,
   colorPalette: { color: string, name: string }[],
   binds: {
     rightClick: CanvasToolName,
@@ -53,6 +57,7 @@ export function defaultConfig(): ConfigDTO {
     // this to be set for further development. Once wournal launches, the
     // theme should likely be set to "light" by default.
     theme: "auto",
+    invertDocument: true,
     binds: {
       rightClick: "CanvasToolEraser",
     },

@@ -70,9 +70,46 @@ export default class Wournal extends Component {
       this.shortcutsCtx.addEl(await this.query('#document'));
     });
 
+    this.subscribe(this.configCtx.partial('invertDocument'), i => {
+      darkTheme.invert = i ? 'invert(1)' : '';
+      const cfgTheme = this.configCtx.value.theme;
+      if (
+        style.currentTheme$.value === 'dark'
+        && (cfgTheme.startsWith('auto') || cfgTheme.startsWith('dark'))
+      ) style.setTheme('wournal', darkTheme);
+    });
+
+    this.subscribe(this.configCtx.partial('theme'), t => {
+      if (t.startsWith('light')) style.setTheme('wournal', lightTheme);
+      if (t.startsWith('dark')) style.setTheme('wournal', darkTheme);
+      const currLight = style.currentTheme$.value === 'light';
+      ui5.config.setTheme(({
+        'auto'                : currLight ? 'sap_horizon' : 'sap_horizon_dark',
+        'light'               : 'sap_horizon',
+        'dark'                : 'sap_horizon_dark',
+        'auto_high_contrast'  : currLight ? 'sap_horizon_hcw' : 'sap_horizon_hcb',
+        'light_high_contrast' : 'sap_horizon_hcw',
+        'dark_high_contrast'  : 'sap_horizon_hcb',
+      })[t] as any);
+      style.setTheme('wournal', ({
+        'auto'                : currLight ? lightTheme : darkTheme,
+        'light'               : lightTheme,
+        'dark'                : darkTheme,
+        'auto_high_contrast'  : currLight ? lightTheme : darkTheme,
+        'light_high_contrast' : lightTheme,
+        'dark_high_contrast'  : darkTheme,
+      })[t] as any)
+    })
+
     this.subscribe(style.currentTheme$, theme => {
-      ui5.config.setTheme(theme === 'light' ? 'sap_horizon' : 'sap_horizon_dark');
-      style.setTheme('wournal', theme === 'light' ? lightTheme : darkTheme);
+      if (this.configCtx.value.theme === 'auto') {
+        ui5.config.setTheme(theme === 'light' ? 'sap_horizon' : 'sap_horizon_dark');
+        style.setTheme('wournal', theme === 'light' ? lightTheme : darkTheme);
+      }
+      if (this.configCtx.value.theme === 'auto_high_contrast') {
+        ui5.config.setTheme(theme === 'light' ? 'sap_horizon_hcw' : 'sap_horizon_hcb');
+        style.setTheme('wournal', theme === 'light' ? lightTheme : darkTheme);
+      }
     });
 
     // for (let i = 0; i < 100; i++) this.api.createTestPages();
