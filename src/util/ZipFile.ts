@@ -9,7 +9,6 @@ export default class ZipFile {
   }
 
   addFile(name: string, content: string) {
-    this.jsZip.folder('hi');
     this.jsZip.file(name, content);
   }
 
