@@ -431,6 +431,28 @@ export default class Wournal extends Component {
       func: () => this.api.setTool('CanvasToolPen'),
       shortcut: 'W',
     },
+    'tool_default_pen': {
+      human_name: 'Default Pen',
+      func: () => {
+        this.api.setTool('CanvasToolPen');
+        this.doc.value.toolConfig.next(v => ({
+          ...v,
+          CanvasToolPen: this.configCtx.value.tools.CanvasToolPen,
+        }));
+      },
+    },
+    'tool_current_default': {
+      human_name: 'Reset Tool to Default',
+      func: () => {
+        const curr = this.api.getTool();
+        if (curr == 'CanvasToolSelectRectangle') return;
+        this.doc.value.toolConfig.next(v => {
+          const ret = DSUtils.copyObj(v);
+          ret[curr] = this.configCtx.value.tools[curr] as any;
+          return ret;
+        });
+      },
+    },
     'tool_eraser': {
       human_name: 'Eraser',
       func: () => this.api.setTool('CanvasToolEraser'),

@@ -70,6 +70,11 @@ export class ToolbarButton extends Component<{
             fields: { name: img.split('icon:')[1] },
           }));
 
+        if (img.startsWith('img:'))
+          return rx.of(h.img({
+            fields: { src: img.split('img:')[1] }
+          }));
+
         return http.get(img, { parseBody: false }).map(res => {
           let outerSvg = document.createElementNS(
             "http://www.w3.org/2000/svg", "svg"

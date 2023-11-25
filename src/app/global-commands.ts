@@ -34,7 +34,9 @@ export const GlobalCommandId = [
 
   'preferences_open',
 
+  'tool_current_default',
   'tool_pen',
+  'tool_default_pen',
   'tool_eraser',
   'tool_rectangle',
   'tool_select_rectangle',

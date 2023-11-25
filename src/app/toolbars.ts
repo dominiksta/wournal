@@ -277,6 +277,17 @@ export default class Toolbars extends Component {
                 }
               }),
             ]),
+            ui5.menuItem({
+              fields: {
+                ...globalCmdMenuItem('tool_current_default'),
+                startsSection: true
+              }
+            }),
+            ui5.menuItem({
+              fields: {
+                ...globalCmdMenuItem('tool_default_pen'),
+              }
+            }),
           ]),
         ]),
 
@@ -410,7 +421,7 @@ export default class Toolbars extends Component {
         Toolbar.t([
           ToolbarButton.t({
             props: {
-              img: 'icon:edit', alt: 'Pen',
+              img: 'img:/res/icon/custom/pen.png', alt: 'Pen',
               current: isCurrentTool(CanvasToolPen),
             },
             events: { click: _ => api.setTool('CanvasToolPen') }
@@ -445,6 +456,27 @@ export default class Toolbars extends Component {
               current: isCurrentTool(CanvasToolSelectRectangle),
             },
             events: { click: _ => api.setTool('CanvasToolSelectRectangle') }
+          }),
+
+          ToolbarSeperator.t(),
+
+          ToolbarButton.t({
+            props: {
+              img: 'img:/res/icon/material/autorenew.svg',
+              alt: globalCmnds.tool_current_default.human_name,
+            },
+            events: {
+              click: _ => globalCmnds.tool_current_default.func()
+            }
+          }),
+          ToolbarButton.t({
+            props: {
+              img: 'img:/res/icon/custom/default-pen.svg',
+              alt: globalCmnds.tool_default_pen.human_name,
+            },
+            events: {
+              click: _ => globalCmnds.tool_default_pen.func()
+            }
           }),
 
           ToolbarSeperator.t(),
