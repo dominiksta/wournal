@@ -20,6 +20,7 @@ import { GlobalCommandsCtx } from 'app/global-commands';
 import { CanvasToolName } from 'document/CanvasTool';
 import { CanvasToolFactory } from 'document/CanvasToolFactory';
 import { StatusBar } from 'app/status-bar';
+import { BasicDialogManager, BasicDialogManagerContext } from 'common/dialog-manager';
 
 @Component.register
 class App extends Component {
@@ -75,24 +76,26 @@ class App extends Component {
     this.doc.value.undoStack.clear();
 
     return [
-      Toolbars.t({
-        fields: { id: 'toolbar' },
-        props: { doc: this.doc },
-      }),
-      StatusBar.t({
-        props: { doc: this.doc },
-      }),
-      h.div(this.shortcutsCtx),
-      Settings.t({ props: { open: rx.bind(this.settingsOpen) } }),
-      ui5.toast({ fields: { id: 'toast', placement: 'BottomEnd' }}),
-      h.div({
-        fields: { id: 'document' },
-        events: {
-          scroll: () => {
-            this.doc.value.setActivePageForCurrentScroll();
+      BasicDialogManager.t([
+        Toolbars.t({
+          fields: { id: 'toolbar' },
+          props: { doc: this.doc },
+        }),
+        StatusBar.t({
+          props: { doc: this.doc },
+        }),
+        h.div(this.shortcutsCtx),
+        Settings.t({ props: { open: rx.bind(this.settingsOpen) } }),
+        ui5.toast({ fields: { id: 'toast', placement: 'BottomEnd' } }),
+        h.div({
+          fields: { id: 'document' },
+          events: {
+            scroll: () => {
+              this.doc.value.setActivePageForCurrentScroll();
+            }
           }
-        }
-      }, this.doc),
+        }, this.doc),
+      ]),
     ]
   }
 

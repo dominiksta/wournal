@@ -1,5 +1,6 @@
 import { Component, rx, h, style } from "@mvui/core";
 import * as ui5 from "@mvui/ui5";
+import { BasicDialogManagerContext } from "common/dialog-manager";
 import { WournalDocument } from "document/WournalDocument";
 import { WournalPage } from "document/WournalPage";
 import { ApiCtx } from "./api-context";
@@ -92,7 +93,6 @@ export class StatusBar extends Component {
         events: { click: globalCmds.scroll_page_last.func }
       }),
       h.span({ fields: { className: 'separator' }}),
-      h.span(currentLayer),
       ui5.button({
         fields: {
           icon: 'slim-arrow-up', design: 'Transparent',
@@ -106,6 +106,7 @@ export class StatusBar extends Component {
           }
         }
       }),
+      h.span(currentLayer),
       LayerEditor.t({ ref: layerEditor, props: { page: activePage }}),
     ]
   }
@@ -151,7 +152,9 @@ class LayerEditor extends Component {
     const { page } = this.props;
 
     const layers = page.pipe(rx.switchMap(p => p.layers));
+
     const api = this.getContext(ApiCtx);
+    const dialog = this.getContext(BasicDialogManagerContext);
 
     // const layers = new rx.State<any>([]);
     // layers.subscribe(l => console.log(l.map(l => l.name)));
@@ -208,12 +211,28 @@ class LayerEditor extends Component {
               }
             }),
             ui5.button({
+              fields: { icon: 'text', design: 'Transparent' },
+              events: {
+                click: async _ => {
+                  const resp = await dialog.promptInput('Rename Layer');
+                  if (resp === '' || !resp) return;
+                  api.renameLayer(layer.name, resp);
+                }
+              }
+            }),
+            ui5.button({
               fields: {
                 icon: 'delete', design: 'Transparent',
                 disabled: layers.length <= 2 || layer.name === 'Background',
               },
               events: {
-                click: _ => api.deleteLayer(layer.name)
+                click: async _ => {
+                  const resp = await dialog.promptYesOrNo(
+                    'Warning',
+                    `Please confirm deletion of layer '${layer.name}'?`
+                  );
+                  if (resp) api.deleteLayer(layer.name);
+                }
               }
             })
           ])

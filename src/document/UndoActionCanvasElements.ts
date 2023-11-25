@@ -125,12 +125,12 @@ export class UndoActionLayer implements UndoAction {
   private setListAttributes(
     list: { name: string, current: boolean, visible: boolean }[]
   ) {
-    console.log(list);
-    for (let layerInfo of list) {
-      const layer = Array.from(this.pageCanvas.children)
-        .find(c => c.getAttribute(WOURNAL_SVG_LAYER_NAME_ATTR) === layerInfo.name);
-      layer.setAttribute(WOURNAL_SVG_LAYER_CURRENT_ATTR, String(layerInfo.current));
-      layer.setAttribute('visibility', layerInfo.visible ? 'visible' : 'hidden');
+    // console.log(list);
+    for (let i = 0; i < list.length; i++) {
+      const layer = this.pageCanvas.children[i];
+      layer.setAttribute(WOURNAL_SVG_LAYER_CURRENT_ATTR, String(list[i].current));
+      layer.setAttribute(WOURNAL_SVG_LAYER_NAME_ATTR, list[i].name);
+      layer.setAttribute('visibility', list[i].visible ? 'visible' : 'hidden');
     }
   }
 
