@@ -1,8 +1,10 @@
 import { rx } from "@mvui/core";
 import { theme } from "global-styles";
-import { DSUtils } from "util/DSUtils";
-import { BackgroundGenerator, BackgroundGeneratorColor } from "./BackgroundGenerators";
-import { UndoActionLayer } from "./UndoActionCanvasElements";
+import {
+  BackgroundGenerator, BackgroundStyleT, BackgroundGenerators
+} from "./BackgroundGenerators";
+import { UndoActionLayer } from "./UndoActionLayer";
+import { UndoAction } from "./UndoStack";
 import { WournalDocument } from "./WournalDocument";
 import { xToPx } from "./WournalPageSize";
 
@@ -12,6 +14,12 @@ import { xToPx } from "./WournalPageSize";
  */
 export const WOURNAL_SVG_LAYER_NAME_ATTR = "wournal-layer-name";
 export const WOURNAL_SVG_LAYER_CURRENT_ATTR = "wournal-layer-current";
+
+export type PageProps = {
+  backgroundColor: string, backgroundStyle: BackgroundStyleT,
+  width: number, height: number,
+};
+
 
 /**
  * An SVG Canvas to draw on.
@@ -35,8 +43,24 @@ export class WournalPage {
    */
   private canvasWrapper: HTMLDivElement;
 
-  private width: number;
-  private height: number;
+  public get width() { return parseFloat(this.canvas.getAttribute('width')) };
+  public set width(w: number) { this.canvas.setAttribute('width', w.toString()) };
+  public get height() { return parseFloat(this.canvas.getAttribute('height')) };
+  public set height(w: number) { this.canvas.setAttribute('height', w.toString()) };
+  public set backgroundColor(col: string) {
+    this.canvas.setAttribute('wournal-page-background-color', col);
+  }
+  public get backgroundColor() {
+    return this.canvas.getAttribute('wournal-page-background-color');
+  }
+  public set backgroundStyle(col: BackgroundStyleT) {
+    this.canvas.setAttribute('wournal-page-background-style', col);
+  }
+  public get backgroundStyle() {
+    return this.canvas.getAttribute('wournal-page-background-style') as
+      BackgroundStyleT;
+  }
+
   private zoom: number = 1;
 
   public toolLayer: SVGSVGElement;
@@ -99,11 +123,28 @@ export class WournalPage {
 
   /** Return a new page with dimensions according to `init` */
   public static createNew(
-    doc: WournalDocument, init: { height: number, width: number }
+    doc: WournalDocument,
+    init: {
+      height: number, width: number, backgroundColor: string,
+      backgroundStyle: BackgroundStyleT
+    },
   ): WournalPage {
     let page = new WournalPage(doc);
-    page.setPageSize(init);
-    page.setBackgroundGenerator(new BackgroundGeneratorColor("white"));
+    page.setPageProps(init, false)
+    page.addLayer('Layer 1');
+    page.setActivePaintLayer('Layer 1');
+
+    page.updateDisplaySize();
+    return page;
+  }
+
+  public newPageLikeThis(): WournalPage {
+    const page = new WournalPage(this.doc);
+    page.setPageProps({
+      width: this.width, height: this.height,
+      backgroundColor: this.backgroundColor,
+      backgroundStyle: this.backgroundStyle
+    }, false);
     page.addLayer('Layer 1');
     page.setActivePaintLayer('Layer 1');
 
@@ -113,7 +154,7 @@ export class WournalPage {
 
   /** Return a page parsed from the <svg> element string `svg` */
   public static fromSvgString(
-    doc: WournalDocument,  svg: string
+    doc: WournalDocument, svg: string
   ): WournalPage {
     let page = new WournalPage(doc);
     let outerSvg = document.createElementNS(
@@ -145,7 +186,7 @@ export class WournalPage {
       wrappingLayer.appendChild(svgEl);
       page.canvas.appendChild(wrappingLayer);
 
-      page.setBackgroundGenerator(new BackgroundGeneratorColor("white"));
+      page.generateBackground(BackgroundGenerators.blank);
       // add a new layer to paint on instead of the foreign svg
       page.addLayer('Layer 1');
       page.setActivePaintLayer('Layer 1');
@@ -187,7 +228,8 @@ export class WournalPage {
   }
 
   public addLayer(
-    name: string = ""
+    name: string = "", undoable = true,
+    prepend = false
   ): SVGGElement {
     const getNewName = () => {
       let i = this.layers.value.length;
@@ -208,10 +250,13 @@ export class WournalPage {
     );
     g.setAttribute(WOURNAL_SVG_LAYER_NAME_ATTR, n);
 
-    this.canvas.appendChild(g);
+    if (prepend && this.canvas.firstChild)
+      this.canvas.insertBefore(g, this.canvas.firstChild);
+    else this.canvas.appendChild(g);
+
     const listBefore = this.layers.value;
     this.updateLayerList();
-    this.doc.undoStack.push(new UndoActionLayer(
+    if (undoable) this.doc.undoStack.push(new UndoActionLayer(
       this.canvas, this.updateLayerList.bind(this),
       [], [g], listBefore, this.layers.value
     ));
@@ -280,7 +325,7 @@ export class WournalPage {
     ));
   }
 
-  public deleteLayer(name: string) {
+  public deleteLayer(name: string, undoable = true) {
     const l = this.getLayer(name);
     l.parentNode.removeChild(l);
 
@@ -295,7 +340,7 @@ export class WournalPage {
     }
 
     this.updateLayerList();
-    this.doc.undoStack.push(new UndoActionLayer(
+    if (undoable) this.doc.undoStack.push(new UndoActionLayer(
       this.canvas, this.updateLayerList.bind(this),
       [l], [], listBefore, this.layers.value
     ));
@@ -315,10 +360,30 @@ export class WournalPage {
   // background generators
   // ----------------------------------------------------------------------
 
-  public setBackgroundGenerator(generator: BackgroundGenerator) {
-    if (this.getLayer('Background')) this.deleteLayer('Background');
-    const newBg = this.addLayer('Background');
-    generator.generate(this.width, this.height, newBg);
+  public generateBackground(generator: BackgroundGenerator) {
+    if (this.getLayer('Background')) this.deleteLayer('Background', false);
+    const newBg = this.addLayer('Background', false, true);
+    const bgEls = generator({
+      width: this.width, height: this.height,
+      backgroundColor: this.backgroundColor
+    });
+    for (const el of bgEls) newBg.appendChild(el);
+  }
+
+  public setPageProps(props: PageProps, undoable = true) {
+    const getProps = () => ({
+      backgroundColor: this.backgroundColor,
+      backgroundStyle: this.backgroundStyle,
+      height: this.height, width: this.width,
+    });
+    const propsBefore = getProps();
+    this.setPageSize(props);
+    this.backgroundColor = props.backgroundColor;
+    this.backgroundStyle = props.backgroundStyle;
+    this.generateBackground(BackgroundGenerators[props.backgroundStyle]);
+    if (undoable) this.doc.undoStack.push(new UndoActionPageProps(
+      this, propsBefore, getProps(),
+    ));
   }
 
   // ------------------------------------------------------------
@@ -343,8 +408,6 @@ export class WournalPage {
     this.svgWrapperEl.style.height = `${this.height.toString()}px`;
     this.toolLayer.setAttribute("width", `${d.width}`);
     this.toolLayer.setAttribute("height", `${d.height}`);
-    this.canvas.setAttribute("width", `${d.width}`);
-    this.canvas.setAttribute("height", `${d.height}`);
     this.updateDisplaySize();
   }
 
@@ -397,5 +460,21 @@ export class WournalPage {
       width: r.width * 1 / this.zoom,
       height: r.height * 1 / this.zoom,
     });
+  }
+}
+
+class UndoActionPageProps implements UndoAction {
+  constructor(
+    private page: WournalPage,
+    private propsBefore: PageProps,
+    private propsAfter: PageProps,
+  ) { }
+
+  redo() {
+    this.page.setPageProps(this.propsAfter, false);
+  }
+
+  undo() {
+    this.page.setPageProps(this.propsBefore, false);
   }
 }

@@ -15,8 +15,8 @@ import { CanvasToolPen } from "./CanvasToolPen";
 import { CanvasSelection } from "./CanvasSelection";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
 import { UndoStack } from "./UndoStack";
-import { WournalPage } from "./WournalPage";
-import { computeZoomFactor, WournalPageSize, xToPx } from "./WournalPageSize";
+import { PageProps, WournalPage } from "./WournalPage";
+import { computeZoomFactor, WournalPageSize } from "./WournalPageSize";
 import { Component, h, rx, style } from "@mvui/core";
 import { theme } from "global-styles";
 import { ShortcutManager } from "app/shortcuts";
@@ -100,8 +100,6 @@ export class WournalDocument extends Component {
     }
   })
 
-  public defaultPageDimensions = WournalPageSize.DINA4_PORTRAIT;
-
   // ------------------------------------------------------------
   // initialization and serialization
   // ------------------------------------------------------------
@@ -110,7 +108,12 @@ export class WournalDocument extends Component {
     config: rx.State<ConfigDTO>, shortcuts: ShortcutManager,
   ): WournalDocument {
     let doc = new WournalDocument(config, shortcuts);
-    const firstPage = WournalPage.createNew(doc, WournalPageSize.DINA4_PORTRAIT);
+    const firstPage = WournalPage.createNew(
+      doc, {
+        ...WournalPageSize.DINA4, backgroundColor: '#FFFFFF',
+        backgroundStyle: 'graph',
+      },
+    );
     doc.addPage(firstPage);
     doc._toolConfig = new rx.State(DSUtils.copyObj(config.value.tools));
     doc.undoStack.clear();
@@ -310,12 +313,12 @@ export class WournalDocument extends Component {
 
   public activePage = new rx.State(
     // dummy page, is immediatly replaced on construction
-    WournalPage.createNew(this, { width: 0, height: 0})
+    WournalPage.createNew(this, {
+      width: 0, height: 0, backgroundColor: '#FFFFFF', backgroundStyle: 'blank'
+    })
   );
 
-  public addNewPage(
-    init: { height: number, width: number } = this.defaultPageDimensions
-  ): void {
+  public addNewPage(init: PageProps): void {
     this.addPage(WournalPage.createNew(this, init));
   }
 

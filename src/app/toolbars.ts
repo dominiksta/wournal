@@ -176,6 +176,14 @@ export default class Toolbars extends Component {
             }),
           ]),
 
+          ui5.menuItem({ fields: { text: 'Page' } }, [
+            ui5.menuItem({
+              fields: {
+                icon: 'request', ...globalCmdMenuItem('page_set_style')
+              }
+            }),
+          ]),
+
           ui5.menuItem({ fields: { text: 'Tool' } }, [
             ui5.menuItem({
               fields: {

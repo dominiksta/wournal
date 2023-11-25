@@ -5,7 +5,7 @@
  * calculate dpi differently and thus have differing opinions on our document
  * size.
  */
-const MM_TO_PIXEL = 4;
+export const MM_TO_PIXEL = 4;
 
 /**
  * Translate any given measurement (cm, mm, etc) into px. See
@@ -33,11 +33,17 @@ export function computeZoomFactor() {
   return xToPx(1000 + "mm") / (1000 * MM_TO_PIXEL);
 }
 
+export const WournalPageSizes = [
+  'DINA4', 'DINA5',
+] as const;
+
+export type WournalPageSizeName = typeof WournalPageSizes[number];
+
 /** A collection of page sizes in px. */
-export const WournalPageSize = {
+export const WournalPageSize: {
+  [K in WournalPageSizeName]: { height: number, width: number }
+} = {
   // real dimensions: 297 mm x 210 mm
-  DINA4_PORTRAIT: { height: 297 * MM_TO_PIXEL, width: 210 * MM_TO_PIXEL },
-  DINA4_LANDSCAPE: { height: 210 * MM_TO_PIXEL, width: 297 * MM_TO_PIXEL },
-  DINA5_PORTRAIT: { height: 210 * MM_TO_PIXEL, width: 148 * MM_TO_PIXEL },
-  DINA5_LANDSCAPE: { height: 148 * MM_TO_PIXEL, width: 210 * MM_TO_PIXEL },
+  DINA4: { height: 297 * MM_TO_PIXEL, width: 210 * MM_TO_PIXEL },
+  DINA5: { height: 210 * MM_TO_PIXEL, width: 148 * MM_TO_PIXEL },
 }

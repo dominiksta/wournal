@@ -11,7 +11,7 @@ type DialogButtons = {
   design?: ButtonDesign
 }[];
 
-type OpenDialog = (decl: (close: () => void) => {
+export type OpenDialog = (decl: (close: () => void) => {
   content: TemplateElementChild,
   heading: TemplateElementChild,
   buttons: DialogButtons,
@@ -27,7 +27,8 @@ export const BasicDialogManagerContext = new rx.Context<{
     heading: TemplateElementChild,
     content?: TemplateElementChild,
   ): Promise<string | undefined>;
-}>();
+  dialogs: rx.State<ComponentTemplateElement<BasicDialog>[]>;
+}>(mkDialogManagerCtx);
 
 let DIALOG_COUNTER = 1;
 function newDialogId(): number { return DIALOG_COUNTER++; }
@@ -52,7 +53,6 @@ export class BasicDialog extends Component<{
           events: {
             click: _ => {
               dialogRef.current.close();
-              this.dispatch('close', null);
             }
           }
         }, 'Close')
@@ -77,13 +77,18 @@ export class BasicDialog extends Component<{
         fields: {
           headerText: heading.derive(
             h => typeof (h) === 'string' ? h : undefined
-          )
+          ),
         },
         slots: {
           footer: h.div({ fields: { id: 'footer' } }, buttonTemplate),
           header: heading.derive(
             h => typeof(h) === 'string' ? undefined : h
           ),
+        },
+        events: {
+          'after-close': _ => {
+            this.dispatch('close', new CustomEvent('close'));
+          }
         }
       }, h.slot())
     ]
@@ -100,6 +105,39 @@ export class BasicDialog extends Component<{
       margin: '3px',
     }
   });
+}
+
+function mkDialogManagerCtx() {
+  const dialogs = new rx.State<ComponentTemplateElement<BasicDialog>[]>([]);
+  const mkCloseDialog = (num: number) => () => {
+    dialogs.next(dialogs => dialogs.filter(d => d.params.props.num !== num));
+  }
+
+  const openDialog = (
+    decl: (close: () => void) => {
+      heading: TemplateElementChild,
+      content: TemplateElementChild,
+      buttons: DialogButtons,
+    }
+  ) => {
+    const num = newDialogId();
+    const close = mkCloseDialog(num);
+    const { heading, content, buttons } = decl(close);
+    const dialog = BasicDialog.t({
+      props: {
+        heading, buttons, num
+      },
+      events: { close }
+    }, content);
+    dialogs.next(d => [...d, dialog]);
+  }
+
+  return {
+    openDialog,
+    promptYesOrNo: mkPromptYesOrNo(openDialog),
+    promptInput: mkPromptInput(openDialog),
+    dialogs,
+  };
 }
 
 @Component.register
@@ -137,6 +175,7 @@ export class BasicDialogManager extends Component<{
       openDialog,
       promptYesOrNo: mkPromptYesOrNo(openDialog),
       promptInput: mkPromptInput(openDialog),
+      dialogs,
     });
 
     return [

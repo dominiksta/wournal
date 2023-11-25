@@ -1,4 +1,6 @@
+import { BackgroundStyleT } from "document/BackgroundGenerators";
 import { CanvasToolName } from "document/CanvasTool";
+import { PageProps } from "document/WournalPage";
 import { CanvasToolStrokeWidth } from "persistence/ConfigDTO";
 
 export interface WournalApi {
@@ -59,5 +61,6 @@ export interface WournalApi {
   deleteLayer(layer: string): void;
   moveLayer(name: string, direction: 'up' | 'down'): void;
   renameLayer(name: string, newName: string): void;
+  setPageProps(props: PageProps): void;
 
 }

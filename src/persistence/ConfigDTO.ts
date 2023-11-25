@@ -84,7 +84,7 @@ export function defaultConfig(): ConfigDTO {
         fontStyle: "normal",
         fontWeight: "normal",
         fontFamily: "Roboto Mono",
-        fontSize: 17,
+        fontSize: 18, // fits graph paper pretty well
       },
       CanvasToolRectangle: {
         color: "#000000",

@@ -5,6 +5,7 @@ import { WournalDocument } from "document/WournalDocument";
 import { WournalPage } from "document/WournalPage";
 import { ApiCtx } from "./api-context";
 import { GlobalCommand, GlobalCommandIdT, GlobalCommandsCtx } from "./global-commands";
+import { pageStyleDialog } from "./page-style-dialog";
 import { ShortcutsCtx } from "./shortcuts-context";
 
 @Component.register
@@ -154,6 +155,7 @@ class LayerEditor extends Component {
     const layers = page.pipe(rx.switchMap(p => p.layers));
 
     const api = this.getContext(ApiCtx);
+    const globalCmnds = this.getContext(GlobalCommandsCtx);
     const dialog = this.getContext(BasicDialogManagerContext);
 
     // const layers = new rx.State<any>([]);
@@ -199,19 +201,39 @@ class LayerEditor extends Component {
           ]),
           h.td([
             ui5.button({
-              fields: { icon: 'arrow-top', design: 'Transparent' },
+              fields: {
+                icon: 'paint-bucket', design: 'Transparent',
+                hidden: layer.name !== 'Background',
+              },
+              events: {
+                click: _ => {
+                  globalCmnds.page_set_style.func();
+                }
+              }
+            }, 'Set Background'),
+            ui5.button({
+              fields: {
+                icon: 'arrow-top', design: 'Transparent',
+                hidden: layer.name === 'Background',
+              },
               events: {
                 click: _ => api.moveLayer(layer.name, 'up')
               }
             }),
             ui5.button({
-              fields: { icon: 'arrow-bottom', design: 'Transparent' },
+              fields: {
+                icon: 'arrow-bottom', design: 'Transparent',
+                hidden: layer.name === 'Background',
+              },
               events: {
                 click: _ => api.moveLayer(layer.name, 'down')
               }
             }),
             ui5.button({
-              fields: { icon: 'text', design: 'Transparent' },
+              fields: {
+                icon: 'text', design: 'Transparent',
+                hidden: layer.name === 'Background',
+              },
               events: {
                 click: async _ => {
                   const resp = await dialog.promptInput('Rename Layer');
@@ -223,7 +245,8 @@ class LayerEditor extends Component {
             ui5.button({
               fields: {
                 icon: 'delete', design: 'Transparent',
-                disabled: layers.length <= 2 || layer.name === 'Background',
+                disabled: layers.length <= 2,
+                hidden: layer.name === 'Background',
               },
               events: {
                 click: async _ => {
@@ -238,6 +261,7 @@ class LayerEditor extends Component {
           ])
         ])))),
         ui5.button({
+          fields: { icon: 'add' },
           events: {
             click: _ => api.newLayer(),
           }

@@ -26,6 +26,8 @@ export const GlobalCommandId = [
 
   'fullscreen_toggle',
 
+  'page_set_style',
+
   'preferences_open',
 
   'tool_pen',
