@@ -16,7 +16,7 @@ import { CanvasSelection } from "./CanvasSelection";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
 import { UndoStack } from "./UndoStack";
 import { WournalPage } from "./WournalPage";
-import { computeZoomFactor, WournalPageSize } from "./WournalPageSize";
+import { computeZoomFactor, WournalPageSize, xToPx } from "./WournalPageSize";
 import { Component, h, rx, style } from "@mvui/core";
 import { theme } from "global-styles";
 import { ShortcutManager } from "app/shortcuts";
@@ -341,6 +341,14 @@ export class WournalDocument extends Component {
     for (let page of this.pages.value) page.setZoom(zoom * this.initialZoomFactor);
   }
   public getZoom(): number { return this.zoom; }
+
+  public setZoomFitWidth() {
+    const page = this.activePage.value;
+    const widthAvailable = this.display.getBoundingClientRect().width;
+    const widthPage = page.canvasWidth;
+
+    this.setZoom(widthAvailable / widthPage);
+  }
 
   // ------------------------------------------------------------
   // tools

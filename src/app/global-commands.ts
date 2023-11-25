@@ -22,6 +22,7 @@ export const GlobalCommandId = [
   'zoom_in',
   'zoom_reset',
   'zoom_out',
+  'zoom_fit_width',
 
   'preferences_open',
 

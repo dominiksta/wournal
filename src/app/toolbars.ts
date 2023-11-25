@@ -161,6 +161,11 @@ export default class Toolbars extends Component {
             }),
             ui5.menuItem({
               fields: {
+                icon: 'border', ...globalCmdMenuItem('zoom_fit_width')
+              }
+            }),
+            ui5.menuItem({
+              fields: {
                 icon: 'zoom-out', ...globalCmdMenuItem('zoom_out')
               }
             }),
@@ -333,6 +338,12 @@ export default class Toolbars extends Component {
           }),
           ToolbarButton.t({
             props: {
+              img: 'icon:border', alt: 'Zoom to Fit to Width',
+            },
+            events: { click: _ => api.setZoomFitWidth() }
+          }),
+          ToolbarButton.t({
+            props: {
               img: 'icon:zoom-out', alt: 'Zoom Out',
             },
             events: { click: _ => api.setZoom(api.getZoom() - 0.1) }
@@ -412,7 +423,6 @@ export default class Toolbars extends Component {
             },
             events: { click: _ => api.setStrokeWidth('fine') }
           }),
-
           ToolbarSeperator.t(),
 
           h.fragment(configCtx, config => config.colorPalette.map(col =>

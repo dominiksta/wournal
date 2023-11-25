@@ -26,6 +26,7 @@ export interface WournalApi {
   // ----------------------------------------------------------------------
   setZoom(zoom: number): void;
   getZoom(): number;
+  setZoomFitWidth(): void;
 
   // tools
   // ----------------------------------------------------------------------

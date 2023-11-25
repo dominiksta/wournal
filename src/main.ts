@@ -137,6 +137,12 @@ class App extends Component {
     // ----------------------------------------------------------------------
     setZoom: (zoom) => { this.doc.value.setZoom(zoom) },
     getZoom: () => { return this.doc.value.getZoom(); },
+    setZoomFitWidth: () => {
+      const idx = this.api.getPageNr();
+      this.doc.value.setZoomFitWidth();
+      this.doc.value.setActivePageForCurrentScroll();
+      if (idx !== this.api.getPageNr()) this.api.scrollPage(idx);
+    },
 
     // tools
     // ----------------------------------------------------------------------
@@ -284,6 +290,11 @@ class App extends Component {
       human_name: 'Zoom Out',
       func: () => this.api.setZoom(this.api.getZoom() - 0.1),
       shortcut: 'Ctrl+-'
+    },
+    'zoom_fit_width': {
+      human_name: 'Zoom to Fit Page Width',
+      func: () => this.api.setZoomFitWidth(),
+      shortcut: 'Ctrl+1'
     },
 
     'tool_pen': {

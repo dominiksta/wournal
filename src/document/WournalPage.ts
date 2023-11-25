@@ -42,6 +42,8 @@ export class WournalPage {
   public toolLayer: SVGSVGElement;
 
   private canvas: SVGSVGElement;
+  public get canvasHeight() { return xToPx(this.canvas.getAttribute('height')) }
+  public get canvasWidth() { return xToPx(this.canvas.getAttribute('width')) }
   public activePaintLayer: SVGGElement;
 
   /**
