@@ -297,6 +297,18 @@ class App extends Component {
       shortcut: 'Ctrl+1'
     },
 
+    'fullscreen_toggle': {
+      human_name: 'Toggle Fullscreen',
+      func: () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen();
+        } else if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      },
+      shortcut: 'F11',
+    },
+
     'tool_pen': {
       human_name: 'Pen',
       func: () => this.api.setTool('CanvasToolPen'),

@@ -169,6 +169,11 @@ export default class Toolbars extends Component {
                 icon: 'zoom-out', ...globalCmdMenuItem('zoom_out')
               }
             }),
+            ui5.menuItem({
+              fields: {
+                icon: 'full-screen', ...globalCmdMenuItem('fullscreen_toggle')
+              }
+            }),
           ]),
 
           ui5.menuItem({ fields: { text: 'Tool' } }, [
@@ -347,6 +352,20 @@ export default class Toolbars extends Component {
               img: 'icon:zoom-out', alt: 'Zoom Out',
             },
             events: { click: _ => api.setZoom(api.getZoom() - 0.1) }
+          }),
+          ToolbarButton.t({
+            props: {
+              img: 'icon:full-screen', alt: 'Toggle Fullscreen',
+            },
+            events: {
+              click: _ => {
+                if (!document.fullscreenElement) {
+                  document.documentElement.requestFullscreen();
+                } else if (document.exitFullscreen) {
+                  document.exitFullscreen();
+                }
+              }
+            }
           }),
           ToolbarSeperator.t(),
           FontPickerToolbarButton.t({
