@@ -65,7 +65,7 @@ export class StatusBar extends Component {
           change: e => {
             const target = e.target as ui5.types.Input;
             let n = parseFloat(target.value);
-            if (isNaN(n)) n = api.getPageNr();
+            if (isNaN(n)) n = api.getCurrentPageNr();
             const newNr = Math.max(1, Math.min(n, api.getPageCount()));
             api.scrollPage(newNr);
             shortcutCtx.focus();

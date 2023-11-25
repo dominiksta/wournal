@@ -49,8 +49,6 @@ export interface WournalApi {
   // scroll
   // ----------------------------------------------------------------------
   scrollPage(pageNr: number): void;
-  getPageNr(): number;
-  getPageCount(): number;
 
   // layers
   // ----------------------------------------------------------------------
@@ -61,6 +59,16 @@ export interface WournalApi {
   deleteLayer(layer: string): void;
   moveLayer(name: string, direction: 'up' | 'down'): void;
   renameLayer(name: string, newName: string): void;
+
+  // page manipulation
+  // ----------------------------------------------------------------------
+  getCurrentPageNr(): number;
+  getPageCount(): number;
   setPageProps(props: PageProps): void;
+  setPagePropsPrompt(): void;
+  addPage(addAfterPageNr: number, props: PageProps): void;
+  getPageProps(pageNr: number): PageProps;
+  deletePage(pageNr: number): void;
+  movePage(pageNr: number, direction: 'up' | 'down'): void;
 
 }

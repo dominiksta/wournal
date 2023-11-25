@@ -152,10 +152,10 @@ export default class Wournal extends Component {
     setZoom: (zoom) => { this.doc.value.setZoom(zoom) },
     getZoom: () => { return this.doc.value.getZoom(); },
     setZoomFitWidth: () => {
-      const idx = this.api.getPageNr();
+      const idx = this.api.getCurrentPageNr();
       this.doc.value.setZoomFitWidth();
       this.doc.value.setActivePageForCurrentScroll();
-      if (idx !== this.api.getPageNr()) this.api.scrollPage(idx);
+      if (idx !== this.api.getCurrentPageNr()) this.api.scrollPage(idx);
     },
 
     // tools
@@ -202,12 +202,6 @@ export default class Wournal extends Component {
       doc.activePage.next(pages[page]);
       doc.activePage.value.display.scrollIntoView();
     },
-    getPageNr: () => {
-      return this.doc.value.pages.value.indexOf(this.doc.value.activePage.value) + 1;
-    },
-    getPageCount: () => {
-      return this.doc.value.pages.value.length;
-    },
 
     // layers
     // ----------------------------------------------------------------------
@@ -232,10 +226,41 @@ export default class Wournal extends Component {
     renameLayer: (name, newName) => {
       this.doc.value.activePage.value.renameLayer(name, newName);
     },
+
+    // page manipulation
+    // ----------------------------------------------------------------------
+    getCurrentPageNr: () => {
+      return this.doc.value.pages.value.indexOf(this.doc.value.activePage.value) + 1;
+    },
+    getPageCount: () => {
+      return this.doc.value.pages.value.length;
+    },
     setPageProps: props => {
       this.doc.value.activePage.value.setPageProps(props);
     },
-
+    setPagePropsPrompt: async () => {
+      const page = this.doc.value.activePage.value;
+      const resp = await pageStyleDialog(this.dialog.openDialog, {
+        width: page.width,
+        height: page.height,
+        backgroundColor: page.backgroundColor,
+        backgroundStyle: page.backgroundStyle,
+      });
+      if (resp) this.api.setPageProps(resp);
+    },
+    addPage: (addAfterPageNr, props) => {
+      this.doc.value.addNewPage(props, addAfterPageNr);
+    },
+    deletePage: pageNr => {
+      this.doc.value.deletePage(pageNr);
+    },
+    getPageProps: pageNr => {
+      const page = this.doc.value.pages.value[pageNr - 1];
+      return page.getPageProps();
+    },
+    movePage: (pageNr, direction) => {
+      this.doc.value.movePage(pageNr, direction);
+    },
   }
 
 
@@ -291,16 +316,36 @@ export default class Wournal extends Component {
     'page_set_style': {
       human_name: 'Set Page Style',
       func: async () => {
-        const page = this.doc.value.activePage.value;
-        const resp = await pageStyleDialog(this.dialog.openDialog, {
-          width: page.width,
-          height: page.height,
-          backgroundColor: page.backgroundColor,
-          backgroundStyle: page.backgroundStyle,
-        });
-        if (resp) this.api.setPageProps(resp);
+        this.api.setPagePropsPrompt();
       },
       shortcut: 'Ctrl+Shift+P'
+    },
+    'page_new_after': {
+      human_name: 'New Page After',
+      func: () => {
+        const nr = this.api.getCurrentPageNr();
+        this.api.addPage(nr, this.api.getPageProps(nr));
+        this.api.scrollPage(nr + 1);
+      },
+      shortcut: 'Ctrl+Shift+ArrowDown'
+    },
+    'page_delete': {
+      human_name: 'Delete Page',
+      func: () => {
+        if (this.api.getPageCount() <= 1) return;
+        this.api.deletePage(this.api.getCurrentPageNr());
+      },
+      shortcut: 'Ctrl+K',
+    },
+    'page_move_down': {
+      human_name: 'Move Page Down',
+      func: () => { this.api.movePage(this.api.getCurrentPageNr(), 'down') },
+      shortcut: 'Ctrl+Shift+ArrowRight'
+    },
+    'page_move_up': {
+      human_name: 'Move Page Up',
+      func: () => { this.api.movePage(this.api.getCurrentPageNr(), 'up') },
+      shortcut: 'Ctrl+Shift+ArrowLeft'
     },
 
     'preferences_open': {
@@ -382,12 +427,12 @@ export default class Wournal extends Component {
 
     'scroll_page_next': {
       human_name: 'Scroll to Next Page',
-      func: () => this.api.scrollPage(this.api.getPageNr() + 1),
+      func: () => this.api.scrollPage(this.api.getCurrentPageNr() + 1),
       shortcut: 'Ctrl+ArrowRight',
     },
     'scroll_page_previous': {
       human_name: 'Scroll to Previous Page',
-      func: () => this.api.scrollPage(this.api.getPageNr() - 1),
+      func: () => this.api.scrollPage(this.api.getCurrentPageNr() - 1),
       shortcut: 'Ctrl+ArrowLeft',
     },
     'scroll_page_focus_goto': {

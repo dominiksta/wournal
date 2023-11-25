@@ -14,12 +14,13 @@ import { CanvasToolFactory } from "./CanvasToolFactory";
 import { CanvasToolPen } from "./CanvasToolPen";
 import { CanvasSelection } from "./CanvasSelection";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
-import { UndoStack } from "./UndoStack";
+import { UndoAction, UndoStack } from "./UndoStack";
 import { PageProps, WournalPage } from "./WournalPage";
 import { computeZoomFactor, WournalPageSize } from "./WournalPageSize";
 import { Component, h, rx, style } from "@mvui/core";
 import { theme } from "global-styles";
 import { ShortcutManager } from "app/shortcuts";
+import { DOMUtils } from "util/DOMUtils";
 
 @Component.register
 export class WournalDocument extends Component {
@@ -77,6 +78,12 @@ export class WournalDocument extends Component {
       this.pages.value.forEach(p => p.display.classList.remove('active'));
       p.display.classList.add('active');
     })
+
+    this.subscribe(this.pages, pages => {
+      const correctPositions =
+        pages.map((p, idx) => p.display === this.display.children[idx]);
+      console.assert(correctPositions.indexOf(false) === -1, pages);
+    });
   }
 
   public setActivePageForCurrentScroll() {
@@ -308,7 +315,7 @@ export class WournalDocument extends Component {
   }
 
   // ------------------------------------------------------------
-  // adding pages
+  // pages
   // ------------------------------------------------------------
 
   public activePage = new rx.State(
@@ -318,20 +325,83 @@ export class WournalDocument extends Component {
     })
   );
 
-  public addNewPage(init: PageProps): void {
-    this.addPage(WournalPage.createNew(this, init));
+  public addNewPage(
+    init: PageProps, addAfterPageNr: number = -1
+  ): void {
+    this.addPage(WournalPage.createNew(this, init), addAfterPageNr);
   }
 
   public addPageFromSvg(svg: string) {
     this.addPage(WournalPage.fromSvgString(this, svg));
   }
 
-  private addPage(page: WournalPage) {
+  private addPage(
+    page: WournalPage, addAfterPageNr: number = -1,
+    undoable = true
+  ) {
     page.setZoom(this.zoom * this.initialZoomFactor);
-    this.display.appendChild(page.display);
-    this.pages.next(v => [...v, page]);
+
+    if (addAfterPageNr === -1) {
+      this.display.appendChild(page.display);
+      this.pages.next(v => [...v, page]);
+    } else {
+      const idx = addAfterPageNr - 1;
+      DOMUtils.insertNodeBeforeIndex(page.display, this.display, idx);
+      this.pages.next(v => [...v.slice(0, idx), page, ...v.slice(idx)]);
+    }
+
+    if (undoable) this.undoStack.push(new this.UndoActionPage(
+      this, [], [{
+        page, idx: Array.from(this.display.children).indexOf(page.display)
+      }]
+    ))
+
     page.toolLayer.style.cursor = this.currentTool.value.idleCursor;
     if (this.pages.value.length === 1) this.activePage.next(page);
+  }
+
+  public deletePage(pageNr: number, undoable = true) {
+    const idx = pageNr - 1;
+    this.display.children[idx].remove();
+    if (undoable) this.undoStack.push(new this.UndoActionPage(
+      this, [{ page: this.pages.value[idx], idx }], []
+    ));
+    this.setActivePageForCurrentScroll();
+    this.pages.next(v => [...v.slice(0, idx), ...v.slice(idx + 1)]);
+  }
+
+  public movePage(pageNr: number, direction: 'up' | 'down') {
+    const idx = pageNr - 1;
+    const c = this.display.children;
+
+    if (idx === 0 && direction === 'up') return;
+    if (idx === c.length - 1 && direction === 'down') return;
+    console.assert(idx >= 0 && idx < c.length);
+
+    const page = this.pages.value[idx];
+    this.display.children[idx].remove();
+    if (direction === 'up') {
+      DOMUtils.insertNodeBeforeIndex(page.display, this.display, idx-1);
+      this.pages.next(v => {
+        const copy = v.slice();
+        copy[idx-1] = page; copy[idx] = v[idx-1];
+        return copy;
+      });
+      this.undoStack.push(new this.UndoActionPage(
+        this, [{ page, idx: idx }], [{ page, idx: idx-1 }]
+      ));
+    } else {
+      DOMUtils.insertNodeBeforeIndex(page.display, this.display, idx+1);
+      this.pages.next(v => {
+        const copy = v.slice();
+        copy[idx+1] = page; copy[idx] = v[idx+1];
+        return copy;
+      });
+      this.undoStack.push(new this.UndoActionPage(
+        this, [{ page, idx: idx }], [{ page, idx: idx+1 }]
+      ));
+    }
+    page.display.scrollIntoView();
   }
 
   // ------------------------------------------------------------
@@ -505,4 +575,22 @@ export class WournalDocument extends Component {
   }
 
 
+
+  private UndoActionPage = class implements UndoAction {
+    constructor(
+      private doc: WournalDocument,
+      private pagesRemoved: { idx: number, page: WournalPage }[],
+      private pagesAdded: { idx: number, page: WournalPage }[],
+    ) { }
+
+    redo() {
+      for (const p of this.pagesRemoved) this.doc.deletePage(p.idx + 1, false);
+      for (const p of this.pagesAdded) this.doc.addPage(p.page, p.idx + 1, false);
+    }
+
+    undo() {
+      for (const p of this.pagesAdded) this.doc.deletePage(p.idx + 1, false);
+      for (const p of this.pagesRemoved) this.doc.addPage(p.page, p.idx + 1, false);
+    }
+  }
 }

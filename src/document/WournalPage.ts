@@ -131,8 +131,8 @@ export class WournalPage {
   ): WournalPage {
     let page = new WournalPage(doc);
     page.setPageProps(init, false)
-    page.addLayer('Layer 1');
-    page.setActivePaintLayer('Layer 1');
+    page.addLayer('Layer 1', false);
+    page.setActivePaintLayer('Layer 1', false);
 
     page.updateDisplaySize();
     return page;
@@ -145,7 +145,7 @@ export class WournalPage {
       backgroundColor: this.backgroundColor,
       backgroundStyle: this.backgroundStyle
     }, false);
-    page.addLayer('Layer 1');
+    page.addLayer('Layer 1', false);
     page.setActivePaintLayer('Layer 1');
 
     page.updateDisplaySize();
@@ -309,7 +309,7 @@ export class WournalPage {
 
   private getLayers = () => WournalPage.getLayers(this.canvas);
 
-  public setActivePaintLayer(name: string) {
+  public setActivePaintLayer(name: string, undoable = true) {
     const l = this.getLayer(name);
     this.activePaintLayer = l;
     this.getLayers().map(
@@ -319,7 +319,7 @@ export class WournalPage {
 
     const listBefore = this.layers.value;
     this.updateLayerList();
-    this.doc.undoStack.push(new UndoActionLayer(
+    if (undoable) this.doc.undoStack.push(new UndoActionLayer(
       this.canvas, this.updateLayerList.bind(this),
       [], [], listBefore, this.layers.value
     ));
@@ -370,19 +370,22 @@ export class WournalPage {
     for (const el of bgEls) newBg.appendChild(el);
   }
 
-  public setPageProps(props: PageProps, undoable = true) {
-    const getProps = () => ({
+  public getPageProps(): PageProps {
+    return {
       backgroundColor: this.backgroundColor,
       backgroundStyle: this.backgroundStyle,
       height: this.height, width: this.width,
-    });
-    const propsBefore = getProps();
+    };
+  }
+
+  public setPageProps(props: PageProps, undoable = true) {
+    const propsBefore = this.getPageProps();
     this.setPageSize(props);
     this.backgroundColor = props.backgroundColor;
     this.backgroundStyle = props.backgroundStyle;
     this.generateBackground(BackgroundGenerators[props.backgroundStyle]);
     if (undoable) this.doc.undoStack.push(new UndoActionPageProps(
-      this, propsBefore, getProps(),
+      this, propsBefore, this.getPageProps(),
     ));
   }
 

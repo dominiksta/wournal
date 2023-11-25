@@ -27,6 +27,10 @@ export const GlobalCommandId = [
   'fullscreen_toggle',
 
   'page_set_style',
+  'page_new_after',
+  'page_delete',
+  'page_move_down',
+  'page_move_up',
 
   'preferences_open',
 

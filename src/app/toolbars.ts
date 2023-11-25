@@ -182,6 +182,26 @@ export default class Toolbars extends Component {
                 icon: 'request', ...globalCmdMenuItem('page_set_style')
               }
             }),
+            ui5.menuItem({
+              fields: {
+                icon: 'add-document', ...globalCmdMenuItem('page_new_after')
+              }
+            }),
+            ui5.menuItem({
+              fields: {
+                icon: 'arrow-top', ...globalCmdMenuItem('page_move_up')
+              }
+            }),
+            ui5.menuItem({
+              fields: {
+                icon: 'arrow-bottom', ...globalCmdMenuItem('page_move_down')
+              }
+            }),
+            ui5.menuItem({
+              fields: {
+                icon: 'delete', ...globalCmdMenuItem('page_delete')
+              }
+            }),
           ]),
 
           ui5.menuItem({ fields: { text: 'Tool' } }, [
