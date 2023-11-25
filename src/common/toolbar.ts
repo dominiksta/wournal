@@ -2,6 +2,39 @@ import { Component, h, http, rx, style, TemplateElementChild } from "@mvui/core"
 import * as ui5 from "@mvui/ui5";
 import { theme } from "global-styles";
 
+export const toolbarButtonStyle = {
+    'button': {
+      background: ui5.Theme.PageHeader_Background,
+      margin: '0px',
+      verticalAlign: 'middle',
+      height: '36px',
+      width: '36px',
+      borderRadius: '5px',
+      border: '1px solid transparent',
+      color: ui5.Theme.TextColor,
+    },
+    'button:hover': {
+      background: ui5.Theme.Button_Hover_Background,
+      border: `1px solid ${ui5.Theme.Button_BorderColor}`,
+    },
+    'button:active:not(:disabled)': {
+      background: ui5.Theme.Button_Active_Background,
+    },
+    'button:disabled': {
+      opacity: '0.4',
+    },
+    'button:active': {
+      border: `2px solid ${ui5.Theme.Button_BorderColor}`,
+    },
+    'button:first-child': {
+      marginLeft: '3px',
+    },
+    'button.current': {
+      border: `1px solid ${ui5.Theme.Button_BorderColor}`,
+      background: ui5.Theme.Button_Active_Background,
+    },
+}
+
 @Component.register
 export class ToolbarButton extends Component<{
   events: {
@@ -62,35 +95,7 @@ export class ToolbarButton extends Component<{
   }
 
   static styles = style.sheet({
-    'button': {
-      background: ui5.Theme.PageHeader_Background,
-      margin: '0px',
-      border: 'none',
-      verticalAlign: 'middle',
-      height: '36px',
-      width: '36px',
-      borderRadius: '5px',
-    },
-    'button:hover': {
-      background: ui5.Theme.Button_Hover_Background,
-      border: `1px solid ${ui5.Theme.Button_BorderColor}`,
-    },
-    'button:active:not(:disabled)': {
-      background: ui5.Theme.Button_Active_Background,
-    },
-    'button:disabled': {
-      opacity: '0.4',
-    },
-    'button:active': {
-      border: `2px solid ${ui5.Theme.Button_BorderColor}`,
-    },
-    'button:first-child': {
-      marginLeft: '3px',
-    },
-    'button.current': {
-      border: `1px solid ${ui5.Theme.Button_BorderColor}`,
-      background: ui5.Theme.Button_Active_Background,
-    },
+    ...toolbarButtonStyle,
     'button > .colorbtn': {
       display: 'inline-block',
       height: '18px',

@@ -34,6 +34,14 @@ export interface WournalApi {
   setStrokeWidth(width: CanvasToolStrokeWidth): void;
   setColorByName(name: string): void;
   setColorByHex(color: string): void;
+  setFont(opt: {
+    family: string, size: number, weight: 'normal' | 'bold',
+    style: 'normal' | 'italic'
+  }): void;
+  getFont(): {
+    family: string, size: number, weight: 'normal' | 'bold',
+    style: 'normal' | 'italic'
+  };
 
   // scroll
   // ----------------------------------------------------------------------

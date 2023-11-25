@@ -15,6 +15,7 @@ import { DSUtils } from "util/DSUtils";
 import { ConfigCtx } from "./config-context";
 import { ApiCtx } from "./api-context";
 import { GlobalCommandId, GlobalCommandIdT, GlobalCommandsCtx } from "./global-commands";
+import { FontPickerToolbarButton } from "common/font-picker";
 
 @Component.register
 export default class Toolbars extends Component {
@@ -335,6 +336,13 @@ export default class Toolbars extends Component {
               img: 'icon:zoom-out', alt: 'Zoom Out',
             },
             events: { click: _ => api.setZoom(api.getZoom() - 0.1) }
+          }),
+          ToolbarSeperator.t(),
+          FontPickerToolbarButton.t({
+            props: {
+              family: toolConfig.map(t => t.CanvasToolText.fontFamily),
+              size: toolConfig.map(t => t.CanvasToolText.fontSize),
+            }
           }),
         ]),
 

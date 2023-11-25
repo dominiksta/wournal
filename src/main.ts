@@ -21,6 +21,7 @@ import { CanvasToolName } from 'document/CanvasTool';
 import { CanvasToolFactory } from 'document/CanvasToolFactory';
 import { StatusBar } from 'app/status-bar';
 import { BasicDialogManager, BasicDialogManagerContext } from 'common/dialog-manager';
+import { DSUtils } from 'util/DSUtils';
 
 @Component.register
 class App extends Component {
@@ -44,7 +45,6 @@ class App extends Component {
     this.provideContext(ToastCtx, {
       open: async (msg: string) => {
         const toast = await this.query<ui5.types.Toast>('#toast');
-        console.log(toast);
         toast.innerText = msg;
         toast.show();
       }
@@ -154,6 +154,23 @@ class App extends Component {
     },
     setColorByHex: (color: string) => {
       this.doc.value.setColor(color);
+    },
+    setFont: (opt) => {
+      const newCfg = DSUtils.copyObj(this.doc.value.toolConfig.value);
+      newCfg.CanvasToolText.fontFamily = opt.family;
+      newCfg.CanvasToolText.fontSize = opt.size;
+      newCfg.CanvasToolText.fontStyle = opt.style;
+      newCfg.CanvasToolText.fontWeight = opt.weight;
+      this.doc.value.toolConfig.next(newCfg);
+    },
+    getFont: () => {
+      const cfg = this.doc.value.toolConfig.value.CanvasToolText;
+      return {
+        family: cfg.fontFamily,
+        size: cfg.fontSize,
+        style: cfg.fontStyle,
+        weight: cfg.fontWeight,
+      }
     },
 
     // scroll
