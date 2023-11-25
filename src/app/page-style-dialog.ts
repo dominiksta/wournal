@@ -108,8 +108,6 @@ export class PageStyleDialog extends Component {
         return found ?? 'user';
       });
 
-    this.subscribe(color, console.log);
-
     return [
       h.section([
         ui5.title({ fields: { level: 'H6' } }, 'Style'),

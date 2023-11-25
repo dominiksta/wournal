@@ -1,4 +1,3 @@
-import { CanvasToolStrokeWidth } from "../persistence/ConfigDTO";
 import { CanvasPath } from "./CanvasPath";
 import { CanvasTool } from "./CanvasTool";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
@@ -17,7 +16,7 @@ export class CanvasToolPen extends CanvasTool {
   /** The svg path for the current line */
   private path: CanvasPath = null;
 
-  public idleCursor = "url('res/custom/pen.svg'), auto";
+  public idleCursor = "url('res/icon/custom/pen.svg'), auto";
 
   public override canSetStrokeWidth = true;
   public override canSetColor = true;
