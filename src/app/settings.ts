@@ -232,6 +232,21 @@ class ToolDefaultSettings extends Component {
         ]),
       ]),
       h.fieldset([
+        h.legend('Highlighter'),
+        h.table([
+          h.tr([
+            h.td(ui5.label('Color')),
+            h.td(ColorPicker.t({
+              props: { color: rx.bind(cfg.partial('CanvasToolHighlighter', 'color')) },
+            }))
+          ]),
+          h.tr([
+            h.td(ui5.label('Stroke Width')),
+            h.td(selectWidth(cfg.partial('CanvasToolHighlighter', 'strokeWidth'))),
+          ]),
+        ]),
+      ]),
+      h.fieldset([
         h.legend('Eraser'),
         h.table([
           h.tr([
@@ -279,6 +294,21 @@ class ToolDefaultSettings extends Component {
           h.tr([
             h.td(ui5.label('Stroke Width')),
             h.td(selectWidth(cfg.partial('CanvasToolRectangle', 'strokeWidth')))
+          ]),
+        ]),
+      ]),
+      h.fieldset([
+        h.legend('Ruler'),
+        h.table([
+          h.tr([
+            h.td(ui5.label('Color')),
+            h.td(ColorPicker.t({
+              props: { color: rx.bind(cfg.partial('CanvasToolRuler', 'color')) },
+            }))
+          ]),
+          h.tr([
+            h.td(ui5.label('Stroke Width')),
+            h.td(selectWidth(cfg.partial('CanvasToolRuler', 'strokeWidth')))
           ]),
         ]),
       ]),

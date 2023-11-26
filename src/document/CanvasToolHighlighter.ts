@@ -6,7 +6,7 @@ export class CanvasToolHighlighter extends CanvasToolPen {
   }
   protected override get cfgColor() { return this.#conf().color };
   protected override get cfgStrokeWidth() { return this.#conf().strokeWidth };
-  protected override get cfgMouseBufferSize() { return 1 };
+  protected override get cfgMouseBufferSize() { return 4 };
 
   protected static override opacity = 0.5;
   protected static override lineCap = "";
