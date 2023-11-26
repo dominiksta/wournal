@@ -24,7 +24,6 @@ export class CanvasToolRectangle extends CanvasTool {
     if (confWidth === "fine") return 1;
     if (confWidth === "medium") return 2;
     if (confWidth === "thick") return 5;
-    if (confWidth === "none") throw new Error("'none' strokeWidth for rect");
   }
 
   public onMouseDown(e: MouseEvent): void {

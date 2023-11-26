@@ -114,6 +114,7 @@ class ToolSelect extends Component {
     'CanvasToolRectangle': 'Rectangle',
     'CanvasToolSelectRectangle': 'Select Rectangle',
     'CanvasToolText': 'Text',
+    'CanvasToolHighlighter': 'Highlighter',
   }
 
   render() {

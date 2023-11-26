@@ -60,7 +60,6 @@ export class CanvasToolEraser extends CanvasTool {
     if (confWidth === "fine") this.actualStrokeWidth = 5;
     if (confWidth === "medium") this.actualStrokeWidth = 10;
     if (confWidth === "thick") this.actualStrokeWidth = 40;
-    if (confWidth === "none") throw new Error("'none' strokeWidth for eraser");
   }
 
   public onMouseDown(e: MouseEvent): void {

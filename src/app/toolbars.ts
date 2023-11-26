@@ -16,6 +16,7 @@ import { ConfigCtx } from "./config-context";
 import { ApiCtx } from "./api-context";
 import { GlobalCommandId, GlobalCommandIdT, GlobalCommandsCtx } from "./global-commands";
 import { FontPickerToolbarButton } from "common/font-picker";
+import { CanvasToolHighlighter } from "document/CanvasToolHighlighter";
 
 @Component.register
 export default class Toolbars extends Component {
@@ -41,7 +42,7 @@ export default class Toolbars extends Component {
       );
 
     const isCurrentTool = (tool: Newable<CanvasTool>) =>
-      currentTool.map(t => t instanceof tool);
+      currentTool.map(t => t.name === tool.name);
 
     const currentToolMenuIcon = (tool: Newable<CanvasTool>) =>
       currentTool.map(t => t instanceof tool ? 'wournal/menu-selected' : '');
@@ -209,6 +210,12 @@ export default class Toolbars extends Component {
               fields: {
                 icon: currentToolMenuIcon(CanvasToolPen),
                 ...globalCmdMenuItem('tool_pen')
+              }
+            }),
+            ui5.menuItem({
+              fields: {
+                icon: currentToolMenuIcon(CanvasToolHighlighter),
+                ...globalCmdMenuItem('tool_highlighter')
               }
             }),
             ui5.menuItem({
@@ -421,10 +428,17 @@ export default class Toolbars extends Component {
         Toolbar.t([
           ToolbarButton.t({
             props: {
-              img: 'img:/res/icon/custom/pen.png', alt: 'Pen',
+              img: 'icon:edit', alt: 'Pen',
               current: isCurrentTool(CanvasToolPen),
             },
             events: { click: _ => api.setTool('CanvasToolPen') }
+          }),
+          ToolbarButton.t({
+            props: {
+              img: 'icon:wournal/highlighter', alt: 'Highlighter',
+              current: isCurrentTool(CanvasToolHighlighter),
+            },
+            events: { click: _ => api.setTool('CanvasToolHighlighter') }
           }),
           ToolbarButton.t({
             props: {

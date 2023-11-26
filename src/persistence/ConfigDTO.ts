@@ -1,6 +1,6 @@
 import { CanvasToolName } from "../document/CanvasTool"
 
-export type CanvasToolStrokeWidth = "fine" | "medium" | "thick" | "none";
+export type CanvasToolStrokeWidth = "fine" | "medium" | "thick";
 
 export type CanvasToolPenConfig = {
   color: string,
@@ -26,11 +26,17 @@ export type CanvasToolRectangleConfig = {
   strokeWidth: CanvasToolStrokeWidth,
 }
 
+export type CanvasToolHighlighterConfig = {
+  color: string,
+  strokeWidth: CanvasToolStrokeWidth,
+}
+
 export type CanvasToolConfig = {
   CanvasToolPen: CanvasToolPenConfig,
   CanvasToolEraser: CanvasToolEraserConfig,
   CanvasToolText: CanvasToolTextConfig,
   CanvasToolRectangle: CanvasToolRectangleConfig,
+  CanvasToolHighlighter: CanvasToolHighlighterConfig,
 }
 
 export type CanvasToolConfigData = CanvasToolConfig[keyof CanvasToolConfig];
@@ -93,6 +99,10 @@ export function defaultConfig(): ConfigDTO {
       },
       CanvasToolRectangle: {
         color: "#000000",
+        strokeWidth: "medium",
+      },
+      CanvasToolHighlighter: {
+        color: "#FFFF00",
         strokeWidth: "medium",
       }
     }

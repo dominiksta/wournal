@@ -7,10 +7,11 @@ import { WournalPage } from "./WournalPage";
 /** All available `CanvasTool`s */
 export const CanvasToolNames = [
   "CanvasToolPen",
+  "CanvasToolHighlighter",
   "CanvasToolEraser",
   "CanvasToolRectangle",
   "CanvasToolSelectRectangle",
-  "CanvasToolText"
+  "CanvasToolText",
 ] as const;
 /** All available `CanvasTool`s */
 export type CanvasToolName = typeof CanvasToolNames[number];
@@ -28,16 +29,6 @@ export class CanvasToolSetupProps {
 
 export abstract class CanvasTool {
   get name(): CanvasToolName { return (this as any).constructor.name; }
-
-  static humanName(name: CanvasToolName) {
-    switch (name) {
-      case "CanvasToolPen": return "Pen";
-      case "CanvasToolEraser": return "Eraser";
-      case "CanvasToolRectangle": return "Rectangle";
-      case "CanvasToolSelectRectangle": return "Select Rectangle";
-      case "CanvasToolText": return "Text Box";
-    }
-  }
 
   /** This cursor should be displayed when the tool is selected */
   public abstract idleCursor: string;

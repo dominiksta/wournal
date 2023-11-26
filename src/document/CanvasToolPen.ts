@@ -3,10 +3,14 @@ import { CanvasTool } from "./CanvasTool";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
 import { WournalPage } from "./WournalPage";
 
+
 export class CanvasToolPen extends CanvasTool {
-  private get conf() {
+  #conf() {
     return this.activePage.value.doc.toolConfig.value.CanvasToolPen;
   };
+  protected get cfgColor() { return this.#conf().color };
+  protected get cfgStrokeWidth() { return this.#conf().strokeWidth };
+  protected get cfgMouseBufferSize() { return this.#conf().mouseBufferSize };
 
   /** Buffer for smoothing. Contains the last positions of the mouse cursor */
   private mouseBuffer: { x: number, y: number }[] = [];
@@ -21,12 +25,14 @@ export class CanvasToolPen extends CanvasTool {
   public override canSetStrokeWidth = true;
   public override canSetColor = true;
 
-  private actualStrokeWidth(): number {
-    const confWidth = this.conf.strokeWidth;
+  protected static opacity = 1;
+  protected static lineCap = "round";
+
+  protected actualStrokeWidth(): number {
+    const confWidth = this.cfgStrokeWidth;
     if (confWidth === "fine") return 1;
     if (confWidth === "medium") return 2;
-    if (confWidth === "thick") return 5;
-    if (confWidth === "none") throw new Error("'none' strokeWidth for pen");
+    if (confWidth === "thick") return 15;
   }
 
   public onMouseDown(e: MouseEvent): void {
@@ -34,12 +40,13 @@ export class CanvasToolPen extends CanvasTool {
     if (this.toolUseStartPage === null) return;
 
     this.path = CanvasPath.fromNewPath();
-    this.path.setLineCap("round");
+    this.path.setLineCap((this.constructor as typeof CanvasToolPen).lineCap);
+    this.path.setOpacity((this.constructor as typeof CanvasToolPen).opacity);
     this.mouseBuffer = [];
     var pt = this.toolUseStartPage.globalCoordsToCanvas({ x: e.x, y: e.y });
     this.appendToBuffer(pt);
     this.path.startAt(pt);
-    this.path.setColor(this.conf.color);
+    this.path.setColor(this.cfgColor);
     this.path.setActualStrokeWidth(this.actualStrokeWidth());
     this.toolUseStartPage.activePaintLayer.appendChild(this.path.svgElem);
   }
@@ -64,9 +71,9 @@ export class CanvasToolPen extends CanvasTool {
 
   /** Calculate the average point, starting at offset in the buffer */
   private getAveragePoint(offset: number): { x: number, y: number } | null {
-    var len = this.mouseBuffer.length;
+    let len = this.mouseBuffer.length;
     if (len % 2 === 1 || len >=
-      this.conf.mouseBufferSize) {
+      this.cfgMouseBufferSize) {
       var totalX = 0;
       var totalY = 0;
       var pt, i;
@@ -88,13 +95,13 @@ export class CanvasToolPen extends CanvasTool {
   private appendToBuffer(pt: { x: number, y: number }) {
     this.mouseBuffer.push(pt);
     while (this.mouseBuffer.length >
-      this.conf.mouseBufferSize) {
+      this.cfgMouseBufferSize) {
       this.mouseBuffer.shift();
     }
   }
 
   private updateSvgPath() {
-    var pt = this.getAveragePoint(0);
+    let pt = this.getAveragePoint(0);
 
     if (pt) {
       // Get the smoothed part of the path that will not change

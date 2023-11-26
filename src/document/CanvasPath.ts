@@ -110,6 +110,14 @@ export class CanvasPath extends CanvasElement {
     return this._svgElem.getAttribute("stroke");
   }
 
+  public setOpacity(opactiy: number) {
+    this._svgElem.setAttribute("stroke-opacity", opactiy.toString());
+  }
+
+  public getOpacity() {
+    return parseFloat(this._svgElem.getAttribute("stroke-opacity"));
+  }
+
   public getData(): CanvasPathData {
     return new CanvasPathData(this.getAttributes());
   }
@@ -283,6 +291,7 @@ export class CanvasPath extends CanvasElement {
       );
       newPath.setColor(this.getColor());
       newPath.setActualStrokeWidth(this.getStrokeWidth());
+      newPath.setOpacity(this.getOpacity());
       this._svgElem.before(this._svgElem, newPath._svgElem);
       added.push(newPath._svgElem);
     }

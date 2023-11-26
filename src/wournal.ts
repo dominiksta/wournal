@@ -431,6 +431,11 @@ export default class Wournal extends Component {
       func: () => this.api.setTool('CanvasToolPen'),
       shortcut: 'W',
     },
+    'tool_highlighter': {
+      human_name: 'Highlighter',
+      func: () => this.api.setTool('CanvasToolHighlighter'),
+      shortcut: 'A',
+    },
     'tool_default_pen': {
       human_name: 'Default Pen',
       func: () => {
