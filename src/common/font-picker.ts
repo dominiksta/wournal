@@ -81,7 +81,7 @@ export class FontPicker extends Component {
       ]),
 
       h.section([
-        ui5.title({ fields: { level: 'H6' }}, 'Size'),
+        ui5.title({ fields: { level: 'H6' }}, 'Size:'),
         ui5.stepInput({ fields: {
           value: rx.bind(size),
           max: 100,

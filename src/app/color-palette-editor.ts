@@ -90,6 +90,11 @@ export default class ColorPaletteEditor extends Component {
     ]
   }
 
+  static styles = style.sheet({
+    ':host': {
+      display: 'inline-block',
+    }
+  });
 }
 
 @Component.register
@@ -108,15 +113,15 @@ export class ColorPicker extends Component<{
     this.subscribe(color.pipe(rx.skip(1)), col => this.dispatch('change', col));
 
     const changeColor = (e: Event) => {
-      const newCol = (e.target as ui5.types.Input).value;
-      if (!newCol.match("^#[A-Fa-f0-9]*$")) return;
+      const newCol = (e.target as ui5.types.Input).value.toUpperCase();
+      if (!newCol.match("^#[A-F0-9]*$")) return;
       color.next(newCol);
     }
 
     return [
       ui5.input({
         fields: { value: color },
-        events: { input: changeColor }
+        events: { change: changeColor }
       }),
       h.input({
         fields: {
@@ -132,6 +137,9 @@ export class ColorPicker extends Component<{
     ':host': {
       display: 'flex',
       alignItems: 'center',
+    },
+    'ui5-input': {
+      width: '6em',
     },
     'input[type=color]': {
       marginLeft: '4px',

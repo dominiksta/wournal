@@ -1,10 +1,14 @@
 import { Component, h, rx, style } from "@mvui/core";
 import * as ui5 from "@mvui/ui5";
 import { ConfigCtx } from "app/config-context";
+import { FontPicker } from "common/font-picker";
+import { SimpleSelect } from "common/simple-select";
 import { CanvasToolName, CanvasToolNames } from "document/CanvasTool";
-import { ConfigDTO, defaultConfig } from "persistence/ConfigDTO";
+import {
+  CanvasToolConfig, CanvasToolStrokeWidth, ConfigDTO, defaultConfig
+} from "persistence/ConfigDTO";
 import { DSUtils } from "util/DSUtils";
-import ColorPaletteEditor from "./color-palette-editor";
+import ColorPaletteEditor, { ColorPicker } from "./color-palette-editor";
 import { ToastCtx } from "./toast-context";
 
 @Component.register
@@ -57,6 +61,11 @@ export class Settings extends Component {
             invert: rx.bind(conf.partial('invertDocument')),
             theme: rx.bind(conf.partial('theme')),
           }})
+        ]),
+        ui5.panel({ fields: { headerText: 'Default Tool Settings', fixed: true }}, [
+          ToolDefaultSettings.t({
+            props: { cfg: rx.bind(conf.partial('tools')) }
+          }),
         ]),
         ui5.panel({ fields: { headerText: 'Right Click Binding', fixed: true }}, [
           ToolSelect.t({ props: { tool: rx.bind(conf.partial('binds', 'rightClick')) } }),
@@ -170,9 +179,133 @@ class ThemeSettings extends Component {
       h.div(ui5.checkbox({
         fields: {
           checked: rx.bind(this.props.invert),
+          wrappingType: 'Normal',
           text: 'Invert Document Colors for Dark Themes',
         }
       })),
     ]
   }
+}
+
+@Component.register
+class ToolDefaultSettings extends Component {
+  props = {
+    cfg: rx.prop<CanvasToolConfig>(),
+  }
+
+  render() {
+    const { cfg } = this.props;
+
+    const selectWidth = (value: rx.State<CanvasToolStrokeWidth>) => SimpleSelect(
+      value, [
+        { value: 'fine', name: 'Fine' },
+        { value: 'medium', name: 'Medium' },
+        { value: 'thick', name: 'Thick' },
+      ]
+    );
+
+    const mainSection = [
+      h.fieldset([
+        h.legend('Pen'),
+        h.table([
+          h.tr([
+            h.td(ui5.label('Color')),
+            h.td(ColorPicker.t({
+              props: { color: rx.bind(cfg.partial('CanvasToolPen', 'color')) },
+            }))
+          ]),
+          h.tr([
+            h.td(ui5.label('Stroke Width')),
+            h.td(selectWidth(cfg.partial('CanvasToolPen', 'strokeWidth'))),
+          ]),
+          h.tr([
+            h.td(ui5.label('Smoothing Factor*')),
+            h.td(ui5.stepInput({
+              fields: {
+                value: rx.bind(cfg.partial('CanvasToolPen', 'mouseBufferSize')),
+                step: 1, min: 0, max: 10
+              }
+            })),
+          ]),
+        ]),
+      ]),
+      h.fieldset([
+        h.legend('Eraser'),
+        h.table([
+          h.tr([
+            h.td(ui5.label('Stroke Width')),
+            h.td(selectWidth(cfg.partial('CanvasToolEraser', 'strokeWidth'))),
+          ]),
+          h.tr([
+            h.td(ui5.checkbox({
+              fields: {
+                checked: rx.bind(cfg.partial('CanvasToolEraser', 'eraseStrokes')),
+                text: 'Erase Strokes',
+              },
+            }))
+          ]),
+        ]),
+      ]),
+      h.fieldset([
+        h.legend('Text'),
+        h.table([
+          h.tr([
+            h.td(ui5.label('Color')),
+            h.td(ColorPicker.t({
+              props: { color: rx.bind(cfg.partial('CanvasToolText', 'color')) },
+            }))
+          ]),
+        ]),
+        FontPicker.t({
+          props: {
+            family: rx.bind(cfg.partial('CanvasToolText', 'fontFamily')),
+            style: rx.bind(cfg.partial('CanvasToolText', 'fontStyle')),
+            weight: rx.bind(cfg.partial('CanvasToolText', 'fontWeight')),
+            size: rx.bind(cfg.partial('CanvasToolText', 'fontSize')),
+          }
+        })
+      ]),
+      h.fieldset([
+        h.legend('Rectangle'),
+        h.table([
+          h.tr([
+            h.td(ui5.label('Color')),
+            h.td(ColorPicker.t({
+              props: { color: rx.bind(cfg.partial('CanvasToolRectangle', 'color')) },
+            }))
+          ]),
+          h.tr([
+            h.td(ui5.label('Stroke Width')),
+            h.td(selectWidth(cfg.partial('CanvasToolRectangle', 'strokeWidth')))
+          ]),
+        ]),
+      ]),
+    ]
+
+    return [
+      h.section(
+        { fields: { id: 'main' } },
+        mainSection
+      ),
+      h.section([
+        h.span('*: Restart Required')
+      ])
+    ]
+  }
+
+  static styles = style.sheet({
+    '#main': {
+      display: 'flex',
+      flexWrap: 'wrap',
+      marginBottom: '10px',
+    },
+    'fieldset': {
+      margin: '10px 20px 0px 0px',
+      borderRadius: '4px',
+      border: `1px solid ${ui5.Theme.Button_BorderColor}`,
+    },
+    'fieldset > legend': {
+      fontWeight: 'bold',
+    },
+  });
 }

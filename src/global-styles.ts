@@ -15,7 +15,7 @@ style.util.applySheetAsStyleTag(document.body, style.sheet({
     fontFamily: ui5.Theme.FontFamily,
     color: ui5.Theme.TextColor,
     background: ui5.Theme.BackgroundColor,
-  }
+  },
 }), 'global-styles');
 
 type WournalTheme = {
