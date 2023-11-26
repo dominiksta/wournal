@@ -585,12 +585,12 @@ export class WournalDocument extends Component {
 
     redo() {
       for (const p of this.pagesRemoved) this.doc.deletePage(p.idx + 1, false);
-      for (const p of this.pagesAdded) this.doc.addPage(p.page, p.idx + 1, false);
+      for (const p of this.pagesAdded) this.doc.addPage(p.page, p.idx, false);
     }
 
     undo() {
       for (const p of this.pagesAdded) this.doc.deletePage(p.idx + 1, false);
-      for (const p of this.pagesRemoved) this.doc.addPage(p.page, p.idx + 1, false);
+      for (const p of this.pagesRemoved) this.doc.addPage(p.page, p.idx, false);
     }
   }
 }
