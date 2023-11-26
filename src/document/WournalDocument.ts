@@ -345,7 +345,7 @@ export class WournalDocument extends Component {
       this.display.appendChild(page.display);
       this.pages.next(v => [...v, page]);
     } else {
-      const idx = addAfterPageNr - 1;
+      const idx = addAfterPageNr;
       DOMUtils.insertNodeBeforeIndex(page.display, this.display, idx);
       this.pages.next(v => [...v.slice(0, idx), page, ...v.slice(idx)]);
     }
