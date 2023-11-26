@@ -374,7 +374,7 @@ export class CanvasPath extends CanvasElement {
     let res = "";
     for (let el of pathData) {
       if (el.x && el.y)
-        res += `${el.t} ${el.x} ${el.y}`;
+        res += `${el.t}${el.x} ${el.y} `;
       else
         res += `${el.t}`; // for Z
     }

@@ -17,6 +17,7 @@ import { ApiCtx } from "./api-context";
 import { GlobalCommandId, GlobalCommandIdT, GlobalCommandsCtx } from "./global-commands";
 import { FontPickerToolbarButton } from "common/font-picker";
 import { CanvasToolHighlighter } from "document/CanvasToolHighlighter";
+import { CanvasToolRuler } from "document/CanvasToolRuler";
 
 @Component.register
 export default class Toolbars extends Component {
@@ -45,7 +46,7 @@ export default class Toolbars extends Component {
       currentTool.map(t => t.name === tool.name);
 
     const currentToolMenuIcon = (tool: Newable<CanvasTool>) =>
-      currentTool.map(t => t instanceof tool ? 'wournal/menu-selected' : '');
+      currentTool.map(t => t.name === tool.name ? 'wournal/menu-selected' : '');
 
     const strokeWidth: rx.Stream<CanvasToolStrokeWidth | undefined> =
       currentToolConfig.map(
@@ -234,6 +235,12 @@ export default class Toolbars extends Component {
               fields: {
                 icon: currentToolMenuIcon(CanvasToolRectangle),
                 ...globalCmdMenuItem('tool_rectangle')
+              }
+            }),
+            ui5.menuItem({
+              fields: {
+                icon: currentToolMenuIcon(CanvasToolRuler),
+                ...globalCmdMenuItem('tool_ruler')
               }
             }),
             ui5.menuItem({
@@ -460,6 +467,13 @@ export default class Toolbars extends Component {
               current: isCurrentTool(CanvasToolRectangle),
             },
             events: { click: _ => api.setTool('CanvasToolRectangle') }
+          }),
+          ToolbarButton.t({
+            props: {
+              img: 'icon:tnt/unit', alt: 'Ruler',
+              current: isCurrentTool(CanvasToolRuler),
+            },
+            events: { click: _ => api.setTool('CanvasToolRuler') }
           }),
 
           ToolbarSeperator.t(),

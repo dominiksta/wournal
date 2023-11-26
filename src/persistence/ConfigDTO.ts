@@ -26,6 +26,11 @@ export type CanvasToolRectangleConfig = {
   strokeWidth: CanvasToolStrokeWidth,
 }
 
+export type CanvasToolRulerConfig = {
+  color: string,
+  strokeWidth: CanvasToolStrokeWidth,
+}
+
 export type CanvasToolHighlighterConfig = {
   color: string,
   strokeWidth: CanvasToolStrokeWidth,
@@ -36,6 +41,7 @@ export type CanvasToolConfig = {
   CanvasToolEraser: CanvasToolEraserConfig,
   CanvasToolText: CanvasToolTextConfig,
   CanvasToolRectangle: CanvasToolRectangleConfig,
+  CanvasToolRuler: CanvasToolRulerConfig,
   CanvasToolHighlighter: CanvasToolHighlighterConfig,
 }
 
@@ -103,6 +109,10 @@ export function defaultConfig(): ConfigDTO {
       },
       CanvasToolHighlighter: {
         color: "#FFFF00",
+        strokeWidth: "medium",
+      },
+      CanvasToolRuler: {
+        color: "#000000",
         strokeWidth: "medium",
       }
     }

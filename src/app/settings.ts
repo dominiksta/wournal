@@ -112,6 +112,7 @@ class ToolSelect extends Component {
     'CanvasToolEraser': 'Eraser',
     'CanvasToolPen': 'Pen',
     'CanvasToolRectangle': 'Rectangle',
+    'CanvasToolRuler': 'Ruler',
     'CanvasToolSelectRectangle': 'Select Rectangle',
     'CanvasToolText': 'Text',
     'CanvasToolHighlighter': 'Highlighter',

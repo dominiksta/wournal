@@ -466,6 +466,11 @@ export default class Wournal extends Component {
     'tool_rectangle': {
       human_name: 'Rectangle',
       func: () => this.api.setTool('CanvasToolRectangle'),
+      shortcut: 'Shift+R',
+    },
+    'tool_ruler': {
+      human_name: 'Ruler',
+      func: () => this.api.setTool('CanvasToolRuler'),
       shortcut: 'R',
     },
     'tool_select_rectangle': {
