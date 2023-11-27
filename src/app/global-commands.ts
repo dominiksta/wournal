@@ -38,6 +38,7 @@ export const GlobalCommandId = [
   'tool_pen',
   'tool_highlighter',
   'tool_ruler',
+  'tool_ellipse',
   'tool_default_pen',
   'tool_eraser',
   'tool_rectangle',

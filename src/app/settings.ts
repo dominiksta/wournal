@@ -112,6 +112,7 @@ class ToolSelect extends Component {
     'CanvasToolEraser': 'Eraser',
     'CanvasToolPen': 'Pen',
     'CanvasToolRectangle': 'Rectangle',
+    'CanvasToolEllipse': 'Ellipse',
     'CanvasToolRuler': 'Ruler',
     'CanvasToolSelectRectangle': 'Select Rectangle',
     'CanvasToolText': 'Text',
@@ -309,6 +310,21 @@ class ToolDefaultSettings extends Component {
           h.tr([
             h.td(ui5.label('Stroke Width')),
             h.td(selectWidth(cfg.partial('CanvasToolRuler', 'strokeWidth')))
+          ]),
+        ]),
+      ]),
+      h.fieldset([
+        h.legend('Ellipse'),
+        h.table([
+          h.tr([
+            h.td(ui5.label('Color')),
+            h.td(ColorPicker.t({
+              props: { color: rx.bind(cfg.partial('CanvasToolEllipse', 'color')) },
+            }))
+          ]),
+          h.tr([
+            h.td(ui5.label('Stroke Width')),
+            h.td(selectWidth(cfg.partial('CanvasToolEllipse', 'strokeWidth')))
           ]),
         ]),
       ]),

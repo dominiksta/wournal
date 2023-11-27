@@ -1,5 +1,6 @@
 import { Newable } from "../util/Newable";
 import { CanvasTool, CanvasToolName } from "./CanvasTool";
+import { CanvasToolEllipse } from "./CanvasToolEllipse";
 import { CanvasToolEraser } from "./CanvasToolEraser";
 import { CanvasToolHighlighter } from "./CanvasToolHighlighter";
 import { CanvasToolPen } from "./CanvasToolPen";
@@ -16,6 +17,7 @@ export class CanvasToolFactory {
       case "CanvasToolHighlighter": return CanvasToolHighlighter;
       case "CanvasToolEraser": return CanvasToolEraser;
       case "CanvasToolRectangle": return CanvasToolRectangle;
+      case "CanvasToolEllipse": return CanvasToolEllipse;
       case "CanvasToolSelectRectangle": return CanvasToolSelectRectangle;
       case "CanvasToolText": return CanvasToolText;
       case "CanvasToolRuler": return CanvasToolRuler;

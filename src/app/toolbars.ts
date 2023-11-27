@@ -18,6 +18,7 @@ import { GlobalCommandId, GlobalCommandIdT, GlobalCommandsCtx } from "./global-c
 import { FontPickerToolbarButton } from "common/font-picker";
 import { CanvasToolHighlighter } from "document/CanvasToolHighlighter";
 import { CanvasToolRuler } from "document/CanvasToolRuler";
+import { CanvasToolEllipse } from "document/CanvasToolEllipse";
 
 @Component.register
 export default class Toolbars extends Component {
@@ -241,6 +242,12 @@ export default class Toolbars extends Component {
               fields: {
                 icon: currentToolMenuIcon(CanvasToolRuler),
                 ...globalCmdMenuItem('tool_ruler')
+              }
+            }),
+            ui5.menuItem({
+              fields: {
+                icon: currentToolMenuIcon(CanvasToolRuler),
+                ...globalCmdMenuItem('tool_ellipse')
               }
             }),
             ui5.menuItem({
@@ -474,6 +481,13 @@ export default class Toolbars extends Component {
               current: isCurrentTool(CanvasToolRuler),
             },
             events: { click: _ => api.setTool('CanvasToolRuler') }
+          }),
+          ToolbarButton.t({
+            props: {
+              img: 'icon:circle-task', alt: 'Ellipse',
+              current: isCurrentTool(CanvasToolEllipse),
+            },
+            events: { click: _ => api.setTool('CanvasToolEllipse') }
           }),
 
           ToolbarSeperator.t(),

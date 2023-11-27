@@ -11,6 +11,7 @@ export const CanvasToolNames = [
   "CanvasToolRuler",
   "CanvasToolEraser",
   "CanvasToolRectangle",
+  "CanvasToolEllipse",
   "CanvasToolSelectRectangle",
   "CanvasToolText",
 ] as const;
