@@ -14,6 +14,7 @@ export const CanvasToolNames = [
   "CanvasToolEllipse",
   "CanvasToolSelectRectangle",
   "CanvasToolText",
+  "CanvasToolHand",
 ] as const;
 /** All available `CanvasTool`s */
 export type CanvasToolName = typeof CanvasToolNames[number];

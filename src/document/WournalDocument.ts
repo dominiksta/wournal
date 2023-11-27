@@ -21,6 +21,7 @@ import { Component, h, rx, style } from "@mvui/core";
 import { theme } from "global-styles";
 import { ShortcutManager } from "app/shortcuts";
 import { DOMUtils } from "util/DOMUtils";
+import { WournalApi } from "api";
 
 @Component.register
 export class WournalDocument extends Component {
@@ -50,8 +51,8 @@ export class WournalDocument extends Component {
   private zoom: number = 1;
 
 
-  /** Store tool set before right click */
-  private toolBeforeRightClick: CanvasToolName;
+  /** Store tool set before right/middle click */
+  private toolBeforeTmpTool: CanvasToolName;
 
   private display = document.createElement('div');
 
@@ -60,9 +61,11 @@ export class WournalDocument extends Component {
   private constructor(
     config: rx.State<ConfigDTO>,
     shortcuts: ShortcutManager,
+    public readonly api: WournalApi,
   ) {
     super();
     this.display.addEventListener("mouseup", this.onMouseUp.bind(this));
+    this.display.addEventListener("mouseleave", this.onMouseUp.bind(this));
     this.display.addEventListener("mousedown", this.onMouseDown.bind(this));
     this.display.addEventListener("mousemove", this.onMouseMove.bind(this));
     this.display.addEventListener("contextmenu", (e) => { e.preventDefault() });
@@ -113,8 +116,9 @@ export class WournalDocument extends Component {
 
   public static create(
     config: rx.State<ConfigDTO>, shortcuts: ShortcutManager,
+    api: WournalApi,
   ): WournalDocument {
-    let doc = new WournalDocument(config, shortcuts);
+    let doc = new WournalDocument(config, shortcuts, api);
     const firstPage = WournalPage.createNew(
       doc, {
         ...WournalPageSize.DINA4, backgroundColor: '#FFFFFF',
@@ -128,9 +132,10 @@ export class WournalDocument extends Component {
   }
 
   public static fromDto(
-    config: rx.State<ConfigDTO>, shortcuts: ShortcutManager, dto: DocumentDTO
+    config: rx.State<ConfigDTO>, shortcuts: ShortcutManager,
+    api: WournalApi, dto: DocumentDTO,
   ): WournalDocument {
-    let doc = new WournalDocument(config, shortcuts);
+    let doc = new WournalDocument(config, shortcuts, api);
     doc.identification = dto.identification;
     doc._toolConfig = new rx.State(DSUtils.copyObj(config.value.tools));
     for (let page of dto.pagesSvg) {
@@ -535,6 +540,7 @@ export class WournalDocument extends Component {
   }
 
   private onMouseDown(e: MouseEvent) {
+    e.preventDefault();
     this.setPageAtPoint(e);
     if (this.activePage) this.activePage.value.onMouseDown(e);
 
@@ -548,8 +554,11 @@ export class WournalDocument extends Component {
       }
     } else {
       if (e.button === 2) { // right click
-        this.toolBeforeRightClick = this.currentTool.value.name;
+        this.toolBeforeTmpTool = this.currentTool.value.name;
         this.setTool(CanvasToolFactory.forName(this._config.value.binds.rightClick));
+      } else if (e.button === 1) { // middle click
+        this.toolBeforeTmpTool = this.currentTool.value.name;
+        this.setTool(CanvasToolFactory.forName(this._config.value.binds.middleClick));
       }
       this.currentTool.value.onMouseDown(e);
     }
@@ -560,9 +569,9 @@ export class WournalDocument extends Component {
       this.selection.onMouseUp(e)
     } else {
       this.currentTool.value.onMouseUp(e);
-      if (e.button === 2) // right click
+      if (e.button === 2 || e.button === 1 || e.buttons === 4) // right/middle click
         this.setTool(
-          CanvasToolFactory.forName(this.toolBeforeRightClick), true
+          CanvasToolFactory.forName(this.toolBeforeTmpTool), true
         );
     }
   }

@@ -44,6 +44,7 @@ export const GlobalCommandId = [
   'tool_rectangle',
   'tool_select_rectangle',
   'tool_text',
+  'tool_hand',
   'tool_stroke_width_fine',
   'tool_stroke_width_medium',
   'tool_stroke_width_thick',

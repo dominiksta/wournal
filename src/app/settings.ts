@@ -67,8 +67,11 @@ export class Settings extends Component {
             props: { cfg: rx.bind(conf.partial('tools')) }
           }),
         ]),
-        ui5.panel({ fields: { headerText: 'Right Click Binding', fixed: true }}, [
-          ToolSelect.t({ props: { tool: rx.bind(conf.partial('binds', 'rightClick')) } }),
+        ui5.panel({ fields: { headerText: 'Mouse Bindings', fixed: true }}, [
+          MouseBindingsConfig.t({ props: {
+            rightClick: rx.bind(conf.partial('binds', 'rightClick')),
+            middleClick: rx.bind(conf.partial('binds', 'middleClick')),
+          }}),
         ]),
         ui5.panel({ fields: { headerText: 'Color Palette', fixed: true }}, [
           ColorPaletteEditor.t({
@@ -100,6 +103,36 @@ export class Settings extends Component {
 }
 
 @Component.register
+class MouseBindingsConfig extends Component {
+  props = {
+    rightClick: rx.prop<CanvasToolName>(),
+    middleClick: rx.prop<CanvasToolName>(),
+  }
+
+  render() {
+    return [
+      h.table([
+        h.tr([
+          h.td(ui5.label({ fields: { for: 'cfg-right-click' }}, 'Right Click')),
+          h.td(ToolSelect.t({
+            fields: { id: 'cfg-right-click' },
+            props: { tool: rx.bind(this.props.rightClick) },
+          })),
+        ]),
+        h.tr([
+          h.td(ui5.label({ fields: { for: 'cfg-middle-click' }}, 'Middle Click')),
+          h.td(ToolSelect.t({
+            fields: { id: 'cfg-middle-click' },
+            props: { tool: rx.bind(this.props.middleClick) },
+          })),
+        ]),
+      ])
+    ]
+  }
+}
+
+
+@Component.register
 class ToolSelect extends Component {
   props = {
     tool: rx.prop<CanvasToolName>(),
@@ -117,6 +150,7 @@ class ToolSelect extends Component {
     'CanvasToolSelectRectangle': 'Select Rectangle',
     'CanvasToolText': 'Text',
     'CanvasToolHighlighter': 'Highlighter',
+    'CanvasToolHand': 'Hand',
   }
 
   render() {

@@ -34,14 +34,190 @@ export default class Wournal extends Component {
     ConfigCtx, new rx.State(this.confRepo.load())
   );
   private shortcutsCtx = this.provideContext(ShortcutsCtx, new ShortcutManager());
+
+  api: WournalApi = {
+    // document
+    // ----------------------------------------------------------------------
+    saveDocumentPrompt: () => {
+      this.docRepo.save(this.doc.value.toDto());
+    },
+    loadDocumentPrompt: async () => {
+      this.doc.next(
+        WournalDocument.fromDto(
+          this.configCtx, this.shortcutsCtx,
+          this.api, await this.docRepo.load(""),
+        )
+      )
+    },
+    newDocument: () => {
+      this.doc.next(WournalDocument.create(
+        this.configCtx, this.shortcutsCtx, this.api
+      ));
+    },
+    createTestPages: () => {
+      this.doc.value.addNewPage({
+        width: WournalPageSize.DINA4.height,
+        height: WournalPageSize.DINA4.width,
+        backgroundColor: '#FFFFFF',
+        backgroundStyle: 'ruled',
+      });
+      this.doc.value.addNewPage({
+        ...WournalPageSize.DINA5, backgroundColor: '#FFFFFF',
+        backgroundStyle: 'blank'
+      });
+      this.doc.value.addNewPage({
+        ...WournalPageSize.DINA5, backgroundColor: '#FFFFFF',
+        backgroundStyle: 'graph'
+      });
+    },
+
+    // history
+    // ----------------------------------------------------------------------
+    undo: () => { this.doc.value.undo() },
+    redo: () => { this.doc.value.redo() },
+
+    // clipboard/selection
+    // ----------------------------------------------------------------------
+    pasteClipboardOrSelection: () => { this.doc.value.selectionOrClipboardPaste() },
+    cutSelection: () => { this.doc.value.selectionCut() },
+    copySelection: () => { this.doc.value.selectionCopy() },
+    deleteSelection: () => { this.doc.value.selectionCut(true) },
+
+    // zoom
+    // ----------------------------------------------------------------------
+    setZoom: (zoom) => { this.doc.value.setZoom(zoom) },
+    getZoom: () => { return this.doc.value.getZoom(); },
+    setZoomFitWidth: () => {
+      const idx = this.api.getCurrentPageNr();
+      this.doc.value.setZoomFitWidth();
+      this.doc.value.setActivePageForCurrentScroll();
+      if (idx !== this.api.getCurrentPageNr()) this.api.scrollPage(idx);
+    },
+
+    // tools
+    // ----------------------------------------------------------------------
+    setTool: (tool: CanvasToolName) => {
+      this.doc.value.setTool(CanvasToolFactory.forName(tool));
+    },
+    getTool: () => {
+      return this.doc.value.currentTool.value.name;
+    },
+    setStrokeWidth: (width) => { this.doc.value.setStrokeWidth(width) },
+    setColorByName: (name: string) => {
+      this.doc.value.setColor(
+        this.configCtx.value.colorPalette.find(c => c.name === name).color
+      );
+    },
+    setColorByHex: (color: string) => {
+      this.doc.value.setColor(color);
+    },
+    setFont: (opt) => {
+      const newCfg = DSUtils.copyObj(this.doc.value.toolConfig.value);
+      newCfg.CanvasToolText.fontFamily = opt.family;
+      newCfg.CanvasToolText.fontSize = opt.size;
+      newCfg.CanvasToolText.fontStyle = opt.style;
+      newCfg.CanvasToolText.fontWeight = opt.weight;
+      this.doc.value.toolConfig.next(newCfg);
+    },
+    getFont: () => {
+      const cfg = this.doc.value.toolConfig.value.CanvasToolText;
+      return {
+        family: cfg.fontFamily,
+        size: cfg.fontSize,
+        style: cfg.fontStyle,
+        weight: cfg.fontWeight,
+      }
+    },
+
+    // scroll
+    // ----------------------------------------------------------------------
+    scrollPage: page => {
+      page -= 1;
+      const doc = this.doc.value; const pages = doc.pages.value;
+      if (page < 0 || page >= pages.length) return;
+      doc.activePage.next(pages[page]);
+      doc.activePage.value.display.scrollIntoView();
+    },
+    scrollPos: (top, left) => {
+      this.documentRef.current.scrollTop = top;
+      this.documentRef.current.scrollLeft = left;
+    },
+    getScrollPos: () => {
+      return {
+        top: this.documentRef.current.scrollTop,
+        left: this.documentRef.current.scrollLeft,
+      }
+    },
+
+    // layers
+    // ----------------------------------------------------------------------
+    newLayer: (name) => {
+      this.doc.value.activePage.value.addLayer(name);
+    },
+    setActiveLayer: (name) => {
+      this.doc.value.activePage.value.setActivePaintLayer(name);
+    },
+    getLayerStatus: () => {
+      return this.doc.value.activePage.value.layers.value;
+    },
+    setLayerVisible: (name, visible) => {
+      return this.doc.value.activePage.value.setLayerVisible(name, visible);
+    },
+    deleteLayer: (name) => {
+      return this.doc.value.activePage.value.deleteLayer(name);
+    },
+    moveLayer: (name, direction) => {
+      return this.doc.value.activePage.value.moveLayer(name, direction);
+    },
+    renameLayer: (name, newName) => {
+      this.doc.value.activePage.value.renameLayer(name, newName);
+    },
+
+    // page manipulation
+    // ----------------------------------------------------------------------
+    getCurrentPageNr: () => {
+      return this.doc.value.pages.value.indexOf(this.doc.value.activePage.value) + 1;
+    },
+    getPageCount: () => {
+      return this.doc.value.pages.value.length;
+    },
+    setPageProps: props => {
+      this.doc.value.activePage.value.setPageProps(props);
+    },
+    setPagePropsPrompt: async () => {
+      const page = this.doc.value.activePage.value;
+      const resp = await pageStyleDialog(this.dialog.openDialog, {
+        width: page.width,
+        height: page.height,
+        backgroundColor: page.backgroundColor,
+        backgroundStyle: page.backgroundStyle,
+      });
+      if (resp) this.api.setPageProps(resp);
+    },
+    addPage: (addAfterPageNr, props) => {
+      this.doc.value.addNewPage(props, addAfterPageNr);
+    },
+    deletePage: pageNr => {
+      this.doc.value.deletePage(pageNr);
+    },
+    getPageProps: pageNr => {
+      const page = this.doc.value.pages.value[pageNr - 1];
+      return page.getPageProps();
+    },
+    movePage: (pageNr, direction) => {
+      this.doc.value.movePage(pageNr, direction);
+    },
+  }
+
   private doc = new rx.State(WournalDocument.create(
-    this.configCtx, this.shortcutsCtx)
-  );
+    this.configCtx, this.shortcutsCtx, this.api
+  ));
 
   private settingsOpen = new rx.State(false);
 
   private dialog = this.provideContext(BasicDialogManagerContext);
 
+  private documentRef = this.ref<HTMLDivElement>();
 
   render() {
     this.setAttribute('data-ui5-compact-size', 'true');
@@ -131,6 +307,7 @@ export default class Wournal extends Component {
       Settings.t({ props: { open: rx.bind(this.settingsOpen) } }),
       ui5.toast({ fields: { id: 'toast', placement: 'BottomEnd' } }),
       h.div({
+        ref: this.documentRef,
         fields: { id: 'document' },
         events: {
           scroll: () => {
@@ -140,168 +317,6 @@ export default class Wournal extends Component {
       }, this.doc),
     ]
   }
-
-  api: WournalApi = {
-    // document
-    // ----------------------------------------------------------------------
-    saveDocumentPrompt: () => {
-      this.docRepo.save(this.doc.value.toDto());
-    },
-    loadDocumentPrompt: async () => {
-      this.doc.next(
-        WournalDocument.fromDto(
-          this.configCtx, this.shortcutsCtx, await this.docRepo.load(""),
-        )
-      )
-    },
-    newDocument: () => {
-      this.doc.next(WournalDocument.create(this.configCtx, this.shortcutsCtx));
-    },
-    createTestPages: () => {
-      this.doc.value.addNewPage({
-        width: WournalPageSize.DINA4.height,
-        height: WournalPageSize.DINA4.width,
-        backgroundColor: '#FFFFFF',
-        backgroundStyle: 'ruled',
-      });
-      this.doc.value.addNewPage({
-        ...WournalPageSize.DINA5, backgroundColor: '#FFFFFF',
-        backgroundStyle: 'blank'
-      });
-      this.doc.value.addNewPage({
-        ...WournalPageSize.DINA5, backgroundColor: '#FFFFFF',
-        backgroundStyle: 'graph'
-      });
-    },
-
-    // history
-    // ----------------------------------------------------------------------
-    undo: () => { this.doc.value.undo() },
-    redo: () => { this.doc.value.redo() },
-
-    // clipboard/selection
-    // ----------------------------------------------------------------------
-    pasteClipboardOrSelection: () => { this.doc.value.selectionOrClipboardPaste() },
-    cutSelection: () => { this.doc.value.selectionCut() },
-    copySelection: () => { this.doc.value.selectionCopy() },
-    deleteSelection: () => { this.doc.value.selectionCut(true) },
-
-    // zoom
-    // ----------------------------------------------------------------------
-    setZoom: (zoom) => { this.doc.value.setZoom(zoom) },
-    getZoom: () => { return this.doc.value.getZoom(); },
-    setZoomFitWidth: () => {
-      const idx = this.api.getCurrentPageNr();
-      this.doc.value.setZoomFitWidth();
-      this.doc.value.setActivePageForCurrentScroll();
-      if (idx !== this.api.getCurrentPageNr()) this.api.scrollPage(idx);
-    },
-
-    // tools
-    // ----------------------------------------------------------------------
-    setTool: (tool: CanvasToolName) => {
-      this.doc.value.setTool(CanvasToolFactory.forName(tool));
-    },
-    getTool: () => {
-      return this.doc.value.currentTool.value.name;
-    },
-    setStrokeWidth: (width) => { this.doc.value.setStrokeWidth(width) },
-    setColorByName: (name: string) => {
-      this.doc.value.setColor(
-        this.configCtx.value.colorPalette.find(c => c.name === name).color
-      );
-    },
-    setColorByHex: (color: string) => {
-      this.doc.value.setColor(color);
-    },
-    setFont: (opt) => {
-      const newCfg = DSUtils.copyObj(this.doc.value.toolConfig.value);
-      newCfg.CanvasToolText.fontFamily = opt.family;
-      newCfg.CanvasToolText.fontSize = opt.size;
-      newCfg.CanvasToolText.fontStyle = opt.style;
-      newCfg.CanvasToolText.fontWeight = opt.weight;
-      this.doc.value.toolConfig.next(newCfg);
-    },
-    getFont: () => {
-      const cfg = this.doc.value.toolConfig.value.CanvasToolText;
-      return {
-        family: cfg.fontFamily,
-        size: cfg.fontSize,
-        style: cfg.fontStyle,
-        weight: cfg.fontWeight,
-      }
-    },
-
-    // scroll
-    // ----------------------------------------------------------------------
-    scrollPage: page => {
-      page -= 1;
-      const doc = this.doc.value; const pages = doc.pages.value;
-      if (page < 0 || page >= pages.length) return;
-      doc.activePage.next(pages[page]);
-      doc.activePage.value.display.scrollIntoView();
-    },
-
-    // layers
-    // ----------------------------------------------------------------------
-    newLayer: (name) => {
-      this.doc.value.activePage.value.addLayer(name);
-    },
-    setActiveLayer: (name) => {
-      this.doc.value.activePage.value.setActivePaintLayer(name);
-    },
-    getLayerStatus: () => {
-      return this.doc.value.activePage.value.layers.value;
-    },
-    setLayerVisible: (name, visible) => {
-      return this.doc.value.activePage.value.setLayerVisible(name, visible);
-    },
-    deleteLayer: (name) => {
-      return this.doc.value.activePage.value.deleteLayer(name);
-    },
-    moveLayer: (name, direction) => {
-      return this.doc.value.activePage.value.moveLayer(name, direction);
-    },
-    renameLayer: (name, newName) => {
-      this.doc.value.activePage.value.renameLayer(name, newName);
-    },
-
-    // page manipulation
-    // ----------------------------------------------------------------------
-    getCurrentPageNr: () => {
-      return this.doc.value.pages.value.indexOf(this.doc.value.activePage.value) + 1;
-    },
-    getPageCount: () => {
-      return this.doc.value.pages.value.length;
-    },
-    setPageProps: props => {
-      this.doc.value.activePage.value.setPageProps(props);
-    },
-    setPagePropsPrompt: async () => {
-      const page = this.doc.value.activePage.value;
-      const resp = await pageStyleDialog(this.dialog.openDialog, {
-        width: page.width,
-        height: page.height,
-        backgroundColor: page.backgroundColor,
-        backgroundStyle: page.backgroundStyle,
-      });
-      if (resp) this.api.setPageProps(resp);
-    },
-    addPage: (addAfterPageNr, props) => {
-      this.doc.value.addNewPage(props, addAfterPageNr);
-    },
-    deletePage: pageNr => {
-      this.doc.value.deletePage(pageNr);
-    },
-    getPageProps: pageNr => {
-      const page = this.doc.value.pages.value[pageNr - 1];
-      return page.getPageProps();
-    },
-    movePage: (pageNr, direction) => {
-      this.doc.value.movePage(pageNr, direction);
-    },
-  }
-
 
   #globalCmds = this.provideContext(GlobalCommandsCtx, {
     'file_new': {
@@ -450,7 +465,10 @@ export default class Wournal extends Component {
       human_name: 'Reset Tool to Default',
       func: () => {
         const curr = this.api.getTool();
-        if (curr == 'CanvasToolSelectRectangle') return;
+        if (
+          curr == 'CanvasToolSelectRectangle' ||
+          curr == 'CanvasToolHand'
+        ) return;
         this.doc.value.toolConfig.next(v => {
           const ret = DSUtils.copyObj(v);
           ret[curr] = this.configCtx.value.tools[curr] as any;
@@ -487,6 +505,23 @@ export default class Wournal extends Component {
       human_name: 'Text',
       func: () => this.api.setTool('CanvasToolText'),
       shortcut: 'T',
+    },
+    'tool_hand': {
+      human_name: 'Hand',
+      func: (() => {
+        let previousTool = this.api.getTool()
+
+        return () => {
+          const current = this.api.getTool()
+          if (current === 'CanvasToolHand') {
+            this.api.setTool(previousTool);
+          } else {
+            previousTool = current;
+            this.api.setTool('CanvasToolHand');
+          }
+        }
+      })(),
+      shortcut: 'Q',
     },
     'tool_stroke_width_fine': {
       human_name: 'Set Stroke Width: Fine',

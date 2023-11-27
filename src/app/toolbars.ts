@@ -19,6 +19,7 @@ import { FontPickerToolbarButton } from "common/font-picker";
 import { CanvasToolHighlighter } from "document/CanvasToolHighlighter";
 import { CanvasToolRuler } from "document/CanvasToolRuler";
 import { CanvasToolEllipse } from "document/CanvasToolEllipse";
+import { CanvasToolHand } from "document/CanvasToolHand";
 
 @Component.register
 export default class Toolbars extends Component {
@@ -248,6 +249,12 @@ export default class Toolbars extends Component {
               fields: {
                 icon: currentToolMenuIcon(CanvasToolRuler),
                 ...globalCmdMenuItem('tool_ellipse')
+              }
+            }),
+            ui5.menuItem({
+              fields: {
+                icon: currentToolMenuIcon(CanvasToolHand),
+                ...globalCmdMenuItem('tool_hand')
               }
             }),
             ui5.menuItem({
@@ -488,6 +495,13 @@ export default class Toolbars extends Component {
               current: isCurrentTool(CanvasToolEllipse),
             },
             events: { click: _ => api.setTool('CanvasToolEllipse') }
+          }),
+          ToolbarButton.t({
+            props: {
+              img: 'icon:touch', alt: 'Toggle Hand',
+              current: isCurrentTool(CanvasToolHand),
+            },
+            events: { click: _ => globalCmnds.tool_hand.func() }
           }),
 
           ToolbarSeperator.t(),

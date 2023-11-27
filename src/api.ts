@@ -49,6 +49,8 @@ export interface WournalApi {
   // scroll
   // ----------------------------------------------------------------------
   scrollPage(pageNr: number): void;
+  scrollPos(top: number, left: number): void;
+  getScrollPos(): { top: number, left: number };
 
   // layers
   // ----------------------------------------------------------------------

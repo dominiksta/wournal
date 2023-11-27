@@ -63,6 +63,7 @@ export type ConfigDTO = {
   colorPalette: { color: string, name: string }[],
   binds: {
     rightClick: CanvasToolName,
+    middleClick: CanvasToolName,
   },
   tools: CanvasToolConfig,
 }
@@ -78,6 +79,7 @@ export function defaultConfig(): ConfigDTO {
     invertDocument: true,
     binds: {
       rightClick: "CanvasToolEraser",
+      middleClick: "CanvasToolHand",
     },
     colorPalette: [ // stolen from xournal
       { name: "Black", color: "#000000" },
