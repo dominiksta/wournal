@@ -13,7 +13,6 @@ import { Settings } from 'app/settings';
 import { ToastCtx } from 'app/toast-context';
 import { Shortcut, ShortcutManager } from 'app/shortcuts';
 import { ShortcutsCtx } from 'app/shortcuts-context';
-import { CanvasToolStrokeWidth } from 'persistence/ConfigDTO';
 import { WournalApi } from 'api';
 import { ApiCtx } from 'app/api-context';
 import { GlobalCommandsCtx } from 'app/global-commands';
@@ -23,11 +22,12 @@ import { StatusBar } from 'app/status-bar';
 import { BasicDialogManagerContext } from 'common/dialog-manager';
 import { DSUtils } from 'util/DSUtils';
 import { pageStyleDialog } from 'app/page-style-dialog';
+import { FileUtils } from 'util/FileUtils';
 
 @Component.register
 export default class Wournal extends Component {
 
-  private docRepo = DocumentRepositoryBrowserFiles.getInstance();
+  public docRepo = new DocumentRepositoryBrowserFiles();
   private confRepo = ConfigRepositoryLocalStorage.getInstance();
 
   private configCtx = this.provideContext(
@@ -35,19 +35,49 @@ export default class Wournal extends Component {
   );
   private shortcutsCtx = this.provideContext(ShortcutsCtx, new ShortcutManager());
 
+  private toast = this.provideContext(ToastCtx, {
+    open: async (msg: string) => {
+      const toast = await this.query<ui5.types.Toast>('#toast');
+      toast.innerText = msg;
+      toast.show();
+    }
+  });
+
   api: WournalApi = {
     // document
     // ----------------------------------------------------------------------
-    saveDocumentPrompt: () => {
-      this.docRepo.save(this.doc.value.toDto());
+    saveDocumentPrompt: async (defaultIdentification) => {
+      const resp = await this.docRepo.savePrompt(
+        this.doc.value.toDto(), defaultIdentification,
+      );
+      if (resp) this.toast.open('Document Saved');
+      return resp;
+    },
+    saveDocument: async (identification) => {
+      await this.docRepo.save(
+        identification, this.doc.value.toDto()
+      );
+      this.toast.open('Document Saved');
     },
     loadDocumentPrompt: async () => {
+      const dto = await this.docRepo.loadPrompt();
+      if (!dto) return false;
       this.doc.next(
         WournalDocument.fromDto(
-          this.configCtx, this.shortcutsCtx,
-          this.api, await this.docRepo.load(""),
+          dto.identification, dto.doc,
+          this.configCtx, this.shortcutsCtx, this.api,
         )
-      )
+      );
+      return true;
+    },
+    loadDocument: async (identification) => {
+      const dto = await this.docRepo.load(identification);
+      this.doc.next(
+        WournalDocument.fromDto(
+          identification, dto,
+          this.configCtx, this.shortcutsCtx, this.api,
+        )
+      );
     },
     newDocument: () => {
       this.doc.next(WournalDocument.create(
@@ -222,14 +252,6 @@ export default class Wournal extends Component {
   render() {
     this.setAttribute('data-ui5-compact-size', 'true');
 
-    const toast = this.provideContext(ToastCtx, {
-      open: async (msg: string) => {
-        const toast = await this.query<ui5.types.Toast>('#toast');
-        toast.innerText = msg;
-        toast.show();
-      }
-    }).open;
-
     this.subscribe(this.configCtx, v => this.confRepo.save(v));
 
     this.provideContext(ApiCtx, this.api);
@@ -290,6 +312,15 @@ export default class Wournal extends Component {
       }
     });
 
+    this.subscribe(this.doc, doc => {
+      const id = doc.identification
+      if (id) {
+        document.title = 'Wournal - ' + FileUtils.fileNameNoPath(id);
+      } else {
+        document.title = 'Wournal';
+      }
+    });
+
     // for (let i = 0; i < 100; i++) this.api.createTestPages();
     this.api.createTestPages();
     this.doc.value.undoStack.clear();
@@ -326,8 +357,22 @@ export default class Wournal extends Component {
     },
     'file_save': {
       human_name: 'Save File',
-      func: this.api.saveDocumentPrompt,
+      func: () => {
+        const id = this.doc.value.identification;
+        if (id === undefined) {
+          this.api.saveDocumentPrompt('wournal-document.woj');
+        } else {
+          this.api.saveDocument(id);
+        }
+      },
       shortcut: 'Ctrl+S',
+    },
+    'file_save_as': {
+      human_name: 'Save As',
+      func: () => {
+        this.api.saveDocumentPrompt(this.doc.value.identification);
+      },
+      shortcut: 'Ctrl+Shift+S',
     },
     'file_load': {
       human_name: 'Load File',

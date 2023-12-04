@@ -56,9 +56,8 @@ export class WournalDocument extends Component {
 
   private display = document.createElement('div');
 
-  public identification: string = "wournaldoc.woj";
-
   private constructor(
+    public identification: string | undefined,
     config: rx.State<ConfigDTO>,
     shortcuts: ShortcutManager,
     public readonly api: WournalApi,
@@ -118,7 +117,7 @@ export class WournalDocument extends Component {
     config: rx.State<ConfigDTO>, shortcuts: ShortcutManager,
     api: WournalApi,
   ): WournalDocument {
-    let doc = new WournalDocument(config, shortcuts, api);
+    let doc = new WournalDocument(undefined, config, shortcuts, api);
     const firstPage = WournalPage.createNew(
       doc, {
         ...WournalPageSize.DINA4, backgroundColor: '#FFFFFF',
@@ -132,24 +131,19 @@ export class WournalDocument extends Component {
   }
 
   public static fromDto(
+    identification: string, dto: DocumentDTO,
     config: rx.State<ConfigDTO>, shortcuts: ShortcutManager,
-    api: WournalApi, dto: DocumentDTO,
+    api: WournalApi,
   ): WournalDocument {
-    let doc = new WournalDocument(config, shortcuts, api);
-    doc.identification = dto.identification;
+    let doc = new WournalDocument(identification, config, shortcuts, api);
     doc._toolConfig = new rx.State(DSUtils.copyObj(config.value.tools));
-    for (let page of dto.pagesSvg) {
-      doc.addPageFromSvg(page);
-    }
+    for (let page of dto) doc.addPageFromSvg(page);
     doc.undoStack.clear();
     return doc;
   }
 
   public toDto(): DocumentDTO {
-    return new DocumentDTO(
-      this.identification,
-      this.pages.value.map((p) => p.asSvgString()),
-    );
+    return this.pages.value.map((p) => p.asSvgString());
   }
 
   // ------------------------------------------------------------

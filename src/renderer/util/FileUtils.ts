@@ -42,7 +42,7 @@ export const FileUtils = {
   promptReadFile: async function(
     extensions: string[] | "any" = "any",
     mimeTypes: string[] | "any" = "any",
-  ): Promise<File> {
+  ): Promise<File | undefined> {
     let input = document.createElement("input");
     input.hidden = true;
     input.multiple = false;
@@ -51,13 +51,28 @@ export const FileUtils = {
     input.setAttribute("type", "file");
 
     // wait for input to come in
-    await new Promise<void>((resolve) => {
+    const files = await new Promise<FileList>((resolve, reject) => {
       input.click();
-      input.onchange = () => resolve();
+
+      // credits: https://github.com/GoogleChromeLabs/browser-fs-access/blob/5d8a551af106121d010c1c50ca4a15d3cb0b189d/src/legacy/file-open.mjs#L32-L45
+      const cancelDetector = () => {
+        window.removeEventListener('focus', cancelDetector);
+        if (input.files.length === 0) {
+          reject(new DOMException('The user aborted a request.', 'AbortError'));
+        }
+      };
+
+      input.addEventListener('click', () => {
+        window.addEventListener('focus', cancelDetector, true);
+      });
+
+      input.addEventListener('change', () => {
+        resolve(input.files);
+      });
     });
 
-    const ftype = input.files[0].type;
-    const fname = input.files[0].name;
+    const ftype = files[0].type;
+    const fname = files[0].name;
 
     const err = () => {
       throw new Error(
@@ -77,7 +92,7 @@ export const FileUtils = {
       err();
 
 
-    return input.files[0];
+    return files[0];
   },
 
   blobToUtf8String: async function(
@@ -153,4 +168,9 @@ export const FileUtils = {
 
     return header + s;
   },
+
+  fileNameNoPath: function(path: string): string {
+    const split = path.split(/[/\\]/);
+    return split[split.length - 1];
+  }
 }

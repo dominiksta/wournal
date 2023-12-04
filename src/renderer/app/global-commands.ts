@@ -9,6 +9,7 @@ export type GlobalCommand = {
 export const GlobalCommandId = [
   'file_new',
   'file_save',
+  'file_save_as',
   'file_load',
 
   'history_undo',

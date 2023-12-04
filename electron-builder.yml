@@ -1,0 +1,21 @@
+---
+productName: Wournal
+appId: me.dominiksta.wournal
+files:
+  - main
+  - renderer
+  - package.json
+directories:
+  app: dist/app
+  output: dist/release
+win:
+  target:
+    - nsis
+nsis:
+  oneClick: 'false'
+  allowToChangeInstallationDirectory: true
+  license: LICENSE
+linux:
+  target:
+    - AppImage
+  category: Utility;Graphics;Office;Education;VectorGraphics

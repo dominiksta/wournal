@@ -10,13 +10,9 @@
 
     "moduleResolution": "node",
     "experimentalDecorators": true,
-    "target": "es2015",
-    "lib": [ "esnext", "dom", "dom.iterable" ],
-    "baseUrl": "./src",
-    "outDir": "./dist/esm2015"
+    "target": "es2022",
+    "lib": [ "es2022", "dom", "dom.iterable" ],
+    "baseUrl": "./",
+    "outDir": "../dist-test-renderer",
   },
-  "include": [
-    "src",
-    "test"
-  ]
 }

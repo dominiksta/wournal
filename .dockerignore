@@ -1,0 +1,5 @@
+/node_modules/*
+/vendor/mvui/node_modules/*
+/vendor/mvui/packages/docs/*
+/dist/release/*
+/.git/*

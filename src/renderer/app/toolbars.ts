@@ -97,6 +97,11 @@ export default class Toolbars extends Component {
             }),
             ui5.menuItem({
               fields: {
+                icon: 'save', ...globalCmdMenuItem('file_save_as'),
+              }
+            }),
+            ui5.menuItem({
+              fields: {
                 icon: 'document', ...globalCmdMenuItem('file_new'),
               }
             }),
@@ -338,7 +343,7 @@ export default class Toolbars extends Component {
             props: {
               img: 'icon:save', alt: 'Save',
             },
-            events: { click: api.saveDocumentPrompt }
+            events: { click: globalCmnds.file_save.func }
           }),
           ToolbarButton.t({
             props: {
@@ -518,7 +523,7 @@ export default class Toolbars extends Component {
 
           ToolbarButton.t({
             props: {
-              img: 'img:/res/icon/material/autorenew.svg',
+              img: 'img:res/icon/material/autorenew.svg',
               alt: globalCmnds.tool_current_default.human_name,
             },
             events: {
@@ -527,7 +532,7 @@ export default class Toolbars extends Component {
           }),
           ToolbarButton.t({
             props: {
-              img: 'img:/res/icon/custom/default-pen.svg',
+              img: 'img:res/icon/custom/default-pen.svg',
               alt: globalCmnds.tool_default_pen.human_name,
             },
             events: {

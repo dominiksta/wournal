@@ -1,0 +1,9 @@
+{
+  "name": "wournal",
+  "version": "0.0.1",
+  "description": "An SVG Editor for Handwritten Documents",
+  "main": "main/main.js",
+  "author": "dominiksta",
+  "license": "LGPL-2.1",
+  "dependencies": {}
+}
