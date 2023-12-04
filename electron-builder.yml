@@ -1,6 +1,7 @@
 ---
 productName: Wournal
 appId: me.dominiksta.wournal
+
 files:
   - main
   - renderer
@@ -8,6 +9,7 @@ files:
 directories:
   app: dist/app
   output: dist/release
+
 win:
   target:
     - nsis
@@ -15,6 +17,7 @@ nsis:
   oneClick: 'false'
   allowToChangeInstallationDirectory: true
   license: LICENSE
+
 linux:
   target:
     - AppImage

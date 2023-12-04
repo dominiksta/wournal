@@ -3,12 +3,20 @@ import { ApiRouteNames, ElectronApi } from '../main/api';
 export let ApiClient: ElectronApi = {} as any;
 
 function registerDevToolsShortcut() {
-  document.addEventListener('keypress', e => {
-    if (e.shiftKey && e.ctrlKey && e.key === 'I')
+  document.addEventListener('keyup', e => {
+    if (!(e instanceof KeyboardEvent)) return;
+    if (
+      (e.shiftKey && e.ctrlKey && e.key === 'I') ||
+      (e.shiftKey && e.ctrlKey && e.key === 'D') ||
+      (e.ctrlKey && e.key === 'F12')
+    )
       ApiClient['debug:showDevTools']();
 
-    if (e.ctrlKey && e.key === 'r')
+    if (
+      (e.ctrlKey && e.key === 'r')
+    ) {
       location.reload();
+    }
   });
 }
 

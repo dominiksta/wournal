@@ -13,6 +13,7 @@ export function registerApiHandlers(win: BrowserWindow) {
       return msg;
     },
     'debug:showDevTools': async () => {
+      console.log('Opening Devtools');
       win.webContents.openDevTools();
     },
     'debug:binTest': async () => {

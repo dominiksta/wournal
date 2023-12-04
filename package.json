@@ -47,6 +47,7 @@
     "build:renderer": "cross-env NODE_ENV=production webpack --config webpack/config.renderer.prod.js",
     "clean": "rm -rf ./dist/app/main/* && rm -rf ./dist/app/renderer/*",
     "package": "npm run clean && npm run build && electron-builder build",
+    "package:only-build": "electron-builder build",
     "package:wine": "bash webpack/build-wine.sh",
     "package:wine:internal": "electron-builder build -w"
   },
