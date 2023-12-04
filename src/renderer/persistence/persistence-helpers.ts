@@ -21,7 +21,7 @@ export async function blobToDoc(
   { dto: DocumentDTO, mode: 'single-page' } |
   { svg: string     , mode: 'background-svg' }
 > {
-  if (fileName.endsWith(".svg")) {
+  if (fileName.toLowerCase().endsWith(".svg")) {
     const svg = await FileUtils.blobToUtf8String(blob, 'string');
     if (WournalPage.svgIsMarkedAsWournalPage(svg)) {
       return { dto: [ svg ], mode: 'single-page' };

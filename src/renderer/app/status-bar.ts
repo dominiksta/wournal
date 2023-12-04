@@ -192,7 +192,7 @@ class LayerEditor extends Component {
               fields: {
                 text: 'Current', checked: layer.current,
                 name: 'Radio ' + layer.name,
-                disabled: layer.name === 'Background',
+                disabled: ['Background', 'Imported'].indexOf(layer.name) !== -1,
               },
               events: {
                 change: _ => api.setActiveLayer(layer.name),
@@ -245,7 +245,9 @@ class LayerEditor extends Component {
             ui5.button({
               fields: {
                 icon: 'delete', design: 'Transparent',
-                disabled: layers.length <= 2,
+                disabled: layers.filter(
+                  l => ['Background', 'Imported'].indexOf(l.name) === -1
+                ).length <= 1,
                 hidden: layer.name === 'Background',
               },
               events: {

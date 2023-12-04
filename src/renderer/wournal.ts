@@ -25,6 +25,7 @@ import { FileUtils } from 'util/FileUtils';
 import FileSystemElectron from 'persistence/FileSystemElectron';
 import { blobToDoc, dtoToZip } from 'persistence/persistence-helpers';
 import { ApiClient } from 'electron-api-client';
+import { BackgroundGenerators } from 'document/BackgroundGenerators';
 
 @Component.register
 export default class Wournal extends Component {
@@ -108,7 +109,16 @@ export default class Wournal extends Component {
           );
           break;
         case 'background-svg':
-          throw new Error('TODO');
+          doc = WournalDocument.fromDto(
+            undefined, [ dto.svg ], this.configCtx,
+            this.shortcutsCtx, this.api
+          );
+          const page1 = doc.pages.value[0];
+          page1.setPageProps({
+            ...page1.getPageProps(),
+            backgroundColor: '#FFFFFF',
+            backgroundStyle: 'blank',
+          });
           break;
       };
       doc.isSinglePage = dto.mode === 'single-page';

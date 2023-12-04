@@ -173,9 +173,6 @@ export class WournalPage {
     let svgEl = outerSvg.children[0] as SVGSVGElement;
     let layers = WournalPage.getLayers(svgEl);
 
-    if (!svgEl.hasAttribute('wournal-page'))
-      throw new Error('SVG is not a wournal page!')
-
     // dimensions
     // ------------------------------------------------------------
 
@@ -193,7 +190,7 @@ export class WournalPage {
       let wrappingLayer = document.createElementNS(
         "http://www.w3.org/2000/svg", "g"
       );
-      wrappingLayer.setAttribute(WOURNAL_SVG_LAYER_NAME_ATTR, "imported");
+      wrappingLayer.setAttribute(WOURNAL_SVG_LAYER_NAME_ATTR, "Imported");
       wrappingLayer.appendChild(svgEl);
       page.canvas.appendChild(wrappingLayer);
 

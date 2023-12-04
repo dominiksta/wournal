@@ -25,9 +25,16 @@ app.whenReady().then(() => {
   })
   win.setMenu(null);
 
-  registerApiHandlers(win);
+  if (!app.isPackaged) win.webContents.openDevTools();
+  if (process.argv.indexOf('--dev-tools') !== -1)
+    win.webContents.openDevTools();
 
-  win.loadURL(resolveHtmlPath('index.html'))
+  try {
+    registerApiHandlers(win);
+    win.loadURL(resolveHtmlPath('index.html'))
+  } catch {
+    win.webContents.openDevTools();
+  }
 })
 
 app.on('window-all-closed', () => { app.quit() })
