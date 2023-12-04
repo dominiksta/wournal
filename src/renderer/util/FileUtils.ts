@@ -113,6 +113,11 @@ export const FileUtils = {
     );
   },
 
+  utf8StringToBlob: function(data: string) {
+    const BOM = new Uint8Array([0xEF,0xBB,0xBF]);
+    return new Blob([BOM, data]);
+  },
+
   /**
    * Prompts the user for a file with one of `extensions`. If the mimetype of
    * the chosen file is not one of `mimeTypes`, throws an Error. Otherwise

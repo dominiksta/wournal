@@ -1,3 +1,4 @@
+import { WournalPage } from "document/WournalPage";
 import { FileUtils } from "util/FileUtils";
 import ZipFile from "util/ZipFile";
 import { DocumentDTO } from "./DocumentDTO";
@@ -15,14 +16,23 @@ export async function dtoToZip(doc: DocumentDTO): Promise<Blob> {
 
 export async function blobToDoc(
   fileName: string, blob: Blob
-): Promise<DocumentDTO> {
+): Promise<
+  { dto: DocumentDTO, mode: 'multi-page' } |
+  { dto: DocumentDTO, mode: 'single-page' } |
+  { svg: string     , mode: 'background-svg' }
+> {
   if (fileName.endsWith(".svg")) {
-    return [ await FileUtils.blobToUtf8String(blob, "string") ];
+    const svg = await FileUtils.blobToUtf8String(blob, 'string');
+    if (WournalPage.svgIsMarkedAsWournalPage(svg)) {
+      return { dto: [ svg ], mode: 'single-page' };
+    } else {
+      return { svg, mode: 'background-svg' };
+    }
   } else {
     const zipFile = await ZipFile.fromBlob(blob);
     const pages = await Promise.all((await zipFile.allFiles())
       .sort((a, b) => a.name.localeCompare(b.name))
       .map(async f => await FileUtils.blobToUtf8String(f.blob, "string")));
-    return pages;
+    return { dto: pages, mode: 'multi-page' };
   }
 }

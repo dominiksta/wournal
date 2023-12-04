@@ -56,6 +56,8 @@ export class WournalDocument extends Component {
 
   private display = document.createElement('div');
 
+  public isSinglePage = false;
+
   private constructor(
     public identification: string | undefined,
     config: rx.State<ConfigDTO>,

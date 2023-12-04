@@ -7,15 +7,19 @@ export const ApiRouteNames = [
   'debug:showDevTools',
   'debug:binTest',
 
-  'file:load',
+  'file:read',
   'file:loadPrompt',
-  'file:save',
+  'file:write',
   'file:savePrompt',
 
   'process:argv',
+
+  'window:setTitle',
 ] as const;
 
 export type ApiRouteName = typeof ApiRouteNames[number];
+
+type Filters = { extensions: string[], name: string }[];
 
 export interface ElectronApi extends ApiSpec<ApiRouteName> {
 
@@ -23,12 +27,15 @@ export interface ElectronApi extends ApiSpec<ApiRouteName> {
   'debug:showDevTools': () => Promise<void>;
   'debug:binTest': () => Promise<Uint8Array>;
 
-  'file:load': (path: string) => Promise<ArrayBuffer>;
-  'file:loadPrompt': () =>
-    Promise<{ buf: ArrayBuffer, path: string } | undefined>;
-  'file:save': (path: string, data: ArrayBuffer) => Promise<void>;
-  'file:savePrompt': (data: ArrayBuffer, defaultPath?: string) => Promise<boolean>;
+  'file:read': (path: string) => Promise<ArrayBuffer>;
+  'file:loadPrompt': (filters?: Filters) => Promise<string | false>;
+  'file:write': (path: string, data: ArrayBuffer) => Promise<void>;
+  'file:savePrompt': (
+    defaultPath?: string, filters?: Filters
+  ) => Promise<string | false>;
 
   'process:argv': () => Promise<string[]>;
+
+  'window:setTitle': (title: string) => Promise<void>;
 
 }

@@ -104,7 +104,7 @@ export class WournalPage {
     this.canvas = document.createElementNS(
       "http://www.w3.org/2000/svg", "svg"
     );
-    this.canvas.setAttribute("class", "wournal-page-canvas");
+    this.canvas.setAttribute("wournal-page", "");
     this.canvas.setAttribute("xmlns", "http://www.w3.org/2000/svg");
     this.canvas.style.position = "absolute";
     this.canvasWrapper.appendChild(this.canvas);
@@ -152,6 +152,14 @@ export class WournalPage {
     return page;
   }
 
+  public static svgIsMarkedAsWournalPage(svg: string): boolean {
+    const outerSvg = document.createElementNS(
+      "http://www.w3.org/2000/svg", "svg"
+    );
+    outerSvg.innerHTML = svg;
+    return outerSvg.children[0].hasAttribute('wournal-page');
+  }
+
   /** Return a page parsed from the <svg> element string `svg` */
   public static fromSvgString(
     doc: WournalDocument, svg: string
@@ -164,6 +172,9 @@ export class WournalPage {
 
     let svgEl = outerSvg.children[0] as SVGSVGElement;
     let layers = WournalPage.getLayers(svgEl);
+
+    if (!svgEl.hasAttribute('wournal-page'))
+      throw new Error('SVG is not a wournal page!')
 
     // dimensions
     // ------------------------------------------------------------

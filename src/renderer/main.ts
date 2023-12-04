@@ -1,11 +1,11 @@
-import { DocumentRepositoryElectron } from "persistence/DocumentRepositoryElectron";
+import FileSystemElectron from "persistence/FileSystemElectron";
 import Wournal from "wournal";
 import './electron-api-client';
 import { ApiClient } from "./electron-api-client";
 
 const wournal = new Wournal();
 
-wournal.docRepo = new DocumentRepositoryElectron();
+wournal.fileSystem = FileSystemElectron;
 
 async function maybeLoadArgvDoc() {
   const argv = await ApiClient["process:argv"]();

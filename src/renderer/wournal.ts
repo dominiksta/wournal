@@ -6,7 +6,6 @@ import Toolbars from 'app/toolbars';
 import { darkTheme, lightTheme, theme } from "./global-styles";
 import { WournalDocument } from "document/WournalDocument";
 import { ConfigRepositoryLocalStorage } from 'persistence/ConfigRepositoryLocalStorage';
-import { DocumentRepositoryBrowserFiles } from 'persistence/DocumentRepositoryBrowserFiles';
 import { WournalPageSize } from 'document/WournalPageSize';
 import { ConfigCtx } from 'app/config-context';
 import { Settings } from 'app/settings';
@@ -23,11 +22,15 @@ import { BasicDialogManagerContext } from 'common/dialog-manager';
 import { DSUtils } from 'util/DSUtils';
 import { pageStyleDialog } from 'app/page-style-dialog';
 import { FileUtils } from 'util/FileUtils';
+import FileSystemElectron from 'persistence/FileSystemElectron';
+import { blobToDoc, dtoToZip } from 'persistence/persistence-helpers';
+import { ApiClient } from 'electron-api-client';
 
 @Component.register
 export default class Wournal extends Component {
 
-  public docRepo = new DocumentRepositoryBrowserFiles();
+  public fileSystem = FileSystemElectron;
+
   private confRepo = ConfigRepositoryLocalStorage.getInstance();
 
   private configCtx = this.provideContext(
@@ -46,38 +49,74 @@ export default class Wournal extends Component {
   api: WournalApi = {
     // document
     // ----------------------------------------------------------------------
-    saveDocumentPrompt: async (defaultIdentification) => {
-      const resp = await this.docRepo.savePrompt(
-        this.doc.value.toDto(), defaultIdentification,
-      );
-      if (resp) this.toast.open('Document Saved');
+    saveDocumentPromptSinglePage: async (defaultIdentification) => {
+      const doc = this.doc.value
+      if (doc.pages.value.length > 1) throw new Error('TODO');
+      const resp = await this.fileSystem.savePrompt(defaultIdentification, [
+        { extensions: ['svg'], name: 'SVG File (Single-Page) (.svg)' }
+      ]);
+      if (!resp) return false;
+      doc.isSinglePage = true;
+      await this.api.saveDocument(resp);
+      return resp;
+    },
+    saveDocumentPromptMultiPage: async (defaultIdentification) => {
+      const resp = await this.fileSystem.savePrompt(defaultIdentification, [
+        { extensions: ['woj'], name: 'Wournal File (Multi-Page) (.woj)' }
+      ]);
+      if (!resp) return false;
+      await this.api.saveDocument(resp);
       return resp;
     },
     saveDocument: async (identification) => {
-      await this.docRepo.save(
-        identification, this.doc.value.toDto()
-      );
+      const doc = this.doc.value;
+      if (doc.isSinglePage) {
+        await this.fileSystem.write(
+          identification, FileUtils.utf8StringToBlob(
+            doc.pages.value[0].asSvgString()
+          )
+        );
+      } else {
+        await this.fileSystem.write(
+          identification, await dtoToZip(doc.toDto())
+        );
+      }
+
       this.toast.open('Document Saved');
     },
     loadDocumentPrompt: async () => {
-      const dto = await this.docRepo.loadPrompt();
-      if (!dto) return false;
-      this.doc.next(
-        WournalDocument.fromDto(
-          dto.identification, dto.doc,
-          this.configCtx, this.shortcutsCtx, this.api,
-        )
-      );
+      const userResp = await this.fileSystem.loadPrompt([
+        { extensions: ['woj', 'svg'], name: 'All Supported Types (.woj/.svg)' },
+        { extensions: ['woj'], name: 'Wournal File (Multi-Page) (.woj)' },
+        { extensions: ['svg'], name: 'SVG File (Single-Page) (.svg)' },
+      ]);
+      if (!userResp) return false;
+      await this.api.loadDocument(userResp);
       return true;
     },
     loadDocument: async (identification) => {
-      const dto = await this.docRepo.load(identification);
-      this.doc.next(
-        WournalDocument.fromDto(
-          identification, dto,
-          this.configCtx, this.shortcutsCtx, this.api,
-        )
-      );
+      const blob = await this.fileSystem.read(identification);
+      const dto = await blobToDoc(identification, blob);
+
+      let doc: WournalDocument;
+      switch (dto.mode) {
+        case 'multi-page':
+        case 'single-page':
+          doc = WournalDocument.fromDto(
+            identification, dto.dto, this.configCtx,
+            this.shortcutsCtx, this.api
+          );
+          break;
+        case 'background-svg':
+          throw new Error('TODO');
+          break;
+      };
+      doc.isSinglePage = dto.mode === 'single-page';
+      if (doc.isSinglePage) this.toast.open(
+        'This is a single page document (SVG). You will not be able to add ' +
+        'pages unless you save as a .woj file'
+      )
+      this.doc.next(doc);
     },
     newDocument: () => {
       this.doc.next(WournalDocument.create(
@@ -225,9 +264,11 @@ export default class Wournal extends Component {
       if (resp) this.api.setPageProps(resp);
     },
     addPage: (addAfterPageNr, props) => {
+      if (!this.checkSinglePage()) return;
       this.doc.value.addNewPage(props, addAfterPageNr);
     },
     deletePage: pageNr => {
+      if (!this.checkSinglePage()) return;
       this.doc.value.deletePage(pageNr);
     },
     getPageProps: pageNr => {
@@ -235,8 +276,19 @@ export default class Wournal extends Component {
       return page.getPageProps();
     },
     movePage: (pageNr, direction) => {
+      if (!this.checkSinglePage()) return;
       this.doc.value.movePage(pageNr, direction);
     },
+  }
+
+  private checkSinglePage() {
+    if (this.doc.value.isSinglePage) {
+      this.toast.open(
+        'Operation Disabled in Single Page Documents'
+      );
+      return false;
+    }
+    return true;
   }
 
   private doc = new rx.State(WournalDocument.create(
@@ -312,14 +364,7 @@ export default class Wournal extends Component {
       }
     });
 
-    this.subscribe(this.doc, doc => {
-      const id = doc.identification
-      if (id) {
-        document.title = 'Wournal - ' + FileUtils.fileNameNoPath(id);
-      } else {
-        document.title = 'Wournal';
-      }
-    });
+    this.subscribe(this.doc, doc => { setTitle(doc.identification); });
 
     // for (let i = 0; i < 100; i++) this.api.createTestPages();
     this.api.createTestPages();
@@ -357,10 +402,16 @@ export default class Wournal extends Component {
     },
     'file_save': {
       human_name: 'Save File',
-      func: () => {
-        const id = this.doc.value.identification;
+      func: async () => {
+        const doc = this.doc.value;
+        const id = doc.identification;
         if (id === undefined) {
-          this.api.saveDocumentPrompt('wournal-document.woj');
+          const newId =
+            await this.api.saveDocumentPromptMultiPage(mkDefaultFileName('woj'));
+          if (newId) {
+            doc.identification = newId;
+            setTitle(newId);
+          }
         } else {
           this.api.saveDocument(id);
         }
@@ -370,9 +421,20 @@ export default class Wournal extends Component {
     'file_save_as': {
       human_name: 'Save As',
       func: () => {
-        this.api.saveDocumentPrompt(this.doc.value.identification);
+        this.api.saveDocumentPromptMultiPage(
+          this.doc.value.identification ?? mkDefaultFileName('woj')
+        );
       },
       shortcut: 'Ctrl+Shift+S',
+    },
+    'file_save_as_single_page': {
+      human_name: 'Save As Single SVG',
+      func: () => {
+        this.api.saveDocumentPromptSinglePage(
+          this.doc.value.identification ?? mkDefaultFileName('svg')
+        );
+      },
+      shortcut: 'Ctrl+Shift+Alt+S',
     },
     'file_load': {
       human_name: 'Load File',
@@ -648,4 +710,22 @@ export default class Wournal extends Component {
       background: 'transparent',
     },
   });
+}
+
+function mkDefaultFileName(extension: string) {
+  const now = new Date();
+  return (
+    `${now.getFullYear()}-${now.getMonth()}-${now.getDay()}` +
+    '-Note-' +
+    `${now.getHours()}-${now.getMinutes()}` +
+    `.${extension}`
+  );
+}
+
+function setTitle(path?: string) {
+  ApiClient['window:setTitle'](
+    path
+      ? 'Wournal - ' + FileUtils.fileNameNoPath(path)
+      : 'Wournal'
+  );
 }

@@ -10,6 +10,7 @@ export const GlobalCommandId = [
   'file_new',
   'file_save',
   'file_save_as',
+  'file_save_as_single_page',
   'file_load',
 
   'history_undo',

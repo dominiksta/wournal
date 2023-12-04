@@ -19,46 +19,37 @@ export function registerApiHandlers(win: BrowserWindow) {
       return new Uint8Array([1, 2, 3]);
     },
 
-    'file:load': async (_, path) => {
+    'file:read': async (_, path) => {
       console.log(`Loading file: ${path}`);
       return fs.readFileSync(path, { encoding: null }).buffer;
     },
-    'file:loadPrompt': async () => {
+    'file:loadPrompt': async (_, filters) => {
       const ret = dialog.showOpenDialogSync(win, {
-        filters: [
-          { extensions: ['woj'], name: 'Wournal Files (.woj)' },
-          { extensions: ['svg'], name: 'SVG Files (.svg)' },
-        ],
-        properties: ['openFile'],
+        filters, properties: ['openFile'],
       });
-      if (!ret) return;
-      const path = ret[0];
-      console.log(`Loading file: ${path}`);
-      return {
-        buf: fs.readFileSync(path, { encoding: null }).buffer,
-        path
-      };
+      if (!ret) return false;
+      return ret[0];
     },
-    'file:save': async (_, path, data) => {
+    'file:write': async (_, path, data) => {
       console.log(`Writing file: ${path}`);
       fs.writeFileSync(path, new DataView(data), { encoding: null });
     },
-    'file:savePrompt': async (_, data, defaultPath) => {
+    'file:savePrompt': async (_, defaultPath, filters) => {
       const resp = dialog.showSaveDialogSync(win, {
-        filters: [
-          { extensions: ['woj'], name: 'Wournal Files (.woj)' },
-          { extensions: ['svg'], name: 'SVG Files (.svg)' },
-        ],
-        properties: ['showOverwriteConfirmation'],
-        defaultPath
+        filters, properties: ['showOverwriteConfirmation'], defaultPath
       });
       if (!resp) return false;
-      console.log(`Writing file: ${resp}`);
-      fs.writeFileSync(resp, new DataView(data), { encoding: null });
-      return true;
+      return resp;
     },
 
-    'process:argv': async () => { return process.argv; }
+    'process:argv': async () => {
+      if (process.argv.length > 3) return [];
+      return process.argv;
+    },
+
+    'window:setTitle': async (_, title) => {
+      win.setTitle(title);
+    }
   }
 
   for (let key in impl) {

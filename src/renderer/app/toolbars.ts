@@ -36,6 +36,8 @@ export default class Toolbars extends Component {
       rx.map(v => !v)
     );
 
+    const isSinglePage = d.derive(d => d.isSinglePage);
+
     const currentTool = d.pipe(rx.switchMap(doc => doc.currentTool));
     const toolConfig = d.pipe(rx.switchMap(doc => doc.toolConfig));
     const currentToolConfig: rx.Stream<CanvasToolConfigData | undefined> =
@@ -98,6 +100,11 @@ export default class Toolbars extends Component {
             ui5.menuItem({
               fields: {
                 icon: 'save', ...globalCmdMenuItem('file_save_as'),
+              }
+            }),
+            ui5.menuItem({
+              fields: {
+                icon: 'save', ...globalCmdMenuItem('file_save_as_single_page'),
               }
             }),
             ui5.menuItem({
@@ -193,22 +200,26 @@ export default class Toolbars extends Component {
             }),
             ui5.menuItem({
               fields: {
-                icon: 'add-document', ...globalCmdMenuItem('page_new_after')
+                icon: 'add-document', ...globalCmdMenuItem('page_new_after'),
+                disabled: isSinglePage,
               }
             }),
             ui5.menuItem({
               fields: {
-                icon: 'arrow-top', ...globalCmdMenuItem('page_move_up')
+                icon: 'arrow-top', ...globalCmdMenuItem('page_move_up'),
+                disabled: isSinglePage,
               }
             }),
             ui5.menuItem({
               fields: {
-                icon: 'arrow-bottom', ...globalCmdMenuItem('page_move_down')
+                icon: 'arrow-bottom', ...globalCmdMenuItem('page_move_down'),
+                disabled: isSinglePage,
               }
             }),
             ui5.menuItem({
               fields: {
-                icon: 'delete', ...globalCmdMenuItem('page_delete')
+                icon: 'delete', ...globalCmdMenuItem('page_delete'),
+                disabled: isSinglePage,
               }
             }),
           ]),

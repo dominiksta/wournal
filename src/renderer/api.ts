@@ -8,7 +8,12 @@ export interface WournalApi {
   // document
   // ----------------------------------------------------------------------
   saveDocument(identification: string): Promise<void>;
-  saveDocumentPrompt(defaultIdentification?: string): Promise<boolean>;
+  saveDocumentPromptSinglePage(
+    defaultIdentification?: string
+  ): Promise<string | false>;
+  saveDocumentPromptMultiPage(
+    defaultIdentification?: string
+  ): Promise<string | false>;
   loadDocumentPrompt(): Promise<boolean>;
   loadDocument(identification: string): Promise<void>;
   newDocument(): void;
