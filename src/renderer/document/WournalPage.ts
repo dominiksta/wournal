@@ -216,7 +216,7 @@ export class WournalPage {
   }
 
   public asSvgString(): string {
-    return this.canvas.outerHTML;
+    return (new XMLSerializer()).serializeToString(this.canvas);
   }
 
   // ------------------------------------------------------------
