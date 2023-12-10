@@ -25,7 +25,6 @@ import { FileUtils } from 'util/FileUtils';
 import FileSystemElectron from 'persistence/FileSystemElectron';
 import { blobToDoc, dtoToZip } from 'persistence/persistence-helpers';
 import { ApiClient } from 'electron-api-client';
-import { BackgroundGenerators } from 'document/BackgroundGenerators';
 
 @Component.register
 export default class Wournal extends Component {
@@ -97,6 +96,7 @@ export default class Wournal extends Component {
       this.toast.open('Document Saved');
     },
     loadDocumentPrompt: async () => {
+      if (await this.confirmClosingUnsaved()) return;
       const userResp = await this.fileSystem.loadPrompt([
         { extensions: ['woj', 'svg'], name: 'All Supported Types (.woj/.svg)' },
         { extensions: ['woj'], name: 'Wournal File (Multi-Page) (.woj)' },
@@ -139,7 +139,8 @@ export default class Wournal extends Component {
       )
       this.doc.next(doc);
     },
-    newDocument: () => {
+    newDocument: async () => {
+      if (await this.confirmClosingUnsaved()) return;
       this.doc.next(WournalDocument.create(
         this.configCtx, this.shortcutsCtx, this.api
       ));
@@ -433,9 +434,10 @@ export default class Wournal extends Component {
         const doc = this.doc.value;
         const id = doc.identification;
         if (id === undefined) {
-          await this.api.saveDocumentPromptMultiPage(mkDefaultFileName('woj'));
+          return await this.api.saveDocumentPromptMultiPage(mkDefaultFileName('woj'));
         } else {
           this.api.saveDocument(id);
+          return id;
         }
       },
       shortcut: 'Ctrl+S',
@@ -691,6 +693,36 @@ export default class Wournal extends Component {
       shortcut: 'Home',
     },
   });
+
+  private async confirmClosingUnsaved(): Promise<boolean> {
+    const doc = this.doc.value;
+    if (!doc.dirty) return false;
+    return new Promise(resolve => {
+      this.dialog.openDialog(close => ({
+        heading: 'Warning',
+        state: 'Warning',
+        content: 'This document is not saved yet.',
+        buttons: [
+          {
+            name: 'Save', design: 'Emphasized', icon: 'save',
+            action: async () => {
+              close();
+              const resp: string | false = await this.#globalCmds.file_save.func();
+              resolve(typeof resp !== 'string');
+            },
+          },
+          {
+            name: 'Discard', design: 'Negative', icon: 'delete',
+            action: () => { close(); resolve(false); },
+          },
+          {
+            name: 'Cancel', design: 'Default', icon: 'cancel',
+            action: () => { close(); resolve(true); },
+          },
+        ],
+      }));
+    });
+  }
 
   static styles = style.sheet({
     ':host': {

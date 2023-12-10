@@ -8,7 +8,7 @@ type ButtonDesign =
 
 type DialogButtons = {
   name: string, action: () => void,
-  design?: ButtonDesign
+  design?: ButtonDesign, icon?: string,
 }[];
 
 export type OpenDialog = (decl: (close: () => void) => {
@@ -67,7 +67,7 @@ export class BasicDialog extends Component<{
         }, 'Close')
       ]
       return btns.map(btn => ui5.button({
-        fields: { design: btn.design },
+        fields: { design: btn.design, icon: btn.icon },
         events: {
           click: _ => {
             dialogRef.current.close();
