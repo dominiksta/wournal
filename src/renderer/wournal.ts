@@ -83,6 +83,8 @@ export default class Wournal extends Component {
         );
       }
 
+      doc.identification = identification;
+      setTitle(identification);
       this.toast.open('Document Saved');
     },
     loadDocumentPrompt: async () => {
@@ -416,12 +418,7 @@ export default class Wournal extends Component {
         const doc = this.doc.value;
         const id = doc.identification;
         if (id === undefined) {
-          const newId =
-            await this.api.saveDocumentPromptMultiPage(mkDefaultFileName('woj'));
-          if (newId) {
-            doc.identification = newId;
-            setTitle(newId);
-          }
+          await this.api.saveDocumentPromptMultiPage(mkDefaultFileName('woj'));
         } else {
           this.api.saveDocument(id);
         }
