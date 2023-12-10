@@ -41,7 +41,7 @@ export const BackgroundGenerators: {
       const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       const currX = squareSize * i;
       path.setAttribute('d', `M${currX} 0 L${currX} ${height}`)
-      path.setAttribute('stroke', '#BCDDEE'); // stolen from xournal++
+      path.setAttribute('stroke', '#BDBDBD'); // stolen from xournal++
       ret.push(path);
     }
 
@@ -49,7 +49,7 @@ export const BackgroundGenerators: {
       const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       const currY = squareSize * i;
       path.setAttribute('d', `M0 ${currY} L${width} ${currY}`)
-      path.setAttribute('stroke', '#BDBDBD'); // stolen from xournal++
+      path.setAttribute('stroke', '#BDBDBD');
       ret.push(path);
     }
 
