@@ -9,8 +9,8 @@ export interface UndoAction {
 const MAX_UNDO_ACTIONS = 100;
 
 export class UndoStack {
-  private undoable: UndoAction[] = [];
-  private redoable: UndoAction[] = [];
+  public undoable: UndoAction[] = [];
+  public redoable: UndoAction[] = [];
 
   constructor(
     private doc: WournalDocument

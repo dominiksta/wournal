@@ -92,7 +92,8 @@ export default class Wournal extends Component {
       }
 
       doc.identification = identification;
-      setTitle(identification);
+      doc.markSaved();
+      updateTitle(doc);
       this.toast.open('Document Saved');
     },
     loadDocumentPrompt: async () => {
@@ -386,7 +387,11 @@ export default class Wournal extends Component {
       }
     });
 
-    this.subscribe(this.doc, doc => { setTitle(doc.identification); });
+    this.subscribe(this.doc, doc => { updateTitle(doc); });
+    this.subscribe(
+      this.doc.pipe(rx.switchMap(doc => doc.undoStack.undoAvailable)),
+      _undoavailable => { updateTitle(this.doc.value); }
+    );
 
     // for (let i = 0; i < 100; i++) this.api.createTestPages();
     this.api.createTestPages();
@@ -739,10 +744,11 @@ function mkDefaultFileName(extension: string) {
   );
 }
 
-function setTitle(path?: string) {
+function updateTitle(doc: WournalDocument) {
+  const dirty = doc.dirty ? '*' : '';
   ApiClient['window:setTitle'](
-    path
-      ? 'Wournal - ' + FileUtils.fileNameNoPath(path)
+    doc.identification
+      ? 'Wournal - ' + dirty + FileUtils.fileNameNoPath(doc.identification)
       : 'Wournal'
   );
 }

@@ -167,6 +167,20 @@ export class WournalDocument extends Component {
     this._undoStack.redo();
   }
 
+  // ----------------------------------------------------------------------
+  // dirty/saved
+  // ----------------------------------------------------------------------
+
+  private undoActionPreviousSave: UndoAction | undefined;
+  public markSaved() {
+    this.undoActionPreviousSave =
+      this.undoStack.undoable[this.undoStack.undoable.length - 1];
+  }
+  public get dirty() {
+    return this.undoActionPreviousSave !==
+      this.undoStack.undoable[this.undoStack.undoable.length - 1];
+  }
+
   // ------------------------------------------------------------
   // selection
   // ------------------------------------------------------------
