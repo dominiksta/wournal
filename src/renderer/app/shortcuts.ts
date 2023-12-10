@@ -11,7 +11,7 @@ export class ShortcutManager extends Component {
 
   /** Focus the main shortcut context element. */
   public focus(): void {
-    // console.debug('focus');
+    // console.debug('focus shortcuts')
     this.focusEl.focus();
   }
 

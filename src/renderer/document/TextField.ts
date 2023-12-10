@@ -3,6 +3,12 @@ import { theme } from "global-styles";
 import { CanvasText } from "./CanvasText";
 import { WournalPage } from "./WournalPage";
 
+/** The offset from the svg text element to the ui text element */
+const DIFF_SVG_VS_UI = {
+  x: -3,
+  y: 1,
+};
+
 export class TextField {
 
   /** The outermost element of the text field */
@@ -81,9 +87,11 @@ export class TextField {
     this.textarea.style.color = fontColor;
     // this.textarea.style.filter = theme.invert;
     this.textarea.addEventListener("blur", this.onBlur.bind(this));
+    this.textarea.addEventListener("keyup", this.onKeyUp.bind(this));
     this.textarea.addEventListener("input", this.updateSize.bind(this));
     this.textarea.addEventListener("paste", this.onPaste.bind(this));
-    this.textarea.addEventListener("mouseup", this.onMouseup.bind(this));
+    this.textarea.addEventListener("mouseup", e => e.stopPropagation());
+    this.textarea.addEventListener("mousedown", e => e.stopPropagation());
     this.label.appendChild(this.textarea);
 
     this.style = page.toolLayer.ownerDocument.createElement("style");
@@ -96,12 +104,18 @@ export class TextField {
     page.toolLayerWrapper.appendChild(this.display);
   }
 
-  private onMouseup(e: MouseEvent) {
-    e.stopPropagation();
+  private onKeyUp(e: KeyboardEvent) {
+    if (
+      e.key === 'Escape' && !e.ctrlKey
+      && !e.altKey && !e.shiftKey
+    ) {
+      this.onBlur();
+    }
   }
 
-  private onBlur(e: FocusEvent) {
-    (e.target as HTMLTextAreaElement).blur();
+  private onBlur() {
+    this.textarea.blur();
+    // console.debug('focus shortcuts: blur textfield')
     this.page.doc.shortcuts.focus();
   }
 
@@ -115,13 +129,12 @@ export class TextField {
 
   public static fromCanvasText(
     page: WournalPage, canvasTxt: CanvasText,
-    offset: { x: number, y: number }
   ) {
     const canvasPos = canvasTxt.getPos();
     return new TextField(
       page, {
-      x: canvasPos.x + offset.x,
-      y: canvasPos.y + offset.y
+      x: canvasPos.x + DIFF_SVG_VS_UI.x,
+      y: canvasPos.y + DIFF_SVG_VS_UI.y
     }, canvasTxt.getFontSize(), canvasTxt.getFontStyle(),
       canvasTxt.getFontWeight(), canvasTxt.getFontFamily(),
       canvasTxt.getColor()
@@ -138,6 +151,7 @@ export class TextField {
 
   public focus(): void {
     requestAnimationFrame(() => {
+      // console.debug('focus textfield');
       this.textarea.focus();
     })
   }
@@ -161,7 +175,7 @@ export class TextField {
   }
 
   public addFocusOutListener(fun: (e: FocusEvent) => any) {
-    this.textarea.addEventListener("focusout", fun);
+    this.textarea.addEventListener("blur", fun);
   }
 
   public destroy() {

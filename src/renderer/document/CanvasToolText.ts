@@ -5,12 +5,6 @@ import { TextField } from "./TextField";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
 import { WournalPage } from "./WournalPage";
 
-/** The offset from the svg text element to the ui text element */
-const diff_svg_vs_ui = {
-  x: -3,
-  y: 1,
-};
-
 export class CanvasToolText extends CanvasTool {
   private get conf() {
     return this.activePage.value.doc.toolConfig.value.CanvasToolText;
@@ -57,27 +51,24 @@ export class CanvasToolText extends CanvasTool {
         editUnderCursosOrNew();
         break;
       case "writing":
-        if (!(e.target instanceof HTMLTextAreaElement)) {
-          editUnderCursosOrNew();
-          // waiting for the next frame is necessary here because we
-          // are setting this.state in the unfocus listener for the
-          // previous text field
-          requestAnimationFrame(() => {
-            this.state = "writing";
-          })
-        }
+        editUnderCursosOrNew();
+        // waiting for the next frame is necessary here because we
+        // are setting this.state in the unfocus listener for the
+        // previous text field
+        requestAnimationFrame(() => {
+          this.state = "writing";
+        })
         return;
     }
   }
 
   /** Edit the existing svg text element in `node` */
   private editTextField(node: SVGTextElement) {
-    let canvasTxt = new CanvasText(node);
-    let txt = TextField.fromCanvasText(
-      this.toolUseStartPage, canvasTxt, diff_svg_vs_ui
-    );
+    const canvasTxt = new CanvasText(node);
+    const txt = TextField.fromCanvasText(this.toolUseStartPage, canvasTxt);
     canvasTxt.hide(true);
     txt.setText(canvasTxt.getText());
+    this.activePage.value.doc.shortcuts.focus();
     txt.focus();
     this.registerTextFieldUnfocus(txt, canvasTxt);
   }
@@ -107,9 +98,8 @@ export class CanvasToolText extends CanvasTool {
       canvasText.svgElem
     );
 
-    let txt = TextField.fromCanvasText(
-      this.toolUseStartPage, canvasText, diff_svg_vs_ui
-    );
+    const txt = TextField.fromCanvasText(this.toolUseStartPage, canvasText);
+    this.activePage.value.doc.shortcuts.focus();
     txt.focus();
 
     this.registerTextFieldUnfocus(txt, canvasText);
