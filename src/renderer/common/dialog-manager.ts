@@ -15,6 +15,7 @@ export type OpenDialog = (decl: (close: () => void) => {
   content: TemplateElementChild,
   heading: TemplateElementChild,
   buttons: DialogButtons,
+  state?: ui5.types.Dialog['state'],
 }) => void;
 
 export const BasicDialogManagerContext = new rx.Context<{
@@ -22,11 +23,18 @@ export const BasicDialogManagerContext = new rx.Context<{
   promptYesOrNo(
     heading: TemplateElementChild,
     content?: TemplateElementChild,
+    state?: ui5.types.Dialog['state'],
   ): Promise<boolean>;
   promptInput(
     heading: TemplateElementChild,
     content?: TemplateElementChild,
+    state?: ui5.types.Dialog['state'],
   ): Promise<string | undefined>;
+  infoBox(
+    heading: TemplateElementChild,
+    content: TemplateElementChild,
+    state?: ui5.types.Dialog['state'],
+  ): void;
   dialogs: rx.State<ComponentTemplateElement<BasicDialog>[]>;
 }>(mkDialogManagerCtx);
 
@@ -42,10 +50,11 @@ export class BasicDialog extends Component<{
     heading: rx.prop<TemplateElementChild>(),
     num: rx.prop<number>(),
     buttons: rx.prop<DialogButtons>({ optional: true }),
+    state: rx.prop<ui5.types.Dialog['state']>({ defaultValue: 'None' }),
   }
 
   render() {
-    const { buttons, heading } = this.props;
+    const { buttons, heading, state } = this.props;
 
     const buttonTemplate = buttons.derive(btns => {
       if (btns.length === 0 || !btns) return [
@@ -78,6 +87,7 @@ export class BasicDialog extends Component<{
           headerText: heading.derive(
             h => typeof (h) === 'string' ? h : undefined
           ),
+          state,
         },
         slots: {
           footer: h.div({ fields: { id: 'footer' } }, buttonTemplate),
@@ -118,15 +128,14 @@ function mkDialogManagerCtx() {
       heading: TemplateElementChild,
       content: TemplateElementChild,
       buttons: DialogButtons,
+      state?: ui5.types.Dialog['state'],
     }
   ) => {
     const num = newDialogId();
     const close = mkCloseDialog(num);
-    const { heading, content, buttons } = decl(close);
+    const { heading, content, buttons, state } = decl(close);
     const dialog = BasicDialog.t({
-      props: {
-        heading, buttons, num
-      },
+      props: { heading, buttons, num, state },
       events: { close }
     }, content);
     dialogs.next(d => [...d, dialog]);
@@ -136,62 +145,36 @@ function mkDialogManagerCtx() {
     openDialog,
     promptYesOrNo: mkPromptYesOrNo(openDialog),
     promptInput: mkPromptInput(openDialog),
+    infoBox: mkInfoBox(openDialog),
     dialogs,
   };
 }
 
-@Component.register
-export class BasicDialogManager extends Component<{
-  slots: { default: any }
-}> {
-
-  render() {
-    const dialogs = new rx.State<ComponentTemplateElement<BasicDialog>[]>([]);
-    const mkCloseDialog = (num: number) => () => {
-      dialogs.next(dialogs => dialogs.filter(d => d.params.props.num !== num));
-    }
-
-    const openDialog = (
-      decl: (close: () => void) => {
-        heading: TemplateElementChild,
-        content: TemplateElementChild,
-        buttons: DialogButtons,
-      }
-    ) => {
-      const num = newDialogId();
-      const { heading, content, buttons } = decl(mkCloseDialog(num));
-      const dialog = BasicDialog.t({
-        props: {
-          heading, buttons, num
-        },
-        events: {
-          close: mkCloseDialog(num),
+const mkInfoBox = (openDialog: OpenDialog) => (
+  heading: TemplateElementChild,
+  content: TemplateElementChild,
+  state?: ui5.types.Dialog['state'],
+) => {
+  openDialog(close => ({
+    content, heading, state,
+    buttons: [
+      {
+        name: 'OK', design: 'Positive', action: () => {
+          close();
         }
-      }, content);
-      dialogs.next(d => [...d, dialog]);
-    }
-
-    this.provideContext(BasicDialogManagerContext, {
-      openDialog,
-      promptYesOrNo: mkPromptYesOrNo(openDialog),
-      promptInput: mkPromptInput(openDialog),
-      dialogs,
-    });
-
-    return [
-      h.slot(),
-      h.div(dialogs)
-    ];
-  }
+      },
+    ]
+  }));
 }
 
-
 const mkPromptYesOrNo = (openDialog: OpenDialog) => (
-  heading: TemplateElementChild, content?: TemplateElementChild
+  heading: TemplateElementChild,
+  content?: TemplateElementChild,
+  state?: ui5.types.Dialog['state'],
 ) => {
   return new Promise<boolean>((resolve) => {
     openDialog(close => ({
-      content, heading,
+      content, heading, state,
       buttons: [
         {
           name: 'Yes', design: 'Positive', action: () => {
@@ -209,12 +192,14 @@ const mkPromptYesOrNo = (openDialog: OpenDialog) => (
 }
 
 const mkPromptInput = (openDialog: OpenDialog) => (
-  heading: TemplateElementChild, content?: TemplateElementChild
+  heading: TemplateElementChild,
+  content?: TemplateElementChild,
+  state?: ui5.types.Dialog['state'],
 ) => {
   const value = new rx.State('');
   return new Promise<string | undefined>((resolve) => {
     openDialog(close => ({
-      heading,
+      heading, state,
       content: [
         h.div(content),
         ui5.input({

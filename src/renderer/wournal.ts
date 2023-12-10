@@ -52,7 +52,15 @@ export default class Wournal extends Component {
     // ----------------------------------------------------------------------
     saveDocumentPromptSinglePage: async (defaultIdentification) => {
       const doc = this.doc.value
-      if (doc.pages.value.length > 1) throw new Error('TODO');
+      if (doc.pages.value.length > 1) {
+        this.dialog.infoBox(
+          'Warning',
+          'This document has multiple pages and can therefore not be saved ' +
+          'as a single-page SVG file. Consider saving as a WOJ file instead.',
+          'Warning'
+        );
+        return;
+      }
       const resp = await this.fileSystem.savePrompt(defaultIdentification, [
         { extensions: ['svg'], name: 'SVG File (Single-Page) (.svg)' }
       ]);
@@ -295,8 +303,10 @@ export default class Wournal extends Component {
 
   private checkSinglePage() {
     if (this.doc.value.isSinglePage) {
-      this.toast.open(
-        'Operation Disabled in Single Page Documents'
+      this.dialog.infoBox(
+        'Warning',
+        'Operation Disabled in Single Page Documents',
+        'Warning',
       );
       return false;
     }
