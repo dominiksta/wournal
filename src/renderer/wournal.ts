@@ -349,6 +349,8 @@ export default class Wournal extends Component {
     this.subscribe(this.configCtx.partial('invertDocument'), i => {
       darkTheme.invert = i ? 'invert(1)' : '';
       const cfgTheme = this.configCtx.value.theme;
+      // re-apply a possible change to invert
+      if (cfgTheme.startsWith('dark')) style.setTheme('wournal', darkTheme);
       if (
         style.currentTheme$.value === 'dark'
         && (cfgTheme.startsWith('auto') || cfgTheme.startsWith('dark'))
