@@ -20,8 +20,10 @@ export class UndoStack {
   public undoAvailable = new rx.State(false);
 
   private notifyAvailable() {
-    this.undoAvailable.next(this.undoable.length > 0);
-    this.redoAvailable.next(this.redoable.length > 0);
+    if (this.undoAvailable.value !== this.undoable.length > 0)
+      this.undoAvailable.next(this.undoable.length > 0);
+    if (this.redoAvailable.value !== this.redoable.length > 0)
+      this.redoAvailable.next(this.redoable.length > 0);
   }
 
   public push(action: UndoAction): void {
