@@ -13,9 +13,12 @@ async function maybeLoadArgvDoc() {
 }
 maybeLoadArgvDoc();
 
-window.electron.on["window:close"](() => {
-  console.log('close');
-  ApiClient["window:destroy"]();
+window.electron.on["window:close"](async () => {
+  console.log('OS attempting to close window');
+  if (!(await wournal.api.promptClosingUnsaved())) {
+    console.log('Closing Window');
+    ApiClient["window:destroy"]();
+  }
 })
 
 document.body.appendChild(wournal);

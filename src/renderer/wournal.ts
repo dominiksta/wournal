@@ -96,7 +96,7 @@ export default class Wournal extends Component {
       this.toast.open('Document Saved');
     },
     loadDocumentPrompt: async () => {
-      if (await this.confirmClosingUnsaved()) return;
+      if (await this.api.promptClosingUnsaved()) return;
       const userResp = await this.fileSystem.loadPrompt([
         { extensions: ['woj', 'svg'], name: 'All Supported Types (.woj/.svg)' },
         { extensions: ['woj'], name: 'Wournal File (Multi-Page) (.woj)' },
@@ -140,7 +140,7 @@ export default class Wournal extends Component {
       this.doc.next(doc);
     },
     newDocument: async () => {
-      if (await this.confirmClosingUnsaved()) return;
+      if (await this.api.promptClosingUnsaved()) return;
       this.doc.next(WournalDocument.create(
         this.configCtx, this.shortcutsCtx, this.api
       ));
@@ -159,6 +159,35 @@ export default class Wournal extends Component {
       this.doc.value.addNewPage({
         ...WournalPageSize.DINA5, backgroundColor: '#FFFFFF',
         backgroundStyle: 'graph'
+      });
+    },
+    promptClosingUnsaved: async () => {
+      const doc = this.doc.value;
+      if (!doc.dirty) return false;
+      return new Promise(resolve => {
+        this.dialog.openDialog(close => ({
+          heading: 'Warning',
+          state: 'Warning',
+          content: 'This document is not saved yet.',
+          buttons: [
+            {
+              name: 'Save', design: 'Emphasized', icon: 'save',
+              action: async () => {
+                close();
+                const resp: string | false = await this.#globalCmds.file_save.func();
+                resolve(typeof resp !== 'string');
+              },
+            },
+            {
+              name: 'Discard', design: 'Negative', icon: 'delete',
+              action: () => { close(); resolve(false); },
+            },
+            {
+              name: 'Cancel', design: 'Default', icon: 'cancel',
+              action: () => { close(); resolve(true); },
+            },
+          ],
+        }));
       });
     },
 
@@ -695,36 +724,6 @@ export default class Wournal extends Component {
       shortcut: 'Home',
     },
   });
-
-  private async confirmClosingUnsaved(): Promise<boolean> {
-    const doc = this.doc.value;
-    if (!doc.dirty) return false;
-    return new Promise(resolve => {
-      this.dialog.openDialog(close => ({
-        heading: 'Warning',
-        state: 'Warning',
-        content: 'This document is not saved yet.',
-        buttons: [
-          {
-            name: 'Save', design: 'Emphasized', icon: 'save',
-            action: async () => {
-              close();
-              const resp: string | false = await this.#globalCmds.file_save.func();
-              resolve(typeof resp !== 'string');
-            },
-          },
-          {
-            name: 'Discard', design: 'Negative', icon: 'delete',
-            action: () => { close(); resolve(false); },
-          },
-          {
-            name: 'Cancel', design: 'Default', icon: 'cancel',
-            action: () => { close(); resolve(true); },
-          },
-        ],
-      }));
-    });
-  }
 
   static styles = style.sheet({
     ':host': {

@@ -18,6 +18,7 @@ export interface WournalApi {
   loadDocument(identification: string): Promise<void>;
   newDocument(): void;
   createTestPages(): void;
+  promptClosingUnsaved(): Promise<boolean>;
 
   // history
   // ----------------------------------------------------------------------
