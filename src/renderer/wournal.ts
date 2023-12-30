@@ -770,10 +770,14 @@ export default class Wournal extends Component {
 
 function mkDefaultFileName(extension: string) {
   const now = new Date();
+  const pad = (s: number) => s.toString().padStart(2, '0');
   return (
-    `${now.getFullYear()}-${now.getMonth()}-${now.getDay()}` +
-    '-Note-' +
-    `${now.getHours()}-${now.getMinutes()}` +
+    `${now.getFullYear()}` +
+    `-${pad(now.getMonth() + 1)}` +
+    `-${pad(now.getDate())}` +
+    '-Note' +
+    `-${pad(now.getHours())}` +
+    `-${pad(now.getMinutes())}` +
     `.${extension}`
   );
 }
