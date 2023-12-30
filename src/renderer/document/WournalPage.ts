@@ -1,5 +1,6 @@
 import { rx } from "@mvui/core";
 import { theme } from "global-styles";
+import { DOMUtils } from "util/DOMUtils";
 import {
   BackgroundGenerator, BackgroundStyleT, BackgroundGenerators
 } from "./BackgroundGenerators";
@@ -153,6 +154,7 @@ export class WournalPage {
   }
 
   public static svgIsMarkedAsWournalPage(svg: string): boolean {
+    svg = DOMUtils.sanitizeSVG(svg);
     const outerSvg = document.createElementNS(
       "http://www.w3.org/2000/svg", "svg"
     );
@@ -164,6 +166,8 @@ export class WournalPage {
   public static fromSvgString(
     doc: WournalDocument, svg: string
   ): WournalPage {
+    svg = DOMUtils.sanitizeSVG(svg);
+
     let page = new WournalPage(doc);
     let outerSvg = document.createElementNS(
       "http://www.w3.org/2000/svg", "svg"

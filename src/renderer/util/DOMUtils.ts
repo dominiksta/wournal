@@ -1,3 +1,5 @@
+import { sanitize } from 'dompurify';
+
 export const DOMUtils = {
   maybeRemoveChild: function(node: Node, child: Node): void {
     node.childNodes.forEach((c) => {
@@ -8,14 +10,6 @@ export const DOMUtils = {
   checkParentClassList: function(e: Element, className: string): boolean {
     if (e.className.split(' ').indexOf(className) >= 0) return true;
     return e.parentElement && DOMUtils.checkParentClassList(e.parentElement, className);
-  },
-
-  createElementFromHTML: function <T>(htmlString: string) {
-    var div = document.createElement('div');
-    div.innerHTML = htmlString.trim();
-
-    // Change this to div.childNodes to support multiple top-level nodes.
-    return (div as any).firstChild as T;
   },
 
   /** Return an elements attributes as a Map */
@@ -38,5 +32,15 @@ export const DOMUtils = {
     if (idx === c.length) parent.appendChild(node);
     else if (idx === 0 && parent.firstChild) parent.insertBefore(node, parent.firstChild);
     else c[idx].before(node);
+  },
+
+  /**
+     This should hopefully prevent most XSS attacks. It's probable not /that/
+     important for wournal because I do not expect people to share a lot of
+     wournal documents, but if that does happen, this should be a reasonable
+     enough protection against basic "script-kiddies".
+   */
+  sanitizeSVG: function(svg: string): string {
+    return sanitize(svg, { USE_PROFILES: { svg: true } });
   }
 }
