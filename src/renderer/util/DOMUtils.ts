@@ -1,3 +1,4 @@
+import { WOURNAL_SVG_LAYER_CURRENT_ATTR, WOURNAL_SVG_LAYER_NAME_ATTR, WOURNAL_SVG_PAGE_BACKGROUND_COLOR_ATTR, WOURNAL_SVG_PAGE_BACKGROUND_STYLE_ATTR, WOURNAL_SVG_PAGE_MARKER_ATTR } from 'document/WournalPage';
 import { sanitize } from 'dompurify';
 
 export const DOMUtils = {
@@ -41,6 +42,16 @@ export const DOMUtils = {
      enough protection against basic "script-kiddies".
    */
   sanitizeSVG: function(svg: string): string {
-    return sanitize(svg, { USE_PROFILES: { svg: true } });
+    // return svg;
+    return sanitize(svg, {
+      USE_PROFILES: { svg: true },
+      ADD_ATTR: [
+        WOURNAL_SVG_PAGE_MARKER_ATTR,
+        WOURNAL_SVG_LAYER_CURRENT_ATTR,
+        WOURNAL_SVG_LAYER_NAME_ATTR,
+        WOURNAL_SVG_PAGE_BACKGROUND_COLOR_ATTR,
+        WOURNAL_SVG_PAGE_BACKGROUND_STYLE_ATTR,
+      ],
+    });
   }
 }

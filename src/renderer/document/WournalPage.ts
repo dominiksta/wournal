@@ -16,6 +16,11 @@ import { xToPx } from "./WournalPageSize";
 export const WOURNAL_SVG_LAYER_NAME_ATTR = "wournal-layer-name";
 export const WOURNAL_SVG_LAYER_CURRENT_ATTR = "wournal-layer-current";
 
+export const WOURNAL_SVG_PAGE_BACKGROUND_COLOR_ATTR = 'wournal-page-background-color';
+export const WOURNAL_SVG_PAGE_BACKGROUND_STYLE_ATTR = 'wournal-page-background-style';
+
+export const WOURNAL_SVG_PAGE_MARKER_ATTR = 'wournal-page';
+
 export type PageProps = {
   backgroundColor: string, backgroundStyle: BackgroundStyleT,
   width: number, height: number,
@@ -49,16 +54,16 @@ export class WournalPage {
   public get height() { return parseFloat(this.canvas.getAttribute('height')) };
   public set height(w: number) { this.canvas.setAttribute('height', w.toString()) };
   public set backgroundColor(col: string) {
-    this.canvas.setAttribute('wournal-page-background-color', col);
+    this.canvas.setAttribute(WOURNAL_SVG_PAGE_BACKGROUND_COLOR_ATTR, col);
   }
   public get backgroundColor() {
-    return this.canvas.getAttribute('wournal-page-background-color');
+    return this.canvas.getAttribute(WOURNAL_SVG_PAGE_BACKGROUND_COLOR_ATTR);
   }
   public set backgroundStyle(col: BackgroundStyleT) {
-    this.canvas.setAttribute('wournal-page-background-style', col);
+    this.canvas.setAttribute(WOURNAL_SVG_PAGE_BACKGROUND_STYLE_ATTR, col);
   }
   public get backgroundStyle() {
-    return this.canvas.getAttribute('wournal-page-background-style') as
+    return this.canvas.getAttribute(WOURNAL_SVG_PAGE_BACKGROUND_STYLE_ATTR) as
       BackgroundStyleT;
   }
 
@@ -87,7 +92,7 @@ export class WournalPage {
     public doc: WournalDocument,
   ) {
     this.display = document.createElement("div");
-    this.display.setAttribute("class", "wournal-page");
+    this.display.setAttribute("class", WOURNAL_SVG_PAGE_MARKER_ATTR);
 
     this.display.style.border = "3px solid white";
     this.display.style.margin = "10px auto 10px auto";
@@ -105,7 +110,7 @@ export class WournalPage {
     this.canvas = document.createElementNS(
       "http://www.w3.org/2000/svg", "svg"
     );
-    this.canvas.setAttribute("wournal-page", "");
+    this.canvas.setAttribute(WOURNAL_SVG_PAGE_MARKER_ATTR, "");
     this.canvas.setAttribute("xmlns", "http://www.w3.org/2000/svg");
     this.canvas.style.position = "absolute";
     this.canvasWrapper.appendChild(this.canvas);
@@ -159,7 +164,8 @@ export class WournalPage {
       "http://www.w3.org/2000/svg", "svg"
     );
     outerSvg.innerHTML = svg;
-    return outerSvg.children[0].hasAttribute('wournal-page');
+    console.log(outerSvg.children[0]);
+    return outerSvg.children[0].hasAttribute(WOURNAL_SVG_PAGE_MARKER_ATTR);
   }
 
   /** Return a page parsed from the <svg> element string `svg` */

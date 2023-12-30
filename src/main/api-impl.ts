@@ -69,8 +69,8 @@ export function registerCallbacks(win: BrowserWindow) {
   const impl: CallbackImpl = {
 
     'window:close': send => win.on('close', event => {
-      event.preventDefault();
-      send({})
+      if (process.env.NODE_ENV !== 'development') event.preventDefault();
+      else send({})
     }),
 
   }
