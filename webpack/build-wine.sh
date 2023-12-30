@@ -10,6 +10,5 @@ docker run --rm -ti \
        -v ~/.cache/electron:/root/.cache/electron \
        -v ~/.cache/electron-builder:/root/.cache/electron-builder \
        -v ${PWD}:/project \
-       -v ${PWD##*/}-node-modules:/project/node_modules \
        wournal_builder_win \
        /project/webpack/build-wine-in-container.sh

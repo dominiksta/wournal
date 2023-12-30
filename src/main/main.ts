@@ -1,4 +1,4 @@
-import { registerApiHandlers } from './api-impl';
+import { registerApiHandlers, registerCallbacks } from './api-impl';
 import { app, BrowserWindow } from 'electron';
 import path from 'path';
 import { URL } from 'url';
@@ -31,6 +31,7 @@ app.whenReady().then(() => {
 
   try {
     registerApiHandlers(win);
+    registerCallbacks(win);
     win.loadURL(resolveHtmlPath('index.html'))
   } catch {
     win.webContents.openDevTools();

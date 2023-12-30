@@ -1,5 +1,6 @@
 const webpack = require('webpack');
 const path = require('path');
+const base = require('./config.base');
 
 module.exports = {
   devtool: 'inline-source-map',
@@ -20,4 +21,8 @@ module.exports = {
     new webpack.EnvironmentPlugin({ NODE_ENV: 'development' }),
   ],
   watch: true,
+  resolve: {
+    ...base.resolve,
+    modules: [path.resolve(__dirname, '../src/main'), 'node_modules'],
+  },
 };

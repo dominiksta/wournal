@@ -1,5 +1,5 @@
 import { BrowserWindow, dialog, ipcMain, IpcMainInvokeEvent } from 'electron';
-import type { ElectronApi, ApiSpec, ApiRouteName } from './api';
+import type { ElectronApi, ApiSpec, ApiRouteName, ElectronCallbacks } from './api';
 import fs from 'fs';
 
 type ApiImpl<T extends ApiSpec<ApiRouteName>> = {
@@ -50,10 +50,35 @@ export function registerApiHandlers(win: BrowserWindow) {
 
     'window:setTitle': async (_, title) => {
       win.setTitle(title);
-    }
+    },
+
+    'window:destroy': async (_) => { win.destroy(); },
   }
 
   for (let key in impl) {
     ipcMain.handle(key, impl[key as keyof typeof impl])
   }
+}
+
+type CallbackImpl = {
+  [key in keyof ElectronCallbacks]:
+    (send: (args: ElectronCallbacks[key]) => void) => void
+};
+
+export function registerCallbacks(win: BrowserWindow) {
+  const impl: CallbackImpl = {
+
+    'window:close': send => win.on('close', event => {
+      event.preventDefault();
+      send({})
+    }),
+
+  }
+
+  for (let key in impl) (impl as any)[key](
+    (...args: any[]) => {
+      console.log(`Callback Triggered: ${key}`);
+      win.webContents.send(key, ...args);
+    }
+  )
 }

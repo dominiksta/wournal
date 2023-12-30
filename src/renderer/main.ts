@@ -13,4 +13,9 @@ async function maybeLoadArgvDoc() {
 }
 maybeLoadArgvDoc();
 
+window.electron.on["window:close"](() => {
+  console.log('close');
+  ApiClient["window:destroy"]();
+})
+
 document.body.appendChild(wournal);

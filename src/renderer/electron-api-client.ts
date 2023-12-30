@@ -29,7 +29,7 @@ function mkApiClient() {
         `Electron API call: ${routeName}\n`,
         args
       )
-      return window.electronInvoke(routeName, ...args);
+      return window.electron.invoke(routeName, ...args);
     };
   }
 }
