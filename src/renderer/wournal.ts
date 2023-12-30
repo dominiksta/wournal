@@ -130,6 +130,7 @@ export default class Wournal extends Component {
             backgroundColor: '#FFFFFF',
             backgroundStyle: 'blank',
           });
+          doc.undoStack.clear();
           break;
       };
       doc.isSinglePage = dto.mode === 'single-page';
