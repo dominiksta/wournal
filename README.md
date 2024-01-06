@@ -1,5 +1,7 @@
 # Wournal
 
+![Screenshot](docs/assets/readme-screenshot.png)
+
 ## Development
 
 1. `npm install`
