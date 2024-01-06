@@ -81,7 +81,10 @@ export class WournalPage {
    * for better performance.
    */
   private _rect: DOMRect;
-  get rect() { return this._rect; }
+  get rect() {
+    if (this._rect === undefined) this._rect = this.toolLayer.getBoundingClientRect();
+    return this._rect;
+  }
 
   /**
    * - `doc`: The wournal document this page is creted as a part of.
@@ -465,8 +468,8 @@ export class WournalPage {
     pt: { x: number, y: number }
   ): { x: number, y: number } {
     return {
-      x: (pt.x - this._rect.left) * 1 / this.zoom,
-      y: (pt.y - this._rect.top) * 1 / this.zoom
+      x: (pt.x - this.rect.left) * 1 / this.zoom,
+      y: (pt.y - this.rect.top) * 1 / this.zoom
     };
   }
 
@@ -476,8 +479,8 @@ export class WournalPage {
    */
   public globalDOMRectToCanvas(r: DOMRect): DOMRect {
     return DOMRect.fromRect({
-      x: (r.x - this._rect.left) * 1 / this.zoom,
-      y: (r.y - this._rect.top) * 1 / this.zoom,
+      x: (r.x - this.rect.left) * 1 / this.zoom,
+      y: (r.y - this.rect.top) * 1 / this.zoom,
       width: r.width * 1 / this.zoom,
       height: r.height * 1 / this.zoom,
     });

@@ -213,7 +213,7 @@ export class WournalDocument extends Component {
 
   /** Paste `copyBuffer` */
   public pasteWournal(dto: CanvasElementDTO[]): void {
-    if (dto.length === 0) return;
+    if (dto.length === 0 || !this.activePage.value) return;
     const page = this.activePage.value;
     const layer = page.activePaintLayer;
     let newEls: CanvasElement<any>[] = [];
@@ -255,7 +255,7 @@ export class WournalDocument extends Component {
 
   /** Insert the given text on the current page */
   private pasteText(text: string): void {
-    if (!this.activePage) return;
+    if (!this.activePage.value) return;
 
     const c = this.toolConfig.value.CanvasToolText;
     let textEl = CanvasText.fromData(
