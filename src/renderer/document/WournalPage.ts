@@ -456,7 +456,7 @@ export class WournalPage {
   // tools and helpers
   // ------------------------------------------------------------
 
-  public onMouseDown(e: MouseEvent) {
+  public refreshClientRect() {
     this._rect = this.toolLayer.getBoundingClientRect();
   }
 

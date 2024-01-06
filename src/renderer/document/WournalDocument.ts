@@ -201,7 +201,6 @@ export class WournalDocument extends Component {
 
   public async pasteClipboard(): Promise<void> {
     const wournal = await this.clipboard.readWournal();
-    console.log(wournal);
     if (wournal) { this.pasteWournal(wournal); return; }
 
     const image = await this.clipboard.readImage();
@@ -211,46 +210,83 @@ export class WournalDocument extends Component {
     if (text) { this.pasteText(text); return; }
   }
 
+  private centerElementsCurrentViewPort(els: CanvasElement<any>[]) {
+    const page = this.activePage.value;
+    const rectDoc =
+      page.globalDOMRectToCanvas(this.parentElement.getBoundingClientRect());
+    const rectPage = page.globalDOMRectToCanvas(page.rect);
+    const centerDoc = {
+      x: rectDoc.left + rectDoc.width / 2,
+      y: rectDoc.top  + rectDoc.height / 2,
+    };
+
+    const minBorderDiff = 50;
+    const centerDest = {
+      x: Math.min(
+        rectPage.right - minBorderDiff,
+        Math.max(rectPage.left + minBorderDiff, centerDoc.x)
+      ),
+      y: Math.min(
+        rectPage.bottom - minBorderDiff,
+        Math.max(rectPage.top + minBorderDiff, centerDoc.y)
+      ),
+    }
+
+    const rectBounding = page.globalDOMRectToCanvas(
+      els
+        .map(el => el.svgElem.getBoundingClientRect())
+        .reduce(SVGUtils.boundingRectForTwo)
+    );
+    const centerBounding = {
+      x: rectBounding.left + rectBounding.width / 2,
+      y: rectBounding.top  + rectBounding.height / 2,
+    };
+
+    const translate = {
+      x: centerDest.x - centerBounding.x,
+      y: centerDest.y - centerBounding.y,
+    };
+
+    for (let el of els) {
+      el.translate(translate.x, translate.y);
+      el.writeTransform();
+    }
+  }
+
   /** Paste `copyBuffer` */
-  public pasteWournal(dto: CanvasElementDTO[]): void {
-    if (dto.length === 0 || !this.activePage.value) return;
+  public pasteWournal(dtos: CanvasElementDTO[]): void {
+    if (dtos.length === 0 || !this.activePage.value) return;
     const page = this.activePage.value;
     const layer = page.activePaintLayer;
     let newEls: CanvasElement<any>[] = [];
-    for (let el of dto) {
+    for (let el of dtos) {
       const newEl =
         CanvasElementFactory.fromData(this.display.ownerDocument, el);
       layer.appendChild(newEl.svgElem);
-      newEl.translate(20, 20);
-      newEl.writeTransform();
       newEls.push(newEl);
     }
-    this.selection.init(page);
-    this.selection.setSelectionFromElements(page, newEls);
 
     this._undoStack.push(new UndoActionCanvasElements(
       null, null, DSUtils.copyArr(newEls.map(e => e.svgElem))
     ));
+
+    this.selection.init(page);
+    page.refreshClientRect();
+    this.centerElementsCurrentViewPort(newEls);
+    this.selection.setSelectionFromElements(page, newEls);
   }
 
   /** Insert the given image on the current page */
   private async pasteImage(dataUrl: string): Promise<void> {
     if (!this.activePage.value) return;
 
-    let imageEl = CanvasImage.fromNewElement();
     const dimensions = await FileUtils.imageDimensionsForDataUrl(dataUrl);
-    imageEl.deserialize({
+    this.pasteWournal([{
       name: 'Image',
       dataUrl, rect: {
         x: 10, y: 10, width: dimensions.width, height: dimensions.height
       }
-    });
-
-    this.activePage.value.activePaintLayer.appendChild(imageEl.svgElem);
-    this.selection.setSelectionFromElements(this.activePage.value, [imageEl]);
-    this._undoStack.push(new UndoActionCanvasElements(
-      null, null, [imageEl.svgElem]
-    ));
+    }]);
   }
 
   /** Insert the given text on the current page */
@@ -258,23 +294,14 @@ export class WournalDocument extends Component {
     if (!this.activePage.value) return;
 
     const c = this.toolConfig.value.CanvasToolText;
-    let textEl = CanvasText.fromData(
-      this.display.ownerDocument,
-      {
+    this.pasteWournal([{
         name: 'Text',
         // TODO: find a more sane paste position then 10,10
         text, pos: { x: 10, y: 10 },
         fontSize: c.fontSize, fontStyle: c.fontStyle,
         fontWeight: c.fontWeight, fontFamily: c.fontFamily,
         color: c.color,
-      }
-    );
-
-    this.activePage.value.activePaintLayer.appendChild(textEl.svgElem);
-    this.selection.setSelectionFromElements(this.activePage.value, [textEl]);
-    this._undoStack.push(new UndoActionCanvasElements(
-      null, null, [textEl.svgElem]
-    ));
+    }]);
   }
 
   // ------------------------------------------------------------
@@ -500,7 +527,7 @@ export class WournalDocument extends Component {
   private onMouseDown(e: MouseEvent) {
     e.preventDefault();
     this.setPageAtPoint(e);
-    if (this.activePage) this.activePage.value.onMouseDown(e);
+    if (this.activePage) this.activePage.value.refreshClientRect();
 
     if (this.activePage && this.selection.selection.length !== 0) {
       const mouse = this.activePage.value.globalCoordsToCanvas(e);
