@@ -162,12 +162,17 @@ export class CanvasSelection {
 
   public setSelectionFromElements(page: WournalPage, els: CanvasElement<any>[]) {
     this.init(page);
-    let boundingRect = els[0].svgElem.getBoundingClientRect();
-    for (let i = 1; i < els.length; i++) {
-      boundingRect = SVGUtils.boundingRectForTwo(
-        boundingRect, els[i].svgElem.getBoundingClientRect()
-      );
-    }
+    if (els.length === 0) return;
+    const boundingRect = els
+      .map(el => el.svgElem.getBoundingClientRect())
+      .reduce(SVGUtils.boundingRectForTwo);
+
+    const padding = 30;
+    boundingRect.x -= padding / 2;
+    boundingRect.y -= padding / 2;
+    boundingRect.width += padding;
+    boundingRect.height += padding;
+
     this._selectionDisplay.setDimension(page.globalDOMRectToCanvas(boundingRect));
     this._selection = els.map(e => { return { el: e, savedData: e.serialize() } });
     this._selectionDisplay.setCursorState("idle");
@@ -177,17 +182,19 @@ export class CanvasSelection {
   public setSelectionFromCurrentRect() {
     this._selectionDisplay.setCursorState("idle");
     const selRect = this.selectionDisplay.getMainRect();
-    for (let el of this.page.activePaintLayer.children) {
-      if (!(el instanceof SVGGraphicsElement)) continue;
-      if (SVGUtils.rectInRect(
-        selRect, this.page.globalDOMRectToCanvas(el.getBoundingClientRect())
-      )) {
-        let wournalEl = CanvasElementFactory.fromSvgElem(el);
-        this._selection.push(
-          { savedData: wournalEl.serialize(), el: wournalEl }
-        );
-      }
-    }
+
+    const canvasEls = Array
+      .from(this.page.activePaintLayer.children)
+      .filter(el =>
+        (el instanceof SVGGraphicsElement) &&
+        SVGUtils.rectInRect(
+          selRect, this.page.globalDOMRectToCanvas(el.getBoundingClientRect())
+        )
+      )
+      .map(el => CanvasElementFactory.fromSvgElem(el as SVGGraphicsElement))
+
+    this.setSelectionFromElements(this.page, canvasEls);
+
     this._available.next(true);
   }
 }
