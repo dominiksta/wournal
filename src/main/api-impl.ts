@@ -88,7 +88,7 @@ export function registerCallbacks(win: BrowserWindow) {
 
     'window:close': send => win.on('close', event => {
       if (process.env.NODE_ENV !== 'development') event.preventDefault();
-      else send({})
+      send({})
     }),
 
   }
