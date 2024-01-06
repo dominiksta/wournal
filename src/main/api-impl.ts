@@ -1,4 +1,7 @@
-import { BrowserWindow, dialog, ipcMain, IpcMainInvokeEvent } from 'electron';
+import {
+  BrowserWindow, clipboard,
+  dialog, ipcMain, IpcMainInvokeEvent, nativeImage
+} from 'electron';
 import type { ElectronApi, ApiSpec, ApiRouteName, ElectronCallbacks } from './api';
 import fs from 'fs';
 
@@ -53,6 +56,21 @@ export function registerApiHandlers(win: BrowserWindow) {
     },
 
     'window:destroy': async (_) => { win.destroy(); },
+
+    'clipboard:writeWournal': async (_, d) => clipboard.writeBuffer(
+      'image/wournal', Buffer.from(JSON.stringify(d), 'utf-8')
+    ),
+    'clipboard:readText': async (_) => clipboard.readText(),
+    'clipboard:readImage': async (_) => {
+      const img = clipboard.readImage();
+      if (img.toBitmap().length === 0) return false;
+      else return img.toDataURL();
+    },
+    'clipboard:readWournal': async (_) => {
+      const resp = clipboard.readBuffer('image/wournal');
+      if (resp.length === 0) return false;
+      else return JSON.parse(resp.toString('utf-8'));
+    },
   }
 
   for (let key in impl) {

@@ -147,7 +147,7 @@ export default class Toolbars extends Component {
             ui5.menuItem({
               fields: {
                 icon: 'paste',
-                ...globalCmdMenuItem('selection_or_clipboard_paste')
+                ...globalCmdMenuItem('clipboard_paste')
               }
             }),
             ui5.menuItem({
@@ -408,7 +408,7 @@ export default class Toolbars extends Component {
             props: {
               img: 'icon:paste', alt: 'Paste Selection/Clipboard',
             },
-            events: { click: api.pasteClipboardOrSelection }
+            events: { click: api.pasteClipboard }
           }),
 
           ToolbarSeperator.t(),

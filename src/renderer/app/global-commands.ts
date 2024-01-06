@@ -16,7 +16,7 @@ export const GlobalCommandId = [
   'history_undo',
   'history_redo',
 
-  'selection_or_clipboard_paste',
+  'clipboard_paste',
   'selection_cut',
   'selection_copy',
   'selection_delete',

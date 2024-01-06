@@ -16,6 +16,11 @@ export const ApiRouteNames = [
 
   'window:setTitle',
   'window:destroy',
+
+  'clipboard:writeWournal',
+  'clipboard:readText',
+  'clipboard:readImage',
+  'clipboard:readWournal',
 ] as const;
 
 export type ApiRouteName = typeof ApiRouteNames[number];
@@ -39,6 +44,11 @@ export interface ElectronApi extends ApiSpec<ApiRouteName> {
 
   'window:setTitle': (title: string) => Promise<void>;
   'window:destroy': () => Promise<void>;
+
+  'clipboard:writeWournal': (data: any) => Promise<void>;
+  'clipboard:readText': () => Promise<string | false>;
+  'clipboard:readImage': () => Promise<string | false>;
+  'clipboard:readWournal': () => Promise<any | false>;
 
 }
 

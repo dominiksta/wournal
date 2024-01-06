@@ -1,11 +1,16 @@
+import { provideDependencies } from "dependency-injection";
 import FileSystemElectron from "persistence/FileSystemElectron";
+import { SystemClipboardElectron } from "util/SystemClipboardElectron";
 import Wournal from "wournal";
 import './electron-api-client';
 import { ApiClient } from "./electron-api-client";
 
-const wournal = new Wournal();
+provideDependencies({
+  'FileSystem': FileSystemElectron,
+  'SystemClipboard': SystemClipboardElectron,
+})
 
-wournal.fileSystem = FileSystemElectron;
+const wournal = new Wournal();
 
 async function maybeLoadArgvDoc() {
   const argv = await ApiClient["process:argv"]();

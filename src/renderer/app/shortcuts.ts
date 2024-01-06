@@ -44,7 +44,6 @@ export class ShortcutManager extends Component {
         },
         events: {
           keydown: this.eventHandler.bind(this),
-          paste: this.pasteEventHandler.bind(this),
         } as any
       })
     ]
@@ -72,34 +71,6 @@ export class ShortcutManager extends Component {
       }
     }
   }
-
-  public pasteImageHandler = (text: string) => { console.log(text) };
-  public pastePlainTextHandler = (text: string) => { console.log(text) };
-
-  private pasteEventHandler(p: ClipboardEvent) {
-    // console.log(p.target);
-    // I am not sure why or how, but there could be multiple items
-    // in the clipbard.
-    for (let item of p.clipboardData.items) {
-      // console.log(item);
-      if (item.kind == 'file' && item.type.match('^image/')) {
-        // Note: In my experience all pasted image data seems to
-        // be of type image/png, no matter what the original source
-        // file was. This could be my image viewer or the
-        // browser, I don't know
-        let blob = item.getAsFile();
-        let reader = new FileReader();
-        reader.onload = (event) =>
-          this.pasteImageHandler(event.target.result as string);
-        reader.readAsDataURL(blob);
-      } else if (item.kind == 'string'
-        && item.type.match('^text/plain')) {
-        // When copying with Ctrl-C in a browser, the text would
-        // also be available as text/html.
-        item.getAsString(this.pastePlainTextHandler)
-      }
-    }
-  };
 }
 
 export class Shortcut {

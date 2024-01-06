@@ -22,15 +22,14 @@ import { BasicDialogManagerContext } from 'common/dialog-manager';
 import { DSUtils } from 'util/DSUtils';
 import { pageStyleDialog } from 'app/page-style-dialog';
 import { FileUtils } from 'util/FileUtils';
-import FileSystemElectron from 'persistence/FileSystemElectron';
 import { blobToDoc, dtoToZip } from 'persistence/persistence-helpers';
 import { ApiClient } from 'electron-api-client';
+import { inject } from 'dependency-injection';
 
 @Component.register
 export default class Wournal extends Component {
 
-  public fileSystem = FileSystemElectron;
-
+  private fileSystem = inject('FileSystem');
   private confRepo = ConfigRepositoryLocalStorage.getInstance();
 
   private configCtx = this.provideContext(
@@ -199,7 +198,7 @@ export default class Wournal extends Component {
 
     // clipboard/selection
     // ----------------------------------------------------------------------
-    pasteClipboardOrSelection: () => { this.doc.value.selectionOrClipboardPaste() },
+    pasteClipboard: () => { this.doc.value.pasteClipboard() },
     cutSelection: () => { this.doc.value.selectionCut() },
     copySelection: () => { this.doc.value.selectionCopy() },
     deleteSelection: () => { this.doc.value.selectionCut(true) },
@@ -509,9 +508,9 @@ export default class Wournal extends Component {
       shortcut: 'Ctrl+Y',
     },
 
-    'selection_or_clipboard_paste': {
+    'clipboard_paste': {
       human_name: 'Paste Clipboard/Selection',
-      func: this.api.pasteClipboardOrSelection,
+      func: this.api.pasteClipboard,
       shortcut: 'Ctrl+V',
     },
     'selection_copy': {

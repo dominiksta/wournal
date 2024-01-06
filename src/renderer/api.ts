@@ -27,7 +27,7 @@ export interface WournalApi {
 
   // clipboard/selection
   // ----------------------------------------------------------------------
-  pasteClipboardOrSelection(): void;
+  pasteClipboard(): void;
   cutSelection(): void;
   copySelection(): void;
   deleteSelection(): void;
