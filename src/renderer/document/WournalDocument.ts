@@ -1,14 +1,13 @@
 import { CanvasToolConfig, CanvasToolStrokeWidth, ConfigDTO } from "../persistence/ConfigDTO";
 import { DocumentDTO } from "../persistence/DocumentDTO";
-import { ClipboardUtils } from "../util/ClipboardUtils";
 import { DSUtils } from "../util/DSUtils";
 import { FileUtils } from "../util/FileUtils";
 import { Newable } from "../util/Newable";
 import { SVGUtils } from "../util/SVGUtils";
 import { CanvasElement } from "./CanvasElement";
 import { CanvasElementFactory } from "./CanvasElementFactory";
-import { CanvasImage, CanvasImageData } from "./CanvasImage";
-import { CanvasText, CanvasTextData } from "./CanvasText";
+import { CanvasImage } from "./CanvasImage";
+import { CanvasText } from "./CanvasText";
 import { CanvasTool, CanvasToolName } from "./CanvasTool";
 import { CanvasToolFactory } from "./CanvasToolFactory";
 import { CanvasToolPen } from "./CanvasToolPen";
@@ -37,7 +36,7 @@ export class WournalDocument extends Component {
   /** An initial zoom factor, invisible to the user. */
   private initialZoomFactor: number;
 
-  private copyBuffer: { content: CanvasElement[], time: Date } =
+  private copyBuffer: { content: CanvasElement<any>[], time: Date } =
     { content: [], time: new Date() };
   /**  */
   private systemClipboard: {
@@ -232,10 +231,10 @@ export class WournalDocument extends Component {
   public selectionPaste(): void {
     const page = this.activePage.value;
     const layer = page.activePaintLayer;
-    let newEls: CanvasElement[] = [];
+    let newEls: CanvasElement<any>[] = [];
     for (let el of this.copyBuffer.content) {
       let newEl = CanvasElementFactory.fromData(
-        this.display.ownerDocument, el.getData()
+        this.display.ownerDocument, el.serialize()
       );
       layer.appendChild(newEl.svgElem);
       newEl.translate(20, 20);
@@ -286,9 +285,12 @@ export class WournalDocument extends Component {
 
     let imageEl = CanvasImage.fromNewElement();
     const dimensions = await FileUtils.imageDimensionsForDataUrl(dataUrl);
-    imageEl.setData(new CanvasImageData(dataUrl, DOMRect.fromRect({
-      x: 10, y: 10, width: dimensions.width, height: dimensions.height
-    })));
+    imageEl.deserialize({
+      name: 'Image',
+      dataUrl, rect: {
+        x: 10, y: 10, width: dimensions.width, height: dimensions.height
+      }
+    });
 
     this.activePage.value.activePaintLayer.appendChild(imageEl.svgElem);
     this.selection.setSelectionFromElements(this.activePage.value, [imageEl]);
@@ -316,11 +318,15 @@ export class WournalDocument extends Component {
     const c = this.toolConfig.value.CanvasToolText;
     let textEl = CanvasText.fromData(
       this.display.ownerDocument,
-      // TODO: find a more sane paste position then 10,10
-      new CanvasTextData(
-        text, { x: 10, y: 10 }, c.fontSize, c.fontStyle, c.fontWeight,
-        c.fontFamily, c.color,
-      ));
+      {
+        name: 'Text',
+        // TODO: find a more sane paste position then 10,10
+        text, pos: { x: 10, y: 10 },
+        fontSize: c.fontSize, fontStyle: c.fontStyle,
+        fontWeight: c.fontWeight, fontFamily: c.fontFamily,
+        color: c.color,
+      }
+    );
 
     this.activePage.value.activePaintLayer.appendChild(textEl.svgElem);
     this.selection.setSelectionFromElements(this.activePage.value, [textEl]);
@@ -478,10 +484,10 @@ export class WournalDocument extends Component {
     if (this.selection.selection.length !== 0) {
       let changed = [];
       for (let el of this.selection.selection) {
-        const dataBefore = el.getData();
+        const dataBefore = el.serialize();
         el.setStrokeWidth(width);
         changed.push({
-          el: el.svgElem, dataBefore: dataBefore, dataAfter: el.getData()
+          el: el.svgElem, dataBefore: dataBefore, dataAfter: el.serialize()
         });
       }
       this._undoStack.push(new UndoActionCanvasElements(
@@ -502,10 +508,10 @@ export class WournalDocument extends Component {
     if (this.selection.selection.length !== 0) {
       let changed = [];
       for (let el of this.selection.selection) {
-        const dataBefore = el.getData();
+        const dataBefore = el.serialize();
         el.setColor(color);
         changed.push({
-          el: el.svgElem, dataBefore: dataBefore, dataAfter: el.getData()
+          el: el.svgElem, dataBefore: dataBefore, dataAfter: el.serialize()
         });
       }
       this._undoStack.push(new UndoActionCanvasElements(

@@ -1,9 +1,9 @@
 import { DOMUtils } from "../util/DOMUtils";
 import { LOG } from "../util/Logging";
 import { UndoAction } from "./UndoStack";
-import { CanvasElementData } from "./CanvasElement";
 import { CanvasElementFactory } from "./CanvasElementFactory";
 import { WournalDocument } from "./WournalDocument";
+import { CanvasElementDTO } from "./CanvasElement";
 
 export class UndoActionCanvasElements implements UndoAction {
 
@@ -13,8 +13,8 @@ export class UndoActionCanvasElements implements UndoAction {
 
   private changed: {
     el: SVGGraphicsElement,
-    dataBefore: CanvasElementData,
-    dataAfter: CanvasElementData
+    dataBefore: CanvasElementDTO,
+    dataAfter: CanvasElementDTO
   }[] = [];
 
   private added: {
@@ -25,8 +25,8 @@ export class UndoActionCanvasElements implements UndoAction {
     deleted: SVGGraphicsElement[] | null,
     changed: {
       el: SVGGraphicsElement,
-      dataBefore: CanvasElementData,
-      dataAfter: CanvasElementData
+      dataBefore: CanvasElementDTO,
+      dataAfter: CanvasElementDTO
     }[] | null,
     added: SVGGraphicsElement[] | null,
   ) {
@@ -57,7 +57,7 @@ export class UndoActionCanvasElements implements UndoAction {
     for (let add of this.added) add.layer.removeChild(add.el);
     for (let chn of this.changed) {
       let wournalEl = CanvasElementFactory.fromSvgElem(chn.el);
-      wournalEl.setData(chn.dataBefore);
+      wournalEl.deserialize(chn.dataBefore);
     }
   }
 
@@ -66,7 +66,7 @@ export class UndoActionCanvasElements implements UndoAction {
     for (let del of this.deleted) del.layer.removeChild(del.el);
     for (let chn of this.changed.slice().reverse()) {
       let wournalEl = CanvasElementFactory.fromSvgElem(chn.el);
-      wournalEl.setData(chn.dataAfter);
+      wournalEl.deserialize(chn.dataAfter);
     }
   }
 

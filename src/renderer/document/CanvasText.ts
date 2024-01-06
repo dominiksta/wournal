@@ -1,8 +1,18 @@
 import { CanvasToolStrokeWidth } from "../persistence/ConfigDTO";
 import { SVGUtils } from "../util/SVGUtils";
-import { CanvasElement, CanvasElementData } from "./CanvasElement";
+import { CanvasElement, CanvasElementDTO } from "./CanvasElement";
 
-export class CanvasText extends CanvasElement {
+export interface CanvasTextData extends CanvasElementDTO {
+  text: string;
+  pos: { x: number, y: number };
+  fontSize: number;
+  fontStyle: "normal" | "italic";
+  fontWeight: "normal" | "bold";
+  fontFamily: string;
+  color: string;
+}
+
+export class CanvasText extends CanvasElement<CanvasTextData> {
 
   /** in px */
   private _lineHeight: number;
@@ -33,7 +43,7 @@ export class CanvasText extends CanvasElement {
     let ret = new CanvasText(
       doc.createElementNS("http://www.w3.org/2000/svg", "text")
     );
-    ret.setData(data);
+    ret.deserialize(data);
     return ret;
   }
 
@@ -86,15 +96,21 @@ export class CanvasText extends CanvasElement {
     this._svgElem.parentNode.removeChild(this._svgElem);
   }
 
-  public override getData(): CanvasTextData {
-    return new CanvasTextData(
-      this.getText(), this.getPos(), this.getFontSize(),
-      this.getFontStyle(), this.getFontWeight(),
-      this.getFontFamily(), this.getColor()
-    );
+  public override serialize(): CanvasTextData {
+    return {
+      name: 'Text',
+      color: this.getColor(),
+      fontFamily: this.getFontFamily(),
+      fontSize: this.getFontSize(),
+      fontStyle: this.getFontStyle(),
+      fontWeight: this.getFontWeight(),
+      pos: this.getPos(),
+      text: this.getText(),
+    }
   }
 
-  public override setData(dto: CanvasTextData) {
+  public override deserialize(dto: CanvasTextData) {
+    console.assert(dto.name === 'Text');
     this.setPos(dto.pos);
     this.setText(dto.text);
     this.setFontFamily(dto.fontFamily);
@@ -196,16 +212,4 @@ export class CanvasText extends CanvasElement {
   }
 
   public override setStrokeWidth(width: CanvasToolStrokeWidth): void { }
-}
-
-export class CanvasTextData extends CanvasElementData {
-  constructor(
-    public text: string,
-    public pos: { x: number, y: number },
-    public fontSize: number,
-    public fontStyle: "normal" | "italic",
-    public fontWeight: "normal" | "bold",
-    public fontFamily: string,
-    public color: string,
-  ) { super(); }
 }

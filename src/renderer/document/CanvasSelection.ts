@@ -1,7 +1,7 @@
 import { rx } from "@mvui/core";
 import { LOG } from "../util/Logging";
 import { SVGUtils } from "../util/SVGUtils";
-import { CanvasElement, CanvasElementData } from "./CanvasElement";
+import { CanvasElement, CanvasElementDTO } from "./CanvasElement";
 import { CanvasElementFactory } from "./CanvasElementFactory";
 import { CanvasSelectionDisplay } from "./CanvasSelectionDisplay";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
@@ -27,8 +27,8 @@ export class CanvasSelection {
   }
 
 
-  private _selection: { el: CanvasElement, savedData: CanvasElementData }[] = [];
-  get selection(): CanvasElement[] { return this._selection.map(e => e.el); }
+  private _selection: { el: CanvasElement<any>, savedData: CanvasElementDTO }[] = [];
+  get selection(): CanvasElement<any>[] { return this._selection.map(e => e.el); }
 
   constructor(private undoStack: UndoStack) { }
 
@@ -56,7 +56,7 @@ export class CanvasSelection {
 
     switch (this.state) {
       case "idle":
-        for (let s of this._selection) s.savedData = s.el.getData();
+        for (let s of this._selection) s.savedData = s.el.serialize();
         if (this._selectionDisplay.lastClicked === "main") {
           this.mouseBeforeMove = { x: mouse.x, y: mouse.y };
           this.state = "moving";
@@ -148,7 +148,7 @@ export class CanvasSelection {
           s.el.writeTransform();
           undo.push({
             el: s.el.svgElem, dataBefore: s.savedData,
-            dataAfter: s.el.getData()
+            dataAfter: s.el.serialize()
           })
         }
         this.undoStack.push(new UndoActionCanvasElements(
@@ -160,7 +160,7 @@ export class CanvasSelection {
     }
   }
 
-  public setSelectionFromElements(page: WournalPage, els: CanvasElement[]) {
+  public setSelectionFromElements(page: WournalPage, els: CanvasElement<any>[]) {
     this.init(page);
     let boundingRect = els[0].svgElem.getBoundingClientRect();
     for (let i = 1; i < els.length; i++) {
@@ -169,7 +169,7 @@ export class CanvasSelection {
       );
     }
     this._selectionDisplay.setDimension(page.globalDOMRectToCanvas(boundingRect));
-    this._selection = els.map(e => { return { el: e, savedData: e.getData() } });
+    this._selection = els.map(e => { return { el: e, savedData: e.serialize() } });
     this._selectionDisplay.setCursorState("idle");
     this._available.next(true);
   }
@@ -184,7 +184,7 @@ export class CanvasSelection {
       )) {
         let wournalEl = CanvasElementFactory.fromSvgElem(el);
         this._selection.push(
-          { savedData: wournalEl.getData(), el: wournalEl }
+          { savedData: wournalEl.serialize(), el: wournalEl }
         );
       }
     }

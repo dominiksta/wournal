@@ -86,13 +86,13 @@ export class CanvasToolText extends CanvasTool {
     const c = this.conf;
     let canvasText = CanvasText.fromData(
       this.toolUseStartPage.toolLayer.ownerDocument,
-      new CanvasTextData(
-        "", {
-        x: svg_pos.x,
-        y: svg_pos.y
+      {
+        name: 'Text',
+        text: "", pos: { x: svg_pos.x, y: svg_pos.y },
+        fontSize: c.fontSize, fontStyle: c.fontStyle,
+        fontWeight: c.fontWeight, fontFamily: c.fontFamily,
+        color: c.color
       },
-        c.fontSize, c.fontStyle, c.fontWeight, c.fontFamily, c.color
-      ),
     );
     this.toolUseStartPage.activePaintLayer.appendChild(
       canvasText.svgElem
@@ -119,13 +119,13 @@ export class CanvasToolText extends CanvasTool {
 
         if (prevText !== txt.getText()) {
           if (prevText !== "") { // editing
-            let dataBefore = canvasText.getData();
+            let dataBefore = canvasText.serialize();
             dataBefore.text = prevText;
             this.undoStack.push(
               new UndoActionCanvasElements(
                 null, [{
                   el: canvasText.svgElem,
-                  dataAfter: canvasText.getData(),
+                  dataAfter: canvasText.serialize(),
                   dataBefore: dataBefore
                 }], null
               )

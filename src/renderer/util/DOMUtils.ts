@@ -14,9 +14,9 @@ export const DOMUtils = {
   },
 
   /** Return an elements attributes as a Map */
-  attributesAsMap: function(el: Element): Map<string, string> {
-    let result = new Map<string, string>();
-    for (let a of el.attributes) result.set(a.name, a.value);
+  attributesAsObj: function(el: Element): { [key: string]: string } {
+    const result: { [key: string]: string } = {};
+    for (let a of el.attributes) result[a.name] = a.value;
     return result;
   },
 

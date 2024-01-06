@@ -3,14 +3,12 @@ import { DSUtils } from "../util/DSUtils";
 import { LOG } from "../util/Logging";
 import { SVGUtils } from "../util/SVGUtils";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
-import { CanvasElement, CanvasElementData } from "./CanvasElement";
+import { CanvasElement, CanvasElementDTO } from "./CanvasElement";
 import { CanvasToolStrokeWidth } from "../persistence/ConfigDTO";
 
-export class CanvasPathData extends CanvasElementData {
-  constructor(
-    /** contains the path ('d' element) along with everything else */
-    public attrs: Map<string, string>,
-  ) { super(); }
+export interface CanvasPathData extends CanvasElementDTO {
+  name: 'Path';
+  attrs: { [key: string]: string };
 }
 
 /**
@@ -22,7 +20,7 @@ export class CanvasPathData extends CanvasElementData {
  * point), "L" (draw line to give position) and "Z" (to smoothly close forms
  * like rectangles).
  */
-export class CanvasPath extends CanvasElement {
+export class CanvasPath extends CanvasElement<CanvasPathData> {
 
   /** Stores the actual svg stroke data to draw */
   private stroke: string;
@@ -118,25 +116,21 @@ export class CanvasPath extends CanvasElement {
     return parseFloat(this._svgElem.getAttribute("stroke-opacity"));
   }
 
-  public getData(): CanvasPathData {
-    return new CanvasPathData(this.getAttributes());
+  public serialize(): CanvasPathData {
+    return { name: 'Path', attrs: this.getAttributes() };
   }
 
-  public setData(dto: CanvasPathData) {
-    let currAttrs = this.getAttributes();
-    let delAttrs = new Map<string, string>();
+  public deserialize(dto: CanvasPathData) {
+    console.assert(dto.name === 'Path');
+    for (let k in this.getAttributes())
+      if (dto.attrs[k] === undefined) this.svgElem.removeAttribute(k)
 
-    for (let k of currAttrs.keys())
-      if (dto.attrs.get(k) === undefined)
-        delAttrs.set(k, dto.attrs.get(k));
-
-    for (let attr of dto.attrs)
-      this.svgElem.setAttribute(attr[0], attr[1]);
-    for (let attr of delAttrs) this.svgElem.removeAttribute(attr[0])
+    for (let k in dto.attrs)
+      this.svgElem.setAttribute(DSUtils.camelToDash(k), dto.attrs[k]);
   }
 
-  private getAttributes(): Map<string, string> {
-    return DOMUtils.attributesAsMap(this._svgElem);
+  private getAttributes(): { [key: string]: string } {
+    return DOMUtils.attributesAsObj(this._svgElem);
   }
 
   public setLineCap(lineCap: string): void {
@@ -303,12 +297,12 @@ export class CanvasPath extends CanvasElement {
     } else {
       this._svgElem.setAttribute(
         "d", CanvasPath.svgPathDataToString(paths[0]));
-      let changed = null;
-      if (!DSUtils.compareMaps(attrsBefore, this.getAttributes()))
+      let changed: UndoActionCanvasElements['changed'] = null;
+      if (JSON.stringify(attrsBefore) !== JSON.stringify(this.getAttributes()))
         changed = [{
           el: this._svgElem,
-          dataBefore: new CanvasPathData(attrsBefore),
-          dataAfter: new CanvasPathData(this.getAttributes())
+          dataBefore: { name: 'Path', attrs: attrsBefore },
+          dataAfter: { name: 'Path', attrs: this.getAttributes() },
         }];
       return new UndoActionCanvasElements(null, changed, added);
     }

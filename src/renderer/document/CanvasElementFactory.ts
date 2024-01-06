@@ -1,14 +1,14 @@
-import { CanvasElement, CanvasElementData } from "./CanvasElement";
-import { CanvasImage, CanvasImageData } from "./CanvasImage";
-import { CanvasPath, CanvasPathData } from "./CanvasPath";
-import { CanvasText, CanvasTextData } from "./CanvasText";
+import { CanvasElement, CanvasElementDTO } from "./CanvasElement";
+import { CanvasImage } from "./CanvasImage";
+import { CanvasPath } from "./CanvasPath";
+import { CanvasText } from "./CanvasText";
 
 export class CanvasElementFactory {
 
   /** Instantiate a new `CanvasElement` from an existing `SVGGraphicselement` */
   public static fromSvgElem(
     svg: SVGGraphicsElement
-  ): CanvasElement {
+  ): CanvasElement<any> {
     if (svg instanceof SVGTextElement) {
       return new CanvasText(svg);
     } else if (svg instanceof SVGPathElement) {
@@ -22,23 +22,23 @@ export class CanvasElementFactory {
 
   /** Create a new `CanvasElement` from the given `data` */
   public static fromData(
-    doc: Document, data: CanvasElementData
-  ): CanvasElement {
-    let canvasEl: CanvasElement;
-    if (data instanceof CanvasTextData) {
+    doc: Document, dto: CanvasElementDTO
+  ): CanvasElement<any> {
+    let canvasEl: CanvasElement<any>;
+    if (dto.name === 'Text') {
       let svg = doc.createElementNS("http://www.w3.org/2000/svg", "text");
       canvasEl = new CanvasText(svg);
-    } else if (data instanceof CanvasPathData) {
+    } else if (dto.name === 'Path') {
       let svg = doc.createElementNS("http://www.w3.org/2000/svg", "path");
       canvasEl = new CanvasPath(svg);
-    } else if (data instanceof CanvasImageData) {
+    } else if (dto.name === 'Image') {
       let svg = doc.createElementNS("http://www.w3.org/2000/svg", "image");
       canvasEl = new CanvasImage(svg);
     } else {
       throw new Error("unsupported svg element!");
     }
 
-    canvasEl.setData(data);
+    canvasEl.deserialize(dto);
     return canvasEl;
   }
 }

@@ -1,6 +1,6 @@
 import { CanvasToolStrokeWidth } from "../persistence/ConfigDTO";
 import { FileUtils } from "../util/FileUtils";
-import { CanvasImage, CanvasImageData } from "./CanvasImage";
+import { CanvasImage } from "./CanvasImage";
 import { CanvasTool } from "./CanvasTool";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
 import { WournalPage } from "./WournalPage";
@@ -29,12 +29,13 @@ export class CanvasToolImage extends CanvasTool {
     const dimensions = await FileUtils.imageDimensionsForDataUrl(file.content);
 
     let newEl = CanvasImage.fromNewElement();
-    newEl.setData(new CanvasImageData(
-      file.content, DOMRect.fromRect({
+    newEl.deserialize({
+      name: 'Image',
+      dataUrl: file.content, rect: {
         x: mouse.x, y: mouse.y,
         width: dimensions.width, height: dimensions.height
-      })
-    ));
+      }
+    });
 
     this.toolUseStartPage.activePaintLayer.appendChild(newEl.svgElem);
     this.selection.setSelectionFromElements(this.toolUseStartPage, [newEl]);
