@@ -629,7 +629,8 @@ export default class Wournal extends Component {
         const curr = this.api.getTool();
         if (
           curr == 'CanvasToolSelectRectangle' ||
-          curr == 'CanvasToolHand'
+          curr == 'CanvasToolHand' ||
+          curr == 'CanvasToolImage'
         ) return;
         this.doc.value.toolConfig.next(v => {
           const ret = DSUtils.copyObj(v);

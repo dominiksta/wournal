@@ -151,6 +151,7 @@ class ToolSelect extends Component {
     'CanvasToolText': 'Text',
     'CanvasToolHighlighter': 'Highlighter',
     'CanvasToolHand': 'Hand',
+    'CanvasToolImage': 'Image',
   }
 
   render() {

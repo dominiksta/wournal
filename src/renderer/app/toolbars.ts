@@ -20,6 +20,7 @@ import { CanvasToolHighlighter } from "document/CanvasToolHighlighter";
 import { CanvasToolRuler } from "document/CanvasToolRuler";
 import { CanvasToolEllipse } from "document/CanvasToolEllipse";
 import { CanvasToolHand } from "document/CanvasToolHand";
+import { CanvasToolImage } from "document/CanvasToolImage";
 
 @Component.register
 export default class Toolbars extends Component {
@@ -490,6 +491,13 @@ export default class Toolbars extends Component {
               current: isCurrentTool(CanvasToolText),
             },
             events: { click: _ => api.setTool('CanvasToolText') }
+          }),
+          ToolbarButton.t({
+            props: {
+              img: 'icon:picture', alt: 'Image',
+              current: isCurrentTool(CanvasToolImage),
+            },
+            events: { click: _ => api.setTool('CanvasToolImage') }
           }),
           ToolbarButton.t({
             props: {

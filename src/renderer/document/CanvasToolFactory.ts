@@ -4,6 +4,7 @@ import { CanvasToolEllipse } from "./CanvasToolEllipse";
 import { CanvasToolEraser } from "./CanvasToolEraser";
 import { CanvasToolHand } from "./CanvasToolHand";
 import { CanvasToolHighlighter } from "./CanvasToolHighlighter";
+import { CanvasToolImage } from "./CanvasToolImage";
 import { CanvasToolPen } from "./CanvasToolPen";
 import { CanvasToolRectangle } from "./CanvasToolRectangle";
 import { CanvasToolRuler } from "./CanvasToolRuler";
@@ -23,6 +24,7 @@ export class CanvasToolFactory {
       case "CanvasToolText": return CanvasToolText;
       case "CanvasToolRuler": return CanvasToolRuler;
       case "CanvasToolHand": return CanvasToolHand;
+      case "CanvasToolImage": return CanvasToolImage;
     }
   }
 }
