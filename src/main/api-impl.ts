@@ -28,7 +28,20 @@ export function registerApiHandlers() {
     'file:read': async (_, path) => {
       console.log(`Loading file: ${path}`);
       if (!fs.existsSync(path)) return false;
-      return fs.readFileSync(path, { encoding: null }).buffer;
+      const b = fs.readFileSync(path, { encoding: null });
+      // Jesus chist node. This is why nobody likes javascript.
+      //
+      // A node `Buffer` has a `buffer` property, which exposes the an
+      // `ArrayBuffer`. Since only `ArrayBuffer` is supported in frontend js,
+      // one would assume that we could just send `buffer` over the wire here
+      // and be done. However, multiple node `Buffer`s may share a single
+      // `ArrayBuffer` under the hood as a performance optimization. Because of
+      // this, we have to explicitly get the desired part of the `ArrayBuffer`
+      // we want like this.
+      //
+      // This was a fun one to debug. Getting random garbled data, but only
+      // sometimes and only in prod. Great.
+      return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
     },
     'file:loadPrompt': async (e, filters) => {
       const win = instances.get(e.sender)!.win;
