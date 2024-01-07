@@ -7,7 +7,7 @@ const TOOL_RECTANGLE_POINT_DIFF_PX = 5;
 
 export class CanvasToolRuler extends CanvasTool {
   private get conf() {
-    return this.activePage.value.doc.toolConfig.value.CanvasToolRectangle
+    return this.activePage.value.doc.toolConfig.value.CanvasToolRuler
   };
 
   public idleCursor = "crosshair";
