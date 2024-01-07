@@ -22,8 +22,8 @@ export class CanvasToolRectangle extends CanvasTool {
   private actualStrokeWidth(): number {
     const confWidth = this.conf.strokeWidth;
     if (confWidth === "fine") return 1;
-    if (confWidth === "medium") return 2;
-    if (confWidth === "thick") return 5;
+    if (confWidth === "medium") return 3;
+    if (confWidth === "thick") return 10;
   }
 
   public onMouseDown(e: MouseEvent): void {

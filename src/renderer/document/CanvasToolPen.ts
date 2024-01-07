@@ -31,8 +31,8 @@ export class CanvasToolPen extends CanvasTool {
   protected actualStrokeWidth(): number {
     const confWidth = this.cfgStrokeWidth;
     if (confWidth === "fine") return 1;
-    if (confWidth === "medium") return 2;
-    if (confWidth === "thick") return 15;
+    if (confWidth === "medium") return 3;
+    if (confWidth === "thick") return 10;
   }
 
   public onMouseDown(e: MouseEvent): void {
