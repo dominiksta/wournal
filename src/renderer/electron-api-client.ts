@@ -25,11 +25,14 @@ registerDevToolsShortcut();
 function mkApiClient() {
   for (const routeName of ApiRouteNames) {
     ApiClient[routeName] = (...args: any[]) => {
-      console.log(
-        `Electron API call: ${routeName}\n`,
-        args
-      )
-      return window.electron.invoke(routeName, ...args);
+      const promise = window.electron.invoke(routeName, ...args);
+      promise.then((val: any) => {
+        console.log(
+          `Electron API call: ${routeName}\n`,
+          args, '\n', val
+        )
+      })
+      return promise
     };
   }
 }

@@ -4,20 +4,21 @@ import {
 } from 'electron';
 import type { ElectronApi, ApiSpec, ApiRouteName, ElectronCallbacks } from './api';
 import fs from 'fs';
+import { instances } from 'main';
 
 type ApiImpl<T extends ApiSpec<ApiRouteName>> = {
   [K in ApiRouteName]: (e: IpcMainInvokeEvent, ...args: Parameters<T[K]>) => ReturnType<T[K]>
 }
 
-export function registerApiHandlers(win: BrowserWindow) {
+export function registerApiHandlers() {
 
   const impl: ApiImpl<ElectronApi> = {
     'debug:echo': async (_, msg) => {
       return msg;
     },
-    'debug:showDevTools': async () => {
+    'debug:showDevTools': async (e) => {
       console.log('Opening Devtools');
-      win.webContents.openDevTools();
+      instances.get(e.sender)!.win.webContents.openDevTools();
     },
     'debug:binTest': async () => {
       return new Uint8Array([1, 2, 3]);
@@ -27,7 +28,8 @@ export function registerApiHandlers(win: BrowserWindow) {
       console.log(`Loading file: ${path}`);
       return fs.readFileSync(path, { encoding: null }).buffer;
     },
-    'file:loadPrompt': async (_, filters) => {
+    'file:loadPrompt': async (e, filters) => {
+      const win = instances.get(e.sender)!.win;
       const ret = dialog.showOpenDialogSync(win, {
         filters, properties: ['openFile'],
       });
@@ -38,7 +40,8 @@ export function registerApiHandlers(win: BrowserWindow) {
       console.log(`Writing file: ${path}`);
       fs.writeFileSync(path, new DataView(data), { encoding: null });
     },
-    'file:savePrompt': async (_, defaultPath, filters) => {
+    'file:savePrompt': async (e, defaultPath, filters) => {
+      const win = instances.get(e.sender)!.win;
       const resp = dialog.showSaveDialogSync(win, {
         filters, properties: ['showOverwriteConfirmation'], defaultPath
       });
@@ -46,16 +49,17 @@ export function registerApiHandlers(win: BrowserWindow) {
       return resp;
     },
 
-    'process:argv': async () => {
-      if (process.argv.length > 3) return [];
-      return process.argv;
+    'process:argv': async (e) => {
+      const argv = instances.get(e.sender)!.argv;
+      if (argv.length > 3) return [];
+      return argv;
     },
 
-    'window:setTitle': async (_, title) => {
-      win.setTitle(title);
+    'window:setTitle': async (e, title) => {
+      instances.get(e.sender)!.win.setTitle(title);
     },
 
-    'window:destroy': async (_) => { win.destroy(); },
+    'window:destroy': async (e) => { instances.get(e.sender)!.win.destroy(); },
 
     'clipboard:writeWournal': async (_, d) => clipboard.writeBuffer(
       'image/wournal', Buffer.from(JSON.stringify(d), 'utf-8')

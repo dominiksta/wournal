@@ -1,5 +1,5 @@
 import { registerApiHandlers, registerCallbacks } from './api-impl';
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, WebContents } from 'electron';
 import path from 'path';
 import { URL } from 'url';
 
@@ -13,7 +13,11 @@ function resolveHtmlPath(htmlFileName: string) {
   return `file://${path.resolve(__dirname, '../renderer/', htmlFileName)}`;
 }
 
-app.whenReady().then(() => {
+export const instances: Map<WebContents, {
+  win: BrowserWindow, pwd: string, argv: string[]
+}> = new Map();
+
+function createWindow(argv: string[], pwd: string) {
   const win = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -29,13 +33,23 @@ app.whenReady().then(() => {
   if (process.argv.indexOf('--dev-tools') !== -1)
     win.webContents.openDevTools();
 
+  win.loadURL(resolveHtmlPath('index.html'))
+
   try {
-    registerApiHandlers(win);
     registerCallbacks(win);
-    win.loadURL(resolveHtmlPath('index.html'))
   } catch {
     win.webContents.openDevTools();
   }
-})
 
-app.on('window-all-closed', () => { app.quit() })
+  instances.set(win.webContents, { win, argv, pwd });
+}
+
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  app.quit();
+} else {
+  registerApiHandlers();
+  app.whenReady().then(() => createWindow(process.argv, process.cwd()));
+  app.on('second-instance', (_, argv, pwd) => createWindow(argv, pwd));
+  app.on('window-all-closed', () => app.quit());
+}

@@ -14,7 +14,7 @@ const wournal = new Wournal();
 
 async function maybeLoadArgvDoc() {
   const argv = await ApiClient["process:argv"]();
-  if (argv.length > 1) wournal.api.loadDocument(argv[1]);
+  if (argv.length > 1) wournal.api.loadDocument(argv[argv.length - 1]);
 }
 maybeLoadArgvDoc();
 
