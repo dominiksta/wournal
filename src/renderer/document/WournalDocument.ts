@@ -107,11 +107,11 @@ export class WournalDocument extends Component {
 
   public static create(
     config: rx.State<ConfigDTO>, shortcuts: ShortcutManager,
-    api: WournalApi,
+    api: WournalApi, firstPageProps?: PageProps,
   ): WournalDocument {
     let doc = new WournalDocument(undefined, config, shortcuts, api);
     const firstPage = WournalPage.createNew(
-      doc, {
+      doc, firstPageProps ?? {
         ...WournalPageSize.DINA4, backgroundColor: '#FFFFFF',
         backgroundStyle: 'graph',
       },

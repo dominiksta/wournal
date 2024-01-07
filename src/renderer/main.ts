@@ -1,4 +1,5 @@
 import { provideDependencies } from "dependency-injection";
+import { BackgroundStyleT } from "document/BackgroundGenerators";
 import FileSystemElectron from "persistence/FileSystemElectron";
 import { SystemClipboardElectron } from "util/SystemClipboardElectron";
 import Wournal from "wournal";
@@ -14,7 +15,19 @@ const wournal = new Wournal();
 
 async function maybeLoadArgvDoc() {
   const argv = await ApiClient["process:argv"]();
-  if (argv.length > 1) wournal.api.loadDocument(argv[argv.length - 1]);
+  if (argv.positionals.length > 3) return; // dev
+  if (argv.positionals.length > 1) {
+    const path = argv.positionals[argv.positionals.length - 1];
+    const exists = await wournal.api.loadDocument(path);
+    if (!exists) {
+      wournal.api.newDocument({
+        backgroundColor: argv.values["page-color"] as string ?? '#000000',
+        backgroundStyle: argv.values["page-style"] as BackgroundStyleT ?? 'graph',
+        height: parseInt(argv.values["page-height"] as string ?? '297'),
+        width:  parseInt(argv.values["page-width"]  as string ?? '210'),
+      }, path);
+    }
+  }
 }
 maybeLoadArgvDoc();
 

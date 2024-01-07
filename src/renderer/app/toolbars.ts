@@ -361,7 +361,7 @@ export default class Toolbars extends Component {
             props: {
               img: 'icon:document', alt: 'New',
             },
-            events: { click: api.newDocument }
+            events: { click: () => api.newDocument() }
           }),
           ToolbarButton.t({
             props: {

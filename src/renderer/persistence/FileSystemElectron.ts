@@ -7,7 +7,9 @@ const FileSystemElectron: FileSystem = {
   },
 
   async read(path) {
-    return new Blob([ await ApiClient['file:read'](path) ]);
+    const resp = await ApiClient['file:read'](path);
+    if (!resp) return false;
+    return new Blob([ resp ]);
   },
 
   async loadPrompt(filters) {

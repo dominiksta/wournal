@@ -1,10 +1,11 @@
 import {
-  BrowserWindow, clipboard,
-  dialog, ipcMain, IpcMainInvokeEvent, nativeImage
+  BrowserWindow, clipboard, dialog, ipcMain, IpcMainInvokeEvent
 } from 'electron';
 import type { ElectronApi, ApiSpec, ApiRouteName, ElectronCallbacks } from './api';
 import fs from 'fs';
-import { instances } from 'main';
+import { instances } from './main';
+import { parseArgs } from 'node:util';
+import { argvParseSpec } from './argv';
 
 type ApiImpl<T extends ApiSpec<ApiRouteName>> = {
   [K in ApiRouteName]: (e: IpcMainInvokeEvent, ...args: Parameters<T[K]>) => ReturnType<T[K]>
@@ -26,6 +27,7 @@ export function registerApiHandlers() {
 
     'file:read': async (_, path) => {
       console.log(`Loading file: ${path}`);
+      if (!fs.existsSync(path)) return false;
       return fs.readFileSync(path, { encoding: null }).buffer;
     },
     'file:loadPrompt': async (e, filters) => {
@@ -51,8 +53,7 @@ export function registerApiHandlers() {
 
     'process:argv': async (e) => {
       const argv = instances.get(e.sender)!.argv;
-      if (argv.length > 3) return [];
-      return argv;
+      return parseArgs({ args: argv, ...argvParseSpec});
     },
 
     'window:setTitle': async (e, title) => {

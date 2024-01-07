@@ -107,9 +107,10 @@ export default class Wournal extends Component {
     },
     loadDocument: async (identification) => {
       const blob = await this.fileSystem.read(identification);
+      let doc: WournalDocument;
+      if (!blob) return false;
       const dto = await blobToDoc(identification, blob);
 
-      let doc: WournalDocument;
       switch (dto.mode) {
         case 'multi-page':
         case 'single-page':
@@ -120,7 +121,7 @@ export default class Wournal extends Component {
           break;
         case 'background-svg':
           doc = WournalDocument.fromDto(
-            undefined, [ dto.svg ], this.configCtx,
+            undefined, [dto.svg], this.configCtx,
             this.shortcutsCtx, this.api
           );
           const page1 = doc.pages.value[0];
@@ -133,17 +134,27 @@ export default class Wournal extends Component {
           break;
       };
       doc.isSinglePage = dto.mode === 'single-page';
+
       if (doc.isSinglePage) this.toast.open(
         'This is a single page document (SVG). You will not be able to add ' +
         'pages unless you save as a .woj file'
       )
       this.doc.next(doc);
+      return true;
     },
-    newDocument: async () => {
+    newDocument: async (props, identification) => {
       if (await this.api.promptClosingUnsaved()) return;
-      this.doc.next(WournalDocument.create(
-        this.configCtx, this.shortcutsCtx, this.api
-      ));
+      const doc = WournalDocument.create(
+        this.configCtx, this.shortcutsCtx, this.api,
+        props,
+      )
+      this.doc.next(doc);
+      if (identification) {
+        doc.identification = identification;
+        updateTitle(doc);
+        doc.isSinglePage = identification.endsWith('.svg');
+        console.log(identification, doc.isSinglePage);
+      }
     },
     createTestPages: () => {
       this.doc.value.addNewPage({
@@ -391,20 +402,20 @@ export default class Wournal extends Component {
       if (t.startsWith('dark')) style.setTheme('wournal', darkTheme);
       const currLight = style.currentTheme$.value === 'light';
       ui5.config.setTheme(({
-        'auto'                : currLight ? 'sap_horizon' : 'sap_horizon_dark',
-        'light'               : 'sap_horizon',
-        'dark'                : 'sap_horizon_dark',
-        'auto_high_contrast'  : currLight ? 'sap_horizon_hcw' : 'sap_horizon_hcb',
-        'light_high_contrast' : 'sap_horizon_hcw',
-        'dark_high_contrast'  : 'sap_horizon_hcb',
+        'auto': currLight ? 'sap_horizon' : 'sap_horizon_dark',
+        'light': 'sap_horizon',
+        'dark': 'sap_horizon_dark',
+        'auto_high_contrast': currLight ? 'sap_horizon_hcw' : 'sap_horizon_hcb',
+        'light_high_contrast': 'sap_horizon_hcw',
+        'dark_high_contrast': 'sap_horizon_hcb',
       })[t] as any);
       style.setTheme('wournal', ({
-        'auto'                : currLight ? lightTheme : darkTheme,
-        'light'               : lightTheme,
-        'dark'                : darkTheme,
-        'auto_high_contrast'  : currLight ? lightTheme : darkTheme,
-        'light_high_contrast' : lightTheme,
-        'dark_high_contrast'  : darkTheme,
+        'auto': currLight ? lightTheme : darkTheme,
+        'light': lightTheme,
+        'dark': darkTheme,
+        'auto_high_contrast': currLight ? lightTheme : darkTheme,
+        'light_high_contrast': lightTheme,
+        'dark_high_contrast': darkTheme,
       })[t] as any)
     })
 
