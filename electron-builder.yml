@@ -1,6 +1,15 @@
 ---
 productName: Wournal
 appId: me.dominiksta.wournal
+fileAssociations:
+  - ext: woj
+    name: Wournal Notebook
+    role: Editor
+    mimeType: image/wournal
+  - ext: svg
+    name: Scalable Vector Graphics
+    role: Viewer
+    mimeType: image/svg+xml
 
 files:
   - main
@@ -13,12 +22,14 @@ directories:
 win:
   target:
     - nsis
+  icon: public/res/icon/wournal/logo.ico
 nsis:
   oneClick: 'false'
   allowToChangeInstallationDirectory: true
   license: LICENSE
 
 linux:
+  icon: public/res/icon/wournal/logo.png
   target:
     - AppImage
   category: Utility;Graphics;Office;Education;VectorGraphics
