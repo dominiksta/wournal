@@ -57,6 +57,9 @@ export const GlobalCommandId = [
   'scroll_page_last',
   'scroll_page_first',
 
+  'help_website',
+  'help_about',
+
   // 'layer_new',
   // 'layer_current_delete',
   // 'layer_current_move_up',

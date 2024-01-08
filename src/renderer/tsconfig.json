@@ -14,5 +14,10 @@
     "lib": [ "es2022", "dom", "dom.iterable" ],
     "baseUrl": "./",
     "outDir": "../dist-test-renderer",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "paths": {
+      "PackageJson": ["../../package.json"],
+    },
   },
 }

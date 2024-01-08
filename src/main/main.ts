@@ -1,5 +1,5 @@
 import { registerApiHandlers, registerCallbacks } from './api-impl';
-import { app, BrowserWindow, WebContents } from 'electron';
+import { app, BrowserWindow, shell, WebContents } from 'electron';
 import path from 'path';
 import { URL } from 'url';
 
@@ -34,6 +34,11 @@ function createWindow(argv: string[], pwd: string) {
     win.webContents.openDevTools();
 
   win.loadURL(resolveHtmlPath('index.html'))
+
+  win.webContents.setWindowOpenHandler(details => {
+    shell.openExternal(details.url);
+    return { action: 'deny' };
+  });
 
   try {
     registerCallbacks(win);

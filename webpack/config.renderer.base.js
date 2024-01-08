@@ -28,5 +28,8 @@ module.exports = {
   resolve: {
     ...base.resolve,
     modules: [path.resolve(__dirname, '../src/renderer'), 'node_modules'],
+    alias: {
+      PackageJson: path.resolve(__dirname, '../package.json'),
+    }
   },
 };

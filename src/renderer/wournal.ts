@@ -25,6 +25,7 @@ import { FileUtils } from 'util/FileUtils';
 import { blobToDoc, dtoToZip } from 'persistence/persistence-helpers';
 import { ApiClient } from 'electron-api-client';
 import { inject } from 'dependency-injection';
+import About from 'app/about';
 
 @Component.register
 export default class Wournal extends Component {
@@ -734,6 +735,19 @@ export default class Wournal extends Component {
       human_name: 'Scroll to First Page',
       func: () => this.api.scrollPage(1),
       shortcut: 'Home',
+    },
+
+    'help_website': {
+      human_name: 'Website',
+      func: () => window.open('https://github.com/dominiksta/wournal/'),
+      shortcut: 'F1',
+    },
+    'help_about': {
+      human_name: 'About',
+      func: () => this.dialog.infoBox(
+        'About',
+        About.t(),
+      ),
     },
   });
 
