@@ -86,7 +86,7 @@ template for the line smoothing algorithm.
 Most of the programs in the lineage of Wournal have not been maintained for a
 long time, with three exceptions:
 
-- **(Xournal++)[https://xournalpp.github.io/]** is written for GTK in C++. This
+- **[Xournal++](https://xournalpp.github.io/)** is written for GTK in C++. This
   has some advantages, but it also introduces a number of issues. Porting to
   Android/iOS is impossible, development and debugging production builds can be
   quite intimidating and subtle differences in behaviour can and do cause
@@ -96,12 +96,12 @@ long time, with three exceptions:
   taking software, but it does have some limitations that make it deserving of
   competition.
 
-- **(PDF Annotator)[https://www.pdfannotator.com/]** is a proprietary
+- **[PDF Annotator](https://www.pdfannotator.com/)** is a proprietary
   Windows-only application (probably written in .NET). It slows down
   significantly with documents containing a decent amount of handwriting. And it
   can be a bit expensive for a casual note taker or broke student.
 
-- **(MrWriter)[https://unruhschuh.github.io/MrWriter/]** is written for Qt in
+- **[MrWriter](https://unruhschuh.github.io/MrWriter/)** is written for Qt in
   C++, which means it inherits some of the issues mentioned for Xournal++. It is
   in a similar state of development as Wournal, but it struggles with
   performance on Windows.
