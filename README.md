@@ -27,6 +27,7 @@ things still missing are *PDF annotation and export* and an *Android version*.
 
   **Before Beta**:
 
+  - [ ] Store Config as File Instead of in LocalStorage
   - [ ] PDF Annotation with [pdf-lib](https://pdf-lib.js.org/)
     - [ ] Viewing & Annotating
     - [ ] Highlight Text
@@ -59,6 +60,7 @@ things still missing are *PDF annotation and export* and an *Android version*.
   - [ ] Page Thumbnails in Left Panel
   - [ ] Put Text Marker Strokes on a Separate Layer to Always Have Text In Front
     - Xournal does not do this, Xournal++ and PDF Annotator do
+  - [ ] A Textfield with Syntax Highlighting for Various Programming Langs
 
 </details>
 

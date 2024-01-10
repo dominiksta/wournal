@@ -16,7 +16,8 @@
     "@mvui/core": "file:vendor/mvui/packages/core",
     "@mvui/ui5": "file:vendor/mvui/packages/ui5",
     "dompurify": "^3.0.6",
-    "jszip": "^3.10.1"
+    "jszip": "^3.10.1",
+    "pdfjs-dist": "^4.0.379"
   },
   "devDependencies": {
     "@babel/core": "^7.21.0",

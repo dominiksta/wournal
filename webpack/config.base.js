@@ -7,7 +7,7 @@ module.exports = {
     ],
   },
   resolve: {
-    extensions: [ '.js', '.ts', '.json' ],
+    extensions: [ '.js', '.mjs', '.ts', '.json' ],
   },
   node: { __dirname: false, __filename: false },
   // living life on the edge

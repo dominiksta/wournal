@@ -1,15 +1,31 @@
-import { provideDependencies } from "dependency-injection";
+import { inject, provideDependencies } from "dependency-injection";
 import { BackgroundStyleT } from "document/BackgroundGenerators";
 import FileSystemElectron from "persistence/FileSystemElectron";
+import { WournalPDFPageView } from "./pdf/WournalPDFPageView";
 import { SystemClipboardElectron } from "util/SystemClipboardElectron";
 import Wournal from "wournal";
 import './electron-api-client';
 import { ApiClient } from "./electron-api-client";
+import * as pdfjs from 'pdfjs-dist';
 
 provideDependencies({
   'FileSystem': FileSystemElectron,
   'SystemClipboard': SystemClipboardElectron,
 })
+
+setTimeout(async () => {
+  const fs = inject('FileSystem');
+  const file = await fs.read('/home/dominik/Source/private/wournal/test.pdf.pdf');
+  if (!file) throw new Error();
+
+  const pdf = await pdfjs.getDocument(await file.arrayBuffer()).promise;
+
+  const viewer = new WournalPDFPageView(await pdf.getPage(1));
+  console.log(viewer.display);
+  document.body.appendChild(viewer.display);
+  // viewer.setZoom(2);
+}, 500);
+
 
 const wournal = new Wournal();
 
@@ -39,4 +55,4 @@ window.electron.on["window:close"](async () => {
   }
 })
 
-document.body.appendChild(wournal);
+// document.body.appendChild(wournal);
