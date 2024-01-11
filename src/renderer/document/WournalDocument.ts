@@ -23,17 +23,13 @@ import { DOMUtils } from "util/DOMUtils";
 import { WournalApi } from "api";
 import { inject } from "dependency-injection";
 import { ShortcutsCtx } from "app/shortcuts-context";
+import { ConfigCtx } from "app/config-context";
 
 const INITIAL_ZOOM_FACTOR = computeZoomFactor();
 
 @Component.register
 export class WournalDocument extends Component {
   static useShadow = false;
-
-  private _config: rx.State<ConfigDTO>;
-  get config() { return this._config };
-  private _toolConfig: rx.State<CanvasToolConfig>;
-  get toolConfig() { return this._toolConfig };
 
   public pages = new rx.State<WournalPage[]>([]);
   private zoom: number = 1;
@@ -43,7 +39,9 @@ export class WournalDocument extends Component {
   private toolBeforeTmpTool: CanvasToolName;
 
   private display = document.createElement('div');
-  public shortcuts = this.getContext(ShortcutsCtx);
+  public readonly shortcuts = this.getContext(ShortcutsCtx);
+  public readonly config = this.getContext(ConfigCtx);
+  public readonly toolConfig = new rx.State(DSUtils.copyObj(this.config.value.tools));
 
   public isSinglePage = false;
 
@@ -51,7 +49,6 @@ export class WournalDocument extends Component {
 
   private constructor(
     public identification: string | undefined,
-    config: rx.State<ConfigDTO>,
     public readonly api: WournalApi,
   ) {
     super();
@@ -61,7 +58,6 @@ export class WournalDocument extends Component {
     this.display.addEventListener("mousemove", this.onMouseMove.bind(this));
     this.display.addEventListener("contextmenu", (e) => { e.preventDefault() });
     this.display.style.background = theme.documentBackground;
-    this._config = config;
 
     this.setTool(CanvasToolPen);
     this.subscribe(this.activePage, p => {
@@ -89,10 +85,9 @@ export class WournalDocument extends Component {
   // ------------------------------------------------------------
 
   public static create(
-    config: rx.State<ConfigDTO>, api: WournalApi,
-    firstPageProps?: PageProps,
+    api: WournalApi, firstPageProps?: PageProps,
   ): WournalDocument {
-    let doc = new WournalDocument(undefined, config, api);
+    let doc = new WournalDocument(undefined, api);
     const firstPage = WournalPage.createNew(
       doc, firstPageProps ?? {
         ...WournalPageSize.DINA4, backgroundColor: '#FFFFFF',
@@ -100,17 +95,15 @@ export class WournalDocument extends Component {
       },
    );
     doc.addPage(firstPage);
-    doc._toolConfig = new rx.State(DSUtils.copyObj(config.value.tools));
     doc.undoStack.clear();
     return doc;
   }
 
   public static fromDto(
     identification: string, dto: DocumentDTO,
-    config: rx.State<ConfigDTO>, api: WournalApi,
+    api: WournalApi,
   ): WournalDocument {
-    let doc = new WournalDocument(identification, config, api);
-    doc._toolConfig = new rx.State(DSUtils.copyObj(config.value.tools));
+    let doc = new WournalDocument(identification, api);
     for (let page of dto) doc.addPageFromSvg(page);
     doc.undoStack.clear();
     return doc;
@@ -425,14 +418,14 @@ export class WournalDocument extends Component {
 
   /** Reset the config of the current tool to loaded global config */
   public resetCurrentTool() {
-    if (!DSUtils.hasKey(this._toolConfig.value, this.currentTool.value.name)
-      || !DSUtils.hasKey(this._config.value.tools, this.currentTool.value.name))
+    if (!DSUtils.hasKey(this.toolConfig.value, this.currentTool.value.name)
+      || !DSUtils.hasKey(this.config.value.tools, this.currentTool.value.name))
       throw new Error(`Could not get config for tool ${this.currentTool.value}`)
 
-    this._toolConfig.next(v => ({
+    this.toolConfig.next(v => ({
       ...v,
       [this.currentTool.value.name]: DSUtils.copyObj(
-        this._config.value.tools[
+        this.config.value.tools[
           this.currentTool.value.name as keyof CanvasToolConfig
         ]
       )
@@ -512,10 +505,10 @@ export class WournalDocument extends Component {
     } else {
       if (e.button === 2) { // right click
         this.toolBeforeTmpTool = this.currentTool.value.name;
-        this.setTool(CanvasToolFactory.forName(this._config.value.binds.rightClick));
+        this.setTool(CanvasToolFactory.forName(this.config.value.binds.rightClick));
       } else if (e.button === 1) { // middle click
         this.toolBeforeTmpTool = this.currentTool.value.name;
-        this.setTool(CanvasToolFactory.forName(this._config.value.binds.middleClick));
+        this.setTool(CanvasToolFactory.forName(this.config.value.binds.middleClick));
       }
       this.currentTool.value.onMouseDown(e);
     }

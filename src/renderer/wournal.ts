@@ -115,14 +115,10 @@ export default class Wournal extends Component {
       switch (dto.mode) {
         case 'multi-page':
         case 'single-page':
-          doc = WournalDocument.fromDto(
-            identification, dto.dto, this.configCtx, this.api
-          );
+          doc = WournalDocument.fromDto(identification, dto.dto, this.api);
           break;
         case 'background-svg':
-          doc = WournalDocument.fromDto(
-            undefined, [dto.svg], this.configCtx, this.api
-          );
+          doc = WournalDocument.fromDto(undefined, [dto.svg], this.api);
           const page1 = doc.pages.value[0];
           page1.setPageProps({
             ...page1.getPageProps(),
@@ -143,9 +139,7 @@ export default class Wournal extends Component {
     },
     newDocument: async (props, identification) => {
       if (await this.api.promptClosingUnsaved()) return;
-      const doc = WournalDocument.create(
-        this.configCtx, this.api, props,
-      )
+      const doc = WournalDocument.create(this.api, props);
       this.doc.next(doc);
       if (identification) {
         doc.identification = identification;
@@ -353,9 +347,7 @@ export default class Wournal extends Component {
     return true;
   }
 
-  private doc = new rx.State(WournalDocument.create(
-    this.configCtx, this.api
-  ));
+  private doc = new rx.State(WournalDocument.create(this.api));
 
   private settingsOpen = new rx.State(false);
 
