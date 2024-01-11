@@ -24,6 +24,7 @@ import { WournalApi } from "api";
 import { inject } from "dependency-injection";
 import { ShortcutsCtx } from "app/shortcuts-context";
 import { ConfigCtx } from "app/config-context";
+import { ApiCtx } from "app/api-context";
 
 const INITIAL_ZOOM_FACTOR = computeZoomFactor();
 
@@ -32,24 +33,24 @@ export class WournalDocument extends Component {
   static useShadow = false;
 
   public pages = new rx.State<WournalPage[]>([]);
-  private zoom: number = 1;
+  public isSinglePage = false;
 
+  private zoom: number = 1;
 
   /** Store tool set before right/middle click */
   private toolBeforeTmpTool: CanvasToolName;
 
   private display = document.createElement('div');
-  public readonly shortcuts = this.getContext(ShortcutsCtx);
-  public readonly config = this.getContext(ConfigCtx);
-  public readonly toolConfig = new rx.State(DSUtils.copyObj(this.config.value.tools));
 
-  public isSinglePage = false;
-
+  public readonly shortcuts: ShortcutManager;
+  public readonly config: rx.State<ConfigDTO>;
+  public readonly toolConfig: rx.State<CanvasToolConfig>;
+  public readonly api: WournalApi;
   private clipboard = inject('SystemClipboard');
 
   private constructor(
+    getContext: Component['getContext'],
     public identification: string | undefined,
-    public readonly api: WournalApi,
   ) {
     super();
     this.display.addEventListener("mouseup", this.onMouseUp.bind(this));
@@ -58,6 +59,11 @@ export class WournalDocument extends Component {
     this.display.addEventListener("mousemove", this.onMouseMove.bind(this));
     this.display.addEventListener("contextmenu", (e) => { e.preventDefault() });
     this.display.style.background = theme.documentBackground;
+
+    this.shortcuts = getContext(ShortcutsCtx);
+    this.config = getContext(ConfigCtx);
+    this.toolConfig = new rx.State(DSUtils.copyObj(this.config.value.tools));
+    this.api = getContext(ApiCtx);
 
     this.setTool(CanvasToolPen);
     this.subscribe(this.activePage, p => {
@@ -85,9 +91,9 @@ export class WournalDocument extends Component {
   // ------------------------------------------------------------
 
   public static create(
-    api: WournalApi, firstPageProps?: PageProps,
+    getContext: Component['getContext'], firstPageProps?: PageProps,
   ): WournalDocument {
-    let doc = new WournalDocument(undefined, api);
+    let doc = new WournalDocument(getContext, undefined);
     const firstPage = WournalPage.createNew(
       doc, firstPageProps ?? {
         ...WournalPageSize.DINA4, backgroundColor: '#FFFFFF',
@@ -100,10 +106,9 @@ export class WournalDocument extends Component {
   }
 
   public static fromDto(
-    identification: string, dto: DocumentDTO,
-    api: WournalApi,
+    getContext: Component['getContext'], identification: string, dto: DocumentDTO,
   ): WournalDocument {
-    let doc = new WournalDocument(identification, api);
+    let doc = new WournalDocument(getContext, identification);
     for (let page of dto) doc.addPageFromSvg(page);
     doc.undoStack.clear();
     return doc;

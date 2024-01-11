@@ -46,7 +46,7 @@ export default class Wournal extends Component {
     }
   });
 
-  api: WournalApi = {
+  public api: WournalApi = this.provideContext(ApiCtx, {
     // document
     // ----------------------------------------------------------------------
     saveDocumentPromptSinglePage: async (defaultIdentification) => {
@@ -115,10 +115,12 @@ export default class Wournal extends Component {
       switch (dto.mode) {
         case 'multi-page':
         case 'single-page':
-          doc = WournalDocument.fromDto(identification, dto.dto, this.api);
+          doc = WournalDocument.fromDto(
+            this.getContext.bind(this), identification, dto.dto
+          );
           break;
         case 'background-svg':
-          doc = WournalDocument.fromDto(undefined, [dto.svg], this.api);
+          doc = WournalDocument.fromDto(this.getContext.bind(this), undefined, [dto.svg]);
           const page1 = doc.pages.value[0];
           page1.setPageProps({
             ...page1.getPageProps(),
@@ -139,7 +141,7 @@ export default class Wournal extends Component {
     },
     newDocument: async (props, identification) => {
       if (await this.api.promptClosingUnsaved()) return;
-      const doc = WournalDocument.create(this.api, props);
+      const doc = WournalDocument.create(this.getContext.bind(this), props);
       this.doc.next(doc);
       if (identification) {
         doc.identification = identification;
@@ -333,7 +335,7 @@ export default class Wournal extends Component {
       if (!this.checkSinglePage()) return;
       this.doc.value.movePage(pageNr, direction);
     },
-  }
+  })
 
   private checkSinglePage() {
     if (this.doc.value.isSinglePage) {
@@ -347,7 +349,7 @@ export default class Wournal extends Component {
     return true;
   }
 
-  private doc = new rx.State(WournalDocument.create(this.api));
+  private doc = new rx.State(WournalDocument.create(this.getContext.bind(this)));
 
   private settingsOpen = new rx.State(false);
 
@@ -359,8 +361,6 @@ export default class Wournal extends Component {
     this.setAttribute('data-ui5-compact-size', 'true');
 
     this.subscribe(this.configCtx, v => this.confRepo.save(v));
-
-    this.provideContext(ApiCtx, this.api);
 
     const globalCmds = this.#globalCmds;
     for (const cmd in globalCmds) {
