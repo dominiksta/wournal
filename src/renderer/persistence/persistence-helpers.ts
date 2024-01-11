@@ -8,13 +8,13 @@ export async function dtoToZip(doc: DocumentDTO): Promise<Blob> {
 
   for (let i = 0; i < doc.length; i++) {
     zipFile.addFile(
-      String(String(i).padStart(4, '0')) + '-page.svg', doc[i]
+      String(i).padStart(4, '0') + '-page.svg', doc[i]
     );
   }
   return await zipFile.asBlob();
 }
 
-export async function blobToDoc(
+export async function fileToDTO(
   fileName: string, blob: Blob
 ): Promise<
   { dto: DocumentDTO, mode: 'multi-page' } |

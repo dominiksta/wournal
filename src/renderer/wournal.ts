@@ -22,7 +22,7 @@ import { BasicDialogManagerContext } from 'common/dialog-manager';
 import { DSUtils } from 'util/DSUtils';
 import { pageStyleDialog } from 'app/page-style-dialog';
 import { FileUtils } from 'util/FileUtils';
-import { blobToDoc, dtoToZip } from 'persistence/persistence-helpers';
+import { fileToDTO, dtoToZip } from 'persistence/persistence-helpers';
 import { ApiClient } from 'electron-api-client';
 import { inject } from 'dependency-injection';
 import About from 'app/about';
@@ -110,20 +110,18 @@ export default class Wournal extends Component {
       const blob = await this.fileSystem.read(identification);
       let doc: WournalDocument;
       if (!blob) return false;
-      const dto = await blobToDoc(identification, blob);
+      const dto = await fileToDTO(identification, blob);
 
       switch (dto.mode) {
         case 'multi-page':
         case 'single-page':
           doc = WournalDocument.fromDto(
-            identification, dto.dto, this.configCtx,
-            this.shortcutsCtx, this.api
+            identification, dto.dto, this.configCtx, this.api
           );
           break;
         case 'background-svg':
           doc = WournalDocument.fromDto(
-            undefined, [dto.svg], this.configCtx,
-            this.shortcutsCtx, this.api
+            undefined, [dto.svg], this.configCtx, this.api
           );
           const page1 = doc.pages.value[0];
           page1.setPageProps({
@@ -146,8 +144,7 @@ export default class Wournal extends Component {
     newDocument: async (props, identification) => {
       if (await this.api.promptClosingUnsaved()) return;
       const doc = WournalDocument.create(
-        this.configCtx, this.shortcutsCtx, this.api,
-        props,
+        this.configCtx, this.api, props,
       )
       this.doc.next(doc);
       if (identification) {
@@ -357,7 +354,7 @@ export default class Wournal extends Component {
   }
 
   private doc = new rx.State(WournalDocument.create(
-    this.configCtx, this.shortcutsCtx, this.api
+    this.configCtx, this.api
   ));
 
   private settingsOpen = new rx.State(false);

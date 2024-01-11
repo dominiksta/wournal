@@ -22,7 +22,7 @@ setTimeout(async () => {
 
   const viewer = new WournalPDFPageView(await pdf.getPage(1));
   console.log(viewer.display);
-  document.body.appendChild(viewer.display);
+  // document.body.appendChild(viewer.display);
   // viewer.setZoom(2);
 }, 500);
 
@@ -55,4 +55,4 @@ window.electron.on["window:close"](async () => {
   }
 })
 
-// document.body.appendChild(wournal);
+document.body.appendChild(wournal);
