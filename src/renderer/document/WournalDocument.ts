@@ -25,6 +25,7 @@ import { inject } from "dependency-injection";
 import { ShortcutsCtx } from "app/shortcuts-context";
 import { ConfigCtx } from "app/config-context";
 import { ApiCtx } from "app/api-context";
+import ZipFile from "util/ZipFile";
 
 const INITIAL_ZOOM_FACTOR = computeZoomFactor();
 
@@ -105,17 +106,44 @@ export class WournalDocument extends Component {
     return doc;
   }
 
-  public static fromDto(
-    getContext: Component['getContext'], identification: string, dto: DocumentDTO,
-  ): WournalDocument {
-    let doc = new WournalDocument(getContext, identification);
-    for (let page of dto) doc.addPageFromSvg(page);
+  public static async fromFile(
+    getContext: Component['getContext'],
+    fileName: string, blob: Blob,
+  ): Promise<WournalDocument> {
+    const doc = new this(getContext, fileName);
+    if (fileName.toLowerCase().endsWith(".svg")) {
+      const svg = await blob.text();
+      doc.addPageFromSvg(svg);
+      if (WournalPage.svgIsMarkedAsWournalPage(svg)) {
+        doc.isSinglePage = true;
+      } else { // background svg
+        const page1 = doc.pages.value[0];
+        page1.setPageProps({
+          ...page1.getPageProps(),
+          backgroundColor: '#FFFFFF', backgroundStyle: 'blank',
+        });
+      }
+    } else {
+      const zipFile = await ZipFile.fromBlob(new Blob([blob]));
+      const pages = await Promise.all((await zipFile.allFiles())
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map(async f => (new TextDecoder()).decode(await f.blob.arrayBuffer())));
+      pages.forEach(p => doc.addPageFromSvg(p));
+    }
     doc.undoStack.clear();
     return doc;
   }
 
-  public toDto(): DocumentDTO {
-    return this.pages.value.map((p) => p.asSvgString());
+  public async toFile(): Promise<Blob> {
+    const pages = this.pages.value;
+    if (this.isSinglePage) {
+      return FileUtils.utf8StringToBlob(pages[0].asSvgString());
+    } else {
+      const zipFile = new ZipFile();
+      pages.forEach((p, i) =>
+        zipFile.addFile(String(i).padStart(4, '0') + '-page.svg', p.asSvgString()));
+      return await zipFile.asBlob();
+    }
   }
 
   // ------------------------------------------------------------

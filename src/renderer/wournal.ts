@@ -22,7 +22,6 @@ import { BasicDialogManagerContext } from 'common/dialog-manager';
 import { DSUtils } from 'util/DSUtils';
 import { pageStyleDialog } from 'app/page-style-dialog';
 import { FileUtils } from 'util/FileUtils';
-import { fileToDTO, dtoToZip } from 'persistence/persistence-helpers';
 import { ApiClient } from 'electron-api-client';
 import { inject } from 'dependency-injection';
 import About from 'app/about';
@@ -78,18 +77,7 @@ export default class Wournal extends Component {
     },
     saveDocument: async (identification) => {
       const doc = this.doc.value;
-      if (doc.isSinglePage) {
-        await this.fileSystem.write(
-          identification, FileUtils.utf8StringToBlob(
-            doc.pages.value[0].asSvgString()
-          )
-        );
-      } else {
-        await this.fileSystem.write(
-          identification, await dtoToZip(doc.toDto())
-        );
-      }
-
+      await this.fileSystem.write(identification, await doc.toFile());
       doc.identification = identification;
       doc.markSaved();
       updateTitle(doc);
@@ -108,30 +96,10 @@ export default class Wournal extends Component {
     },
     loadDocument: async (identification) => {
       const blob = await this.fileSystem.read(identification);
-      let doc: WournalDocument;
       if (!blob) return false;
-      const dto = await fileToDTO(identification, blob);
-
-      switch (dto.mode) {
-        case 'multi-page':
-        case 'single-page':
-          doc = WournalDocument.fromDto(
-            this.getContext.bind(this), identification, dto.dto
-          );
-          break;
-        case 'background-svg':
-          doc = WournalDocument.fromDto(this.getContext.bind(this), undefined, [dto.svg]);
-          const page1 = doc.pages.value[0];
-          page1.setPageProps({
-            ...page1.getPageProps(),
-            backgroundColor: '#FFFFFF',
-            backgroundStyle: 'blank',
-          });
-          doc.undoStack.clear();
-          break;
-      };
-      doc.isSinglePage = dto.mode === 'single-page';
-
+      const doc = await WournalDocument.fromFile(
+        this.getContext.bind(this), identification, blob
+      );
       if (doc.isSinglePage) this.toast.open(
         'This is a single page document (SVG). You will not be able to add ' +
         'pages unless you save as a .woj file'
