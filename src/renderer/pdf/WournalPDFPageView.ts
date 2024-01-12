@@ -25,9 +25,13 @@ export class WournalPDFPageView {
   private setup() {
     const defaultZoom = 1;
 
-    const viewport = this.page.getViewport({ scale: defaultZoom });
+    const viewport = this.page.getViewport({
+      scale: defaultZoom / pdfjs.PixelsPerInch.PDF_TO_CSS_UNITS
+    });
 
     const _shadow = document.createElement('div');
+    _shadow.setAttribute('class', 'wournal-pdf-page-view');
+    _shadow.style.position = 'absolute';
     const shadow = _shadow.attachShadow({ mode: 'closed' });
 
     // TODO: optimize with adoptedStyleSheets
@@ -58,6 +62,13 @@ export class WournalPDFPageView {
       viewer,
       display: _shadow,
     };
+  }
+
+  public getDimensionsPx(): { width: number, height: number } {
+    const { width, height } = this.page.getViewport({
+      scale: 1 * pdfjs.PixelsPerInch.PDF_TO_CSS_UNITS
+    });
+    return { width, height };
   }
 
   public async setZoom(zoom: number) {

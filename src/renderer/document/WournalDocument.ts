@@ -26,6 +26,7 @@ import { ShortcutsCtx } from "app/shortcuts-context";
 import { ConfigCtx } from "app/config-context";
 import { ApiCtx } from "app/api-context";
 import ZipFile from "util/ZipFile";
+import { PDFCache } from "pdf/PDFCache";
 
 const INITIAL_ZOOM_FACTOR = computeZoomFactor();
 
@@ -111,7 +112,40 @@ export class WournalDocument extends Component {
     fileName: string, blob: Blob,
   ): Promise<WournalDocument> {
     const doc = new this(getContext, fileName);
-    if (fileName.toLowerCase().endsWith(".svg")) {
+
+    // woj
+    // ----------------------------------------------------------------------
+    if (fileName.toLowerCase().endsWith('.woj')) {
+      const zipFile = await ZipFile.fromBlob(new Blob([blob]));
+      const pages = await Promise.all((await zipFile.allFiles())
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map(async f => (new TextDecoder()).decode(await f.blob.arrayBuffer())));
+      pages.forEach(p => doc.addPageFromSvg(p));
+    // pdf
+    // ----------------------------------------------------------------------
+    } else if (fileName.toLowerCase().endsWith('.pdf')) {
+      const pdf = await PDFCache.fromBlob(blob, { fileName, location: 'filesystem' });
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const pdfPage = await pdf.getPage(i);
+        const viewport = pdfPage.getViewport({ scale: doc.zoom});
+        console.log(viewport);
+
+        const wournalPage = WournalPage.createNew(doc, {
+          backgroundColor: '#FFFFFF',
+          backgroundStyle: 'blank',
+          height: viewport.height, width: viewport.height,
+          pdfMode: {
+            fileName, location: 'filesystem', pageNr: i,
+          }
+        });
+
+        // TODO: filename default as woj on same path
+        doc.identification = undefined;
+        doc.addPage(wournalPage);
+      }
+    // svg
+    // ----------------------------------------------------------------------
+    } else if (fileName.toLowerCase().endsWith('.svg')) {
       const svg = await blob.text();
       doc.addPageFromSvg(svg);
       if (WournalPage.svgIsMarkedAsWournalPage(svg)) {
@@ -123,12 +157,6 @@ export class WournalDocument extends Component {
           backgroundColor: '#FFFFFF', backgroundStyle: 'blank',
         });
       }
-    } else {
-      const zipFile = await ZipFile.fromBlob(new Blob([blob]));
-      const pages = await Promise.all((await zipFile.allFiles())
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .map(async f => (new TextDecoder()).decode(await f.blob.arrayBuffer())));
-      pages.forEach(p => doc.addPageFromSvg(p));
     }
     doc.undoStack.clear();
     return doc;

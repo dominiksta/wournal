@@ -1,6 +1,9 @@
 import { rx } from "@mvui/core";
+import { inject } from "dependency-injection";
 import { theme } from "global-styles";
+import { WournalPDFPageView } from "pdf/WournalPDFPageView";
 import { DOMUtils } from "util/DOMUtils";
+import { DSUtils } from "util/DSUtils";
 import {
   BackgroundGenerator, BackgroundStyleT, BackgroundGenerators
 } from "./BackgroundGenerators";
@@ -8,6 +11,7 @@ import { UndoActionLayer } from "./UndoActionLayer";
 import { UndoAction } from "./UndoStack";
 import { WournalDocument } from "./WournalDocument";
 import { xToPx } from "./WournalPageSize";
+import { PDFCache } from "pdf/PDFCache";
 
 /**
  * The attribute defining a "layer" element for wournal. Really they are just
@@ -19,13 +23,21 @@ export const WOURNAL_SVG_LAYER_CURRENT_ATTR = "wournal-layer-current";
 export const WOURNAL_SVG_PAGE_BACKGROUND_COLOR_ATTR = 'wournal-page-background-color';
 export const WOURNAL_SVG_PAGE_BACKGROUND_STYLE_ATTR = 'wournal-page-background-style';
 
+export const WOURNAL_SVG_PAGE_PDF_ATTR = 'wournal-page-pdf';
+
 export const WOURNAL_SVG_PAGE_MARKER_ATTR = 'wournal-page';
+
+export type PagePDFMode = {
+  location: 'filesystem', // future: attachment
+  fileName: string,
+  pageNr: number,
+}
 
 export type PageProps = {
   backgroundColor: string, backgroundStyle: BackgroundStyleT,
   width: number, height: number,
+  pdfMode?: PagePDFMode,
 };
-
 
 /**
  * An SVG Canvas to draw on.
@@ -49,27 +61,36 @@ export class WournalPage {
    */
   private canvasWrapper: HTMLDivElement;
 
-  public get width() { return parseFloat(this.canvas.getAttribute('width')) };
-  public set width(w: number) { this.canvas.setAttribute('width', w.toString()) };
-  public get height() { return parseFloat(this.canvas.getAttribute('height')) };
-  public set height(w: number) { this.canvas.setAttribute('height', w.toString()) };
-  public set backgroundColor(col: string) {
+  private get width() { return parseFloat(this.canvas.getAttribute('width')) };
+  private set width(w: number) { this.canvas.setAttribute('width', w.toString()) };
+  private get height() { return parseFloat(this.canvas.getAttribute('height')) };
+  private set height(w: number) { this.canvas.setAttribute('height', w.toString()) };
+  private set backgroundColor(col: string) {
     this.canvas.setAttribute(WOURNAL_SVG_PAGE_BACKGROUND_COLOR_ATTR, col);
   }
-  public get backgroundColor() {
+  private get backgroundColor() {
     return this.canvas.getAttribute(WOURNAL_SVG_PAGE_BACKGROUND_COLOR_ATTR);
   }
-  public set backgroundStyle(col: BackgroundStyleT) {
+  private set backgroundStyle(col: BackgroundStyleT) {
     this.canvas.setAttribute(WOURNAL_SVG_PAGE_BACKGROUND_STYLE_ATTR, col);
   }
-  public get backgroundStyle() {
+  private get backgroundStyle() {
     return this.canvas.getAttribute(WOURNAL_SVG_PAGE_BACKGROUND_STYLE_ATTR) as
       BackgroundStyleT;
+  }
+  private get pdfMode(): PagePDFMode | undefined {
+    return this.canvas.hasAttribute(WOURNAL_SVG_PAGE_PDF_ATTR)
+      ? JSON.parse(this.canvas.getAttribute(WOURNAL_SVG_PAGE_PDF_ATTR))
+      : undefined;
+  }
+  private set pdfMode(mode: PagePDFMode) {
+    this.canvas.setAttribute(WOURNAL_SVG_PAGE_PDF_ATTR, JSON.stringify(mode));
   }
 
   private zoom: number = 1;
 
   public toolLayer: SVGSVGElement;
+  private pdfViewer: WournalPDFPageView | false = false;
 
   private canvas: SVGSVGElement;
   public get canvasHeight() { return xToPx(this.canvas.getAttribute('height')) }
@@ -85,6 +106,8 @@ export class WournalPage {
     if (this._rect === undefined) this._rect = this.toolLayer.getBoundingClientRect();
     return this._rect;
   }
+
+  private readonly fs = inject('FileSystem');
 
   /**
    * - `doc`: The wournal document this page is creted as a part of.
@@ -127,19 +150,16 @@ export class WournalPage {
   }
 
   // ------------------------------------------------------------
-  // initialization and serialization
+  // initialization
   // ------------------------------------------------------------
 
   /** Return a new page with dimensions according to `init` */
   public static createNew(
     doc: WournalDocument,
-    init: {
-      height: number, width: number, backgroundColor: string,
-      backgroundStyle: BackgroundStyleT
-    },
+    props: PageProps,
   ): WournalPage {
     let page = new WournalPage(doc);
-    page.setPageProps(init, false)
+    page.setPageProps(props, false)
     page.addLayer('Layer 1', false);
     page.setActivePaintLayer('Layer 1', false);
 
@@ -149,27 +169,16 @@ export class WournalPage {
 
   public newPageLikeThis(): WournalPage {
     const page = new WournalPage(this.doc);
-    page.setPageProps({
-      width: this.width, height: this.height,
-      backgroundColor: this.backgroundColor,
-      backgroundStyle: this.backgroundStyle
-    }, false);
+    page.setPageProps(DSUtils.copyObj(this.getPageProps()), false);
     page.addLayer('Layer 1', false);
     page.setActivePaintLayer('Layer 1');
-
     page.updateDisplaySize();
     return page;
   }
 
-  public static svgIsMarkedAsWournalPage(svg: string): boolean {
-    svg = DOMUtils.sanitizeSVG(svg);
-    const outerSvg = document.createElementNS(
-      "http://www.w3.org/2000/svg", "svg"
-    );
-    outerSvg.innerHTML = svg;
-    console.log(outerSvg.children[0]);
-    return outerSvg.children[0].hasAttribute(WOURNAL_SVG_PAGE_MARKER_ATTR);
-  }
+  // ----------------------------------------------------------------------
+  // serialization
+  // ----------------------------------------------------------------------
 
   /** Return a page parsed from the <svg> element string `svg` */
   public static fromSvgString(
@@ -224,12 +233,29 @@ export class WournalPage {
       )
     );
 
+    page.maybeLoadPDFPage();
+
     page.updateDisplaySize();
     return page;
   }
 
   public asSvgString(): string {
     return (new XMLSerializer()).serializeToString(this.canvas);
+  }
+
+  private async maybeLoadPDFPage(): Promise<boolean> {
+    // TODO: display error when pdf not found
+    if (!this.pdfMode) return;
+    const resp = await PDFCache.fromLocation(this.pdfMode);
+    if (resp === false) return false;
+    this.pdfViewer = new WournalPDFPageView(await resp.getPage(this.pdfMode.pageNr));
+    this.pdfViewer.setZoom(this.zoom);
+    this.setPageSize(this.pdfViewer.getDimensionsPx());
+    // TODO: pdf layer should appear to user as background layer
+    this.setLayerVisible('Background', false);
+    this.pdfViewer.display.style.pointerEvents = 'none';
+    this.display.insertBefore(this.pdfViewer.display, this.svgWrapperEl);
+    return true;
   }
 
   // ------------------------------------------------------------
@@ -381,7 +407,7 @@ export class WournalPage {
   // background generators
   // ----------------------------------------------------------------------
 
-  public generateBackground(generator: BackgroundGenerator) {
+  private generateBackground(generator: BackgroundGenerator) {
     if (this.getLayer('Background')) this.deleteLayer('Background', false);
     const newBg = this.addLayer('Background', false, true);
     const bgEls = generator({
@@ -405,6 +431,8 @@ export class WournalPage {
     this.backgroundColor = props.backgroundColor;
     this.backgroundStyle = props.backgroundStyle;
     this.generateBackground(BackgroundGenerators[props.backgroundStyle]);
+    if (props.pdfMode) this.pdfMode = props.pdfMode;
+    this.maybeLoadPDFPage();
     if (undoable) this.doc.undoStack.push(new UndoActionPageProps(
       this, propsBefore, this.getPageProps(),
     ));
@@ -449,6 +477,7 @@ export class WournalPage {
     // basis.
     this.svgWrapperEl.style.transform = `scale(${zoom})`;
     this.zoom = zoom;
+    if (this.pdfViewer) this.pdfViewer.setZoom(zoom);
     this.updateDisplaySize();
   }
 
@@ -484,6 +513,16 @@ export class WournalPage {
       width: r.width * 1 / this.zoom,
       height: r.height * 1 / this.zoom,
     });
+  }
+
+  public static svgIsMarkedAsWournalPage(svg: string): boolean {
+    svg = DOMUtils.sanitizeSVG(svg);
+    const outerSvg = document.createElementNS(
+      "http://www.w3.org/2000/svg", "svg"
+    );
+    outerSvg.innerHTML = svg;
+    console.log(outerSvg.children[0]);
+    return outerSvg.children[0].hasAttribute(WOURNAL_SVG_PAGE_MARKER_ATTR);
   }
 }
 

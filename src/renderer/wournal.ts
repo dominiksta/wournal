@@ -86,9 +86,10 @@ export default class Wournal extends Component {
     loadDocumentPrompt: async () => {
       if (await this.api.promptClosingUnsaved()) return;
       const userResp = await this.fileSystem.loadPrompt([
-        { extensions: ['woj', 'svg'], name: 'All Supported Types (.woj/.svg)' },
+        { extensions: ['woj', 'pdf', 'svg'], name: 'All Supported Types (.woj/.pdf/.svg)' },
         { extensions: ['woj'], name: 'Wournal File (Multi-Page) (.woj)' },
-        { extensions: ['svg'], name: 'SVG File (Single-Page) (.svg)' },
+        { extensions: ['pdf'], name: 'Portable Document Format (.pdf)' },
+        { extensions: ['svg'], name: 'Scalable Vector Graphics (Single-Page) (.svg)' },
       ]);
       if (!userResp) return false;
       await this.api.loadDocument(userResp);
@@ -279,12 +280,9 @@ export default class Wournal extends Component {
     },
     setPagePropsPrompt: async () => {
       const page = this.doc.value.activePage.value;
-      const resp = await pageStyleDialog(this.dialog.openDialog, {
-        width: page.width,
-        height: page.height,
-        backgroundColor: page.backgroundColor,
-        backgroundStyle: page.backgroundStyle,
-      });
+      const resp = await pageStyleDialog(
+        this.dialog.openDialog, DSUtils.copyObj(page.getPageProps())
+      );
       if (resp) this.api.setPageProps(resp);
     },
     addPage: (addAfterPageNr, props) => {

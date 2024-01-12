@@ -2,18 +2,18 @@ import JSZip from "jszip";
 
 export default class ZipFile {
 
-  private jsZip: any;
+  private jsZip: JSZip;
 
   constructor() {
     this.jsZip = new JSZip();
   }
 
-  addFile(name: string, content: string) {
+  addFile(name: string, content: string | Blob) {
     this.jsZip.file(name, content);
   }
 
-  getFile(name: string): Blob {
-    return this.jsZip.file(name).async({ type: "blob" });
+  async getFile(name: string): Promise<Blob> {
+    return await this.jsZip.file(name).async('blob');
   }
 
   listFiles(): string[] {
