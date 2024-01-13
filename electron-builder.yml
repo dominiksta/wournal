@@ -10,6 +10,10 @@ fileAssociations:
     name: Scalable Vector Graphics
     role: Viewer
     mimeType: image/svg+xml
+  - ext: pdf
+    name: Portable Document Format
+    role: Viewer
+    mimeType: application/pdf
 
 files:
   - main
