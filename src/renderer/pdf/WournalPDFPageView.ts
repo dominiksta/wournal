@@ -4,6 +4,7 @@ import 'pdfjs-dist/build/pdf.worker';
 import { css } from './pdf_viewer.css';
 import type { PDFPageProxy } from 'pdfjs-dist/types/src/display/api';
 import { PDFPageView } from 'pdfjs-dist/web/pdf_viewer.mjs';
+import { computeZoomFactor } from 'document/WournalPageSize';
 
 // accessing this and importing pdf.worker sets up a default
 pdfjs.GlobalWorkerOptions.workerSrc
@@ -25,9 +26,9 @@ export class WournalPDFPageView {
   private setup() {
     const defaultZoom = 1;
 
-    const viewport = this.page.getViewport({
-      scale: defaultZoom / pdfjs.PixelsPerInch.PDF_TO_CSS_UNITS
-    });
+    const scale =
+      defaultZoom * pdfjs.PixelsPerInch.PDF_TO_CSS_UNITS / computeZoomFactor();
+    const viewport = this.page.getViewport({ scale });
 
     const _shadow = document.createElement('div');
     _shadow.setAttribute('class', 'wournal-pdf-page-view');
@@ -66,14 +67,19 @@ export class WournalPDFPageView {
 
   public getDimensionsPx(): { width: number, height: number } {
     const { width, height } = this.page.getViewport({
-      scale: 1 * pdfjs.PixelsPerInch.PDF_TO_CSS_UNITS
+      scale: 1 * pdfjs.PixelsPerInch.PDF_TO_CSS_UNITS / computeZoomFactor()
     });
-    return { width, height };
+    return {
+      width: parseFloat(width.toFixed(2)),
+      height: parseFloat(height.toFixed(2))
+    };
   }
 
   public async setZoom(zoom: number) {
     this.zoom = zoom;
-    this.viewer.update({ scale: zoom });
+    this.viewer.update({
+      scale: zoom / computeZoomFactor()
+    });
     return await this.viewer.draw();
   }
 
