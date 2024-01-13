@@ -2,37 +2,39 @@ import { PDFDocumentProxy } from "pdfjs-dist/types/src/display/api";
 import * as pdfjs from 'pdfjs-dist';
 import { inject } from "dependency-injection";
 
-const loadedPDFs: { [location: string]: { [fileName: string]: PDFDocumentProxy }} = {
-  'filesystem': {},
-};
+const loadedPDFs: { [fileName: string]: PDFDocumentProxy } = {};
 
 // TODO: hash
+
+export class FileNotFoundError extends Error {
+  constructor(
+    public fileName: string,
+    message?: string, options?: ErrorOptions
+  ) { super(message, options) }
+}
 
 export const PDFCache = {
 
   async fromBlob(
-    blob: Blob, desc: { fileName: string, location: string }
+    blob: Blob, fileName: string
   ): Promise<PDFDocumentProxy> {
-    const { fileName, location } = desc;
-    if (!(fileName in loadedPDFs[location])) {
+    if (!(fileName in loadedPDFs)) {
       const pdf = await pdfjs.getDocument(await blob.arrayBuffer()).promise;
-      loadedPDFs[location][fileName] = pdf;
+      loadedPDFs[fileName] = pdf;
     }
-    return loadedPDFs[location][fileName];
+    return loadedPDFs[fileName];
   },
 
   async fromLocation(
-    desc: { fileName: string, location: string }
+    fileName: string,
   ): Promise<PDFDocumentProxy | false> {
     const fs = inject('FileSystem');
-    const { fileName, location } = desc;
-    if (location !== 'filesystem') throw new Error();
-    if (!(fileName in loadedPDFs[location])) {
+    if (!(fileName in loadedPDFs)) {
       const file = await fs.read(fileName);
       if (file === false) return false;
-      await this.fromBlob(file, desc);
+      await this.fromBlob(file, fileName);
     }
-    return loadedPDFs[location][fileName];
+    return loadedPDFs[fileName];
   }
 
 }

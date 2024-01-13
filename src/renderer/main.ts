@@ -14,14 +14,14 @@ provideDependencies({
 })
 
 setTimeout(async () => {
-  const fs = inject('FileSystem');
-  const file = await fs.read('/home/dominik/Source/private/wournal/test.pdf.pdf');
-  if (!file) throw new Error();
-
-  const pdf = await pdfjs.getDocument(await file.arrayBuffer()).promise;
-
-  const viewer = new WournalPDFPageView(await pdf.getPage(1));
-  console.log(viewer.display);
+  // const fs = inject('FileSystem');
+  // const file = await fs.read('/home/dominik/Source/private/wournal/test.pdf.pdf');
+  // if (!file) throw new Error();
+  //
+  // const pdf = await pdfjs.getDocument(await file.arrayBuffer()).promise;
+  //
+  // const viewer = new WournalPDFPageView(await pdf.getPage(1));
+  // console.log(viewer.getDimensionsPx());
   // document.body.appendChild(viewer.display);
   // viewer.setZoom(2);
 }, 500);

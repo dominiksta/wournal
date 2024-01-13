@@ -26,7 +26,7 @@ import { ShortcutsCtx } from "app/shortcuts-context";
 import { ConfigCtx } from "app/config-context";
 import { ApiCtx } from "app/api-context";
 import ZipFile from "util/ZipFile";
-import { PDFCache } from "pdf/PDFCache";
+import { FileNotFoundError, PDFCache } from "pdf/PDFCache";
 
 const INITIAL_ZOOM_FACTOR = computeZoomFactor();
 
@@ -110,21 +110,29 @@ export class WournalDocument extends Component {
   public static async fromFile(
     getContext: Component['getContext'],
     fileName: string, blob: Blob,
-  ): Promise<WournalDocument> {
+    pdfNotFoundActions: {
+      fileName: string, replaceOrRemove: string | false
+    }[] = [],
+  ): Promise<WournalDocument | FileNotFoundError> {
     const doc = new this(getContext, fileName);
 
     // woj
     // ----------------------------------------------------------------------
     if (fileName.toLowerCase().endsWith('.woj')) {
       const zipFile = await ZipFile.fromBlob(new Blob([blob]));
-      const pages = await Promise.all((await zipFile.allFiles())
+      const pagesSvg = await Promise.all((await zipFile.allFiles())
         .sort((a, b) => a.name.localeCompare(b.name))
         .map(async f => (new TextDecoder()).decode(await f.blob.arrayBuffer())));
-      pages.forEach(p => doc.addPageFromSvg(p));
+      for (const svg of pagesSvg) {
+        console.log(pdfNotFoundActions);
+        const page = await WournalPage.fromSvgString(doc, svg, pdfNotFoundActions);
+        if (page instanceof FileNotFoundError) return page;
+        doc.addPage(page);
+      }
     // pdf
     // ----------------------------------------------------------------------
     } else if (fileName.toLowerCase().endsWith('.pdf')) {
-      const pdf = await PDFCache.fromBlob(blob, { fileName, location: 'filesystem' });
+      const pdf = await PDFCache.fromBlob(blob, fileName);
       for (let i = 1; i <= pdf.numPages; i++) {
         const pdfPage = await pdf.getPage(i);
         const viewport = pdfPage.getViewport({ scale: doc.zoom});
@@ -147,7 +155,9 @@ export class WournalDocument extends Component {
     // ----------------------------------------------------------------------
     } else if (fileName.toLowerCase().endsWith('.svg')) {
       const svg = await blob.text();
-      doc.addPageFromSvg(svg);
+      const page = await WournalPage.fromSvgString(doc, svg, pdfNotFoundActions);
+      if (page instanceof FileNotFoundError) return page;
+      doc.addPage(page);
       if (WournalPage.svgIsMarkedAsWournalPage(svg)) {
         doc.isSinglePage = true;
       } else { // background svg
@@ -368,10 +378,6 @@ export class WournalDocument extends Component {
     init: PageProps, addAfterPageNr: number = -1
   ): void {
     this.addPage(WournalPage.createNew(this, init), addAfterPageNr);
-  }
-
-  public addPageFromSvg(svg: string) {
-    this.addPage(WournalPage.fromSvgString(this, svg));
   }
 
   private addPage(

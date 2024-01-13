@@ -11,7 +11,7 @@ import { UndoActionLayer } from "./UndoActionLayer";
 import { UndoAction } from "./UndoStack";
 import { WournalDocument } from "./WournalDocument";
 import { xToPx } from "./WournalPageSize";
-import { PDFCache } from "pdf/PDFCache";
+import { FileNotFoundError, PDFCache } from "pdf/PDFCache";
 
 /**
  * The attribute defining a "layer" element for wournal. Really they are just
@@ -185,9 +185,12 @@ export class WournalPage {
   // ----------------------------------------------------------------------
 
   /** Return a page parsed from the <svg> element string `svg` */
-  public static fromSvgString(
-    doc: WournalDocument, svg: string
-  ): WournalPage {
+  public static async fromSvgString(
+    doc: WournalDocument, svg: string,
+    pdfNotFoundActions: {
+      fileName: string, replaceOrRemove: string | false
+    }[] = [],
+  ): Promise<WournalPage | FileNotFoundError> {
     svg = DOMUtils.sanitizeSVG(svg);
 
     let page = new WournalPage(doc);
@@ -237,7 +240,13 @@ export class WournalPage {
       )
     );
 
-    page.maybeLoadPDFPage();
+
+    const notFoundAction =
+      pdfNotFoundActions.filter(a => a.fileName === page.pdfMode.fileName)[0];
+    const maybePdf = await page.maybeLoadPDFPage(
+      (notFoundAction ? notFoundAction.replaceOrRemove : undefined)
+    );
+    if (maybePdf !== true) return maybePdf;
 
     page.updateDisplaySize();
     return page;
@@ -247,15 +256,31 @@ export class WournalPage {
     return (new XMLSerializer()).serializeToString(this.canvas);
   }
 
-  private async maybeLoadPDFPage(): Promise<boolean> {
-    // TODO: display error when pdf not found
+  private async maybeLoadPDFPage(
+    pdfNotFoundAction?: string | false,
+  ): Promise<true | FileNotFoundError> {
     if (this.pdfMode === undefined) {
       if (this.pdfViewer) this.pdfViewer.display.remove();
       this._setLayerVisible('Background', true, false);
-      return;
+      return true;
     }
-    const resp = await PDFCache.fromLocation(this.pdfMode);
-    if (resp === false) return false;
+    let resp = await PDFCache.fromLocation(this.pdfMode.fileName);
+    if (resp === false) {
+      if (pdfNotFoundAction !== undefined) {
+        if (pdfNotFoundAction === false) {
+          this._setLayerVisible('Background', true, false);
+          this.generateBackground(BackgroundGenerators.blank);
+          this.pdfMode = undefined;
+          return true;
+        } else {
+          resp = await PDFCache.fromLocation(pdfNotFoundAction);
+          if (!resp) return new FileNotFoundError(pdfNotFoundAction);
+          this.pdfMode = { ...this.pdfMode, fileName: pdfNotFoundAction };
+        }
+      } else {
+        return new FileNotFoundError(this.pdfMode.fileName);
+      }
+    }
     this.pdfViewer = new WournalPDFPageView(await resp.getPage(this.pdfMode.pageNr));
     this.pdfViewer.setZoom(this.zoom);
     this.setPageSize(this.pdfViewer.getDimensionsPx());
@@ -560,7 +585,6 @@ export class WournalPage {
       "http://www.w3.org/2000/svg", "svg"
     );
     outerSvg.innerHTML = svg;
-    console.log(outerSvg.children[0]);
     return outerSvg.children[0].hasAttribute(WOURNAL_SVG_PAGE_MARKER_ATTR);
   }
 }

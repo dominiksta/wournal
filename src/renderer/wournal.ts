@@ -25,6 +25,7 @@ import { FileUtils } from 'util/FileUtils';
 import { ApiClient } from 'electron-api-client';
 import { inject } from 'dependency-injection';
 import About from 'app/about';
+import { FileNotFoundError } from 'pdf/PDFCache';
 
 @Component.register
 export default class Wournal extends Component {
@@ -98,9 +99,38 @@ export default class Wournal extends Component {
     loadDocument: async (identification) => {
       const blob = await this.fileSystem.read(identification);
       if (!blob) return false;
-      const doc = await WournalDocument.fromFile(
-        this.getContext.bind(this), identification, blob
+      let pdfNotFoundActions: {
+        fileName: string, replaceOrRemove: string | false
+      }[] = [];
+      let doc = await WournalDocument.fromFile(
+        this.getContext.bind(this), identification, blob, pdfNotFoundActions
       );
+      while (doc instanceof FileNotFoundError) {
+        const file = doc.fileName;
+        const resp = await new Promise<string | false>(resolve => this.dialog.openDialog(_close => ({
+          heading: 'PDF Not Found!',
+          state: 'Error',
+          content: h.section([
+            `The PDF file "${file}" was not found. ` +
+            'It may have been moved, deleted or renamed.'
+          ]),
+          buttons: [
+            {
+              name: 'Choose other PDF', action: async () => {
+                resolve(await this.fileSystem.loadPrompt([
+                  { extensions: ['pdf'], name: 'Portable Document Format (PDF)' }
+                ]));
+              }
+            },
+            { name: 'Remove PDF Background', action: () => resolve(false) },
+          ],
+        })));
+        pdfNotFoundActions.push({ fileName: doc.fileName, replaceOrRemove: resp  });
+        console.log(pdfNotFoundActions);
+        doc = await WournalDocument.fromFile(
+          this.getContext.bind(this), identification, blob, pdfNotFoundActions
+        );
+      }
       if (doc.isSinglePage) this.toast.open(
         'This is a single page document (SVG). You will not be able to add ' +
         'pages unless you save as a .woj file'
