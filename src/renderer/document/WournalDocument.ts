@@ -328,7 +328,6 @@ export class WournalDocument extends Component {
     const c = this.toolConfig.value.CanvasToolText;
     this.pasteWournal([{
         name: 'Text',
-        // TODO: find a more sane paste position then 10,10
         text, pos: { x: 10, y: 10 },
         fontSize: c.fontSize, fontStyle: c.fontStyle,
         fontWeight: c.fontWeight, fontFamily: c.fontFamily,

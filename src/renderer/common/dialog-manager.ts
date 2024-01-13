@@ -67,7 +67,7 @@ export class BasicDialog extends Component<{
         }, 'Close')
       ]
       return btns.map(btn => ui5.button({
-        fields: { design: btn.design, icon: btn.icon },
+        fields: { design: btn.design, icon: btn.icon ?? null },
         events: {
           click: _ => {
             dialogRef.current.close();

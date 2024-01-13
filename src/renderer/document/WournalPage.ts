@@ -5,7 +5,7 @@ import { WournalPDFPageView } from "pdf/WournalPDFPageView";
 import { DOMUtils } from "util/DOMUtils";
 import { DSUtils } from "util/DSUtils";
 import {
-  BackgroundGenerator, BackgroundStyleT, BackgroundGenerators
+  BackgroundGenerator, BackgroundStyleT, BackgroundGenerators, genBackgroundRect
 } from "./BackgroundGenerators";
 import { UndoActionLayer } from "./UndoActionLayer";
 import { UndoAction } from "./UndoStack";
@@ -84,7 +84,11 @@ export class WournalPage {
       : undefined;
   }
   private set pdfMode(mode: PagePDFMode) {
-    this.canvas.setAttribute(WOURNAL_SVG_PAGE_PDF_ATTR, JSON.stringify(mode));
+    if (mode === undefined) this.canvas.removeAttribute(WOURNAL_SVG_PAGE_PDF_ATTR);
+    else this.canvas.setAttribute(WOURNAL_SVG_PAGE_PDF_ATTR, JSON.stringify(mode));
+  }
+  public get isAnnotatingPDF() {
+    return this.canvas.hasAttribute(WOURNAL_SVG_PAGE_PDF_ATTR);
   }
 
   private zoom: number = 1;
@@ -245,14 +249,17 @@ export class WournalPage {
 
   private async maybeLoadPDFPage(): Promise<boolean> {
     // TODO: display error when pdf not found
-    if (!this.pdfMode) return;
+    if (this.pdfMode === undefined) {
+      if (this.pdfViewer) this.pdfViewer.display.remove();
+      this._setLayerVisible('Background', true, false);
+      return;
+    }
     const resp = await PDFCache.fromLocation(this.pdfMode);
     if (resp === false) return false;
     this.pdfViewer = new WournalPDFPageView(await resp.getPage(this.pdfMode.pageNr));
     this.pdfViewer.setZoom(this.zoom);
     this.setPageSize(this.pdfViewer.getDimensionsPx());
-    // TODO: pdf layer should appear to user as background layer
-    this.setLayerVisible('Background', false);
+    this._setLayerVisible('Background', false, false);
     this.pdfViewer.display.style.pointerEvents = 'none';
     this.display.insertBefore(this.pdfViewer.display, this.svgWrapperEl);
     return true;
@@ -267,11 +274,18 @@ export class WournalPage {
   }[]>([]);
 
   private updateLayerList() {
-    this.layers.next(this.getLayers().map(l => ({
+    let layers = this.getLayers().map(l => ({
       current: l.getAttribute(WOURNAL_SVG_LAYER_CURRENT_ATTR) === 'true',
       visible: l.getAttribute('visibility') !== 'hidden',
       name: l.getAttribute(WOURNAL_SVG_LAYER_NAME_ATTR),
-    })));
+    }));
+    if (this.isAnnotatingPDF && this.pdfViewer)
+      layers = [
+        { current: false, visible: !this.pdfViewer.display.hidden, name: 'Background' },
+        ...layers.filter(l => l.name !== 'Background'),
+      ];
+
+    this.layers.next(layers);
   }
 
   public addLayer(
@@ -311,6 +325,7 @@ export class WournalPage {
   }
 
   public moveLayer(name: string, direction: 'up' | 'down') {
+    if (name === 'Background') throw new Error('Cannot move Background layer');
     const l = this.getLayer(name);
     const parent = l.parentElement;
 
@@ -329,16 +344,28 @@ export class WournalPage {
     ));
   }
 
-  public setLayerVisible(name: string, visible: boolean): void {
+  private _setLayerVisible(name: string, visible: boolean, undoable = true): void {
     this.getLayer(name).setAttribute(
       'visibility', visible ? 'visible' : 'hidden'
     );
     const listBefore = this.layers.value;
     this.updateLayerList();
-    this.doc.undoStack.push(new UndoActionLayer(
-      this.canvas, this.updateLayerList.bind(this),
-      [], [], listBefore, this.layers.value
-    ));
+    if (undoable)
+      this.doc.undoStack.push(new UndoActionLayer(
+        this.canvas, this.updateLayerList.bind(this),
+        [], [], listBefore, this.layers.value
+      ));
+  }
+
+  public setLayerVisible(name: string, visible: boolean, undoable = true) {
+    if (this.pdfMode !== undefined && name === 'Background' && this.pdfViewer) {
+      // HACK: toggling visibility of pdf layer is not undoable
+      this.pdfViewer.display.hidden = !visible;
+      this.updateLayerList();
+      console.log('set visible = ', visible);
+    } else {
+      this._setLayerVisible(name, visible, undoable);
+    }
   }
 
   /** Get a layer by its name */
@@ -357,6 +384,7 @@ export class WournalPage {
   private getLayers = () => WournalPage.getLayers(this.canvas);
 
   public setActivePaintLayer(name: string, undoable = true) {
+    if (name === 'Background') throw new Error('Cannot paint on Background layer');
     const l = this.getLayer(name);
     this.activePaintLayer = l;
     this.getLayers().map(
@@ -372,7 +400,7 @@ export class WournalPage {
     ));
   }
 
-  public deleteLayer(name: string, undoable = true) {
+  private _deleteLayer(name: string, undoable = true) {
     const l = this.getLayer(name);
     l.parentNode.removeChild(l);
 
@@ -393,7 +421,13 @@ export class WournalPage {
     ));
   }
 
+  public deleteLayer(name: string, undoable = true) {
+    if (name === 'Background') throw new Error('Cannot delete Background layer');
+    return this._deleteLayer(name, undoable);
+  }
+
   public renameLayer(name: string, newName: string) {
+    if (name === 'Background') throw new Error('Cannot rename Background layer');
     this.getLayer(name).setAttribute(WOURNAL_SVG_LAYER_NAME_ATTR, newName);
     const listBefore = this.layers.value;
     this.updateLayerList();
@@ -408,7 +442,7 @@ export class WournalPage {
   // ----------------------------------------------------------------------
 
   private generateBackground(generator: BackgroundGenerator) {
-    if (this.getLayer('Background')) this.deleteLayer('Background', false);
+    if (this.getLayer('Background')) this._deleteLayer('Background', false);
     const newBg = this.addLayer('Background', false, true);
     const bgEls = generator({
       width: this.width, height: this.height,
@@ -422,6 +456,7 @@ export class WournalPage {
       backgroundColor: this.backgroundColor,
       backgroundStyle: this.backgroundStyle,
       height: this.height, width: this.width,
+      pdfMode: this.pdfMode,
     };
   }
 
@@ -430,8 +465,12 @@ export class WournalPage {
     this.setPageSize(props);
     this.backgroundColor = props.backgroundColor;
     this.backgroundStyle = props.backgroundStyle;
-    this.generateBackground(BackgroundGenerators[props.backgroundStyle]);
-    if (props.pdfMode) this.pdfMode = props.pdfMode;
+    if (props.pdfMode !== undefined) {
+      this.generateBackground(() => [ genBackgroundRect({ ...props, fillOpacity: 0 }) ]);
+    } else {
+      this.generateBackground(BackgroundGenerators[props.backgroundStyle]);
+    }
+    this.pdfMode = props.pdfMode;
     this.maybeLoadPDFPage();
     if (undoable) this.doc.undoStack.push(new UndoActionPageProps(
       this, propsBefore, this.getPageProps(),

@@ -1,10 +1,8 @@
 import { Component, h, rx, style } from "@mvui/core";
 import * as ui5 from "@mvui/ui5";
 import { OpenDialog } from "common/dialog-manager";
-import {
-  BackgroundGeneratorDesc, BackgroundStyle, BackgroundStyleT
-} from "document/BackgroundGenerators";
-import { PageProps } from "document/WournalPage";
+import { BackgroundStyle, BackgroundStyleT } from "document/BackgroundGenerators";
+import { PagePDFMode, PageProps } from "document/WournalPage";
 import { MM_TO_PIXEL, WournalPageSize, WournalPageSizeName, WournalPageSizes } from "document/WournalPageSize";
 import { DSUtils } from "util/DSUtils";
 
@@ -15,7 +13,7 @@ export function pageStyleDialog(
   const state = new rx.State(DSUtils.copyObj(current));
 
   return new Promise(resolve => {
-    openDialog(close => ({
+    openDialog(_close => ({
       heading: 'Set Page Properties',
       content: [
         PageStyleDialog.t({
@@ -24,6 +22,7 @@ export function pageStyleDialog(
             color: rx.bind(state.partial('backgroundColor')),
             width: rx.bind(state.partial('width')),
             height: rx.bind(state.partial('height')),
+            pdfMode: rx.bind(state.partial('pdfMode')),
           }
         })
       ],
@@ -50,10 +49,11 @@ export class PageStyleDialog extends Component {
     color: rx.prop<string>(),
     width: rx.prop<number>(),
     height: rx.prop<number>(),
+    pdfMode: rx.prop<PagePDFMode>(),
   }
 
   render() {
-    const { style, color, width, height } = this.props;
+    const { style, color, width, height, pdfMode } = this.props;
 
     const defaultColors = [ // stolen from xournal++
       '#FFFFFF', // white
@@ -68,6 +68,12 @@ export class PageStyleDialog extends Component {
       '#FABEBE', // red
     ];
 
+    const backgroundStyles = [ 'blank', 'graph', 'ruled', 'pdf' ] as const;
+
+    const styleNames = {
+      blank: 'Blank', graph: 'Graph', ruled: 'Ruled', pdf: 'PDF',
+    }
+
     const dimensionNames: { [K in WournalPageSizeName]: string } = {
       DINA4: 'DIN A4',
       DINA5: 'DIN A5',
@@ -80,6 +86,10 @@ export class PageStyleDialog extends Component {
       width, height,
       (width, height) => height > width ? 'vertical' : 'horizontal'
     );
+    const isAnnotatingPDF = pdfMode.derive(m => m !== undefined);
+
+    const styleOrPDF = rx.derive(style, isAnnotatingPDF, (s, p) => p ? 'pdf' : s);
+
     const setOrientation = (o: 'vertical' | 'horizontal') => {
       if (orientation.value !== o) {
         const oldWidth = width.value, oldHeight = height.value;
@@ -111,16 +121,28 @@ export class PageStyleDialog extends Component {
     return [
       h.section([
         ui5.title({ fields: { level: 'H6' } }, 'Style'),
-        ...BackgroundStyle.map(name => ui5.radioButton({
+        ...backgroundStyles.map(name => ui5.radioButton({
           fields: {
             name: 'radio-group-style',
-            checked: style.derive(s => s === name),
-            text: BackgroundGeneratorDesc[name],
+            checked: styleOrPDF.derive(s => s === name),
+            text: styleNames[name],
           },
-          events: { change: _ => { style.next(name) } }
+          style: {
+            display: styleOrPDF.derive(
+              s => (name === 'pdf' && s !== 'pdf') ? 'none' : 'block'
+            ),
+          },
+          events: {
+            change: _ => {
+              if (name !== 'pdf') {
+                pdfMode.next(undefined);
+                style.next(name);
+              }
+            }
+          }
         }))
       ]),
-      h.section([
+      h.section({ fields: { hidden: isAnnotatingPDF }}, [
         ui5.title({ fields: { level: 'H6' } }, 'Color'),
         ui5.colorPalette({
           events: {
@@ -148,6 +170,9 @@ export class PageStyleDialog extends Component {
             h.td(ui5.label({ fields: { for: 'select-preset' }, }, 'Preset')),
             h.td(ui5.select(
               {
+                fields: {
+                  disabled: isAnnotatingPDF,
+                },
                 events: {
                   change: e => {
                     const n = e.detail.selectedOption.value as
@@ -166,6 +191,7 @@ export class PageStyleDialog extends Component {
               [
                 ui5.option({
                   fields: {
+                    disabled: isAnnotatingPDF,
                     value: 'user',
                     selected: dimensionMatchingPreset.derive(p => p === 'user'),
                   }
@@ -183,6 +209,7 @@ export class PageStyleDialog extends Component {
             h.td(ui5.stepInput({
               fields: {
                 id: 'input-width', min: 0, valuePrecision: 2,
+                disabled: isAnnotatingPDF,
                 value: rx.bind(width.createLinked(
                   (val) => val / MM_TO_PIXEL / 10,
                   (val, next) => next(val * MM_TO_PIXEL * 10)
@@ -196,6 +223,7 @@ export class PageStyleDialog extends Component {
             h.td(ui5.stepInput({
               fields: {
                 id: 'input-height', min: 0, valuePrecision: 2,
+                disabled: isAnnotatingPDF,
                 value: rx.bind(height.createLinked(
                   (val) => val / MM_TO_PIXEL / 10,
                   (val, next) => next(val * MM_TO_PIXEL * 10)
@@ -210,6 +238,7 @@ export class PageStyleDialog extends Component {
             fields: {
               text: 'Vertical',
               checked: orientation.derive(o => o === 'vertical'),
+              disabled: isAnnotatingPDF,
             },
             events: { change: _ => { setOrientation('vertical') } },
           }),
@@ -217,6 +246,7 @@ export class PageStyleDialog extends Component {
             fields: {
               text: 'Horizontal',
               checked: orientation.derive(o => o === 'horizontal'),
+              disabled: isAnnotatingPDF,
             },
             events: { change: _ => { setOrientation('horizontal') } },
           }),

@@ -6,19 +6,19 @@ export type BackgroundGenerator =
 export const BackgroundStyle = ['blank', 'graph', 'ruled'] as const;
 export type BackgroundStyleT = 'blank' | 'graph' | 'ruled';
 
-export const BackgroundGeneratorDesc: { [K in BackgroundStyleT]: string } = {
-  blank: 'Blank',
-  graph: 'Graph',
-  ruled: 'Ruled',
-}
-
-function genBackgroundRect(
-  params: {width: number, height: number, backgroundColor: string}
+export function genBackgroundRect(
+  params: {
+    width: number, height: number, backgroundColor: string,
+    fillOpacity?: number,
+  }
 ): SVGRectElement {
   const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
   rect.setAttribute('width', params.width.toString());
   rect.setAttribute('height', params.height.toString());
   rect.setAttribute('fill', params.backgroundColor);
+  if (params.fillOpacity !== undefined) rect.setAttribute(
+    'fill-opactiy', params.fillOpacity.toString()
+  );
   rect.setAttribute('stroke', params.backgroundColor);
   return rect;
 }

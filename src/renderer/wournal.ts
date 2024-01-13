@@ -506,6 +506,8 @@ export default class Wournal extends Component {
     'page_new_after': {
       human_name: 'New Page After',
       func: () => {
+        // TODO: if current is pdf, set new page to same size but default
+        // background
         const nr = this.api.getCurrentPageNr();
         this.api.addPage(nr, this.api.getPageProps(nr));
         this.api.scrollPage(nr + 1);
