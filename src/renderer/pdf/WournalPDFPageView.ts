@@ -16,27 +16,21 @@ export class WournalPDFPageView {
     WournalPDFPageView.DEFAULT_ZOOM_FACTOR *
     pdfjs.PixelsPerInch.PDF_TO_CSS_UNITS / DEFAULT_ZOOM_FACTOR;
 
-  private viewer: PDFPageView;
+  private viewer: PDFPageView | false = false;
   public readonly display: HTMLDivElement;
+  private readonly container: HTMLDivElement;
   private zoom = 1;
-  private needsDrawing = false;
+  private needsDrawing = true;
 
   constructor(
     private page: PDFPageProxy,
   ) {
-    const s = this.setup();
-    this.viewer = s.viewer;
-    this.display = s.display;
-  }
+    this.display = document.createElement('div');
+    this.display.setAttribute('class', 'wournal-pdf-page-view');
+    this.display.style.position = 'absolute';
+    this.display.style.pointerEvents = 'none';
 
-  private setup() {
-    const scale = WournalPDFPageView.DEFAULT_ZOOM_ADJUSTED;
-    const viewport = this.page.getViewport({ scale });
-
-    const _shadow = document.createElement('div');
-    _shadow.setAttribute('class', 'wournal-pdf-page-view');
-    _shadow.style.position = 'absolute';
-    const shadow = _shadow.attachShadow({ mode: 'closed' });
+    const shadow = this.display.attachShadow({ mode: 'closed' });
 
     // TODO: optimize with adoptedStyleSheets
 
@@ -44,31 +38,33 @@ export class WournalPDFPageView {
     styles.innerText = css;
     shadow.appendChild(styles);
 
-    const container = document.createElement('div');
-    container.id = 'container';
-    shadow.appendChild(container);
+    this.container = document.createElement('div');
+    this.container.id = 'container';
+    shadow.appendChild(this.container);
+  }
 
-    const eventBus = new pdfjsViewer.EventBus();
+  private createViewer() {
+    console.debug(`Creating Viewer for Page ${this.page.pageNumber}`);
+
     const viewer = new pdfjsViewer.PDFPageView({
-      container,
+      container: this.container,
       id: 1,
-      defaultViewport: viewport,
+      defaultViewport: this.page.getViewport({
+        scale: WournalPDFPageView.DEFAULT_ZOOM_ADJUSTED
+      }),
       scale: 1,
-      eventBus,
+      eventBus: new pdfjsViewer.EventBus(),
       textLayerMode: 1,
     });
 
     viewer.setPdfPage(this.page);
-    this.needsDrawing = true;
 
-    return {
-      viewer,
-      display: _shadow,
-    };
+    return viewer;
   }
 
   public async drawIfNeeded(): Promise<any> {
     if (!this.needsDrawing) return;
+    if (!this.viewer) this.viewer = this.createViewer();
     const resp = this.viewer.draw();
     this.needsDrawing = false;
     return await resp;
@@ -86,9 +82,7 @@ export class WournalPDFPageView {
 
   public async setZoom(zoom: number) {
     this.zoom = zoom;
-    this.viewer.update({
-      scale: zoom / DEFAULT_ZOOM_FACTOR
-    });
+    if (this.viewer) this.viewer.update({ scale: zoom / DEFAULT_ZOOM_FACTOR });
     this.needsDrawing = true;
   }
 

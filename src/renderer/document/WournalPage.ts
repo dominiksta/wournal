@@ -296,7 +296,6 @@ export class WournalPage {
     this.pdfViewer.setZoom(this.zoom);
     this.setPageSize(this.pdfViewer.getDimensionsPx());
     this._setLayerVisible('Background', false, false);
-    this.pdfViewer.display.style.pointerEvents = 'none';
     this.display.insertBefore(this.pdfViewer.display, this.svgWrapperEl);
     return true;
   }
