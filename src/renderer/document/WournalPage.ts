@@ -259,12 +259,13 @@ export class WournalPage {
   public async renderPDFIfNeeded() {
     if (!this.pdfViewer) return;
     const rect = this.display.getBoundingClientRect();
-    const upperLowerThres = window.innerHeight * 2;
+    const upperLowerThres = Math.max(2000, window.innerHeight * 2);
     const isVisible = (
       rect.top >= -upperLowerThres
       && rect.bottom <= window.innerHeight + upperLowerThres
     );
     if (isVisible) return await this.pdfViewer.drawIfNeeded();
+    else return await this.pdfViewer.free();
   }
 
   private async maybeLoadPDFPage(

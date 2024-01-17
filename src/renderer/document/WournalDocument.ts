@@ -129,7 +129,6 @@ export class WournalDocument extends Component {
         .sort((a, b) => a.name.localeCompare(b.name))
         .map(async f => (new TextDecoder()).decode(await f.blob.arrayBuffer())));
       for (const svg of pagesSvg) {
-        console.log(pdfNotFoundActions);
         const page = await WournalPage.fromSvgString(doc, svg, pdfNotFoundActions);
         if (page instanceof FileNotFoundError) return page;
         doc.addPage(page);
@@ -141,7 +140,6 @@ export class WournalDocument extends Component {
       for (let i = 1; i <= pdf.numPages; i++) {
         const pdfPage = await pdf.getPage(i);
         const viewport = pdfPage.getViewport({ scale: doc.zoom});
-        console.log(viewport);
 
         const wournalPage = WournalPage.createNew(doc, {
           backgroundColor: '#FFFFFF',

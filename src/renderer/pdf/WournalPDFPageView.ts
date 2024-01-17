@@ -11,14 +11,13 @@ import { DEFAULT_ZOOM_FACTOR } from 'document/WournalPageSize';
 
 export class WournalPDFPageView {
 
-  private static readonly DEFAULT_ZOOM_FACTOR = 1;
   private static readonly DEFAULT_ZOOM_ADJUSTED =
-    WournalPDFPageView.DEFAULT_ZOOM_FACTOR *
     pdfjs.PixelsPerInch.PDF_TO_CSS_UNITS / DEFAULT_ZOOM_FACTOR;
 
   private viewer: PDFPageView | false = false;
   public readonly display: HTMLDivElement;
-  private readonly container: HTMLDivElement;
+  private readonly shadow: ShadowRoot;
+  private container: HTMLDivElement;
   private zoom = 1;
   private needsDrawing = true;
 
@@ -30,21 +29,21 @@ export class WournalPDFPageView {
     this.display.style.position = 'absolute';
     this.display.style.pointerEvents = 'none';
 
-    const shadow = this.display.attachShadow({ mode: 'closed' });
+    this.shadow = this.display.attachShadow({ mode: 'closed' });
 
     // TODO: optimize with adoptedStyleSheets
 
     const styles = document.createElement('style');
     styles.innerText = css;
-    shadow.appendChild(styles);
-
-    this.container = document.createElement('div');
-    this.container.id = 'container';
-    shadow.appendChild(this.container);
+    this.shadow.appendChild(styles);
   }
 
   private createViewer() {
-    console.debug(`Creating Viewer for Page ${this.page.pageNumber}`);
+    console.debug(`Creating PDF Viewer for Page ${this.page.pageNumber}`);
+
+    this.container = document.createElement('div');
+    this.container.id = 'container';
+    this.shadow.appendChild(this.container);
 
     const viewer = new pdfjsViewer.PDFPageView({
       container: this.container,
@@ -52,7 +51,7 @@ export class WournalPDFPageView {
       defaultViewport: this.page.getViewport({
         scale: WournalPDFPageView.DEFAULT_ZOOM_ADJUSTED
       }),
-      scale: 1,
+      scale: this.zoom / DEFAULT_ZOOM_FACTOR,
       eventBus: new pdfjsViewer.EventBus(),
       textLayerMode: 1,
     });
@@ -60,6 +59,15 @@ export class WournalPDFPageView {
     viewer.setPdfPage(this.page);
 
     return viewer;
+  }
+
+  public async free() {
+    if (!this.viewer) return;
+    console.debug(`Freeing PDF Viewer for Page ${this.page.pageNumber}`);
+    this.viewer.destroy();
+    this.shadow.removeChild(this.container);
+    this.viewer = false;
+    this.needsDrawing = true;
   }
 
   public async drawIfNeeded(): Promise<any> {
