@@ -1,19 +1,25 @@
+// we need to import this on startup to have pdf.js do its rendering
+// asynchronously in a web worker
+import 'pdfjs-dist/webpack';
+
 import * as pdfjs from 'pdfjs-dist';
 import * as pdfjsViewer from 'pdfjs-dist/web/pdf_viewer.mjs';
-import 'pdfjs-dist/build/pdf.worker';
 import { css } from './pdf_viewer.css';
 import type { PDFPageProxy } from 'pdfjs-dist/types/src/display/api';
 import { PDFPageView } from 'pdfjs-dist/web/pdf_viewer.mjs';
-import { computeZoomFactor } from 'document/WournalPageSize';
-
-// accessing this and importing pdf.worker sets up a default
-pdfjs.GlobalWorkerOptions.workerSrc
+import { DEFAULT_ZOOM_FACTOR } from 'document/WournalPageSize';
 
 export class WournalPDFPageView {
+
+  private static readonly DEFAULT_ZOOM_FACTOR = 1;
+  private static readonly DEFAULT_ZOOM_ADJUSTED =
+    WournalPDFPageView.DEFAULT_ZOOM_FACTOR *
+    pdfjs.PixelsPerInch.PDF_TO_CSS_UNITS / DEFAULT_ZOOM_FACTOR;
 
   private viewer: PDFPageView;
   public readonly display: HTMLDivElement;
   private zoom = 1;
+  private needsDrawing = false;
 
   constructor(
     private page: PDFPageProxy,
@@ -24,10 +30,7 @@ export class WournalPDFPageView {
   }
 
   private setup() {
-    const defaultZoom = 1;
-
-    const scale =
-      defaultZoom * pdfjs.PixelsPerInch.PDF_TO_CSS_UNITS / computeZoomFactor();
+    const scale = WournalPDFPageView.DEFAULT_ZOOM_ADJUSTED;
     const viewport = this.page.getViewport({ scale });
 
     const _shadow = document.createElement('div');
@@ -53,11 +56,10 @@ export class WournalPDFPageView {
       scale: 1,
       eventBus,
       textLayerMode: 1,
-      isOffscreenCanvasSupported: true,
     });
 
     viewer.setPdfPage(this.page);
-    viewer.draw();
+    this.needsDrawing = true;
 
     return {
       viewer,
@@ -65,9 +67,16 @@ export class WournalPDFPageView {
     };
   }
 
+  public async drawIfNeeded(): Promise<any> {
+    if (!this.needsDrawing) return;
+    const resp = this.viewer.draw();
+    this.needsDrawing = false;
+    return await resp;
+  }
+
   public getDimensionsPx(): { width: number, height: number } {
     const { width, height } = this.page.getViewport({
-      scale: 1 * pdfjs.PixelsPerInch.PDF_TO_CSS_UNITS / computeZoomFactor()
+      scale: WournalPDFPageView.DEFAULT_ZOOM_ADJUSTED
     });
     return {
       width: parseFloat(width.toFixed(2)),
@@ -78,9 +87,9 @@ export class WournalPDFPageView {
   public async setZoom(zoom: number) {
     this.zoom = zoom;
     this.viewer.update({
-      scale: zoom / computeZoomFactor()
+      scale: zoom / DEFAULT_ZOOM_FACTOR
     });
-    return await this.viewer.draw();
+    this.needsDrawing = true;
   }
 
   public getZoom(): number {

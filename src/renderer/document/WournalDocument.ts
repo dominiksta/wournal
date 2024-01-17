@@ -15,7 +15,7 @@ import { CanvasSelection } from "./CanvasSelection";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
 import { UndoAction, UndoStack } from "./UndoStack";
 import { PageProps, WournalPage } from "./WournalPage";
-import { computeZoomFactor, WournalPageSize } from "./WournalPageSize";
+import { DEFAULT_ZOOM_FACTOR, WournalPageSize } from "./WournalPageSize";
 import { Component, h, rx, style } from "@mvui/core";
 import { theme } from "global-styles";
 import { ShortcutManager } from "app/shortcuts";
@@ -27,8 +27,6 @@ import { ConfigCtx } from "app/config-context";
 import { ApiCtx } from "app/api-context";
 import ZipFile from "util/ZipFile";
 import { FileNotFoundError, PDFCache } from "pdf/PDFCache";
-
-const INITIAL_ZOOM_FACTOR = computeZoomFactor();
 
 @Component.register
 export class WournalDocument extends Component {
@@ -71,7 +69,14 @@ export class WournalDocument extends Component {
     this.subscribe(this.activePage, p => {
       this.pages.value.forEach(p => p.display.classList.remove('active'));
       p.display.classList.add('active');
-    })
+    });
+
+    this.subscribe(this.activePage, async _ => {
+      // not ideal that we have to await a frame here, but it is needed for
+      // `renderPDFIfNeeded` to check wether the page is currently visible
+      await new Promise(requestAnimationFrame);
+      for (const p of this.pages.value) p.renderPDFIfNeeded();
+    });
 
     this.subscribe(this.pages, pages => {
       const correctPositions =
@@ -384,7 +389,7 @@ export class WournalDocument extends Component {
     page: WournalPage, addAfterPageNr: number = -1,
     undoable = true
   ) {
-    page.setZoom(this.zoom * INITIAL_ZOOM_FACTOR);
+    page.setZoom(this.zoom * DEFAULT_ZOOM_FACTOR);
 
     if (addAfterPageNr === -1) {
       this.display.appendChild(page.display);
@@ -456,7 +461,7 @@ export class WournalDocument extends Component {
   /** Set the zoom level of all pages. [0-inf[ */
   public setZoom(zoom: number) {
     this.zoom = zoom;
-    for (let page of this.pages.value) page.setZoom(zoom * INITIAL_ZOOM_FACTOR);
+    for (let page of this.pages.value) page.setZoom(zoom * DEFAULT_ZOOM_FACTOR);
   }
   public getZoom(): number { return this.zoom; }
 

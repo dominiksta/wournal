@@ -256,6 +256,17 @@ export class WournalPage {
     return (new XMLSerializer()).serializeToString(this.canvas);
   }
 
+  public async renderPDFIfNeeded() {
+    if (!this.pdfViewer) return;
+    const rect = this.display.getBoundingClientRect();
+    const upperLowerThres = window.innerHeight * 2;
+    const isVisible = (
+      rect.top >= -upperLowerThres
+      && rect.bottom <= window.innerHeight + upperLowerThres
+    );
+    if (isVisible) return await this.pdfViewer.drawIfNeeded();
+  }
+
   private async maybeLoadPDFPage(
     pdfNotFoundAction?: string | false,
   ): Promise<true | FileNotFoundError> {

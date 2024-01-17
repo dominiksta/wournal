@@ -33,6 +33,8 @@ export function computeZoomFactor() {
   return xToPx(1000 + "mm") / (1000 * MM_TO_PIXEL);
 }
 
+export const DEFAULT_ZOOM_FACTOR = computeZoomFactor();
+
 export const WournalPageSizes = [
   'DINA4', 'DINA5',
 ] as const;
