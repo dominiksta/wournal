@@ -35,6 +35,10 @@ export const BasicDialogManagerContext = new rx.Context<{
     content: TemplateElementChild,
     state?: ui5.types.Dialog['state'],
   ): void;
+  pleaseWait(
+    heading: TemplateElementChild,
+    content?: TemplateElementChild,
+  ): () => void;
   dialogs: rx.State<ComponentTemplateElement<BasicDialog>[]>;
 }>(mkDialogManagerCtx);
 
@@ -57,7 +61,7 @@ export class BasicDialog extends Component<{
     const { buttons, heading, state } = this.props;
 
     const buttonTemplate = buttons.derive(btns => {
-      if (btns.length === 0 || !btns) return [
+      if (btns === undefined) return [
         ui5.button({
           events: {
             click: _ => {
@@ -146,6 +150,7 @@ function mkDialogManagerCtx() {
     promptYesOrNo: mkPromptYesOrNo(openDialog),
     promptInput: mkPromptInput(openDialog),
     infoBox: mkInfoBox(openDialog),
+    pleaseWait: mkPleaseWait(openDialog),
     dialogs,
   };
 }
@@ -227,4 +232,24 @@ const mkPromptInput = (openDialog: OpenDialog) => (
       ]
     }));
   });
+}
+
+const mkPleaseWait = (openDialog: OpenDialog) => (
+  heading: TemplateElementChild,
+  content?: TemplateElementChild,
+  state?: ui5.types.Dialog['state'],
+) => {
+  let _close: () => void;
+  openDialog(close => {
+    _close = close;
+    return {
+      heading,
+      state: state ?? 'Information',
+      content: content ?? ui5.busyIndicator({
+        fields: { size: 'Medium', active: true, delay: 0 }
+      }),
+      buttons: [],
+    }
+  });
+  return _close;
 }

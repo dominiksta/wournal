@@ -97,6 +97,10 @@ export default class Wournal extends Component {
       return true;
     },
     loadDocument: async (identification) => {
+      const closePleaseWait = this.dialog.pleaseWait(
+        'Loading Document',
+      );
+      await new Promise(resolve => setTimeout(resolve, 100));
       const blob = await this.fileSystem.read(identification);
       if (!blob) return false;
       let pdfNotFoundActions: {
@@ -136,6 +140,7 @@ export default class Wournal extends Component {
         'pages unless you save as a .woj file'
       )
       this.doc.next(doc);
+      closePleaseWait();
       return true;
     },
     newDocument: async (props, identification) => {
