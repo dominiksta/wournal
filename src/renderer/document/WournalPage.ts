@@ -554,6 +554,7 @@ export class WournalPage {
     this.zoom = zoom;
     if (this.pdfViewer) this.pdfViewer.setZoom(zoom);
     this.updateDisplaySize();
+    this.renderPDFIfNeeded();
   }
 
   // ------------------------------------------------------------
