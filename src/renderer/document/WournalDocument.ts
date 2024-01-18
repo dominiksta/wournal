@@ -50,7 +50,7 @@ export class WournalDocument extends Component {
 
   private constructor(
     getContext: Component['getContext'],
-    public identification: string | undefined,
+    public fileName: string | undefined,
   ) {
     super();
     this.display.addEventListener("mouseup", this.onMouseUp.bind(this));
@@ -150,8 +150,7 @@ export class WournalDocument extends Component {
           }
         });
 
-        // TODO: filename default as woj on same path
-        doc.identification = undefined;
+        doc.fileName = undefined;
         doc.addPage(wournalPage);
       }
     // svg
@@ -185,6 +184,32 @@ export class WournalDocument extends Component {
         zipFile.addFile(String(i).padStart(4, '0') + '-page.svg', p.asSvgString()));
       return await zipFile.asBlob();
     }
+  }
+
+  public defaultFileName(extension: 'svg' | 'woj'): string {
+    const uniqPDFs = this.pages.value
+      .map(p => p.pdfMode ? p.pdfMode.fileName : undefined)
+      .filter(el => el !== undefined)
+      .filter((maybeUniq, maybeUniqIdx, arr) => arr.indexOf(maybeUniq) === maybeUniqIdx)
+    const hasUniqPDF = uniqPDFs.length === 1 ? uniqPDFs[0] : null;
+    if (hasUniqPDF) {
+      return (
+        hasUniqPDF.split(/\.(pdf|PDF)/).slice(0, -2).reduce((a, b) => a + '.' + b)
+        + '.woj'
+      );
+    }
+
+    const now = new Date();
+    const pad = (s: number) => s.toString().padStart(2, '0');
+    return (
+      `${now.getFullYear()}` +
+      `-${pad(now.getMonth() + 1)}` +
+      `-${pad(now.getDate())}` +
+      '-Note' +
+      `-${pad(now.getHours())}` +
+      `-${pad(now.getMinutes())}` +
+      `.${extension}`
+    );
   }
 
   public async free() {

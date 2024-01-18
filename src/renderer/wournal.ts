@@ -79,7 +79,7 @@ export default class Wournal extends Component {
     saveDocument: async (identification) => {
       const doc = this.doc.value;
       await this.fileSystem.write(identification, await doc.toFile());
-      doc.identification = identification;
+      doc.fileName = identification;
       doc.markSaved();
       updateTitle(doc);
       this.toast.open('Document Saved');
@@ -150,7 +150,7 @@ export default class Wournal extends Component {
       await this.doc.value.free();
       this.doc.next(doc);
       if (identification) {
-        doc.identification = identification;
+        doc.fileName = identification;
         updateTitle(doc);
         doc.isSinglePage = identification.endsWith('.svg');
         console.log(identification, doc.isSinglePage);
@@ -467,9 +467,9 @@ export default class Wournal extends Component {
       human_name: 'Save File',
       func: async () => {
         const doc = this.doc.value;
-        const id = doc.identification;
+        const id = doc.fileName;
         if (id === undefined) {
-          return await this.api.saveDocumentPromptMultiPage(mkDefaultFileName('woj'));
+          return await this.api.saveDocumentPromptMultiPage(doc.defaultFileName('woj'));
         } else {
           this.api.saveDocument(id);
           return id;
@@ -480,8 +480,9 @@ export default class Wournal extends Component {
     'file_save_as': {
       human_name: 'Save As',
       func: () => {
+        const doc = this.doc.value;
         this.api.saveDocumentPromptMultiPage(
-          this.doc.value.identification ?? mkDefaultFileName('woj')
+          doc.fileName ?? doc.defaultFileName('woj')
         );
       },
       shortcut: 'Ctrl+Shift+S',
@@ -489,8 +490,9 @@ export default class Wournal extends Component {
     'file_save_as_single_page': {
       human_name: 'Save As Single SVG',
       func: () => {
+        const doc = this.doc.value;
         this.api.saveDocumentPromptSinglePage(
-          this.doc.value.identification ?? mkDefaultFileName('svg')
+          doc.fileName ?? doc.defaultFileName('svg')
         );
       },
       shortcut: 'Ctrl+Shift+Alt+S',
@@ -787,25 +789,11 @@ export default class Wournal extends Component {
   });
 }
 
-function mkDefaultFileName(extension: string) {
-  const now = new Date();
-  const pad = (s: number) => s.toString().padStart(2, '0');
-  return (
-    `${now.getFullYear()}` +
-    `-${pad(now.getMonth() + 1)}` +
-    `-${pad(now.getDate())}` +
-    '-Note' +
-    `-${pad(now.getHours())}` +
-    `-${pad(now.getMinutes())}` +
-    `.${extension}`
-  );
-}
-
 function updateTitle(doc: WournalDocument) {
   const dirty = doc.dirty ? '*' : '';
   ApiClient['window:setTitle'](
-    doc.identification
-      ? 'Wournal - ' + dirty + FileUtils.fileNameNoPath(doc.identification)
+    doc.fileName
+      ? 'Wournal - ' + dirty + FileUtils.fileNameNoPath(doc.fileName)
       : 'Wournal'
   );
 }
