@@ -171,7 +171,7 @@ export class WournalDocument extends Component {
     }
     doc.undoStack.clear();
     doc.readyToRenderPDF = true;
-    doc.renderPDFIfNeeded();
+    setTimeout(() => { doc.renderPDFIfNeeded(); }, 500); // meeeeh
     return doc;
   }
 
@@ -226,7 +226,7 @@ export class WournalDocument extends Component {
     // not ideal that we have to await a frame here, but it is needed for
     // `renderPDFIfNeeded` to check wether the page is currently visible
     await new Promise(requestAnimationFrame);
-    for (const p of this.pages.value) p.renderPDFIfNeeded();
+    return Promise.all(this.pages.value.map(p => p.renderPDFIfNeeded()));
   }
 
   // ------------------------------------------------------------

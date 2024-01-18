@@ -265,6 +265,7 @@ export class WournalPage {
   public async renderPDFIfNeeded() {
     if (!this.pdfViewer || !this.doc.readyToRenderPDF) return;
     const rect = this.display.getBoundingClientRect();
+    if (rect.top === 0 && rect.bottom === 0) return;
     const upperLowerThres = Math.max(2000, window.innerHeight * 2);
     const isVisible = (
       rect.top >= -upperLowerThres
