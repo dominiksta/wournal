@@ -139,6 +139,7 @@ export default class Wournal extends Component {
         'This is a single page document (SVG). You will not be able to add ' +
         'pages unless you save as a .woj file'
       )
+      await this.doc.value.free();
       this.doc.next(doc);
       closePleaseWait();
       return true;
@@ -146,6 +147,7 @@ export default class Wournal extends Component {
     newDocument: async (props, identification) => {
       if (await this.api.promptClosingUnsaved()) return;
       const doc = WournalDocument.create(this.getContext.bind(this), props);
+      await this.doc.value.free();
       this.doc.next(doc);
       if (identification) {
         doc.identification = identification;

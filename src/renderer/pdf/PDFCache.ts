@@ -19,6 +19,7 @@ export const PDFCache = {
     blob: Blob, fileName: string
   ): Promise<PDFDocumentProxy> {
     if (!(fileName in loadedPDFs)) {
+      console.debug(`Loading PDF: ${fileName}`);
       const pdf = await pdfjs.getDocument(await blob.arrayBuffer()).promise;
       loadedPDFs[fileName] = pdf;
     }
@@ -35,6 +36,16 @@ export const PDFCache = {
       await this.fromBlob(file, fileName);
     }
     return loadedPDFs[fileName];
+  },
+
+  async destroy(
+    fileName: string
+  ): Promise<void> {
+    if (!(fileName in loadedPDFs)) return;
+    console.debug(`Freeing PDF: ${fileName}`);
+    const resp = await loadedPDFs[fileName].destroy();
+    delete loadedPDFs[fileName];
+    return resp;
   }
 
 }

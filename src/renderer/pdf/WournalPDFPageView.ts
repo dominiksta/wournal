@@ -73,6 +73,7 @@ export class WournalPDFPageView {
   public async drawIfNeeded(): Promise<any> {
     if (!this.needsDrawing) return;
     if (!this.viewer) this.viewer = this.createViewer();
+    console.debug(`Drawing PDF Viewer for Page ${this.page.pageNumber}`);
     const resp = this.viewer.draw();
     this.needsDrawing = false;
     return await resp;

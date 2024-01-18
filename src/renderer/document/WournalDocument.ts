@@ -187,6 +187,15 @@ export class WournalDocument extends Component {
     }
   }
 
+  public async free() {
+    const annotatedPDFs = [];
+    for (const page of this.pages.value) {
+      page.pdfMode && annotatedPDFs.push(page.pdfMode.fileName);
+      page.free();
+    }
+    for (const pdf of annotatedPDFs) await PDFCache.destroy(pdf);
+  }
+
   // ------------------------------------------------------------
   // undo, dirty/saved
   // ------------------------------------------------------------

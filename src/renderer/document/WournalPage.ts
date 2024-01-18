@@ -78,7 +78,7 @@ export class WournalPage {
     return this.canvas.getAttribute(WOURNAL_SVG_PAGE_BACKGROUND_STYLE_ATTR) as
       BackgroundStyleT;
   }
-  private get pdfMode(): PagePDFMode | undefined {
+  public get pdfMode(): PagePDFMode | undefined {
     return this.canvas.hasAttribute(WOURNAL_SVG_PAGE_PDF_ATTR)
       ? JSON.parse(this.canvas.getAttribute(WOURNAL_SVG_PAGE_PDF_ATTR))
       : undefined;
@@ -254,6 +254,12 @@ export class WournalPage {
 
   public asSvgString(): string {
     return (new XMLSerializer()).serializeToString(this.canvas);
+  }
+
+  public async free() {
+    const ret = this.pdfMode ? this.pdfMode.fileName : false;
+    if (this.pdfViewer) this.pdfViewer.free();
+    this.display.innerHTML = '';
   }
 
   public async renderPDFIfNeeded() {
