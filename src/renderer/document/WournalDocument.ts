@@ -34,6 +34,7 @@ export class WournalDocument extends Component {
 
   public pages = new rx.State<WournalPage[]>([]);
   public isSinglePage = false;
+  public readyToRenderPDF = false;
 
   private zoom: number = 1;
 
@@ -71,11 +72,9 @@ export class WournalDocument extends Component {
       p.display.classList.add('active');
     });
 
-    this.subscribe(this.activePage, async _ => {
-      // not ideal that we have to await a frame here, but it is needed for
-      // `renderPDFIfNeeded` to check wether the page is currently visible
-      await new Promise(requestAnimationFrame);
-      for (const p of this.pages.value) p.renderPDFIfNeeded();
+    this.subscribe(this.activePage, p => {
+      console.log('active page: ', this.pages.value.indexOf(p));
+      this.renderPDFIfNeeded();
     });
 
     this.subscribe(this.pages, pages => {
@@ -171,6 +170,8 @@ export class WournalDocument extends Component {
       }
     }
     doc.undoStack.clear();
+    doc.readyToRenderPDF = true;
+    doc.renderPDFIfNeeded();
     return doc;
   }
 
@@ -219,6 +220,13 @@ export class WournalDocument extends Component {
       page.free();
     }
     for (const pdf of annotatedPDFs) await PDFCache.destroy(pdf);
+  }
+
+  private async renderPDFIfNeeded() {
+    // not ideal that we have to await a frame here, but it is needed for
+    // `renderPDFIfNeeded` to check wether the page is currently visible
+    await new Promise(requestAnimationFrame);
+    for (const p of this.pages.value) p.renderPDFIfNeeded();
   }
 
   // ------------------------------------------------------------

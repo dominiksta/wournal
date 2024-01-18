@@ -263,7 +263,7 @@ export class WournalPage {
   }
 
   public async renderPDFIfNeeded() {
-    if (!this.pdfViewer) return;
+    if (!this.pdfViewer || !this.doc.readyToRenderPDF) return;
     const rect = this.display.getBoundingClientRect();
     const upperLowerThres = Math.max(2000, window.innerHeight * 2);
     const isVisible = (
@@ -299,8 +299,9 @@ export class WournalPage {
         return new FileNotFoundError(this.pdfMode.fileName);
       }
     }
-    this.pdfViewer = new WournalPDFPageView(await resp.getPage(this.pdfMode.pageNr));
-    this.pdfViewer.setZoom(this.zoom);
+    this.pdfViewer = new WournalPDFPageView(
+      await resp.getPage(this.pdfMode.pageNr), this.zoom
+    );
     this.setPageSize(this.pdfViewer.getDimensionsPx());
     this._setLayerVisible('Background', false, false);
     this.display.insertBefore(this.pdfViewer.display, this.svgWrapperEl);
@@ -558,9 +559,11 @@ export class WournalPage {
     // basis.
     this.svgWrapperEl.style.transform = `scale(${zoom})`;
     this.zoom = zoom;
-    if (this.pdfViewer) this.pdfViewer.setZoom(zoom);
+    if (this.pdfViewer) {
+      this.pdfViewer.setZoom(zoom);
+      this.renderPDFIfNeeded();
+    }
     this.updateDisplaySize();
-    this.renderPDFIfNeeded();
   }
 
   // ------------------------------------------------------------

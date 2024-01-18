@@ -21,12 +21,15 @@ export class WournalPDFPageView {
   public readonly display: HTMLDivElement;
   private readonly shadow: ShadowRoot;
   private container: HTMLDivElement;
-  private zoom = 1;
+  private zoom: number;
   private needsDrawing = true;
 
   constructor(
     private page: PDFPageProxy,
+    initialZoom?: number,
   ) {
+    this.zoom = initialZoom ?? 1;
+
     this.display = document.createElement('div');
     this.display.setAttribute('class', 'wournal-pdf-page-view');
     this.display.style.position = 'absolute';
