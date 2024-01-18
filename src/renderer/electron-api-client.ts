@@ -29,7 +29,7 @@ function mkApiClient() {
       promise.then((val: any) => {
         console.log(
           `Electron API call: ${routeName}\n`,
-          args, '\n', val
+          args, '\n', val instanceof ArrayBuffer ? 'ArrayBuffer' : val
         )
       })
       return promise

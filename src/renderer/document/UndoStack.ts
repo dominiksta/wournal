@@ -31,7 +31,7 @@ export class UndoStack {
     this.undoable.push(action);
     if (this.undoable.length > MAX_UNDO_ACTIONS)
       this.undoable.splice(0, 1)
-    console.debug('Undoable action pushed', action);
+    // console.debug('Undoable action pushed', action);
     this.notifyAvailable();
   }
 
@@ -40,7 +40,7 @@ export class UndoStack {
     let action = this.undoable.pop();
     action.undo(this.doc);
     this.redoable.push(action);
-    console.debug('Undo:', action);
+    // console.debug('Undo:', action);
     this.notifyAvailable();
   }
 
@@ -49,7 +49,7 @@ export class UndoStack {
     let action = this.redoable.pop();
     action.redo(this.doc);
     this.undoable.push(action);
-    console.debug('Redo:', action);
+    // console.debug('Redo:', action);
     this.notifyAvailable();
   }
 
