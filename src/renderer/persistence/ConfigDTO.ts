@@ -1,72 +1,148 @@
-import { CanvasToolName } from "../document/CanvasTool"
+import { JTDDataType } from "ajv/dist/core";
+import DTOVersioner from "util/DTOVersioner";
+import { CanvasToolNames } from "../document/CanvasTool"
+import Ajv from 'ajv/dist/jtd';
+
+const ajv = new Ajv();
 
 export type CanvasToolStrokeWidth = "fine" | "medium" | "thick";
+const CanvasToolStrokeWidthSchema = { enum: [ 'fine', 'medium', 'thick' ] } as const;
 
-export type CanvasToolPenConfig = {
-  color: string,
-  strokeWidth: CanvasToolStrokeWidth,
-  mouseBufferSize: number,
-}
+const CanvasToolPenConfigSchema = {
+  properties: {
+    color: { type: 'string' },
+    strokeWidth: CanvasToolStrokeWidthSchema,
+    mouseBufferSize: { type: 'int32' }
+  },
+} as const;
+export type CanvasToolPenConfig
+  = JTDDataType<typeof CanvasToolPenConfigSchema>;
 
-export type CanvasToolEraserConfig = {
-  strokeWidth: CanvasToolStrokeWidth,
-  eraseStrokes: boolean,
-}
+const CanvasToolEraserConfigSchema = {
+  properties: {
+    strokeWidth: CanvasToolStrokeWidthSchema,
+    eraseStrokes: { type: 'boolean' }
+  },
+} as const;
+export type CanvasToolEraserConfig
+  = JTDDataType<typeof CanvasToolEraserConfigSchema>;
 
-export type CanvasToolTextConfig = {
-  color: string,
-  fontSize: number,
-  fontStyle: "normal" | "italic",
-  fontWeight: "normal" | "bold",
-  fontFamily: string,
-}
+const CanvasToolTextConfigSchema = {
+  properties: {
+    color: { type: 'string' },
+    fontSize: { type: 'int32' },
+    fontStyle: { enum: [ 'normal', 'italic' ] },
+    fontWeight: { enum: [ 'normal', 'bold' ] },
+    fontFamily: { type: 'string' },
+  },
+} as const;
+export type CanvasToolTextConfig
+  = JTDDataType<typeof CanvasToolTextConfigSchema>;
 
-export type CanvasToolRectangleConfig = {
-  color: string,
-  strokeWidth: CanvasToolStrokeWidth,
-}
+const CanvasToolRectangleConfigSchema = {
+  properties: {
+    color: { type: 'string' },
+    strokeWidth: CanvasToolStrokeWidthSchema,
+  },
+} as const;
+export type CanvasToolRectangleConfig
+  = JTDDataType<typeof CanvasToolRectangleConfigSchema>;
 
-export type CanvasToolRulerConfig = {
-  color: string,
-  strokeWidth: CanvasToolStrokeWidth,
-}
+const CanvasToolRulerConfigSchema = {
+  properties: {
+    color: { type: 'string' },
+    strokeWidth: CanvasToolStrokeWidthSchema,
+  },
+} as const;
+export type CanvasToolRulerConfig
+  = JTDDataType<typeof CanvasToolRulerConfigSchema>;
 
-export type CanvasToolEllipseConfig = {
-  color: string,
-  strokeWidth: CanvasToolStrokeWidth,
-}
+const CanvasToolEllipseConfigSchema = {
+  properties: {
+    color: { type: 'string' },
+    strokeWidth: CanvasToolStrokeWidthSchema,
+  },
+} as const;
+export type CanvasToolEllipseConfig
+  = JTDDataType<typeof CanvasToolEllipseConfigSchema>;
 
-export type CanvasToolHighlighterConfig = {
-  color: string,
-  strokeWidth: CanvasToolStrokeWidth,
-}
+const CanvasToolHighlighterConfigSchema = {
+  properties: {
+    color: { type: 'string' },
+    strokeWidth: CanvasToolStrokeWidthSchema,
+  },
+} as const;
+export type CanvasToolHighlighterConfig =
+  JTDDataType<typeof CanvasToolHighlighterConfigSchema>;
 
-export type CanvasToolConfig = {
-  CanvasToolPen: CanvasToolPenConfig,
-  CanvasToolEraser: CanvasToolEraserConfig,
-  CanvasToolText: CanvasToolTextConfig,
-  CanvasToolRectangle: CanvasToolRectangleConfig,
-  CanvasToolRuler: CanvasToolRulerConfig,
-  CanvasToolEllipse: CanvasToolEllipseConfig,
-  CanvasToolHighlighter: CanvasToolHighlighterConfig,
-}
+const CanvasToolConfigSchema = {
+  properties: {
+    CanvasToolPen: CanvasToolPenConfigSchema,
+    CanvasToolEraser: CanvasToolEraserConfigSchema,
+    CanvasToolText: CanvasToolTextConfigSchema,
+    CanvasToolRectangle: CanvasToolRectangleConfigSchema,
+    CanvasToolRuler: CanvasToolRulerConfigSchema,
+    CanvasToolEllipse: CanvasToolEllipseConfigSchema,
+    CanvasToolHighlighter: CanvasToolHighlighterConfigSchema,
+  },
+} as const;
+export type CanvasToolConfig = JTDDataType<typeof CanvasToolConfigSchema>;
 
 export type CanvasToolConfigData = CanvasToolConfig[keyof CanvasToolConfig];
 
-export type ConfigDTO = {
-  version: 0.01,
-  theme: (
-    'light' | 'dark' | 'light_high_contrast' | 'dark_high_contrast' |
-    'auto' | 'auto_high_contrast'
-  ),
-  invertDocument: boolean,
-  colorPalette: { color: string, name: string }[],
-  binds: {
-    rightClick: CanvasToolName,
-    middleClick: CanvasToolName,
+const ConfigDTOSchema = {
+  properties: {
+    version: { type: 'float32' },
+    theme: { enum: [
+      'light', 'dark',
+      'light_high_contrast', 'dark_high_contrast',
+      'auto', 'auto_high_contrast',
+    ] },
+    invertDocument: { type: 'boolean' },
+    colorPalette: {
+      elements: {
+        properties: { color: { type: 'string' }, name: { type: 'string' } }
+      }
+    },
+    binds: {
+      properties: {
+        rightClick: { enum: CanvasToolNames },
+        middleClick: { enum: CanvasToolNames },
+      }
+    },
+    tools: CanvasToolConfigSchema,
+  }
+} as const;
+
+export type ConfigDTO = JTDDataType<typeof ConfigDTOSchema>;
+
+export const ConfigDTOVersioner = new DTOVersioner<ConfigDTO>({
+  name: 'ConfigDTO',
+  validator: ((() => {
+    const validate = ajv.compile(ConfigDTOSchema);
+    return obj => {
+      const res = validate(obj)
+      return {
+        success: res,
+        error: validate.errors?.toString(),
+      }
+    }
+  }))(),
+  getVersion: obj => {
+    return obj.version;
   },
-  tools: CanvasToolConfig,
-}
+  updateFunctions: {
+    0.2: (ver0_01: any) => {
+      console.log(ver0_01);
+      const ret = {
+        ...ver0_01,
+        version: 0.2,
+      }
+      console.log(ret);
+      return ret;
+    },
+  }
+})
 
 export function defaultConfig(): ConfigDTO {
   return {

@@ -3,6 +3,11 @@ import { app, BrowserWindow, shell, WebContents } from 'electron';
 import path from 'path';
 import { URL } from 'url';
 
+// We disable security warnings because we have to use unsafe-eval for ajv
+// schema compilation. This should not cause an issue since we are still (a) not
+// exposing node directly and (b) sanitizing all loaded svg with dompurify.
+process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
+
 function resolveHtmlPath(htmlFileName: string) {
   if (process.env.NODE_ENV === 'development') {
     const port = process.env.PORT || 8080;

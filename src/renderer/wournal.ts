@@ -26,6 +26,7 @@ import { ApiClient } from 'electron-api-client';
 import { inject } from 'dependency-injection';
 import About from 'app/about';
 import { FileNotFoundError } from 'pdf/PDFCache';
+import { ConfigDTOVersioner } from 'persistence/ConfigDTO';
 
 @Component.register
 export default class Wournal extends Component {
@@ -34,7 +35,7 @@ export default class Wournal extends Component {
   private confRepo = ConfigRepositoryLocalStorage.getInstance();
 
   private configCtx = this.provideContext(
-    ConfigCtx, new rx.State(this.confRepo.load())
+    ConfigCtx, new rx.State(ConfigDTOVersioner.updateToCurrent(this.confRepo.load()))
   );
   private shortcutsCtx = this.provideContext(ShortcutsCtx, new ShortcutManager());
 

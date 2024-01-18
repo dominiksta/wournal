@@ -13,8 +13,11 @@
 
     <meta
       http-equiv="Content-Security-Policy"
-      content="script-src 'self' 'unsafe-inline'"
+      content="script-src 'self' 'unsafe-inline' 'unsafe-eval'"
       />
+    <!-- We need unsafe-eval for ajv schema compilation. Plus wournal should not
+    really be a target for XSS, especially since we ron dompurify over all
+    loaded svg. -->
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

@@ -28,11 +28,11 @@ things still missing are *PDF annotation and export* and an *Android version*.
   **Before Beta**:
 
   - [ ] Store Config as File Instead of in LocalStorage
-  - [ ] PDF Annotation with [pdf-lib](https://pdf-lib.js.org/)
-    - [ ] Viewing & Annotating
+  - [ ] PDF Annotation with [pdf-js](https://mozilla.github.io/pdf.js/)
+    - [x] Viewing & Annotating
     - [ ] Highlight Text
     - [ ] Choose between attaching PDF to WOJ, Relative or Absolute File Path
-  - [ ] Exporting to PDF
+  - [ ] Exporting to PDF with [pdf-lib](https://pdf-lib.js.org/)
   - [ ] Table of Contents
     - [ ] Auto Import From PDF
   - [ ] Tabs
