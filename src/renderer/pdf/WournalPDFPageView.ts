@@ -9,6 +9,9 @@ import type { PDFPageProxy } from 'pdfjs-dist/types/src/display/api';
 import { PDFPageView } from 'pdfjs-dist/web/pdf_viewer.mjs';
 import { DEFAULT_ZOOM_FACTOR } from 'document/WournalPageSize';
 
+const PDF_PAGE_VIEW_CSS_SHEET = new CSSStyleSheet();
+PDF_PAGE_VIEW_CSS_SHEET.replaceSync(css);
+
 export class WournalPDFPageView {
 
   private static readonly DEFAULT_ZOOM_ADJUSTED =
@@ -31,11 +34,13 @@ export class WournalPDFPageView {
 
     this.shadow = this.display.attachShadow({ mode: 'closed' });
 
-    // TODO: optimize with adoptedStyleSheets
-
-    const styles = document.createElement('style');
-    styles.innerText = css;
-    this.shadow.appendChild(styles);
+    if ('adoptedStyleSheets' in Document.prototype) {
+      this.shadow.adoptedStyleSheets.push(PDF_PAGE_VIEW_CSS_SHEET);
+    } else {
+      const styles = document.createElement('style');
+      styles.innerText = css;
+      this.shadow.append(styles);
+    }
   }
 
   private createViewer() {

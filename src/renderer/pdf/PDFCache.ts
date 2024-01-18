@@ -4,8 +4,6 @@ import { inject } from "dependency-injection";
 
 const loadedPDFs: { [fileName: string]: PDFDocumentProxy } = {};
 
-// TODO: hash
-
 export class FileNotFoundError extends Error {
   constructor(
     public fileName: string,
