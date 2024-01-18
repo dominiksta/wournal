@@ -177,5 +177,10 @@ export const FileUtils = {
   fileNameNoPath: function(path: string): string {
     const split = path.split(/[/\\]/);
     return split[split.length - 1];
-  }
+  },
+
+  fileNameBase: function(path: string): string {
+    return path.slice(0, path.lastIndexOf('.'));
+  },
+
 }

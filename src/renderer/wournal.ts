@@ -100,18 +100,30 @@ export default class Wournal extends Component {
       await this.api.loadDocument(userResp);
       return true;
     },
-    loadDocument: async (identification) => {
+    loadDocument: async (fileName) => {
       const closePleaseWait = this.dialog.pleaseWait(
         'Loading Document',
       );
       await new Promise(resolve => setTimeout(resolve, 100));
-      const blob = await this.fileSystem.read(identification);
+
+      if (this.configCtx.value.autoOpenWojWithSameNameAsPDF) {
+        const wojFile = FileUtils.fileNameBase(fileName) + '.woj';
+        if (await this.fileSystem.exists(wojFile)) {
+          this.toast.open(
+            `Loading associated WOJ file for ` +
+            `'${FileUtils.fileNameNoPath(fileName)}'`
+          );
+          fileName = wojFile;
+        }
+      }
+
+      const blob = await this.fileSystem.read(fileName);
       if (!blob) return false;
       let pdfNotFoundActions: {
         fileName: string, replaceOrRemove: string | false
       }[] = [];
       let doc = await WournalDocument.fromFile(
-        this.getContext.bind(this), identification, blob, pdfNotFoundActions
+        this.getContext.bind(this), fileName, blob, pdfNotFoundActions
       );
       while (doc instanceof FileNotFoundError) {
         const file = doc.fileName;
@@ -137,7 +149,7 @@ export default class Wournal extends Component {
         pdfNotFoundActions.push({ fileName: doc.fileName, replaceOrRemove: resp  });
         console.log(pdfNotFoundActions);
         doc = await WournalDocument.fromFile(
-          this.getContext.bind(this), identification, blob, pdfNotFoundActions
+          this.getContext.bind(this), fileName, blob, pdfNotFoundActions
         );
       }
       if (doc.isSinglePage) this.toast.open(
@@ -147,6 +159,7 @@ export default class Wournal extends Component {
       await this.doc.value.free();
       this.doc.next(doc);
       closePleaseWait();
+      this.shortcutsCtx.focus();
       return true;
     },
     newDocument: async (props, identification) => {

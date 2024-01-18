@@ -16,4 +16,6 @@ export default interface FileSystem {
     }[]
   ): Promise<string | false>;
 
+  exists(path: string): Promise<boolean>;
+
 }

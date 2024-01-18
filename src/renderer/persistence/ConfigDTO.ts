@@ -110,6 +110,7 @@ const ConfigDTOSchema = {
         middleClick: { enum: CanvasToolNames },
       }
     },
+    autoOpenWojWithSameNameAsPDF: { type: 'boolean' },
     tools: CanvasToolConfigSchema,
   }
 } as const;
@@ -121,26 +122,32 @@ export const ConfigDTOVersioner = new DTOVersioner<ConfigDTO>({
   validator: ((() => {
     const validate = ajv.compile(ConfigDTOSchema);
     return obj => {
-      const res = validate(obj)
-      return {
-        success: res,
-        error: validate.errors?.toString(),
-      }
+      const res = validate(obj);
+      return { success: res, error: validate.errors?.toString() };
     }
   }))(),
-  getVersion: obj => {
-    return obj.version;
-  },
+  getVersion: obj => obj.version,
   updateFunctions: {
+
+    // ver 0.2 -- just a test
+    // ----------------------------------------------------------------------
     0.2: (ver0_01: any) => {
-      console.log(ver0_01);
-      const ret = {
+      return {
         ...ver0_01,
         version: 0.2,
       }
-      console.log(ret);
-      return ret;
     },
+
+    // ver 0.3 -- auto open woj with same name as pdf if available
+    // ----------------------------------------------------------------------
+    0.3: (ver0_2: any) => {
+      return {
+        ...ver0_2,
+        version: 0.3,
+        autoOpenWojWithSameNameAsPDF: true,
+      }
+    },
+
   }
 })
 
@@ -170,6 +177,7 @@ export function defaultConfig(): ConfigDTO {
       { name: "Yellow", color: "#FFFF00" },
       { name: "White", color: "#FFFFFF" },
     ],
+    autoOpenWojWithSameNameAsPDF: true,
     tools: {
       CanvasToolPen: {
         color: "#000000",

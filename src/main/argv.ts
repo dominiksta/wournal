@@ -1,4 +1,4 @@
-import { parseArgs, ParseArgsConfig } from "node:util";
+import { parseArgs } from "node:util";
 
 export const argvParseSpec = {
   options: {
@@ -10,6 +10,6 @@ export const argvParseSpec = {
   },
   allowPositionals: true,
   strict: false,
-} satisfies ParseArgsConfig;
+} as const;
 
 export type ArgvParsed = ReturnType<typeof parseArgs<typeof argvParseSpec>>;

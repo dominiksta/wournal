@@ -63,6 +63,9 @@ export function registerApiHandlers() {
       if (!resp) return false;
       return resp;
     },
+    'file:exists': async (_, fileName) => {
+      return fs.existsSync(fileName);
+    },
 
     'process:argv': async (e) => {
       const argv = instances.get(e.sender)!.argv;

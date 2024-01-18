@@ -13,6 +13,7 @@ export const ApiRouteNames = [
   'file:loadPrompt',
   'file:write',
   'file:savePrompt',
+  'file:exists',
 
   'process:argv',
 
@@ -41,6 +42,7 @@ export interface ElectronApi extends ApiSpec<ApiRouteName> {
   'file:savePrompt': (
     defaultPath?: string, filters?: Filters
   ) => Promise<string | false>;
+  'file:exists': (path: string) => Promise<boolean>;
 
   'process:argv': () => Promise<ArgvParsed>;
 

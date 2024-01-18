@@ -38,6 +38,7 @@ export class Settings extends Component {
         fields: {
           headerText: 'Settings',
         },
+        style: { width: '100%', height: '100%' },
         slots: {
           footer: [
             h.div({ fields: { id: 'footer' }}, [
@@ -56,27 +57,35 @@ export class Settings extends Component {
           ]
         }
       }, [
-        ui5.panel({ fields: { headerText: 'Theme', fixed: true }}, [
+        ui5.panel({ fields: { headerText: 'Theme', collapsed: true }}, [
           ThemeSettings.t({ props: {
             invert: rx.bind(conf.partial('invertDocument')),
             theme: rx.bind(conf.partial('theme')),
           }})
         ]),
-        ui5.panel({ fields: { headerText: 'Default Tool Settings', fixed: true }}, [
+        ui5.panel({ fields: { headerText: 'Default Tool Settings', collapsed: true }}, [
           ToolDefaultSettings.t({
             props: { cfg: rx.bind(conf.partial('tools')) }
           }),
         ]),
-        ui5.panel({ fields: { headerText: 'Mouse Bindings', fixed: true }}, [
+        ui5.panel({ fields: { headerText: 'Mouse Bindings', collapsed: true }}, [
           MouseBindingsConfig.t({ props: {
             rightClick: rx.bind(conf.partial('binds', 'rightClick')),
             middleClick: rx.bind(conf.partial('binds', 'middleClick')),
           }}),
         ]),
-        ui5.panel({ fields: { headerText: 'Color Palette', fixed: true }}, [
+        ui5.panel({ fields: { headerText: 'Color Palette', collapsed: true }}, [
           ColorPaletteEditor.t({
             props: { palette: rx.bind(conf.partial('colorPalette')) }
           }),
+        ]),
+        ui5.panel({ fields: { headerText: 'PDF Annotation', collapsed: true }}, [
+          ui5.label({ fields: { for: 'auto-open-woj' }}),
+          ui5.checkbox({ fields: {
+            checked: rx.bind(conf.partial('autoOpenWojWithSameNameAsPDF')),
+            wrappingType: 'Normal',
+            text: 'Auto open WOJ file for PDF if found',
+          }})
         ]),
       ])
     ]
