@@ -61,7 +61,8 @@ export default class Wournal extends Component {
         return;
       }
       const resp = await this.fileSystem.savePrompt(defaultIdentification, [
-        { extensions: ['svg'], name: 'SVG File (Single-Page) (.svg)' }
+        { extensions: ['svg'], name: 'SVG File (Single-Page) (.svg)' },
+        { extensions: ['*'], name: 'All Files' },
       ]);
       if (!resp) return false;
       doc.isSinglePage = true;
@@ -70,7 +71,8 @@ export default class Wournal extends Component {
     },
     saveDocumentPromptMultiPage: async (defaultIdentification) => {
       const resp = await this.fileSystem.savePrompt(defaultIdentification, [
-        { extensions: ['woj'], name: 'Wournal File (Multi-Page) (.woj)' }
+        { extensions: ['woj'], name: 'Wournal File (Multi-Page) (.woj)' },
+        { extensions: ['*'], name: 'All Files' },
       ]);
       if (!resp) return false;
       await this.api.saveDocument(resp);
@@ -91,6 +93,7 @@ export default class Wournal extends Component {
         { extensions: ['woj'], name: 'Wournal File (Multi-Page) (.woj)' },
         { extensions: ['pdf'], name: 'Portable Document Format (.pdf)' },
         { extensions: ['svg'], name: 'Scalable Vector Graphics (Single-Page) (.svg)' },
+        { extensions: ['*'], name: 'All Files' },
       ]);
       if (!userResp) return false;
       await this.api.loadDocument(userResp);
@@ -122,7 +125,8 @@ export default class Wournal extends Component {
             {
               name: 'Choose other PDF', action: async () => {
                 resolve(await this.fileSystem.loadPrompt([
-                  { extensions: ['pdf'], name: 'Portable Document Format (PDF)' }
+                  { extensions: ['pdf'], name: 'Portable Document Format (PDF)' },
+                  { extensions: ['*'], name: 'All Files' },
                 ]));
               }
             },
@@ -545,10 +549,16 @@ export default class Wournal extends Component {
     'page_new_after': {
       human_name: 'New Page After',
       func: () => {
-        // TODO: if current is pdf, set new page to same size but default
-        // background
         const nr = this.api.getCurrentPageNr();
-        this.api.addPage(nr, this.api.getPageProps(nr));
+        if (this.doc.value.pages.value[nr - 1].pdfMode) {
+          this.api.addPage(nr, {
+            ...this.api.getPageProps(nr),
+            backgroundStyle: 'graph',
+            pdfMode: undefined,
+          })
+        } else {
+          this.api.addPage(nr, this.api.getPageProps(nr));
+        }
         this.api.scrollPage(nr + 1);
       },
       shortcut: 'Ctrl+Shift+ArrowDown'
