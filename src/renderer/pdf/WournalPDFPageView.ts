@@ -8,6 +8,7 @@ import { css } from './pdf_viewer.css';
 import type { PDFPageProxy } from 'pdfjs-dist/types/src/display/api';
 import { PDFPageView } from 'pdfjs-dist/web/pdf_viewer.mjs';
 import { DEFAULT_ZOOM_FACTOR } from 'document/WournalPageSize';
+import { debounce } from 'lodash';
 
 const PDF_PAGE_VIEW_CSS_SHEET = new CSSStyleSheet();
 PDF_PAGE_VIEW_CSS_SHEET.replaceSync(css);
@@ -24,9 +25,12 @@ export class WournalPDFPageView {
   private needsDrawing = true;
 
   private readonly loadingEl: SVGSVGElement;
+  private readonly zoomPreview = document.createElement('canvas');
+  private readonly zoomPreviewCtx = this.zoomPreview.getContext('2d');
 
   constructor(
     private page: PDFPageProxy,
+    private isVisible: () => boolean,
     initialZoom?: number,
   ) {
     this.zoom = initialZoom ?? 1;
@@ -35,6 +39,8 @@ export class WournalPDFPageView {
     this.display.setAttribute('class', 'wournal-pdf-page-view');
     this.display.style.position = 'absolute';
     this.display.style.pointerEvents = 'none';
+    this.display.style.transform = 'none';
+    this.display.style.transformOrigin = '0 0';
 
     this.shadow = this.display.attachShadow({ mode: 'closed' });
 
@@ -48,6 +54,9 @@ export class WournalPDFPageView {
       this.shadow.append(styles);
     }
 
+    this.zoomPreview.hidden = true;
+    this.shadow.appendChild(this.zoomPreview);
+    this.disableZoomPreview();
     this.setLoading(true);
   }
 
@@ -66,6 +75,7 @@ export class WournalPDFPageView {
       scale: this.zoom / DEFAULT_ZOOM_FACTOR,
       eventBus: new pdfjsViewer.EventBus(),
       textLayerMode: 1,
+      isOffscreenCanvasSupported: false
     });
 
     viewer.setPdfPage(this.page);
@@ -82,15 +92,21 @@ export class WournalPDFPageView {
     this.needsDrawing = true;
   }
 
-  public async drawIfNeeded(): Promise<void> {
+  public async drawOrFree(): Promise<void> {
+    if (!this.isVisible()) {
+      this.free();
+      return;
+    }
     if (!this.needsDrawing) return;
-    if (!this.viewer) this.viewer = this.createViewer();
+    if (!this.viewer) {
+      this.viewer = this.createViewer();
+      this.setLoading(false);
+    }
     console.debug(`Drawing PDF Viewer for Page ${this.page.pageNumber}`);
-    this.setLoading(true);
     const resp = this.viewer.viewer.draw();
     this.needsDrawing = false;
     await resp;
-    this.setLoading(false);
+    this.disableZoomPreview();
     return;
   }
 
@@ -104,19 +120,25 @@ export class WournalPDFPageView {
     };
   }
 
-  public async setZoom(zoom: number) {
-    this.zoom = zoom;
-    if (this.viewer) this.viewer.viewer.update({ scale: zoom / DEFAULT_ZOOM_FACTOR });
-    this.needsDrawing = true;
+  public setZoom(zoom: number) {
+    this.enableZoomPreview(this.zoom, zoom);
 
     const dim = this.getDimensionsPx();
     this.loadingEl.setAttribute('height', `${dim.height * zoom}px`);
     this.loadingEl.setAttribute('width', `${dim.width * zoom}px`);
+
+    this.setZoomRenderer(zoom);
   }
 
-  public getZoom(): number {
-    return this.zoom;
+  private _setZoomRerender(zoom: number) {
+    if (this.viewer) this.viewer.viewer.update({ scale: zoom / DEFAULT_ZOOM_FACTOR });
+    this.zoom = zoom;
+    this.needsDrawing = true;
+    if (this.isVisible()) this.drawOrFree();
   }
+  private setZoomRenderer = debounce(this._setZoomRerender.bind(this), 500);
+
+  public getZoom(): number { return this.zoom; }
 
   private genLoadingBackground(): SVGSVGElement {
     const dim = this.getDimensionsPx();
@@ -147,6 +169,24 @@ export class WournalPDFPageView {
     text.appendChild(tspan);
 
     return svg;
+  }
+
+  private enableZoomPreview(oldZoom: number, newZoom: number) {
+    if (!this.viewer) return;
+    const viewer = this.viewer.viewer.canvas;
+    this.zoomPreview.height = viewer.height;
+    this.zoomPreview.width = viewer.width;
+    const factor = newZoom / oldZoom;
+    this.zoomPreview.style.transform = `scale(${factor})`;
+    this.zoomPreview.style.transformOrigin = '0 0';
+    this.zoomPreviewCtx.drawImage(viewer, 0, 0); // copy img
+    this.viewer.container.hidden = true;
+    this.zoomPreview.hidden = false;
+  }
+
+  private disableZoomPreview() {
+    this.zoomPreview.hidden = true;
+    if (this.viewer) this.viewer.container.hidden = false;
   }
 
   private setLoading(loading: boolean) {

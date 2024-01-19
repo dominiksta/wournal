@@ -262,18 +262,18 @@ export class WournalPage {
     this.display.innerHTML = '';
   }
 
-  public async renderPDFIfNeeded() {
-    if (!this.pdfViewer || !this.doc.readyToRenderPDF) return;
-
+  private isVisible(): boolean {
     // very rough and generous approximation
     const canFit = Math.max(3, 2 / this.doc.getZoom())
 
     const activeIdx = this.doc.pages.value.indexOf(this.doc.activePage.value);
     const thisIdx = this.doc.pages.value.indexOf(this);
-    const isVisible = Math.abs(activeIdx - thisIdx) < canFit;
+    return Math.abs(activeIdx - thisIdx) < canFit;
+  }
 
-    if (isVisible) return await this.pdfViewer.drawIfNeeded();
-    else return await this.pdfViewer.free();
+  public async renderPDFIfNeeded() {
+    if (!this.pdfViewer || !this.doc.readyToRenderPDF) return;
+    return await this.pdfViewer.drawOrFree();
   }
 
   private async maybeLoadPDFPage(
@@ -301,8 +301,11 @@ export class WournalPage {
         return new FileNotFoundError(this.pdfMode.fileName);
       }
     }
+
     this.pdfViewer = new WournalPDFPageView(
-      await resp.getPage(this.pdfMode.pageNr), this.zoom
+      await resp.getPage(this.pdfMode.pageNr),
+      this.isVisible.bind(this),
+      this.zoom
     );
     this.setPageSize(this.pdfViewer.getDimensionsPx());
     this._setLayerVisible('Background', false, false);
