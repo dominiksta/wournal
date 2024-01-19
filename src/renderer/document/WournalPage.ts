@@ -264,13 +264,14 @@ export class WournalPage {
 
   public async renderPDFIfNeeded() {
     if (!this.pdfViewer || !this.doc.readyToRenderPDF) return;
-    const rect = this.display.getBoundingClientRect();
-    if (rect.top === 0 && rect.bottom === 0) return;
-    const upperLowerThres = Math.max(2000, window.innerHeight * 2);
-    const isVisible = (
-      rect.top >= -upperLowerThres
-      && rect.bottom <= window.innerHeight + upperLowerThres
-    );
+
+    // very rough and generous approximation
+    const canFit = Math.max(3, 2 / this.doc.getZoom())
+
+    const activeIdx = this.doc.pages.value.indexOf(this.doc.activePage.value);
+    const thisIdx = this.doc.pages.value.indexOf(this);
+    const isVisible = Math.abs(activeIdx - thisIdx) < canFit;
+
     if (isVisible) return await this.pdfViewer.drawIfNeeded();
     else return await this.pdfViewer.free();
   }
