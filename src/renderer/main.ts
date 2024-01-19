@@ -37,7 +37,7 @@ async function maybeLoadArgvDoc() {
     const exists = await wournal.api.loadDocument(path);
     if (!exists) {
       wournal.api.newDocument({
-        backgroundColor: argv.values["page-color"] as string ?? '#000000',
+        backgroundColor: argv.values["page-color"] as string ?? '#FFFFFF',
         backgroundStyle: argv.values["page-style"] as BackgroundStyleT ?? 'graph',
         height: parseInt(argv.values["page-height"] as string ?? '297'),
         width:  parseInt(argv.values["page-width"]  as string ?? '210'),

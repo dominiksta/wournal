@@ -107,7 +107,10 @@ export default class Wournal extends Component {
       );
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      if (this.configCtx.value.autoOpenWojWithSameNameAsPDF) {
+      if (
+        this.configCtx.value.autoOpenWojWithSameNameAsPDF &&
+        fileName.toLowerCase().endsWith('.pdf')
+      ) {
         const wojFile = FileUtils.fileNameBase(fileName) + '.woj';
         if (await this.fileSystem.exists(wojFile)) {
           this.toast.open(

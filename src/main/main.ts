@@ -52,6 +52,7 @@ function createWindow(argv: string[], pwd: string) {
   }
 
   instances.set(win.webContents, { win, argv, pwd });
+  win.show();
 }
 
 const gotTheLock = app.requestSingleInstanceLock();
