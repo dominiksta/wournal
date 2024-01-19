@@ -101,6 +101,7 @@ export default class Wournal extends Component {
       return true;
     },
     loadDocument: async (fileName) => {
+      this.doc.next(WournalDocument.create(this.getContext.bind(this)));
       const closePleaseWait = this.dialog.pleaseWait(
         'Loading Document',
       );
