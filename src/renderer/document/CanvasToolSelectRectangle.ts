@@ -27,7 +27,7 @@ export class CanvasToolSelectRectangle extends CanvasTool {
       return;
     }
     const mouse =
-      this.activePage.value.globalCoordsToCanvas({ x: e.x, y: e.y });
+      this.activePage.value.viewportCoordsToCanvas({ x: e.x, y: e.y });
     switch (this.state) {
       case "idle":
         this.toolUseStartPage = this.activePage.value;
@@ -63,7 +63,7 @@ export class CanvasToolSelectRectangle extends CanvasTool {
     if (this.state === "idle") return;
     if (this.activePage.value === null) return;
 
-    const mouse = this.toolUseStartPage.globalCoordsToCanvas({ x: e.x, y: e.y });
+    const mouse = this.toolUseStartPage.viewportCoordsToCanvas({ x: e.x, y: e.y });
 
     switch (this.state) {
       case "selecting":

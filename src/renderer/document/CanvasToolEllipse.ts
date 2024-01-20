@@ -33,7 +33,7 @@ export class CanvasToolEllipse extends CanvasTool {
     this.path = CanvasPath.fromNewPath();
     this.path.setActualStrokeWidth(this.actualStrokeWidth());
     this.path.setColor(this.conf.color);
-    this.pointStart = this.toolUseStartPage.globalCoordsToCanvas({ x: e.x, y: e.y })
+    this.pointStart = this.toolUseStartPage.viewportCoordsToCanvas({ x: e.x, y: e.y })
     this.toolUseStartPage.activePaintLayer.appendChild(this.path.svgElem);
   }
 
@@ -49,7 +49,7 @@ export class CanvasToolEllipse extends CanvasTool {
 
   public onMouseMove(e: MouseEvent): void {
     if (this.path === null) return;
-    const mouse = this.toolUseStartPage.globalCoordsToCanvas({ x: e.x, y: e.y });
+    const mouse = this.toolUseStartPage.viewportCoordsToCanvas({ x: e.x, y: e.y });
 
     const lenX = mouse.x - this.pointStart.x;
     const lenY = mouse.y - this.pointStart.y;

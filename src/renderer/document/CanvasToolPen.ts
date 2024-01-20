@@ -43,7 +43,7 @@ export class CanvasToolPen extends CanvasTool {
     this.path.setLineCap((this.constructor as typeof CanvasToolPen).lineCap);
     this.path.setOpacity((this.constructor as typeof CanvasToolPen).opacity);
     this.mouseBuffer = [];
-    var pt = this.toolUseStartPage.globalCoordsToCanvas({ x: e.x, y: e.y });
+    var pt = this.toolUseStartPage.viewportCoordsToCanvas({ x: e.x, y: e.y });
     this.appendToBuffer(pt);
     this.path.startAt(pt);
     this.path.setColor(this.cfgColor);
@@ -63,7 +63,7 @@ export class CanvasToolPen extends CanvasTool {
   public onMouseMove(e: MouseEvent): void {
     if (this.path) {
       this.appendToBuffer(
-        this.toolUseStartPage.globalCoordsToCanvas({ x: e.x, y: e.y })
+        this.toolUseStartPage.viewportCoordsToCanvas({ x: e.x, y: e.y })
       );
       this.updateSvgPath();
     }

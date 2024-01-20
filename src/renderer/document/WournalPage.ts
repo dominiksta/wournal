@@ -583,12 +583,22 @@ export class WournalPage {
    * Translate x and y to canvas coords. USE THIS FOR ALL COORDINATE
    * TRANSLATIONS, OTHERWISE ZOOM WILL NOT WORK.
    */
-  public globalCoordsToCanvas(
+  public viewportCoordsToCanvas(
     pt: { x: number, y: number }
   ): { x: number, y: number } {
     return {
-      x: (pt.x - this.rect.left) * 1 / this.zoom,
-      y: (pt.y - this.rect.top) * 1 / this.zoom
+      // pt.x / this.zoom - this.rect.left / this.zoom
+      x: (pt.x - this.rect.left) / this.zoom,
+      y: (pt.y - this.rect.top) / this.zoom
+    };
+  }
+
+  public canvasCoordsToViewport(
+    pt: { x: number, y: number }
+  ): { x: number, y: number } {
+    return {
+      x: pt.x * this.zoom + this.rect.left,
+      y: pt.y * this.zoom + this.rect.top,
     };
   }
 
@@ -596,12 +606,12 @@ export class WournalPage {
    * Translate r to canvas coords. USE THIS FOR ALL COORDINATE TRANSLATIONS,
    * OTHERWISE ZOOM WILL NOT WORK.
    */
-  public globalDOMRectToCanvas(r: DOMRect): DOMRect {
+  public viewportDOMRectToCanvas(r: DOMRect): DOMRect {
     return DOMRect.fromRect({
-      x: (r.x - this.rect.left) * 1 / this.zoom,
-      y: (r.y - this.rect.top) * 1 / this.zoom,
-      width: r.width * 1 / this.zoom,
-      height: r.height * 1 / this.zoom,
+      x: (r.x - this.rect.left) / this.zoom,
+      y: (r.y - this.rect.top) / this.zoom,
+      width: r.width / this.zoom,
+      height: r.height / this.zoom,
     });
   }
 

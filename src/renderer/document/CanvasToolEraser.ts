@@ -90,7 +90,7 @@ export class CanvasToolEraser extends CanvasTool {
   }
 
   private eraseTouched(e: MouseEvent) {
-    const mouse = this.toolUseStartPage.globalCoordsToCanvas(e);
+    const mouse = this.toolUseStartPage.viewportCoordsToCanvas(e);
 
     const eraserRect = DOMRect.fromRect({
       x: mouse.x - this.actualStrokeWidth / 2,
@@ -99,7 +99,7 @@ export class CanvasToolEraser extends CanvasTool {
       width: this.actualStrokeWidth,
     });
     for (let node of this.toolUseStartPage.activePaintLayer.children) {
-      const elRect = this.toolUseStartPage.globalDOMRectToCanvas(
+      const elRect = this.toolUseStartPage.viewportDOMRectToCanvas(
         node.getBoundingClientRect());
       // Ignore non-path elements. When text-boxes are added in the
       // future, they should not be affected by erasers.

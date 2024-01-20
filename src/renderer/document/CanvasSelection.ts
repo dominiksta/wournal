@@ -52,7 +52,7 @@ export class CanvasSelection {
 
   public onMouseDown(e: MouseEvent): void {
     e.stopPropagation();
-    const mouse = this.page.globalCoordsToCanvas(e);
+    const mouse = this.page.viewportCoordsToCanvas(e);
 
     switch (this.state) {
       case "idle":
@@ -75,7 +75,7 @@ export class CanvasSelection {
   public onMouseMove(e: MouseEvent): void {
     if (this.state === "idle") return;
     e.stopPropagation();
-    const mouse = this.page.globalCoordsToCanvas(e);
+    const mouse = this.page.viewportCoordsToCanvas(e);
 
     switch (this.state) {
       case "moving":
@@ -173,7 +173,7 @@ export class CanvasSelection {
     boundingRect.width += padding;
     boundingRect.height += padding;
 
-    this._selectionDisplay.setDimension(page.globalDOMRectToCanvas(boundingRect));
+    this._selectionDisplay.setDimension(page.viewportDOMRectToCanvas(boundingRect));
     this._selection = els.map(e => { return { el: e, savedData: e.serialize() } });
     this._selectionDisplay.setCursorState("idle");
     this._available.next(true);
@@ -188,7 +188,7 @@ export class CanvasSelection {
       .filter(el =>
         (el instanceof SVGGraphicsElement) &&
         SVGUtils.rectInRect(
-          selRect, this.page.globalDOMRectToCanvas(el.getBoundingClientRect())
+          selRect, this.page.viewportDOMRectToCanvas(el.getBoundingClientRect())
         )
       )
       .map(el => CanvasElementFactory.fromSvgElem(el as SVGGraphicsElement))

@@ -300,8 +300,8 @@ export class WournalDocument extends Component {
   private centerElementsCurrentViewPort(els: CanvasElement<any>[]) {
     const page = this.activePage.value;
     const rectDoc =
-      page.globalDOMRectToCanvas(this.parentElement.getBoundingClientRect());
-    const rectPage = page.globalDOMRectToCanvas(page.rect);
+      page.viewportDOMRectToCanvas(this.parentElement.getBoundingClientRect());
+    const rectPage = page.viewportDOMRectToCanvas(page.rect);
     const centerDoc = {
       x: rectDoc.left + rectDoc.width / 2,
       y: rectDoc.top  + rectDoc.height / 2,
@@ -319,7 +319,7 @@ export class WournalDocument extends Component {
       ),
     }
 
-    const rectBounding = page.globalDOMRectToCanvas(
+    const rectBounding = page.viewportDOMRectToCanvas(
       els
         .map(el => el.svgElem.getBoundingClientRect())
         .reduce(SVGUtils.boundingRectForTwo)
@@ -499,9 +499,39 @@ export class WournalDocument extends Component {
   // ------------------------------------------------------------
 
   /** Set the zoom level of all pages. [0-inf[ */
-  public setZoom(zoom: number) {
+  public async setZoom(
+    zoom: number,
+    keepViewportPos: { x: number, y: number } = { x: -1, y: -1 } // -1 = center
+  ) {
+    const zoomActual = zoom * DEFAULT_ZOOM_FACTOR;
+
+    if (keepViewportPos.x === -1 || keepViewportPos.y === -1) {
+      const r = this.parentElement.getBoundingClientRect();
+      keepViewportPos.x = r.left + r.width / 2;
+      keepViewportPos.y = r.top + r.height / 2;
+    }
+
+    const activePage = this.activePage.value;
+    activePage.refreshClientRect();
+
+    const keepCanvasPoint = activePage.viewportCoordsToCanvas(keepViewportPos);
+    const pointBefore = activePage.canvasCoordsToViewport(keepCanvasPoint);
+
+    for (let page of this.pages.value) page.setZoom(zoomActual);
+
+    await new Promise(requestAnimationFrame);
+    activePage.refreshClientRect();
+    const pointAfter = activePage.canvasCoordsToViewport(keepCanvasPoint);
+    const pointDiff = {
+      x: pointAfter.x - pointBefore.x,
+      y: pointAfter.y - pointBefore.y,
+    }
+    // console.log(pointDiff);
+
+    const { top, left } = this.api.getScrollPos();
+    this.api.scrollPos(top + pointDiff.y, left + pointDiff.x);
+
     this.zoom = zoom;
-    for (let page of this.pages.value) page.setZoom(zoom * DEFAULT_ZOOM_FACTOR);
   }
   public getZoom(): number { return this.zoom; }
 
@@ -606,7 +636,7 @@ export class WournalDocument extends Component {
     if (this.activePage) this.activePage.value.refreshClientRect();
 
     if (this.activePage && this.selection.selection.length !== 0) {
-      const mouse = this.activePage.value.globalCoordsToCanvas(e);
+      const mouse = this.activePage.value.viewportCoordsToCanvas(e);
       if (SVGUtils.pointInRect(mouse, this.selection.selectionDisplay.hitbox())) {
         this.selection.onMouseDown(e);
       } else {

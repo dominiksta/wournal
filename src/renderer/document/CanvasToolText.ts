@@ -26,7 +26,7 @@ export class CanvasToolText extends CanvasTool {
     this.toolUseStartPage = this.activePage.value;
     if (this.toolUseStartPage === null) return;
 
-    const mouse = this.toolUseStartPage.globalCoordsToCanvas(e)
+    const mouse = this.toolUseStartPage.viewportCoordsToCanvas(e)
 
     const editUnderCursosOrNew = () => {
       let underCursor: SVGTextElement;
