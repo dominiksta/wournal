@@ -2261,9 +2261,14 @@ export let css = `
 css += `
 /* custom additional pdf.js css */
 
+/* smoothes out text selection */
+/* its a bit scary that this seems necessary, but oh well */
 .textLayer span {
-    /* smoothes out text selection */
-    /* its a bit scary that this seems necessary, but oh well */
     min-height: 2em !important;
+}
+
+/* hide annotation layer popups but keep non-popup annotations visible */
+.annotationLayer * {
+  display: none;
 }
 `;

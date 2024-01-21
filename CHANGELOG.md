@@ -8,6 +8,12 @@ Changelog
 
 - Select text in PDF
 
+### Fixed
+
+- PDF annotations popups are no longer displayed. Maybe a seperate mode to
+  display them can be added in the future, but for now hiding them is a lot less
+  janky.
+
 `0.0.2` - _2024-01-21_
 ----------------------------------------------------------------------
 
