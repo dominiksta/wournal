@@ -8,7 +8,7 @@ import { WournalPage } from "./WournalPage";
 export class CanvasToolImage extends CanvasTool {
 
   public override idleCursor = "default";
-  protected override toolUseStartPage: WournalPage;
+  protected toolUseStartPage: WournalPage;
 
   public override canSetStrokeWidth = false;
   public override canSetColor = false;

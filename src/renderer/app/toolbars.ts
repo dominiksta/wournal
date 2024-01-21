@@ -21,6 +21,7 @@ import { CanvasToolRuler } from "document/CanvasToolRuler";
 import { CanvasToolEllipse } from "document/CanvasToolEllipse";
 import { CanvasToolHand } from "document/CanvasToolHand";
 import { CanvasToolImage } from "document/CanvasToolImage";
+import { CanvasToolSelectText } from "document/CanvasToolSelectText";
 
 @Component.register
 export default class Toolbars extends Component {
@@ -287,6 +288,12 @@ export default class Toolbars extends Component {
               }
             }),
             ui5.menuItem({
+              fields: {
+                icon: currentToolMenuIcon(CanvasToolSelectText),
+                ...globalCmdMenuItem('tool_select_text'),
+              }
+            }),
+            ui5.menuItem({
               fields: {text: 'Color', icon: 'palette', startsSection: true }
             }, [
               h.fragment(configCtx, config => config.colorPalette.map(col =>
@@ -546,6 +553,13 @@ export default class Toolbars extends Component {
               current: isCurrentTool(CanvasToolSelectRectangle),
             },
             events: { click: _ => api.setTool('CanvasToolSelectRectangle') }
+          }),
+          ToolbarButton.t({
+            props: {
+              img: 'icon:text-align-justified', alt: 'Select Text',
+              current: isCurrentTool(CanvasToolSelectText),
+            },
+            events: { click: _ => api.setTool('CanvasToolSelectText') }
           }),
 
           ToolbarSeperator.t(),

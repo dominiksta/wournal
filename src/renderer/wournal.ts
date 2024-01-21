@@ -38,7 +38,7 @@ export default class Wournal extends Component {
   private configCtx = this.provideContext(
     ConfigCtx, new rx.State(ConfigDTOVersioner.updateToCurrent(this.confRepo.load()))
   );
-  private shortcutsCtx = this.provideContext(ShortcutsCtx, new ShortcutManager());
+  public shortcutsCtx = this.provideContext(ShortcutsCtx, new ShortcutManager());
 
   private toast = this.provideContext(ToastCtx, {
     open: async (msg: string) => {
@@ -485,7 +485,6 @@ export default class Wournal extends Component {
       StatusBar.t({
         props: { doc: this.doc },
       }),
-      h.div(this.shortcutsCtx),
       h.div(this.dialog.dialogs),
       Settings.t({ props: { open: rx.bind(this.settingsOpen) } }),
       ui5.toast({ fields: { id: 'toast', placement: 'BottomEnd' } }),
@@ -693,7 +692,8 @@ export default class Wournal extends Component {
         if (
           curr == 'CanvasToolSelectRectangle' ||
           curr == 'CanvasToolHand' ||
-          curr == 'CanvasToolImage'
+          curr == 'CanvasToolImage' ||
+          curr == 'CanvasToolSelectText'
         ) return;
         this.doc.value.toolConfig.next(v => {
           const ret = DSUtils.copyObj(v);
@@ -726,6 +726,11 @@ export default class Wournal extends Component {
       human_name: 'Select Rectangle',
       func: () => this.api.setTool('CanvasToolSelectRectangle'),
       shortcut: 'S',
+    },
+    'tool_select_text': {
+      human_name: 'Select Text in PDF',
+      func: () => this.api.setTool('CanvasToolSelectText'),
+      shortcut: 'X',
     },
     'tool_text': {
       human_name: 'Text',

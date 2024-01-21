@@ -12,6 +12,7 @@ export const toolbarButtonStyle = {
       borderRadius: '5px',
       border: '1px solid transparent',
       color: ui5.Theme.TextColor,
+      outline: 'none',
     },
     'button:hover': {
       background: ui5.Theme.Button_Hover_Background,

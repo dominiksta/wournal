@@ -25,6 +25,7 @@ import { ApiCtx } from "app/api-context";
 import ZipFile from "util/ZipFile";
 import { FileNotFoundError, PDFCache } from "pdf/PDFCache";
 import { CanvasToolSelectRectangle } from "./CanvasToolSelectRectangle";
+import { CanvasToolSelectText } from "./CanvasToolSelectText";
 
 @Component.register
 export class WournalDocument extends Component {
@@ -52,11 +53,7 @@ export class WournalDocument extends Component {
     public fileName: string | undefined,
   ) {
     super();
-    this.display.addEventListener("mouseup", this.onMouseUp.bind(this));
-    this.display.addEventListener("mouseleave", this.onMouseUp.bind(this));
-    this.display.addEventListener("mousedown", this.onMouseDown.bind(this));
-    this.display.addEventListener("mousemove", this.onMouseMove.bind(this));
-    this.display.addEventListener("contextmenu", (e) => { e.preventDefault() });
+    this.setupEventListeners();
     this.display.style.background = theme.documentBackground;
 
     this.shortcuts = getContext(ShortcutsCtx);
@@ -227,6 +224,23 @@ export class WournalDocument extends Component {
     return Promise.all(this.pages.value.map(p => p.renderPDFIfNeeded()));
   }
 
+  private readonly listeners = {
+    'mouseup': this.onMouseUp.bind(this),
+    'mousedown': this.onMouseDown.bind(this),
+    'mousemove': this.onMouseMove.bind(this),
+    'contextmenu': (e: any) => e.preventDefault(),
+  } as const;
+
+  public setupEventListeners() {
+    for (const evtName in this.listeners) {
+      if (this.pdfSelectionPassthrough.value) {
+        this.removeEventListener(evtName, (this.listeners as any)[evtName]);
+      } else {
+        this.addEventListener(evtName, (this.listeners as any)[evtName]);
+      }
+    }
+  }
+
   // ------------------------------------------------------------
   // undo, dirty/saved
   // ------------------------------------------------------------
@@ -285,6 +299,9 @@ export class WournalDocument extends Component {
   }
 
   public async pasteClipboard(): Promise<void> {
+    if (this.currentTool.value instanceof CanvasToolSelectText)
+      this.setTool(CanvasToolSelectRectangle);
+
     const wournal = await this.clipboard.readWournal();
     if (wournal) { this.pasteWournal(wournal); return; }
 
@@ -553,6 +570,7 @@ export class WournalDocument extends Component {
     ));
     for (let page of this.pages.value)
       page.toolLayer.style.cursor = this.currentTool.value.idleCursor;
+    this.setupEventListeners();
   }
 
   /** Reset the config of the current tool to loaded global config */
@@ -575,6 +593,9 @@ export class WournalDocument extends Component {
   public currentTool = new rx.State<CanvasTool>(new CanvasToolPen(
     this.activePage, this._undoStack, this.selection
   ));
+
+  public readonly pdfSelectionPassthrough =
+    this.currentTool.derive(t => t instanceof CanvasToolSelectText);
 
   /** set stroke width for current tool or selection */
   public setStrokeWidth(width: CanvasToolStrokeWidth): void {

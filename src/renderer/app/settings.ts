@@ -161,6 +161,7 @@ class ToolSelect extends Component {
     'CanvasToolHighlighter': 'Highlighter',
     'CanvasToolHand': 'Hand',
     'CanvasToolImage': 'Image',
+    'CanvasToolSelectText': 'Select Text in PDF',
   }
 
   render() {

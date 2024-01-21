@@ -13,6 +13,7 @@ export const CanvasToolNames = [
   "CanvasToolRectangle",
   "CanvasToolEllipse",
   "CanvasToolSelectRectangle",
+  "CanvasToolSelectText",
   "CanvasToolText",
   "CanvasToolHand",
   "CanvasToolImage",
@@ -36,8 +37,6 @@ export abstract class CanvasTool {
 
   /** This cursor should be displayed when the tool is selected */
   public abstract idleCursor: string;
-  /** The page where the first mousedown event for the tool was fired */
-  protected abstract toolUseStartPage: WournalPage;
 
   public abstract canSetStrokeWidth: boolean;
   public abstract canSetColor: boolean;

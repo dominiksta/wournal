@@ -126,7 +126,6 @@ export class WournalPage {
 
     this.display.style.border = "3px solid white";
     this.display.style.margin = "10px auto 10px auto";
-    this.display.style.userSelect = "none";
     this.display.style.filter = theme.invert;
 
     this.svgWrapperEl = document.createElement("div");
@@ -150,7 +149,12 @@ export class WournalPage {
     );
     this.toolLayer.setAttribute("class", "wournal-page-toollayer");
     this.toolLayer.style.position = "absolute";
-    this.svgWrapperEl.appendChild(this.toolLayer)
+    this.svgWrapperEl.appendChild(this.toolLayer);
+
+    doc.pdfSelectionPassthrough?.subscribe(passthrough => {
+      if (!this.pdfViewer) return;
+      this.pdfViewer.setAllowTextSelection(passthrough);
+    });
   }
 
   // ------------------------------------------------------------
@@ -307,6 +311,7 @@ export class WournalPage {
       this.isVisible.bind(this),
       this.zoom
     );
+    if (this.doc.pdfSelectionPassthrough.value) this.pdfViewer.setAllowTextSelection(true);
     this.setPageSize(this.pdfViewer.getDimensionsPx());
     this._setLayerVisible('Background', false, false);
     this.display.insertBefore(this.pdfViewer.display, this.svgWrapperEl);

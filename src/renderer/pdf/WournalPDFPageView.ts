@@ -9,6 +9,10 @@ import type { PDFPageProxy } from 'pdfjs-dist/types/src/display/api';
 import { PDFPageView } from 'pdfjs-dist/web/pdf_viewer.mjs';
 import { DEFAULT_ZOOM_FACTOR } from 'document/WournalPageSize';
 import { debounce } from 'lodash';
+import WournalPDFPageViewContextMenu from './WournalPDFPageViewContextMenu';
+
+const CTX_MENU = new WournalPDFPageViewContextMenu();
+document.body.append(CTX_MENU);
 
 const PDF_PAGE_VIEW_CSS_SHEET = new CSSStyleSheet();
 PDF_PAGE_VIEW_CSS_SHEET.replaceSync(css);
@@ -38,9 +42,12 @@ export class WournalPDFPageView {
     this.display = document.createElement('div');
     this.display.setAttribute('class', 'wournal-pdf-page-view');
     this.display.style.position = 'absolute';
-    this.display.style.pointerEvents = 'none';
     this.display.style.transform = 'none';
     this.display.style.transformOrigin = '0 0';
+    this.display.addEventListener('contextmenu', e => {
+      CTX_MENU.show(e);
+    });
+    this.setAllowTextSelection(false);
 
     this.shadow = this.display.attachShadow({ mode: 'closed' });
 
@@ -81,6 +88,10 @@ export class WournalPDFPageView {
     viewer.setPdfPage(this.page);
 
     return { viewer, container };
+  }
+
+  public setAllowTextSelection(allow: boolean) {
+    this.display.style.pointerEvents = allow ? 'unset' : 'none';
   }
 
   public async free() {

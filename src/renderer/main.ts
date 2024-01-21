@@ -29,6 +29,8 @@ setTimeout(async () => {
 
 const wournal = new Wournal();
 
+wournal.shortcutsCtx.addEl(document);
+
 async function maybeLoadArgvDoc() {
   const argv = await ApiClient["process:argv"]();
   if (argv.positionals.length > 3) return; // dev

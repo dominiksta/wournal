@@ -1,5 +1,5 @@
 // copied from from pdfjs-dist/web/pdf_viewer.css
-export const css = `
+export let css = `
 
 /* Copyright 2014 Mozilla Foundation
  *
@@ -2255,5 +2255,15 @@ export const css = `
 .pdfPresentationMode .pdfViewer .page{
   margin:0 auto;
   border:2px solid transparent;
+}
+`;
+
+css += `
+/* custom additional pdf.js css */
+
+.textLayer span {
+    /* smoothes out text selection */
+    /* its a bit scary that this seems necessary, but oh well */
+    min-height: 2em !important;
 }
 `;

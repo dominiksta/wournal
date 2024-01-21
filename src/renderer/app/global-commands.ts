@@ -46,6 +46,7 @@ export const GlobalCommandId = [
   'tool_eraser',
   'tool_rectangle',
   'tool_select_rectangle',
+  'tool_select_text',
   'tool_text',
   'tool_hand',
   'tool_stroke_width_fine',
