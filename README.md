@@ -7,6 +7,7 @@ freely put your handwriting, text, images and vector graphics on a canvas that
 is about as easy to use as paper, freeing up your brain to focus on the subject
 matter.
 
+- Can be used to annotate PDF documents
 - Supports Windows and GNU/Linux. (Android support is planned, MacOS/iOS open to
   contribution)
 - Save single-page documents as SVG to interoperate with other software.
@@ -14,13 +15,15 @@ matter.
 
 ![Screenshot](docs/assets/readme-screenshot.png)
 
+![Screenshot PDF Annotation](docs/assets/readme-screenshot-pdf-annotation.png)
+
 ## Current Project Status
 
 Wournal just released (2024-01-07) as an alpha version. There may still be some
 bugs creeping around, but it should be mostly stable.
 
-There are lots of things planned for the future (see below), but the two biggest
-things still missing are *PDF annotation and export* and an *Android version*.
+There are lots of things planned for the future (see below), but the biggest
+thing still missing is an *Android version*.
 
 <details>
   <summary>Development Roadmap</summary>
