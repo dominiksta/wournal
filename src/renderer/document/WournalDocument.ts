@@ -187,14 +187,14 @@ export class WournalDocument extends Component {
     }
   }
 
-  public defaultFileName(extension: 'svg' | 'woj'): string {
-    const uniqPDFs = this.pages.value
-      .map(p => p.pdfMode ? p.pdfMode.fileName : undefined)
-      .filter(el => el !== undefined)
-      .filter((maybeUniq, maybeUniqIdx, arr) => arr.indexOf(maybeUniq) === maybeUniqIdx)
-    const hasUniqPDF = uniqPDFs.length === 1 ? uniqPDFs[0] : null;
-    if (hasUniqPDF) {
-      return (
+  public defaultFileName(extension: string): string {
+    if (extension === 'woj') {
+      const uniqPDFs = this.pages.value
+        .map(p => p.pdfMode ? p.pdfMode.fileName : undefined)
+        .filter(el => el !== undefined)
+        .filter((maybeUniq, maybeUniqIdx, arr) => arr.indexOf(maybeUniq) === maybeUniqIdx)
+      const hasUniqPDF = uniqPDFs.length === 1 ? uniqPDFs[0] : null;
+      if (hasUniqPDF) return (
         hasUniqPDF.split(/\.(pdf|PDF)/).slice(0, -2).reduce((a, b) => a + '.' + b)
         + '.woj'
       );

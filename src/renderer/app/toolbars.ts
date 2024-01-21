@@ -95,6 +95,16 @@ export default class Toolbars extends Component {
           ui5.menuItem({ fields: { text: 'File' } }, [
             ui5.menuItem({
               fields: {
+                icon: 'document', ...globalCmdMenuItem('file_new'),
+              }
+            }),
+            ui5.menuItem({
+              fields: {
+                icon: 'open-folder', ...globalCmdMenuItem('file_load'),
+              }
+            }),
+            ui5.menuItem({
+              fields: {
                 icon: 'save', ...globalCmdMenuItem('file_save'),
               }
             }),
@@ -110,12 +120,7 @@ export default class Toolbars extends Component {
             }),
             ui5.menuItem({
               fields: {
-                icon: 'document', ...globalCmdMenuItem('file_new'),
-              }
-            }),
-            ui5.menuItem({
-              fields: {
-                icon: 'open-folder', ...globalCmdMenuItem('file_load'),
+                icon: 'pdf-attachment', ...globalCmdMenuItem('file_export_pdf'),
               }
             }),
           ]),

@@ -19,6 +19,7 @@ export interface WournalApi {
   newDocument(props?: PageProps, identification?: string): void;
   createTestPages(): void;
   promptClosingUnsaved(): Promise<boolean>;
+  promptExportPDF(): Promise<boolean>;
 
   // history
   // ----------------------------------------------------------------------

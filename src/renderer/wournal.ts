@@ -27,6 +27,7 @@ import { inject } from 'dependency-injection';
 import About from 'app/about';
 import { FileNotFoundError } from 'pdf/PDFCache';
 import { ConfigDTOVersioner } from 'persistence/ConfigDTO';
+import PDFExporter from 'pdf/PDFExporter';
 
 @Component.register
 export default class Wournal extends Component {
@@ -222,6 +223,27 @@ export default class Wournal extends Component {
           ],
         }));
       });
+    },
+
+    promptExportPDF: async () => {
+      const doc = this.doc.value;
+      const resp = await this.fileSystem.savePrompt(
+        doc.fileName !== undefined
+          ? (doc.fileName + '.pdf')
+          : doc.defaultFileName('woj.pdf'),
+        [
+          { extensions: ['pdf'], name: 'Portable Document Format (.pdf)' },
+          { extensions: ['*'], name: 'All Files' },
+        ]
+      );
+      if (!resp) return false;
+      const closePleaseWait = this.dialog.pleaseWait('Exporting Document');
+      await this.fileSystem.write(
+        resp, new Blob([await new PDFExporter().exportDocument(doc)])
+      );
+      closePleaseWait();
+      this.toast.open('Document Exported');
+      return true;
     },
 
     // history
@@ -510,7 +532,7 @@ export default class Wournal extends Component {
       shortcut: 'Ctrl+Shift+S',
     },
     'file_save_as_single_page': {
-      human_name: 'Save As Single SVG',
+      human_name: 'Save as Single SVG',
       func: () => {
         const doc = this.doc.value;
         this.api.saveDocumentPromptSinglePage(
@@ -523,6 +545,11 @@ export default class Wournal extends Component {
       human_name: 'Load File',
       func: this.api.loadDocumentPrompt,
       shortcut: 'Ctrl+O',
+    },
+    'file_export_pdf': {
+      human_name: 'Export as PDF',
+      func: this.api.promptExportPDF,
+      shortcut: 'Ctrl+E',
     },
 
     'history_undo': {

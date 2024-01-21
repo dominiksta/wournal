@@ -417,7 +417,7 @@ export class WournalPage {
   }
 
   /** Get a layer by its name */
-  private getLayer(name: string): SVGGElement {
+  public getLayer(name: string): SVGGElement {
     return this.getLayers().find(
       l => l.getAttribute(WOURNAL_SVG_LAYER_NAME_ATTR) === name
     );

@@ -113,6 +113,7 @@ export class CanvasPath extends CanvasElement<CanvasPathData> {
   }
 
   public getOpacity() {
+    if (!this._svgElem.hasAttribute('stroke-opactiy')) return 1;
     return parseFloat(this._svgElem.getAttribute("stroke-opacity"));
   }
 
