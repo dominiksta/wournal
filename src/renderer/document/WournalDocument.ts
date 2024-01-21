@@ -1,13 +1,10 @@
 import { CanvasToolConfig, CanvasToolStrokeWidth, ConfigDTO } from "../persistence/ConfigDTO";
-import { DocumentDTO } from "../persistence/DocumentDTO";
 import { DSUtils } from "../util/DSUtils";
 import { FileUtils } from "../util/FileUtils";
 import { Newable } from "../util/Newable";
 import { SVGUtils } from "../util/SVGUtils";
 import { CanvasElement, CanvasElementDTO } from "./CanvasElement";
 import { CanvasElementFactory } from "./CanvasElementFactory";
-import { CanvasImage } from "./CanvasImage";
-import { CanvasText } from "./CanvasText";
 import { CanvasTool, CanvasToolName } from "./CanvasTool";
 import { CanvasToolFactory } from "./CanvasToolFactory";
 import { CanvasToolPen } from "./CanvasToolPen";
@@ -27,6 +24,7 @@ import { ConfigCtx } from "app/config-context";
 import { ApiCtx } from "app/api-context";
 import ZipFile from "util/ZipFile";
 import { FileNotFoundError, PDFCache } from "pdf/PDFCache";
+import { CanvasToolSelectRectangle } from "./CanvasToolSelectRectangle";
 
 @Component.register
 export class WournalDocument extends Component {
@@ -66,7 +64,7 @@ export class WournalDocument extends Component {
     this.toolConfig = new rx.State(DSUtils.copyObj(this.config.value.tools));
     this.api = getContext(ApiCtx);
 
-    this.setTool(CanvasToolPen);
+    this.setTool(CanvasToolSelectRectangle);
     this.subscribe(this.activePage, p => {
       this.pages.value.forEach(p => p.display.classList.remove('active'));
       p.display.classList.add('active');
