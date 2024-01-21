@@ -1,6 +1,20 @@
 Changelog
 ======================================================================
 
+`0.0.2` - _2024-01-21_
+----------------------------------------------------------------------
+
+### Added
+
+- Open and annotate PDF files (using [pdf.js](https://mozilla.github.io/pdf.js/))
+- Export to PDF (using [pdf-lib](https://pdf-lib.js.org/))
+
+### Fixed
+
+- Zooming no longer scrolls the document
+- Default SVG background for files created through the CLI was black
+
+
 `0.0.1` - _2024-01-08_
 ----------------------------------------------------------------------
 
