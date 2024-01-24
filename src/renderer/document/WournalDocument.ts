@@ -26,7 +26,7 @@ import ZipFile from "util/ZipFile";
 import { FileNotFoundError, PDFCache } from "pdf/PDFCache";
 import { CanvasToolSelectRectangle } from "./CanvasToolSelectRectangle";
 import { CanvasToolSelectText } from "./CanvasToolSelectText";
-import { getPDFOutline } from "pdf/outline";
+import { getPDFOutline } from "pdf/get-outline";
 import {
   defaultDocumentMeta, DocumentMetaVersioner, OutlineNode
 } from "persistence/DocumentMeta";
