@@ -27,8 +27,11 @@ import { FileNotFoundError, PDFCache } from "pdf/PDFCache";
 import { CanvasToolSelectRectangle } from "./CanvasToolSelectRectangle";
 import { CanvasToolSelectText } from "./CanvasToolSelectText";
 import { getPDFOutline } from "pdf/outline";
-import { defaultDocumentMeta, DocumentMetaVersioner } from "persistence/DocumentMeta";
+import {
+  defaultDocumentMeta, DocumentMetaVersioner, OutlineNode
+} from "persistence/DocumentMeta";
 import PackageJson from 'PackageJson';
+import { pairwise } from "util/rx";
 
 @Component.register
 export class WournalDocument extends Component {
@@ -81,6 +84,8 @@ export class WournalDocument extends Component {
         pages.map((p, idx) => p.display === this.display.children[idx]);
       console.assert(correctPositions.indexOf(false) === -1, pages);
     });
+
+    this.setupListenChangeOutlinePages();
   }
 
   render() { return [ h.div(this.display) ] }
@@ -124,12 +129,6 @@ export class WournalDocument extends Component {
     if (fileName.toLowerCase().endsWith('.woj')) {
       const zipFile = await ZipFile.fromBlob(new Blob([blob]));
       const allFiles = await zipFile.allFiles();
-      const metaFile = allFiles.find(f => f.name === 'meta.json');
-      // the metafile should always be there since 2024-01-23, but for documents
-      // older then that we have to check
-      if (metaFile) doc.meta.next(DocumentMetaVersioner.updateToCurrent(
-        JSON.parse((new TextDecoder()).decode(await metaFile.blob.arrayBuffer()))
-      ));
       const pagesSvg = await Promise.all(allFiles
         .filter(f => f.name.endsWith('.svg'))
         .sort((a, b) => a.name.localeCompare(b.name))
@@ -139,12 +138,16 @@ export class WournalDocument extends Component {
         if (page instanceof FileNotFoundError) return page;
         doc.addPage(page);
       }
+      const metaFile = allFiles.find(f => f.name === 'meta.json');
+      // the metafile should always be there since 2024-01-23, but for documents
+      // older then that we have to check
+      if (metaFile) doc.meta.next(DocumentMetaVersioner.updateToCurrent(
+        JSON.parse((new TextDecoder()).decode(await metaFile.blob.arrayBuffer()))
+      ));
     // pdf
     // ----------------------------------------------------------------------
     } else if (fileName.toLowerCase().endsWith('.pdf')) {
       const pdf = await PDFCache.fromBlob(blob, fileName);
-      const outline = await getPDFOutline(pdf);
-      doc.meta.next(m => ({ ...m, outline }));
       for (let i = 1; i <= pdf.numPages; i++) {
         const pdfPage = await pdf.getPage(i);
         const viewport = pdfPage.getViewport({ scale: doc.zoom});
@@ -161,6 +164,8 @@ export class WournalDocument extends Component {
         doc.fileName = undefined;
         doc.addPage(wournalPage);
       }
+      const outline = await getPDFOutline(pdf);
+      doc.meta.next(m => ({ ...m, outline }));
     // svg
     // ----------------------------------------------------------------------
     } else if (fileName.toLowerCase().endsWith('.svg')) {
@@ -523,6 +528,36 @@ export class WournalDocument extends Component {
       ));
     }
     page.display.scrollIntoView();
+  }
+
+  private setupListenChangeOutlinePages() {
+    const getOutlineCtx = (
+      head: OutlineNode[], o: OutlineNode
+    ): OutlineNode[] | false => {
+      if (head.indexOf(o) !== -1) return head;
+      for (const el of head) {
+        const attempt = getOutlineCtx(el.children, o);
+        if (attempt) return attempt;
+      }
+      return false;
+    };
+
+    this.subscribe(this.pages.pipe(pairwise()), ([prev, curr]) => {
+      if (prev === undefined || this.meta.value.outline.length === 0) return;
+      const copy = DSUtils.copyObj(this.meta.value.outline);
+      const traverse = (o: OutlineNode) => {
+        const page = prev[o.pageNr - 1];
+        const newIdx = curr.indexOf(page);
+        // console.debug(`${o.pageNr} -> ${newIdx + 1}`)
+        if (newIdx === -1) {
+          const selfArr = getOutlineCtx(copy, o);
+          if (selfArr) selfArr.splice(selfArr.indexOf(o), 1);
+        }
+        else o.pageNr = newIdx + 1;
+      };
+      copy.forEach(traverse);
+      this.meta.next(m => ({ ...m, outline: copy }));
+    });
   }
 
   // ------------------------------------------------------------

@@ -111,8 +111,6 @@ export class WournalPage {
     return this._rect;
   }
 
-  private readonly fs = inject('FileSystem');
-
   /**
    * - `doc`: The wournal document this page is creted as a part of.
    * - `init`: Either the svg data of a saved document as a string or
