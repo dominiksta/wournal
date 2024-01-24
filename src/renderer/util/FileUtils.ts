@@ -159,7 +159,7 @@ export const FileUtils = {
   firstSvgElFromXmlFileString: function(s: string): SVGSVGElement {
     let parser = new DOMParser();
     let xmlDoc = parser.parseFromString(s, "image/svg+xml");
-    LOG.debug(xmlDoc.firstElementChild);
+    console.warn(xmlDoc.firstElementChild);
     return xmlDoc.firstElementChild as SVGSVGElement;
   },
 

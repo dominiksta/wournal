@@ -6,6 +6,9 @@ import Wournal from "wournal";
 import './electron-api-client';
 import { ApiClient } from "./electron-api-client";
 import { ErrorPopup } from "app/error-popup";
+import { overwriteConsoleLogFunctions } from "util/Logging";
+
+overwriteConsoleLogFunctions();
 
 provideDependencies({
   'FileSystem': FileSystemElectron,

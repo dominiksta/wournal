@@ -2,13 +2,13 @@ import { Component, h, rx, style } from '@mvui/core';
 import * as ui5 from '@mvui/ui5';
 import environment from 'environment';
 import PackageJson from 'PackageJson';
+import { getLogHistory } from 'util/Logging';
 
 @Component.register
 export class ErrorPopup extends Component {
 
   private readonly dialogRef = this.ref<ui5.types.Dialog>();
   private readonly error = new rx.State<any>(null);
-  // private readonly logs = new rx.State<string[]>(null);
 
   show(error: any) {
     this.error.next(error);
@@ -106,6 +106,9 @@ export class ErrorPopup extends Component {
   }
 
   static styles = style.sheet({
+    'ui5-dialog': {
+      maxWidth: '800px',
+    },
     '#section-copy': {
       textAlign: 'right',
     },
@@ -127,6 +130,7 @@ export class ErrorPopup extends Component {
 }
 
 const trySerialize = (data: any): string | '<Not Serializable>' => {
+  if (typeof data === 'string') return data;
   try {
     return JSON.stringify(data, null, 2);
   } catch {
@@ -184,6 +188,15 @@ function errorDetails(error: any): string {
       ret['error'] = checkSerialize(error);
     }
   } catch { }
+
+  try {
+    ret['logs'] = getLogHistory().map(
+      l => `${l.time} [${l.level}]: ${trySerialize(l.msg)}` +
+        (l.data !== undefined ? ` -- ${trySerialize(l.data)}` : '')
+    );
+  } catch {
+    ret['logs'] = '<Could Not Get Logs>';
+  }
 
   return trySerialize(ret);
 }

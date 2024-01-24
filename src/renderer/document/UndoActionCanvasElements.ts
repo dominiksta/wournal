@@ -34,7 +34,7 @@ export class UndoActionCanvasElements implements UndoAction {
     const enrich = (source: SVGGraphicsElement[]) => {
       return source.map(v => {
         if (!(v.parentNode instanceof SVGGElement)) {
-          LOG.error(v);
+          console.warn(v);
           throw new Error(
             "could not find layer for element pushed to undo stack"
           )
