@@ -6,6 +6,7 @@ import { DSUtils } from 'util/DSUtils';
 import { ApiCtx } from 'app/api-context';
 import { DocumentCtx } from 'app/document-context';
 import { GlobalCommandsCtx } from './global-commands';
+import { customScrollbar } from 'global-styles';
 
 @Component.register
 export class OutlineContainer extends Component {
@@ -70,6 +71,7 @@ export class OutlineContainer extends Component {
   }
 
   static styles = style.sheet({
+    ...customScrollbar,
     '#title': {
       // margin: '.5em',
       display: 'grid',

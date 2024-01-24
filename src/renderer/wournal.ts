@@ -3,7 +3,7 @@ import './global-styles';
 import './app/debugger';
 import * as ui5 from "@mvui/ui5";
 import Toolbars from 'app/toolbars';
-import { darkTheme, lightTheme, theme } from "./global-styles";
+import { customScrollbar, darkTheme, lightTheme, theme } from "./global-styles";
 import { WournalDocument } from "document/WournalDocument";
 import { ConfigRepositoryLocalStorage } from 'persistence/ConfigRepositoryLocalStorage';
 import { WournalPageSize } from 'document/WournalPageSize';
@@ -902,25 +902,7 @@ export default class Wournal extends Component {
       height: '100%',
       width: '100%',
     },
-    '*::-webkit-scrollbar': {
-      // background: ui5.Theme.ScrollBar_TrackColor,
-      background: 'transparent',
-      // width: ui5.Theme.ScrollBar_Dimension,
-      // height: ui5.Theme.ScrollBar_Dimension,
-      width: '8px',
-      height: '8px',
-    },
-    '*::-webkit-scrollbar-thumb': {
-      background: theme.scrollbar,
-      borderRadius: '10px',
-    },
-    '*::-webkit-scrollbar-thumb:hover': {
-      background: theme.scrollbarHover,
-    },
-    '*::-webkit-scrollbar-corner': {
-      // background: ui5.Theme.ScrollBar_TrackColor,
-      background: 'transparent',
-    },
+    ...customScrollbar,
   });
 }
 

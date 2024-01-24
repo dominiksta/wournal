@@ -1,22 +1,7 @@
 import { style } from "@mvui/core";
+import { MvuiCSSDeclarations } from "@mvui/core/dist/types/style";
 import * as ui5 from "@mvui/ui5";
 import "./icons";
-
-style.util.applySheetAsStyleTag(document.body, style.sheet({
-  'body': {
-    margin: '0px',
-    width: '100vw',
-    height: '100vh',
-  },
-  'html': {
-    overflow: 'hidden',
-  },
-  ':root': {
-    fontFamily: ui5.Theme.FontFamily,
-    color: ui5.Theme.TextColor,
-    background: ui5.Theme.BackgroundColor,
-  },
-}), 'global-styles');
 
 type WournalTheme = {
   documentBackground: string,
@@ -43,3 +28,42 @@ export const darkTheme: WournalTheme = {
 }
 
 export const theme = style.themeVariables('wournal', lightTheme);
+
+export const customScrollbar: { [selector: string]: MvuiCSSDeclarations } = {
+  '*::-webkit-scrollbar': {
+    // background: ui5.Theme.ScrollBar_TrackColor,
+    background: 'transparent',
+    // width: ui5.Theme.ScrollBar_Dimension,
+    // height: ui5.Theme.ScrollBar_Dimension,
+    width: '8px',
+    height: '8px',
+  },
+  '*::-webkit-scrollbar-thumb': {
+    background: theme.scrollbar,
+    borderRadius: '10px',
+  },
+  '*::-webkit-scrollbar-thumb:hover': {
+    background: theme.scrollbarHover,
+  },
+  '*::-webkit-scrollbar-corner': {
+    // background: ui5.Theme.ScrollBar_TrackColor,
+    background: 'transparent',
+  },
+}
+
+style.util.applySheetAsStyleTag(document.body, style.sheet({
+  'body': {
+    margin: '0px',
+    width: '100vw',
+    height: '100vh',
+  },
+  'html': {
+    overflow: 'hidden',
+  },
+  ':root': {
+    fontFamily: ui5.Theme.FontFamily,
+    color: ui5.Theme.TextColor,
+    background: ui5.Theme.BackgroundColor,
+  },
+  ...customScrollbar,
+}), 'global-styles');
