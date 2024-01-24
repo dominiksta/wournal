@@ -1,6 +1,5 @@
 const webpack = require('webpack');
 const path = require('path');
-const { spawn } = require('child_process');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const base = require('./config.base');
 
@@ -11,7 +10,7 @@ module.exports = {
   mode: 'production',
   devtool: 'source-map',
   plugins: [
-    new webpack.EnvironmentPlugin({ NODE_ENV: process.env.NODE_ENV }),
+    ...base.plugins,
     new HtmlWebpackPlugin({
       filename: path.join('index.html'),
       template: path.resolve(__dirname, '../src/renderer/index.ejs'),

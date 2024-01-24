@@ -1,3 +1,8 @@
+const { DefinePlugin } = require('webpack');
+const { execSync } = require('child_process');
+
+const git = cmd => execSync(`git ${cmd}`, { encoding: 'utf8' }).trim();
+
 module.exports = {
   module: {
     rules: [
@@ -9,6 +14,13 @@ module.exports = {
   resolve: {
     extensions: [ '.js', '.mjs', '.ts', '.json' ],
   },
+  plugins: [
+    new DefinePlugin({
+      'WOURNAL_ENV.production': process.env.NODE_ENV !== 'development',
+      'WOURNAL_ENV.gitVersion': JSON.stringify(git('describe --always')),
+      'WOURNAL_ENV.buildTime': JSON.stringify(new Date().toISOString()),
+    }),
+  ],
   node: { __dirname: false, __filename: false },
   // living life on the edge
   performance: {
