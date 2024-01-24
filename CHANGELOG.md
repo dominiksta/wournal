@@ -6,8 +6,9 @@ Changelog
 
 ### Added
 
-- Create and edit an outline of bookmarks (automatically imported from PDF if
-  available)
+- Create and edit an outline of bookmarks
+  - Automatically imported from PDF if available
+  - Exports to PDF
 - Select text in PDF
 
 ### Fixed

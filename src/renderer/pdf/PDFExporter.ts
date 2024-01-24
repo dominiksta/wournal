@@ -6,6 +6,8 @@ import { PDFDocument, PDFPage, RGB, ColorTypes, LineCapStyle, PDFFont, PDFEmbedd
 import fontkit from '@pdf-lib/fontkit';
 import { SVGUtils } from 'util/SVGUtils';
 import { CanvasImage } from 'document/CanvasImage';
+import { setOutline } from './set-outline';
+import { OutlineNode } from 'persistence/DocumentMeta';
 
 const AvailableFonts = ['Roboto', 'Roboto Mono'] as const;
 type AvailableFont = 'Roboto' | 'Roboto Mono';
@@ -163,6 +165,8 @@ export default class PDFExporter {
 
       ret.addPage(pdfPage);
     }
+
+    await setOutline(ret, doc.meta.value.outline);
 
     console.log('Creating PDF ArrayBuffer...');
     const uint8array = await ret.save()

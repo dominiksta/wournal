@@ -119,7 +119,7 @@ class Outline extends Component {
     {
       // HACK: maybe we want a "synchronous switchmap" in mvui?
       this.subscribe(doc.pipe(rx.switchMap(d => d.meta)), m => {
-        if (JSON.stringify(m.outline) === JSON.stringify(outline.value)) return;
+        if (m.outline === outline.value) return;
         outline.next(m.outline)
       });
       this.subscribe(outline, outline => {
@@ -230,14 +230,19 @@ class Outline extends Component {
       const pageNr = api.getCurrentPageNr();
       const title = await dialog.promptInput('Add Bookmark');
       if (!title) return;
+      const newO: OutlineNode = { title, pageNr, expanded: false, children: [] };
       if (outline.value.length === 0 || !focus.value) {
-        outline.next(o => [ ...o, {title, pageNr, expanded: false, children: [] }]);
+        outline.next(o => [ ...o, newO]);
       } else {
         const o = focus.value.o;
         const arr = getOutlineCtx(o).selfChildren;
-        arr.push(o);
+        arr.push(newO);
         DSUtils.moveInArr(arr, arr.length - 1, arr.indexOf(o) + 1);
+        outline.next(o => o);
       }
+      requestAnimationFrame(() => {
+        focus.next({ o: newO, el: findElForOutlineNode(newO) });
+      });
     }
 
     const mkOutlineTemplate = (o: OutlineNode): TemplateElementChild => {
