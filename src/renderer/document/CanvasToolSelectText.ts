@@ -7,7 +7,9 @@ export class CanvasToolSelectText extends CanvasTool {
   public override canSetStrokeWidth = false;
   public override canSetColor = false;
 
-  override onDeselect() { }
+  override onDeselect() {
+    document.getSelection().removeAllRanges();
+  }
   override onMouseDown() { }
   override onMouseMove() { }
   override onMouseUp() { }

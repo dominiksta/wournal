@@ -124,6 +124,7 @@ export class WournalPage {
     this.display = document.createElement("div");
     this.display.setAttribute("class", WOURNAL_SVG_PAGE_MARKER_ATTR);
 
+    this.display.style.position = 'relative';
     this.display.style.border = "3px solid white";
     this.display.style.margin = "10px auto 10px auto";
     this.display.style.filter = theme.invert;

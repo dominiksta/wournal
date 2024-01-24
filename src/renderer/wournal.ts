@@ -14,6 +14,7 @@ import { Shortcut, ShortcutManager } from 'app/shortcuts';
 import { ShortcutsCtx } from 'app/shortcuts-context';
 import { WournalApi } from 'api';
 import { ApiCtx } from 'app/api-context';
+import { DocumentCtx } from 'app/document-context';
 import { GlobalCommandsCtx } from 'app/global-commands';
 import { CanvasToolName } from 'document/CanvasTool';
 import { CanvasToolFactory } from 'document/CanvasToolFactory';
@@ -28,6 +29,7 @@ import About from 'app/about';
 import { FileNotFoundError } from 'pdf/PDFCache';
 import { ConfigDTOVersioner } from 'persistence/ConfigDTO';
 import PDFExporter from 'pdf/PDFExporter';
+import { OutlineContainer } from 'app/outline';
 
 @Component.register
 export default class Wournal extends Component {
@@ -39,6 +41,9 @@ export default class Wournal extends Component {
     ConfigCtx, new rx.State(ConfigDTOVersioner.updateToCurrent(this.confRepo.load()))
   );
   public shortcutsCtx = this.provideContext(ShortcutsCtx, new ShortcutManager());
+
+  private readonly outlineRef = this.ref<OutlineContainer>();
+  private hideSideBar = new rx.State(true);
 
   private toast = this.provideContext(ToastCtx, {
     open: async (msg: string) => {
@@ -84,6 +89,7 @@ export default class Wournal extends Component {
       const doc = this.doc.value;
       await this.fileSystem.write(identification, await doc.toFile());
       doc.fileName = identification;
+      doc.meta.next(m => ({ ...m, lastSavedTime: new Date().toISOString() }));
       doc.markSaved();
       updateTitle(doc);
       this.toast.open('Document Saved');
@@ -396,7 +402,9 @@ export default class Wournal extends Component {
     return true;
   }
 
-  private doc = new rx.State(WournalDocument.create(this.getContext.bind(this)));
+  private doc = this.provideContext(
+    DocumentCtx, new rx.State(WournalDocument.create(this.getContext.bind(this)))
+  );
 
   private settingsOpen = new rx.State(false);
 
@@ -467,11 +475,42 @@ export default class Wournal extends Component {
       }
     });
 
-    this.subscribe(this.doc, doc => { updateTitle(doc); });
+    this.subscribe(this.doc, doc => {
+      updateTitle(doc);
+      this.hideSideBar.next(doc.meta.value.outline.length === 0);
+    });
     this.subscribe(
       this.doc.pipe(rx.switchMap(doc => doc.undoStack.undoAvailable)),
       _undoavailable => { updateTitle(this.doc.value); }
     );
+
+    // sidebar resizing
+    Promise.all([
+      this.query('#seperator'), this.query('#sidebar'),
+    ]).then(([sep, sideb]) => {
+      let oldMouseX = 0;
+      sideb.style.minWidth = '200px'; sideb.style.maxWidth = '200px';
+      const resize = (e: MouseEvent) => {
+        const mouseX =
+          Math.max(200, Math.min(e.clientX, this.getBoundingClientRect().width - 50));
+        sideb.style.minWidth =
+          parseInt(sideb.style.minWidth.split('px')[0]) + mouseX - oldMouseX + 'px';
+        sideb.style.maxWidth = sideb.style.minWidth;
+        oldMouseX = mouseX;
+      }
+      const stopListening = () => {
+        document.removeEventListener('mousemove', resize);
+        document.removeEventListener('mouseup', stopListening);
+        this.style.userSelect = 'unset';
+      }
+      this.subscribe(rx.fromEvent(sep, 'mousedown'), e => {
+        oldMouseX = e.clientX;
+        this.style.userSelect = 'none';
+        document.addEventListener('mousemove', resize);
+        document.addEventListener('mouseup', stopListening);
+        e.stopPropagation();
+      });
+    })
 
     // for (let i = 0; i < 100; i++) this.api.createTestPages();
     this.api.createTestPages();
@@ -488,15 +527,24 @@ export default class Wournal extends Component {
       h.div(this.dialog.dialogs),
       Settings.t({ props: { open: rx.bind(this.settingsOpen) } }),
       ui5.toast({ fields: { id: 'toast', placement: 'BottomEnd' } }),
-      h.div({
-        ref: this.documentRef,
-        fields: { id: 'document' },
-        events: {
-          scroll: () => {
-            this.doc.value.setActivePageForCurrentScroll();
+      h.div({ fields: { id: 'main' } }, [
+        h.div({
+          fields: { id: 'sidebar', hidden: this.hideSideBar },
+        }, [OutlineContainer.t({ ref: this.outlineRef })]),
+        h.div({
+          fields: { id: 'seperator', hidden: this.hideSideBar },
+        }),
+        h.div({
+          ref: this.documentRef,
+          fields: { id: 'document' },
+          style: { display: 'inline-block' },
+          events: {
+            scroll: () => {
+              this.doc.value.setActivePageForCurrentScroll();
+            }
           }
-        }
-      }, this.doc),
+        }, this.doc),
+      ]),
     ]
   }
 
@@ -805,6 +853,23 @@ export default class Wournal extends Component {
         About.t(),
       ),
     },
+
+    'bookmark_add': {
+      human_name: 'Add Bookmark',
+      func: () => {
+        this.hideSideBar.next(false);
+        this.outlineRef.current.add();
+      },
+      shortcut: 'Ctrl+B',
+    },
+
+    'bookmark_display_toggle': {
+      human_name: 'Toggle Display Bookmarks',
+      func: async () => {
+        this.hideSideBar.next(v => !v);
+      },
+      shortcut: 'F12',
+    }
   });
 
   static styles = style.sheet({
@@ -813,14 +878,24 @@ export default class Wournal extends Component {
       display: 'block',
       height: '100%',
     },
-    '#document': {
+    '#main': {
       position: 'relative',
       top: '87px',
+      display: 'flex',
       marginBottom: '100px',
-      background: theme.documentBackground,
       height: 'calc(100% - 87px - 35px)',
       width: '100%',
+    },
+    '#seperator': {
+      width: '0.7em',
+      cursor: 'col-resize',
+      borderRadius: '3px',
+      backgroundColor: ui5.Theme.BaseColor,
+    },
+    '#document': {
+      background: theme.documentBackground,
       overflow: 'auto',
+      flexGrow: '1',
     },
     '#document > div': {
       overflow: 'auto',

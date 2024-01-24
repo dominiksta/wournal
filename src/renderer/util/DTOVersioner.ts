@@ -13,6 +13,11 @@ export default class DTOVersioner<T> {
     return this.update(obj) as T;
   }
 
+  public maxVersion() {
+    const versions = Object.keys(this.props.updateFunctions).map(parseFloat);
+    return Math.max(...versions);
+  }
+
   private update(
     obj: object, toVersion: number = -1 // -1 is current
   ) {

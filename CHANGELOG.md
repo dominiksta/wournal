@@ -6,10 +6,13 @@ Changelog
 
 ### Added
 
+- Create and edit an outline of bookmarks (automatically imported from PDF if
+  available)
 - Select text in PDF
 
 ### Fixed
 
+- Shortcuts are no longer triggered when writing in a text field
 - PDF annotations popups are no longer displayed. Maybe a seperate mode to
   display them can be added in the future, but for now hiding them is a lot less
   janky.

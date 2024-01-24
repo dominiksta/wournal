@@ -26,12 +26,16 @@ import ZipFile from "util/ZipFile";
 import { FileNotFoundError, PDFCache } from "pdf/PDFCache";
 import { CanvasToolSelectRectangle } from "./CanvasToolSelectRectangle";
 import { CanvasToolSelectText } from "./CanvasToolSelectText";
+import { getPDFOutline } from "pdf/outline";
+import { defaultDocumentMeta, DocumentMetaVersioner } from "persistence/DocumentMeta";
+import PackageJson from 'PackageJson';
 
 @Component.register
 export class WournalDocument extends Component {
   static useShadow = false;
 
   public pages = new rx.State<WournalPage[]>([]);
+  public meta = new rx.State(defaultDocumentMeta());
   public isSinglePage = false;
   public readyToRenderPDF = false;
 
@@ -119,7 +123,15 @@ export class WournalDocument extends Component {
     // ----------------------------------------------------------------------
     if (fileName.toLowerCase().endsWith('.woj')) {
       const zipFile = await ZipFile.fromBlob(new Blob([blob]));
-      const pagesSvg = await Promise.all((await zipFile.allFiles())
+      const allFiles = await zipFile.allFiles();
+      const metaFile = allFiles.find(f => f.name === 'meta.json');
+      // the metafile should always be there since 2024-01-23, but for documents
+      // older then that we have to check
+      if (metaFile) doc.meta.next(DocumentMetaVersioner.updateToCurrent(
+        JSON.parse((new TextDecoder()).decode(await metaFile.blob.arrayBuffer()))
+      ));
+      const pagesSvg = await Promise.all(allFiles
+        .filter(f => f.name.endsWith('.svg'))
         .sort((a, b) => a.name.localeCompare(b.name))
         .map(async f => (new TextDecoder()).decode(await f.blob.arrayBuffer())));
       for (const svg of pagesSvg) {
@@ -131,6 +143,8 @@ export class WournalDocument extends Component {
     // ----------------------------------------------------------------------
     } else if (fileName.toLowerCase().endsWith('.pdf')) {
       const pdf = await PDFCache.fromBlob(blob, fileName);
+      const outline = await getPDFOutline(pdf);
+      doc.meta.next(m => ({ ...m, outline }));
       for (let i = 1; i <= pdf.numPages; i++) {
         const pdfPage = await pdf.getPage(i);
         const viewport = pdfPage.getViewport({ scale: doc.zoom});
@@ -178,6 +192,8 @@ export class WournalDocument extends Component {
       const zipFile = new ZipFile();
       pages.forEach((p, i) =>
         zipFile.addFile(String(i).padStart(4, '0') + '-page.svg', p.asSvgString()));
+      this.meta.next(m => ({ ...m, lastSavedWournalVersion: PackageJson.version}));
+      zipFile.addFile('meta.json', JSON.stringify(this.meta.value, null, 2));
       return await zipFile.asBlob();
     }
   }
@@ -650,6 +666,7 @@ export class WournalDocument extends Component {
   }
 
   private onMouseDown(e: MouseEvent) {
+    (document.activeElement instanceof HTMLElement) && document.activeElement.blur();
     e.preventDefault();
     this.setPageAtPoint(e);
     if (this.activePage) this.activePage.value.refreshClientRect();

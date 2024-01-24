@@ -6,6 +6,12 @@ export const DSUtils = {
     return res;
   },
 
+  moveInArr: function <T>(arr: T[], fromIdx: number, toIdx: number): void {
+    const element = arr[fromIdx];
+    arr.splice(fromIdx, 1);
+    arr.splice(toIdx, 0, element);
+  },
+
   /** Return a deep copy of the given object. Might break some complex types. */
   copyObj: function <T>(obj: T) {
     // In the future, this could be updated to use the new

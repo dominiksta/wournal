@@ -111,6 +111,7 @@ export class TextField {
     ) {
       this.onBlur();
     }
+    e.stopPropagation();
   }
 
   private onBlur() {

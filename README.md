@@ -36,8 +36,8 @@ thing still missing is an *Android version*.
     - [ ] Highlight Text
     - [ ] Choose between attaching PDF to WOJ, Relative or Absolute File Path
   - [x] Exporting to PDF with [pdf-lib](https://pdf-lib.js.org/)
-  - [ ] Table of Contents
-    - [ ] Auto Import From PDF
+  - [x] Table of Contents
+    - [x] Auto Import From PDF
   - [ ] Tabs
   - [ ] Tablet (and Phone) Friendly UI
   - [ ] Android Version with Cordova or Capacitor

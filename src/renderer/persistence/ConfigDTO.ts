@@ -151,9 +151,11 @@ export const ConfigDTOVersioner = new DTOVersioner<ConfigDTO>({
   }
 })
 
+export const CONFIG_CURRENT_VERSION = ConfigDTOVersioner.maxVersion();
+
 export function defaultConfig(): ConfigDTO {
   return {
-    version: 0.01,
+    version: CONFIG_CURRENT_VERSION,
     // NOTE(dominiksta): While automatically inverting colors could be
     // considered unintuitive and therefore bad default behaviour, I want
     // this to be set for further development. Once wournal launches, the

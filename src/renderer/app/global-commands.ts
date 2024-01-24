@@ -62,6 +62,9 @@ export const GlobalCommandId = [
   'help_website',
   'help_about',
 
+  'bookmark_add',
+  'bookmark_display_toggle',
+
   // 'layer_new',
   // 'layer_current_delete',
   // 'layer_current_move_up',

@@ -197,6 +197,11 @@ export default class Toolbars extends Component {
                 icon: 'full-screen', ...globalCmdMenuItem('fullscreen_toggle')
               }
             }),
+            ui5.menuItem({
+              fields: {
+                icon: 'bookmark-2', ...globalCmdMenuItem('bookmark_display_toggle')
+              }
+            }),
           ]),
 
           ui5.menuItem({ fields: { text: 'Page' } }, [
