@@ -70,7 +70,7 @@ export class ErrorPopup extends Component {
         h.section(
           { fields: { id: 'section-copy' } },
           [
-            h.span(
+            h.i(
               { fields: { hidden: displayCopied.derive(v => !v) } },
               'Copied '
             ),

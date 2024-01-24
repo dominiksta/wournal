@@ -65,6 +65,8 @@ export const GlobalCommandId = [
   'bookmark_add',
   'bookmark_display_toggle',
 
+  'system_show_debug_info',
+
   // 'layer_new',
   // 'layer_current_delete',
   // 'layer_current_move_up',

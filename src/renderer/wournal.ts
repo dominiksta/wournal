@@ -30,6 +30,7 @@ import { FileNotFoundError } from 'pdf/PDFCache';
 import { ConfigDTOVersioner } from 'persistence/ConfigDTO';
 import PDFExporter from 'pdf/PDFExporter';
 import { OutlineContainer } from 'app/outline';
+import openSystemDebugInfo from 'app/debug-info';
 
 @Component.register
 export default class Wournal extends Component {
@@ -869,6 +870,11 @@ export default class Wournal extends Component {
         this.hideSideBar.next(v => !v);
       },
       shortcut: 'F12',
+    },
+
+    'system_show_debug_info': {
+      human_name: 'System Debug Information',
+      func: () => openSystemDebugInfo(this.dialog.openDialog),
     }
   });
 

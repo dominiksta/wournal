@@ -16,6 +16,7 @@ export type OpenDialog = (decl: (close: () => void) => {
   heading: TemplateElementChild,
   buttons: DialogButtons,
   state?: ui5.types.Dialog['state'],
+  maxWidth?: string,
 }) => void;
 
 export const BasicDialogManagerContext = new rx.Context<{
@@ -24,20 +25,24 @@ export const BasicDialogManagerContext = new rx.Context<{
     heading: TemplateElementChild,
     content?: TemplateElementChild,
     state?: ui5.types.Dialog['state'],
+    maxWidth?: string,
   ): Promise<boolean>;
   promptInput(
     heading: TemplateElementChild,
     content?: TemplateElementChild,
     state?: ui5.types.Dialog['state'],
+    maxWidth?: string,
   ): Promise<string | undefined>;
   infoBox(
     heading: TemplateElementChild,
     content: TemplateElementChild,
     state?: ui5.types.Dialog['state'],
+    maxWidth?: string,
   ): void;
   pleaseWait(
     heading: TemplateElementChild,
     content?: TemplateElementChild,
+    maxWidth?: string,
   ): () => void;
   dialogs: rx.State<ComponentTemplateElement<BasicDialog>[]>;
 }>(mkDialogManagerCtx);
@@ -55,10 +60,11 @@ export class BasicDialog extends Component<{
     num: rx.prop<number>(),
     buttons: rx.prop<DialogButtons>({ optional: true }),
     state: rx.prop<ui5.types.Dialog['state']>({ defaultValue: 'None' }),
+    maxWidth: rx.prop<string>({ defaultValue: 'auto' }),
   }
 
   render() {
-    const { buttons, heading, state } = this.props;
+    const { buttons, heading, state, maxWidth } = this.props;
 
     const buttonTemplate = buttons.derive(btns => {
       if (btns === undefined) return [
@@ -93,6 +99,7 @@ export class BasicDialog extends Component<{
           ),
           state,
         },
+        style: { maxWidth },
         slots: {
           footer: h.div({ fields: { id: 'footer' } }, buttonTemplate),
           header: heading.derive(
@@ -133,13 +140,14 @@ function mkDialogManagerCtx() {
       content: TemplateElementChild,
       buttons: DialogButtons,
       state?: ui5.types.Dialog['state'],
+      maxWidth?: string,
     }
   ) => {
     const num = newDialogId();
     const close = mkCloseDialog(num);
-    const { heading, content, buttons, state } = decl(close);
+    const { heading, content, buttons, state, maxWidth } = decl(close);
     const dialog = BasicDialog.t({
-      props: { heading, buttons, num, state },
+      props: { heading, buttons, num, state, maxWidth },
       events: { close }
     }, content);
     dialogs.next(d => [...d, dialog]);
@@ -159,9 +167,10 @@ const mkInfoBox = (openDialog: OpenDialog) => (
   heading: TemplateElementChild,
   content: TemplateElementChild,
   state?: ui5.types.Dialog['state'],
+  maxWidth?: string,
 ) => {
   openDialog(close => ({
-    content, heading, state,
+    content, heading, state, maxWidth,
     buttons: [
       {
         name: 'OK', design: 'Positive', action: () => {
@@ -176,10 +185,11 @@ const mkPromptYesOrNo = (openDialog: OpenDialog) => (
   heading: TemplateElementChild,
   content?: TemplateElementChild,
   state?: ui5.types.Dialog['state'],
+  maxWidth?: string,
 ) => {
   return new Promise<boolean>((resolve) => {
     openDialog(close => ({
-      content, heading, state,
+      content, heading, state, maxWidth,
       buttons: [
         {
           name: 'Yes', design: 'Positive', action: () => {
@@ -200,11 +210,12 @@ const mkPromptInput = (openDialog: OpenDialog) => (
   heading: TemplateElementChild,
   content?: TemplateElementChild,
   state?: ui5.types.Dialog['state'],
+  maxWidth?: string,
 ) => {
   const value = new rx.State('');
   return new Promise<string | undefined>((resolve) => {
     openDialog(close => ({
-      heading, state,
+      heading, state, maxWidth,
       content: [
         h.div(content),
         ui5.input({
@@ -238,12 +249,13 @@ const mkPleaseWait = (openDialog: OpenDialog) => (
   heading: TemplateElementChild,
   content?: TemplateElementChild,
   state?: ui5.types.Dialog['state'],
+  maxWidth?: string,
 ) => {
   let _close: () => void;
   openDialog(close => {
     _close = close;
     return {
-      heading,
+      heading, maxWidth,
       state: state ?? 'Information',
       content: content ?? ui5.busyIndicator({
         fields: { size: 'Medium', active: true, delay: 0 }

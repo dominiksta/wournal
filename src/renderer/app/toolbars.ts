@@ -355,6 +355,7 @@ export default class Toolbars extends Component {
           ui5.menuItem({ fields: { text: 'Help' } }, [
             ui5.menuItem({ fields: { ...globalCmdMenuItem('help_website') } }),
             ui5.menuItem({ fields: { ...globalCmdMenuItem('help_about') } }),
+            ui5.menuItem({ fields: { ...globalCmdMenuItem('system_show_debug_info') } }),
           ]),
         ]),
 
