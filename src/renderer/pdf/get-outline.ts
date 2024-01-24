@@ -8,14 +8,15 @@ export async function getPDFOutline(doc: PDFDocumentProxy): Promise<OutlineNode[
   const format = async (o: typeof resp[0]): Promise<OutlineNode> => {
     let children: OutlineNode[] = [];
     for (const c of o.items) children.push(await format(c));
-    if (o.dest[0] === null) console.warn(`Invalid outline dest: ${o.title}`)
+    const dest = typeof o.dest === 'string' ? await doc.getDestination(o.dest) : o.dest;
+    if (dest[0] === null) console.warn(`Invalid outline dest: ${o.title}`)
     return {
       title: o.title
         .replaceAll('\n', ' ')
         // yes i actually found a pdf with \r in an outline. may the tool that
         // allowed the creation of that pdf rot in hell
         .replaceAll('\r', ''),
-      pageNr: o.dest[0] !== null ? (await doc.getPageIndex(o.dest[0]) + 1) : -1,
+      pageNr: dest[0] !== null ? (await doc.getPageIndex(dest[0]) + 1) : -1,
       expanded: children.length !== 0,
       children,
     }
