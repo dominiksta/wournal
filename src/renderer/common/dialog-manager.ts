@@ -2,6 +2,7 @@ import {
   Component, ComponentTemplateElement, h, rx, style, TemplateElementChild
 } from "@mvui/core";
 import * as ui5 from "@mvui/ui5";
+import { DSUtils } from "util/DSUtils";
 
 type ButtonDesign =
   'Default' | 'Positive' | 'Negative' | 'Transparent' | 'Emphasized' | 'Attention';
@@ -66,6 +67,8 @@ export class BasicDialog extends Component<{
   render() {
     const { buttons, heading, state, maxWidth } = this.props;
 
+    console.log(`showing dialog with heading ${DSUtils.trySerialize(heading)}`);
+
     const buttonTemplate = buttons.derive(btns => {
       if (btns === undefined) return [
         ui5.button({
@@ -88,7 +91,11 @@ export class BasicDialog extends Component<{
     })
 
     const dialogRef = this.ref<ui5.types.Dialog>();
-    this.onRendered(() => dialogRef.current.show());
+    this.onRendered(() => {
+      console.log(dialogRef.current);
+      console.log(dialogRef.current.constructor.name);
+      dialogRef.current.show()
+    });
 
     return [
       ui5.dialog({

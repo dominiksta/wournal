@@ -2,6 +2,7 @@ import { Component, h, rx, style } from '@mvui/core';
 import * as ui5 from '@mvui/ui5';
 import environment from 'environment';
 import PackageJson from 'PackageJson';
+import { DSUtils } from 'util/DSUtils';
 import { getLogHistory } from 'util/Logging';
 
 @Component.register
@@ -130,24 +131,6 @@ export class ErrorPopup extends Component {
 
 }
 
-const trySerialize = (data: any): string | '<Not Serializable>' => {
-  if (typeof data === 'string') return data;
-  try {
-    return JSON.stringify(data, null, 2);
-  } catch {
-    return '<Not Serializable>';
-  }
-}
-
-const checkSerialize = <T>(data: T): T | '<Not Serializable>' => {
-  try {
-    JSON.stringify(data);
-    return data;
-  } catch {
-    return '<Not Serializable>';
-  }
-}
-
 const prettyStack = (stack: any) => {
   try {
     return stack.split('\n');
@@ -155,6 +138,8 @@ const prettyStack = (stack: any) => {
     return stack;
   }
 }
+
+const { trySerialize, checkSerialize } = DSUtils;
 
 function errorDetails(error: any): string {
   let ret: any = {};

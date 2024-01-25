@@ -35,5 +35,23 @@ export const DSUtils = {
   camelToDash: function(camel: string) {
     const camelToDashRegexp = /[A-Z]/g;
     return camel.replace(camelToDashRegexp, m => "-" + m.toLowerCase());
+  },
+
+  trySerialize: function (data: any): string | '<Not Serializable>' {
+    if (typeof data === 'string') return data;
+    try {
+      return JSON.stringify(data, null, 2);
+    } catch {
+      return '<Not Serializable>';
+    }
+  },
+
+  checkSerialize: function <T>(data: T): T | '<Not Serializable>' {
+    try {
+      JSON.stringify(data);
+      return data;
+    } catch {
+      return '<Not Serializable>';
+    }
   }
 }

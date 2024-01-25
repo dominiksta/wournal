@@ -7,6 +7,7 @@ import './electron-api-client';
 import { ApiClient } from "./electron-api-client";
 import { ErrorPopup } from "app/error-popup";
 import { overwriteConsoleLogFunctions } from "util/Logging";
+import { waitInitUi5 } from "util/ui5-boot";
 
 overwriteConsoleLogFunctions();
 
@@ -49,7 +50,6 @@ async function maybeLoadArgvDoc() {
     }
   }
 }
-maybeLoadArgvDoc();
 
 window.electron.on["window:close"](async () => {
   console.log('OS attempting to close window');
@@ -59,4 +59,16 @@ window.electron.on["window:close"](async () => {
   }
 })
 
-document.body.appendChild(wournal);
+
+async function main() {
+  const l = document.createElement('div');
+  l.innerText = 'loading...';
+  document.body.appendChild(l);
+  await waitInitUi5();
+  l.remove();
+
+  document.body.appendChild(wournal);
+  maybeLoadArgvDoc();
+}
+
+main();

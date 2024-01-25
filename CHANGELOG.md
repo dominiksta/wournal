@@ -10,6 +10,11 @@ Changelog
 - Autosaves
 - Error Dialog
 
+### Fixed
+
+- An error on startup when the "loading document" dialog was displayed "too
+  early"
+
 `0.0.3` - _2024-01-24_
 ----------------------------------------------------------------------
 
