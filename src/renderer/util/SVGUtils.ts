@@ -1,4 +1,12 @@
 export const SVGUtils = {
+  create: function<K extends keyof SVGElementTagNameMap>(
+    name: K, attrs: { [key: string]: any },
+  ): SVGElementTagNameMap[K] {
+    const el = document.createElementNS('http://www.w3.org/2000/svg', name);
+    for (const key in attrs) el.setAttribute(key, attrs[key].toString());
+    return el
+  },
+
   /** Check if `inner` is in `outer` */
   rectInRect: function(outer: DOMRect, inner: DOMRect) {
     return outer.top <= inner.top &&
@@ -50,7 +58,7 @@ export const SVGUtils = {
   },
 
   /** Display `r` in `canvas` for `ms` milliseconds. Inteded for debugging. */
-  tmpDisplayRect: function(
+  tmpDisplayRect: async function(
     r: DOMRect, canvas: SVGSVGElement, ms: number = 1000, color = "red"
   ) {
     let rect = canvas.ownerDocument.createElementNS(
@@ -67,9 +75,12 @@ export const SVGUtils = {
 
     canvas.appendChild(rect);
 
-    setTimeout(() => {
-      canvas.removeChild(rect);
-    }, ms);
+    return new Promise<void>(resolve => {
+      setTimeout(() => {
+        canvas.removeChild(rect);
+        resolve();
+      }, ms);
+    })
   },
 
   /** Display `pt` in `canvas` for `ms` milliseconds. Inteded for debugging. */

@@ -32,6 +32,7 @@ import {
 } from "persistence/DocumentMeta";
 import PackageJson from 'PackageJson';
 import { pairwise } from "util/rx";
+import { PDF_CTX_MENU } from "pdf/WournalPDFPageView";
 
 @Component.register
 export class WournalDocument extends Component {
@@ -69,6 +70,9 @@ export class WournalDocument extends Component {
     this.api = getContext(ApiCtx);
 
     this.setTool(CanvasToolSelectRectangle);
+  }
+
+  render() {
     this.subscribe(this.activePage, p => {
       this.pages.value.forEach(p => p.display.classList.remove('active'));
       p.display.classList.add('active');
@@ -86,9 +90,11 @@ export class WournalDocument extends Component {
     });
 
     this.setupListenChangeOutlinePages();
-  }
 
-  render() { return [ h.div(this.display) ] }
+    this.setupListenPDFCtxMenu();
+
+    return [h.div(this.display)];
+  }
 
   static styles = style.sheet({
     '.wournal-page.active': {
@@ -109,7 +115,7 @@ export class WournalDocument extends Component {
         ...WournalPageSize.DINA4, backgroundColor: '#FFFFFF',
         backgroundStyle: 'graph',
       },
-   );
+    );
     doc.addPage(firstPage);
     doc.undoStack.clear();
     return doc;
@@ -560,6 +566,80 @@ export class WournalDocument extends Component {
     });
   }
 
+  private setupListenPDFCtxMenu() {
+    this.subscribe(PDF_CTX_MENU.events, async e => {
+      if (e.type === 'copy') { // ========================================
+
+        navigator.clipboard.writeText(e.data);
+
+      } else { // ========================================================
+
+        const page = this.activePage.value;
+        page.refreshClientRect();
+
+        // filter weird elements
+        // --------------------------------------------------
+
+        let selRects = e.data.dim
+          .map(page.viewportDOMRectToCanvas.bind(page))
+          .filter(r =>
+            r.width === 0 || r.height === 0 || (Math.abs(r.width - r.width) < 10)
+          );
+
+        const combinations = selRects
+          .map(r => selRects.map(r2 => [r, r2] as [DOMRect, DOMRect]))
+          .reduce((a, b) => [...a, ...b])
+          .filter(([a, b]) => a !== b);
+
+        // when two rects intersect, we discard the higher rect. for some reason
+        // these are often double
+
+        for (const c of combinations) {
+          if (SVGUtils.rectIntersect(c[0], c[1])) {
+            const diff = Math.abs(c[0].height - c[1].height);
+            if (diff < 5) continue;
+            const discard = c[0].height > c[1].height ? c[0] : c[1];
+            const idx = selRects.indexOf(discard);
+            if (idx !== -1) selRects.splice(idx, 1);
+          }
+        }
+
+        // add paths
+        // --------------------------------------------------
+
+        const added: SVGPathElement[] = [];
+        for (let rect of selRects) {
+          const yMid = rect.top + rect.height / 2;
+          const strokeWidth = {
+            'fine': 1, 'medium': 3, 'thick': 10,
+          }[this.toolConfig.value.CanvasToolSelectText.strokeWidth];
+          const path = SVGUtils.create('path', {
+            'stroke': this.toolConfig.value.CanvasToolSelectText.color,
+            'stroke-width': strokeWidth,
+            ...{
+              'highlight': {
+                'd': `M${rect.left} ${yMid} L${rect.right} ${yMid}`,
+                'stroke-opacity': 0.4, 'stroke-width': rect.height,
+              },
+              'strikethrough': {
+                'd': (
+                  `M${rect.left} ${yMid + strokeWidth / 2} ` +
+                  `L${rect.right} ${yMid + strokeWidth / 2}`
+                )
+              },
+              'underline': {
+                'd': `M${rect.left} ${rect.bottom} L${rect.right} ${rect.bottom}`,
+              },
+            }[e.type]
+          });
+          added.push(path);
+          page.activePaintLayer.appendChild(path);
+        }
+        this.undoStack.push(new UndoActionCanvasElements([], [], added));
+      }
+    });
+  }
+
   // ------------------------------------------------------------
   // zoom
   // ------------------------------------------------------------
@@ -703,7 +783,6 @@ export class WournalDocument extends Component {
   private onMouseDown(e: MouseEvent) {
     (document.activeElement instanceof HTMLElement) && document.activeElement.blur();
     e.preventDefault();
-    this.setPageAtPoint(e);
     if (this.activePage) this.activePage.value.refreshClientRect();
 
     if (this.activePage && this.selection.selection.length !== 0) {
@@ -748,26 +827,6 @@ export class WournalDocument extends Component {
   // ----------------------------------------------------------------------
   // helpers
   // ----------------------------------------------------------------------
-
-  private setPageAtPoint(pt: { x: number, y: number }) {
-    // const start = performance.now();
-    let result: WournalPage = null;
-    for (let page of this.pages.value) {
-      if (SVGUtils.pointInRect(
-        pt, page.toolLayer.getBoundingClientRect()
-      )) {
-        result = page;
-      }
-    }
-    // NOTE(dominiksta): This is actually suprisingly fast. I would not have
-    // thought that over 2000 pages can be checked this way in under 1ms.
-    // LOG.info(`took ${start - performance.now()}ms`);
-    if (this.activePage.value !== result && result !== null) {
-      this.pages.value.forEach(p => p.display.classList.remove('active'));
-      result.display.classList.add('active');
-      this.activePage.next(result)
-    }
-  }
 
   public setActivePageForCurrentScroll() {
     const outer = this.parentElement.getBoundingClientRect();

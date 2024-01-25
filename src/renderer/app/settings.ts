@@ -90,7 +90,7 @@ export class Settings extends Component {
             text: 'Auto open WOJ file for PDF if found',
           }})
         ]),
-        ui5.panel({ fields: { headerText: 'Autosaving', collapsed: false }}, [
+        ui5.panel({ fields: { headerText: 'Autosaving', collapsed: true }}, [
           AutosaveSettings.t({ props: {
             intervalSeconds: rx.bind(conf.partial('autosave', 'intervalSeconds')),
             enable: rx.bind(conf.partial('autosave', 'enable')),
@@ -383,6 +383,21 @@ class ToolDefaultSettings extends Component {
           ]),
         ]),
       ]),
+      h.fieldset([
+        h.legend('Select Text'),
+        h.table([
+          h.tr([
+            h.td(ui5.label('Color')),
+            h.td(ColorPicker.t({
+              props: { color: rx.bind(cfg.partial('CanvasToolSelectText', 'color')) },
+            }))
+          ]),
+          h.tr([
+            h.td(ui5.label('Stroke Width')),
+            h.td(selectWidth(cfg.partial('CanvasToolSelectText', 'strokeWidth')))
+          ]),
+        ]),
+      ]),
     ]
 
     return [
@@ -442,7 +457,7 @@ class AutosaveSettings extends Component {
       h.table([
         h.tr([
           h.td(ui5.label({ fields: { for: 'enable' }}, 'Enable Autosave: ')),
-          h.td(ui5.checkbox(
+          h.td(ui5.switchToggle(
             { fields: { id: 'enable', checked: rx.bind(enable) } },
           ))
         ]),

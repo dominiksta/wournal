@@ -33,7 +33,7 @@ thing still missing is an *Android version*.
   - [ ] Store Config as File Instead of in LocalStorage
   - [ ] PDF Annotation with [pdf-js](https://mozilla.github.io/pdf.js/)
     - [x] Viewing & Annotating
-    - [ ] Highlight Text
+    - [x] Highlight Text
     - [ ] Choose between attaching PDF to WOJ, Relative or Absolute File Path
   - [x] Exporting to PDF with [pdf-lib](https://pdf-lib.js.org/)
   - [x] Table of Contents

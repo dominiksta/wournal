@@ -11,8 +11,8 @@ import { DEFAULT_ZOOM_FACTOR } from 'document/WournalPageSize';
 import { debounce } from 'lodash';
 import WournalPDFPageViewContextMenu from './WournalPDFPageViewContextMenu';
 
-const CTX_MENU = new WournalPDFPageViewContextMenu();
-document.body.append(CTX_MENU);
+export const PDF_CTX_MENU = new WournalPDFPageViewContextMenu();
+document.body.append(PDF_CTX_MENU);
 
 const PDF_PAGE_VIEW_CSS_SHEET = new CSSStyleSheet();
 PDF_PAGE_VIEW_CSS_SHEET.replaceSync(css);
@@ -45,11 +45,17 @@ export class WournalPDFPageView {
     this.display.style.transform = 'none';
     this.display.style.transformOrigin = '0 0';
     this.display.addEventListener('contextmenu', e => {
-      CTX_MENU.show(e);
+      // this is so bad
+      // https://stackoverflow.com/a/70523247
+      const sel: Selection = ('chrome' in window)
+        ? (this.shadow as any).getSelection()
+        : document.getSelection();
+
+      PDF_CTX_MENU.show(e, sel);
     });
     this.setAllowTextSelection(false);
 
-    this.shadow = this.display.attachShadow({ mode: 'closed' });
+    this.shadow = this.display.attachShadow({ mode: 'open' });
 
     this.loadingEl = this.genLoadingBackground();
 

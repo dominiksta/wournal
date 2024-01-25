@@ -18,6 +18,16 @@ export default class DTOVersioner<T> {
     return Math.max(...versions);
   }
 
+  public validate(obj: any): void {
+    const res = this.props.validator(obj);
+    if (!res.success) {
+      throw new Error(
+        `Could not validate ${this.props.name}, msg: \n` +
+        res.error
+      )
+    }
+  }
+
   private update(
     obj: object, toVersion: number = -1 // -1 is current
   ) {
@@ -54,15 +64,7 @@ export default class DTOVersioner<T> {
       newObj = updateFunctions[ver](newObj);
     }
 
-    if (toVersion === maxVersion && !validator(newObj)) {
-      const res = validator(newObj);
-      if (!res.success) {
-        throw new Error(
-          `Could not validate ${name}, msg: \n` +
-          res.error
-        )
-      }
-    }
+    if (toVersion === maxVersion) this.validate(newObj);
 
     return newObj;
   }

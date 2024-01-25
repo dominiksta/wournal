@@ -75,6 +75,16 @@ const CanvasToolHighlighterConfigSchema = {
 export type CanvasToolHighlighterConfig =
   JTDDataType<typeof CanvasToolHighlighterConfigSchema>;
 
+
+const CanvasToolSelectTextConfigSchema = {
+  properties: {
+    color: { type: 'string' },
+    strokeWidth: CanvasToolStrokeWidthSchema,
+  },
+} as const;
+export type CanvasToolSelectTextConfigConfig =
+  JTDDataType<typeof CanvasToolSelectTextConfigSchema>;
+
 const CanvasToolConfigSchema = {
   properties: {
     CanvasToolPen: CanvasToolPenConfigSchema,
@@ -84,6 +94,7 @@ const CanvasToolConfigSchema = {
     CanvasToolRuler: CanvasToolRulerConfigSchema,
     CanvasToolEllipse: CanvasToolEllipseConfigSchema,
     CanvasToolHighlighter: CanvasToolHighlighterConfigSchema,
+    CanvasToolSelectText: CanvasToolSelectTextConfigSchema,
   },
 } as const;
 export type CanvasToolConfig = JTDDataType<typeof CanvasToolConfigSchema>;
@@ -133,7 +144,7 @@ export const ConfigDTOVersioner = new DTOVersioner<ConfigDTO>({
     const validate = ajv.compile(ConfigDTOSchema);
     return obj => {
       const res = validate(obj);
-      return { success: res, error: validate.errors?.toString() };
+      return { success: res, error: JSON.stringify(validate.errors) };
     }
   }))(),
   getVersion: obj => obj.version,
@@ -160,6 +171,21 @@ export const ConfigDTOVersioner = new DTOVersioner<ConfigDTO>({
       return {
         ...ver0_3, version: 0.4,
         autosave: { intervalSeconds: 3 * 60, enable: true, keepFiles: 300 },
+      };
+    },
+
+    // ver 0.5 -- text select color
+    // ----------------------------------------------------------------------
+    0.5: (ver0_4: any) => {
+      return {
+        ...ver0_4, version: 0.5,
+        tools: {
+          ...ver0_4.tools,
+          CanvasToolSelectText: {
+            color: '#FFFF00',
+            strokeWidth: 'medium',
+          },
+        }
       };
     },
 
@@ -231,6 +257,10 @@ export function defaultConfig(): ConfigDTO {
       },
       CanvasToolEllipse: {
         color: "#000000",
+        strokeWidth: "medium",
+      },
+      CanvasToolSelectText: {
+        color: "#FFFF00",
         strokeWidth: "medium",
       },
     }

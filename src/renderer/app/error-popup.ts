@@ -10,13 +10,13 @@ export class ErrorPopup extends Component {
   private readonly dialogRef = this.ref<ui5.types.Dialog>();
   private readonly error = new rx.State<any>(null);
 
-  show(error: any) {
+  async show(error: any) {
     this.error.next(error);
-    console.log(this.dialogRef.current);
-    if (!this.dialogRef.current && window.alert) {
-      alert('Uncaught Exception. Could not Display: \n' + errorDetails(error));
-    } else {
+    try {
+      await new Promise(requestAnimationFrame);
       this.dialogRef.current.show();
+    } catch {
+      alert('Uncaught Exception. Could not Display: \n' + errorDetails(error));
     }
   }
 
@@ -108,6 +108,7 @@ export class ErrorPopup extends Component {
   static styles = style.sheet({
     'ui5-dialog': {
       maxWidth: '800px',
+      wordBreak: 'break-all',
     },
     '#section-copy': {
       textAlign: 'right',
@@ -178,7 +179,7 @@ function errorDetails(error: any): string {
         ret['error']['name'] = error.name;
         ret['error']['constructor'] = error.constructor.name;
         ret['error']['message'] = error.message;
-        ret['error']['cause'] = error.cause;
+        ret['error']['cause'] = checkSerialize(error.cause);
         ret['error']['stack'] = prettyStack(error.stack);
       }
       for (const key of Object.keys(error)) {

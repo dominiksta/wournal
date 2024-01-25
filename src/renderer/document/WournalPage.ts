@@ -121,6 +121,9 @@ export class WournalPage {
   ) {
     this.display = document.createElement("div");
     this.display.setAttribute("class", WOURNAL_SVG_PAGE_MARKER_ATTR);
+    this.display.addEventListener('mousedown', _ => {
+      doc.activePage.next(this);
+    })
 
     this.display.style.position = 'relative';
     this.display.style.border = "3px solid white";
