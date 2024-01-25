@@ -1,5 +1,5 @@
 import {
-  BrowserWindow, clipboard, dialog, ipcMain, IpcMainInvokeEvent
+  BrowserWindow, clipboard, dialog, ipcMain, IpcMainInvokeEvent, shell
 } from 'electron';
 import type { ElectronApi, ApiSpec, ApiRouteName, ElectronCallbacks } from './api';
 import fs from 'fs';
@@ -7,6 +7,7 @@ import { instances } from './main';
 import { parseArgs } from 'node:util';
 import { argvParseSpec } from './argv';
 import { homedir } from 'os';
+import { normalize } from 'path';
 
 type ApiImpl<T extends ApiSpec<ApiRouteName>> = {
   [K in ApiRouteName]: (e: IpcMainInvokeEvent, ...args: Parameters<T[K]>) => ReturnType<T[K]>
@@ -24,6 +25,11 @@ export function registerApiHandlers() {
     },
     'debug:binTest': async () => {
       return new Uint8Array([1, 2, 3]);
+    },
+
+    'shell:open': async (_, path) => {
+      path = normalize(path.replace(/^~/, homedir));
+      shell.openPath(path);
     },
 
     'file:read': async (_, path) => {

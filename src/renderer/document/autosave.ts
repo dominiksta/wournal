@@ -3,7 +3,7 @@ import { AutosaveConfig } from "persistence/ConfigDTO";
 import { FileUtils } from "util/FileUtils";
 import { WournalDocument } from "./WournalDocument";
 
-const AUTOSAVE_DIR = navigator.userAgent.indexOf('Windows') !== -1
+export const AUTOSAVE_DIR = navigator.userAgent.indexOf('Windows') !== -1
   ? '~/AppData/Local/Wournal/autosave/'
   : '~/.cache/wournal/autosave/';
 
