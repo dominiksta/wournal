@@ -31,6 +31,7 @@ import { ConfigDTOVersioner } from 'persistence/ConfigDTO';
 import PDFExporter from 'pdf/PDFExporter';
 import { OutlineContainer } from 'app/outline';
 import openSystemDebugInfo from 'app/debug-info';
+import setupAutosave from 'document/autosave';
 
 @Component.register
 export default class Wournal extends Component {
@@ -417,6 +418,12 @@ export default class Wournal extends Component {
     this.setAttribute('data-ui5-compact-size', 'true');
 
     this.subscribe(this.configCtx, v => this.confRepo.save(v));
+
+    this.onRendered(() => {
+      const stopAutoSave =
+        setupAutosave(this.configCtx.value.autosave, () => this.doc.value);
+      this.onRemoved(stopAutoSave);
+    })
 
     const globalCmds = this.#globalCmds;
     for (const cmd in globalCmds) {

@@ -20,9 +20,10 @@ const FileSystemElectron: FileSystem = {
     return await ApiClient["file:savePrompt"](defaultPath, filters);
   },
 
-  async exists(path: string) {
-    return await ApiClient['file:exists'](path);
-  }
+  async exists(path: string) { return await ApiClient['file:exists'](path) },
+  async mkdir(path: string) { return await ApiClient['file:mkdir'](path) },
+  async ls(path: string) { return await ApiClient['file:ls'](path) },
+  async rm(path: string) { return await ApiClient['file:rm'](path) },
 }
 
 export default FileSystemElectron;

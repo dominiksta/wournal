@@ -42,7 +42,7 @@ thing still missing is an *Android version*.
   - [ ] Tablet (and Phone) Friendly UI
   - [ ] Android Version with Cordova or Capacitor
   - [x] Stack Trace & Bug Report Dialog
-  - [ ] Auto Saves
+  - [x] Auto Saves
   - [ ] Polish Icon (especially lower resolution versions)
   - [ ] Simple Website with some Documentation with GitHub Pages
 

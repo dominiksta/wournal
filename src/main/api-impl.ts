@@ -6,6 +6,7 @@ import fs from 'fs';
 import { instances } from './main';
 import { parseArgs } from 'node:util';
 import { argvParseSpec } from './argv';
+import { homedir } from 'os';
 
 type ApiImpl<T extends ApiSpec<ApiRouteName>> = {
   [K in ApiRouteName]: (e: IpcMainInvokeEvent, ...args: Parameters<T[K]>) => ReturnType<T[K]>
@@ -26,6 +27,7 @@ export function registerApiHandlers() {
     },
 
     'file:read': async (_, path) => {
+      path = path.replace(/^~/, homedir);
       console.log(`Loading file: ${path}`);
       if (!fs.existsSync(path)) return false;
       const b = fs.readFileSync(path, { encoding: null });
@@ -52,6 +54,7 @@ export function registerApiHandlers() {
       return ret[0];
     },
     'file:write': async (_, path, data) => {
+      path = path.replace(/^~/, homedir);
       console.log(`Writing file: ${path}`);
       fs.writeFileSync(path, new DataView(data), { encoding: null });
     },
@@ -64,7 +67,25 @@ export function registerApiHandlers() {
       return resp;
     },
     'file:exists': async (_, fileName) => {
+      fileName = fileName.replace(/^~/, homedir);
       return fs.existsSync(fileName);
+    },
+    'file:mkdir': async (_, path) => {
+      path = path.replace(/^~/, homedir);
+      fs.mkdirSync(path, { recursive: true });
+    },
+    'file:ls': async (_, dirName) => {
+      dirName = dirName.replace(/^~/, homedir);
+      return fs.readdirSync(dirName);
+    },
+    'file:rm': async (_, fileName) => {
+      const allowedDir = process.platform === 'win32'
+        ? '~/AppDat/Local/Wournal'
+        : '~/.cache/wournal/';
+      if (!fileName.startsWith(allowedDir))
+        throw new Error(`Cannot rm in dir: ${fileName}`);
+      fileName = fileName.replace(/^~/, homedir);
+      return fs.rmSync(fileName);
     },
 
     'process:argv': async (e) => {

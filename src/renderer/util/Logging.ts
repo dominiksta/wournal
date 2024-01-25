@@ -110,7 +110,7 @@ const LOG_PROD = {
    A replacement for the console.* logging functions. See module description for
    details.
  */
-export const LOG: Logger = !environment.production ? LOG_PROD : LOG_BUILTIN;
+export const LOG: Logger = environment.production ? LOG_PROD : LOG_BUILTIN;
 
 /** Overwrite built-in console.log functions to point to `LOG`. */
 export function overwriteConsoleLogFunctions() {

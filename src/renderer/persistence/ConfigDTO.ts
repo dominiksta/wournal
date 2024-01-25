@@ -90,6 +90,15 @@ export type CanvasToolConfig = JTDDataType<typeof CanvasToolConfigSchema>;
 
 export type CanvasToolConfigData = CanvasToolConfig[keyof CanvasToolConfig];
 
+const AutosaveConfigSchema = {
+  properties: {
+    enable: { type: 'boolean' },
+    intervalSeconds: { type: 'int32' },
+    keepFiles: { type: 'int32' },
+  }
+} as const;
+export type AutosaveConfig = JTDDataType<typeof AutosaveConfigSchema>;
+
 const ConfigDTOSchema = {
   properties: {
     version: { type: 'float32' },
@@ -112,6 +121,7 @@ const ConfigDTOSchema = {
     },
     autoOpenWojWithSameNameAsPDF: { type: 'boolean' },
     tools: CanvasToolConfigSchema,
+    autosave: AutosaveConfigSchema,
   }
 } as const;
 
@@ -132,20 +142,25 @@ export const ConfigDTOVersioner = new DTOVersioner<ConfigDTO>({
     // ver 0.2 -- just a test
     // ----------------------------------------------------------------------
     0.2: (ver0_01: any) => {
-      return {
-        ...ver0_01,
-        version: 0.2,
-      }
+      return { ...ver0_01, version: 0.2 };
     },
 
     // ver 0.3 -- auto open woj with same name as pdf if available
     // ----------------------------------------------------------------------
     0.3: (ver0_2: any) => {
       return {
-        ...ver0_2,
-        version: 0.3,
+        ...ver0_2, version: 0.3,
         autoOpenWojWithSameNameAsPDF: true,
-      }
+      };
+    },
+
+    // ver 0.4 -- autosaves
+    // ----------------------------------------------------------------------
+    0.4: (ver0_3: any) => {
+      return {
+        ...ver0_3, version: 0.4,
+        autosave: { intervalSeconds: 3 * 60, enable: true, keepFiles: 300 },
+      };
     },
 
   }
@@ -180,6 +195,11 @@ export function defaultConfig(): ConfigDTO {
       { name: "White", color: "#FFFFFF" },
     ],
     autoOpenWojWithSameNameAsPDF: true,
+    autosave: {
+      intervalSeconds: 3 * 60,
+      enable: true,
+      keepFiles: 300,
+    },
     tools: {
       CanvasToolPen: {
         color: "#000000",

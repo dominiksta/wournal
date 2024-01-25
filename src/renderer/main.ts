@@ -10,11 +10,6 @@ import { overwriteConsoleLogFunctions } from "util/Logging";
 
 overwriteConsoleLogFunctions();
 
-provideDependencies({
-  'FileSystem': FileSystemElectron,
-  'SystemClipboard': SystemClipboardElectron,
-})
-
 {
   const errorDialog = new ErrorPopup();
   document.body.appendChild(errorDialog);
@@ -23,9 +18,16 @@ provideDependencies({
     errorDialog.show(e.error);
     e.stopPropagation();
   });
+
+  window.addEventListener('unhandledrejection', e => {
+    errorDialog.show(e.reason);
+  })
 }
 
-
+provideDependencies({
+  'FileSystem': FileSystemElectron,
+  'SystemClipboard': SystemClipboardElectron,
+})
 
 const wournal = new Wournal();
 

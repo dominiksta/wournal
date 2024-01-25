@@ -5,6 +5,7 @@ import { FontPicker } from "common/font-picker";
 import { SimpleSelect } from "common/simple-select";
 import { CanvasToolName, CanvasToolNames } from "document/CanvasTool";
 import {
+    AutosaveConfig,
   CanvasToolConfig, CanvasToolStrokeWidth, ConfigDTO, defaultConfig
 } from "persistence/ConfigDTO";
 import { DSUtils } from "util/DSUtils";
@@ -86,6 +87,13 @@ export class Settings extends Component {
             wrappingType: 'Normal',
             text: 'Auto open WOJ file for PDF if found',
           }})
+        ]),
+        ui5.panel({ fields: { headerText: 'Autosaving', collapsed: false }}, [
+          AutosaveSettings.t({ props: {
+            intervalSeconds: rx.bind(conf.partial('autosave', 'intervalSeconds')),
+            enable: rx.bind(conf.partial('autosave', 'enable')),
+            keepFiles: rx.bind(conf.partial('autosave', 'keepFiles')),
+          } }),
         ]),
       ])
     ]
@@ -401,4 +409,61 @@ class ToolDefaultSettings extends Component {
       fontWeight: 'bold',
     },
   });
+}
+
+@Component.register
+class AutosaveSettings extends Component {
+  props = {
+    intervalSeconds: rx.prop<number>(),
+    keepFiles: rx.prop<number>(),
+    enable: rx.prop<boolean>(),
+  }
+
+  render() {
+    const { intervalSeconds, keepFiles, enable } = this.props;
+
+    return [
+      h.p([
+        'Wournal can automatically save versions of your documents ',
+        'to avoid data loss.'
+      ]),
+      h.table([
+        h.tr([
+          h.td(ui5.label({ fields: { for: 'enable' }}, 'Enable Autosave: ')),
+          h.td(ui5.checkbox(
+            { fields: { id: 'enable', checked: rx.bind(enable) } },
+          ))
+        ]),
+        h.tr([
+          h.td(ui5.label({ fields: { for: 'interval' }}, 'Save every *n* minutes: ')),
+          h.td(ui5.stepInput({
+            fields: {
+              value: rx.bind(intervalSeconds.createLinked(
+                (val) => val / 60,
+                (val, next) => next(val * 60),
+              )),
+              step: 1, min: 0, max: 10 * 60,
+            },
+            style: { width: '8em' },
+          }))
+        ]),
+        h.tr([
+          h.td(ui5.label({ fields: { for: 'keep' }}, 'Keep *n* files: ')),
+          h.td(ui5.stepInput({
+            fields: {
+              value: rx.bind(keepFiles),
+              step: 10, min: 0, max: 500,
+            },
+            style: { width: '8em' },
+          }))
+        ]),
+      ]),
+    ];
+  }
+
+  static styles = style.sheet({
+    'table > tr': {
+      height: '3em',
+    }
+  })
 }

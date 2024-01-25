@@ -18,4 +18,8 @@ export default interface FileSystem {
 
   exists(path: string): Promise<boolean>;
 
+  mkdir(path: string): Promise<void>;
+  ls(path: string): Promise<string[]>;
+  rm(path: string): Promise<void>;
+
 }
