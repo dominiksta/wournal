@@ -17,7 +17,7 @@ export function genBackgroundRect(
   rect.setAttribute('height', params.height.toString());
   rect.setAttribute('fill', params.backgroundColor);
   if (params.fillOpacity !== undefined) rect.setAttribute(
-    'fill-opactiy', params.fillOpacity.toString()
+    'fill-opacity', params.fillOpacity.toString()
   );
   rect.setAttribute('stroke', params.backgroundColor);
   return rect;
