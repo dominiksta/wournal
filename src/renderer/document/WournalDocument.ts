@@ -577,13 +577,13 @@ export class WournalDocument extends Component {
         const page = this.activePage.value;
         page.refreshClientRect();
 
-        // filter weird elements
+        // filter weird rects
         // --------------------------------------------------
 
         let selRects = e.data.dim
           .map(page.viewportDOMRectToCanvas.bind(page))
           .filter(r =>
-            r.width === 0 || r.height === 0 || (Math.abs(r.width - r.width) < 10)
+            r.width !== 0 && r.height !== 0 && r.y > 0
           );
 
         const combinations = selRects
@@ -603,6 +603,42 @@ export class WournalDocument extends Component {
             if (idx !== -1) selRects.splice(idx, 1);
           }
         }
+
+        // filling horizontal gaps
+        // --------------------------------------------------
+
+        console.log(selRects);
+        const yDiffPx = 5;
+
+        const yBatched = selRects.map(r => r.y)
+          // thanks https://stackoverflow.com/a/41725005
+          .reduce((a, b, idx, arr) => {
+            if (b - arr[idx - 1] < yDiffPx) {
+              if (!Array.isArray(a[a.length - 1]))
+                a[a.length - 1] = [a[a.length - 1]];
+              a[a.length - 1].push(b);
+              return a;
+            }
+            a.push(b);
+            return a;
+          }, [])
+          .map(el => el instanceof Array ? el : [el]) as number[][];
+
+        yBatched.forEach(batch => batch.sort());
+
+        const rectsBatched: { [batchIdx: number]: DOMRect[] } = { };
+
+        for (const r of selRects) {
+          const yBatch = yBatched.filter(
+            batch => r.y >= batch[0] && r.y <= batch[batch.length - 1]
+          )[0];
+          const idx = yBatched.indexOf(yBatch);
+          if (!(idx in rectsBatched)) rectsBatched[idx] = [];
+          rectsBatched[idx].push(r);
+        }
+
+        selRects = (Object.keys(rectsBatched) as any as number[])
+          .map(k => rectsBatched[k].reduce(SVGUtils.boundingRectForTwo))
 
         // add paths
         // --------------------------------------------------
