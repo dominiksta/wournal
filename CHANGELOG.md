@@ -6,6 +6,7 @@ Changelog
 
 ### Added
 
+- Full Text Search
 - Highlight, underline and strike through text in PDF with mouse selection
 - Autosaves
 - Error Dialog

@@ -12,6 +12,10 @@ import { UndoAction } from "./UndoStack";
 import { WournalDocument } from "./WournalDocument";
 import { xToPx } from "./WournalPageSize";
 import { FileNotFoundError, PDFCache } from "pdf/PDFCache";
+import { Rect, SearchText } from "./types";
+import getTextRanges from "util/get-text-ranges";
+import { Highlights } from "util/highlights";
+import { SVGUtils } from "util/SVGUtils";
 
 /**
  * The attribute defining a "layer" element for wournal. Really they are just
@@ -579,6 +583,54 @@ export class WournalPage {
   }
 
   // ------------------------------------------------------------
+  // text search
+  // ------------------------------------------------------------
+
+  public async highlightText(
+    text: string, emphasizeIdx: number | false = false
+  ) {
+    const els = this.canvas.querySelectorAll('tspan');
+    const ranges = getTextRanges(text, els);
+    if (ranges.length !== 0) {
+      ranges.forEach(r => Highlights.add(r, 'search'));
+      if (emphasizeIdx !== false && ranges.length > emphasizeIdx) {
+        Highlights.add(ranges[emphasizeIdx], 'search-current');
+      }
+    }
+
+    if (this.pdfMode) {
+      if (this.pdfViewer === false) await this.maybeLoadPDFPage();
+      (this.pdfViewer as WournalPDFPageView).highlightText(
+        text,
+        (emphasizeIdx !== false && emphasizeIdx >= ranges.length)
+          ? emphasizeIdx - ranges.length
+          : false
+      );
+    }
+  }
+
+  public async getText(): Promise<SearchText[]> {
+    const ret: SearchText[] = [];
+
+    const textEls = this.canvas.querySelectorAll('text');
+    for (const textEl of textEls)
+      ret.push({
+        str: textEl.textContent,
+        rect: this.viewportDOMRectToCanvas(
+          SVGUtils.scaleRect(textEl.getBoundingClientRect(), 1 / this.zoom)
+        ),
+      });
+
+    if (this.pdfMode) {
+      if (this.pdfViewer === false) await this.maybeLoadPDFPage();
+      const pdfText = await (this.pdfViewer as WournalPDFPageView).getText();
+      for (const t of pdfText) ret.push(t);
+    }
+
+    return ret;
+  }
+
+  // ------------------------------------------------------------
   // tools and helpers
   // ------------------------------------------------------------
 
@@ -613,13 +665,22 @@ export class WournalPage {
    * Translate r to canvas coords. USE THIS FOR ALL COORDINATE TRANSLATIONS,
    * OTHERWISE ZOOM WILL NOT WORK.
    */
-  public viewportDOMRectToCanvas(r: DOMRect): DOMRect {
+  public viewportDOMRectToCanvas(r: Rect): DOMRect {
     return DOMRect.fromRect({
       x: (r.x - this.rect.left) / this.zoom,
       y: (r.y - this.rect.top) / this.zoom,
       width: r.width / this.zoom,
       height: r.height / this.zoom,
     });
+  }
+
+  public canvasRectToViewport(r: Rect): Rect {
+    return {
+      x: r.x * this.zoom + this.rect.left,
+      y: r.y * this.zoom + this.rect.top,
+      width: r.width * this.zoom,
+      height: r.height * this.zoom,
+    };
   }
 
   public static svgIsMarkedAsWournalPage(svg: string): boolean {

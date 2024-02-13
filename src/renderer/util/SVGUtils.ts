@@ -1,10 +1,13 @@
+import { Rect } from "document/types";
+
 export const SVGUtils = {
   create: function<K extends keyof SVGElementTagNameMap>(
-    name: K, attrs: { [key: string]: any },
+    name: K, attrs?: { [key: string]: any },
   ): SVGElementTagNameMap[K] {
     const el = document.createElementNS('http://www.w3.org/2000/svg', name);
+    if (!attrs) return el;
     for (const key in attrs) el.setAttribute(key, attrs[key].toString());
-    return el
+    return el;
   },
 
   /** Check if `inner` is in `outer` */
@@ -13,6 +16,13 @@ export const SVGUtils = {
       outer.bottom >= inner.bottom &&
       outer.left <= inner.left &&
       outer.right >= inner.right;
+  },
+
+  scaleRect: function(rect: Rect, factor: number): Rect {
+    return {
+      x: rect.x * factor, y: rect.y * factor,
+      width: rect.width * factor, height: rect.height * factor,
+    }
   },
 
   /** Check if `pt` is in `r` */

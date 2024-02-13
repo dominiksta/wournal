@@ -5,3 +5,5 @@ export interface Rect {
   width: number;
   height: number;
 }
+
+export type SearchText = { str: string, rect: Rect };

@@ -65,5 +65,13 @@ style.util.applySheetAsStyleTag(document.body, style.sheet({
     color: ui5.Theme.TextColor,
     background: ui5.Theme.BackgroundColor,
   },
+  '::highlight(search)': {
+    backgroundColor: 'yellow',
+    color: 'transparent',
+  },
+  '::highlight(search-current)': {
+    backgroundColor: 'orange',
+    color: 'transparent',
+  },
   ...customScrollbar,
 }), 'global-styles');

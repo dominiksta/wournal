@@ -1,6 +1,6 @@
 import { CanvasToolStrokeWidth } from "../persistence/ConfigDTO";
 import { CanvasElement, CanvasElementDTO } from "./CanvasElement";
-import { Rect } from "./Rect";
+import { Rect } from "./types";
 
 export interface CanvasImageDTO extends CanvasElementDTO {
   name: 'Image';

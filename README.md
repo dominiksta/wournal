@@ -56,6 +56,9 @@ thing still missing is an *Android version*.
 
   **(Probably/Maybe) After 1.0**
 
+  - [ ] Different Page Layouts
+    - [ ] Single Page
+    - [ ] Two Pages (Continuous)
   - [ ] Annotate Multiple PDFs in one Wournal Document
   - [ ] Import XOJ (from Xournal)
   - [ ] DPI Calibration for Default Zoom Level. See Xournal++

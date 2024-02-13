@@ -10,6 +10,10 @@ import { PDFPageView } from 'pdfjs-dist/web/pdf_viewer.mjs';
 import { DEFAULT_ZOOM_FACTOR } from 'document/WournalPageSize';
 import { debounce } from 'lodash';
 import WournalPDFPageViewContextMenu from './WournalPDFPageViewContextMenu';
+import { SearchText } from 'document/types';
+import { SVGUtils } from 'util/SVGUtils';
+import getTextRanges from 'util/get-text-ranges';
+import { Highlights } from 'util/highlights';
 
 export const PDF_CTX_MENU = new WournalPDFPageViewContextMenu();
 document.body.append(PDF_CTX_MENU);
@@ -31,6 +35,9 @@ export class WournalPDFPageView {
   private readonly loadingEl: SVGSVGElement;
   private readonly zoomPreview = document.createElement('canvas');
   private readonly zoomPreviewCtx = this.zoomPreview.getContext('2d');
+  private readonly textHighlightLayer = SVGUtils.create('svg', {
+    style: 'position: absolute; pointerEvents: none; width: 100%; height: 100%',
+  });
 
   constructor(
     private page: PDFPageProxy,
@@ -69,6 +76,7 @@ export class WournalPDFPageView {
 
     this.zoomPreview.hidden = true;
     this.shadow.appendChild(this.zoomPreview);
+    this.shadow.appendChild(this.textHighlightLayer);
     this.disableZoomPreview();
     this.setLoading(true);
   }
@@ -124,6 +132,7 @@ export class WournalPDFPageView {
     this.needsDrawing = false;
     await resp;
     this.disableZoomPreview();
+    this.doHighlightText();
     return;
   }
 
@@ -156,6 +165,69 @@ export class WournalPDFPageView {
   private setZoomRenderer = debounce(this._setZoomRerender.bind(this), 500);
 
   public getZoom(): number { return this.zoom; }
+
+  private highlightedText:
+    { text: string, emphasizeIdx: number | false } | false = false;
+
+  public async highlightText(text: string, emphasizeIdx: number | false = false) {
+    this.highlightedText = { text, emphasizeIdx };
+    if (this.isVisible()) {
+      await this.drawOrFree();
+      this.doHighlightText();
+    }
+  }
+
+  private doHighlightText() {
+    if (!this.viewer) return;
+    if (this.highlightedText !== false) {
+      const t = this.highlightedText.text;
+      const textLayer = this.viewer.viewer.textLayer.div;
+      if (textLayer.textContent.indexOf(t) === -1) return;
+      const spans = Array.from(
+        textLayer.querySelectorAll<HTMLSpanElement>('span:not(:has(span))')
+      ).filter(el => el.innerText != '');
+      const ranges = getTextRanges(this.highlightedText.text, spans);
+      if (ranges.length !== 0) {
+        ranges.forEach(r => Highlights.add(r, 'search'));
+        if (
+          this.highlightedText.emphasizeIdx !== false
+        ) {
+          // console.debug(ranges, this.highlightedText.emphasizeIdx);
+          console.assert(this.highlightedText.emphasizeIdx < ranges.length, {
+            emphIdx: this.highlightedText.emphasizeIdx,
+            ranges,
+          });
+          Highlights.add(ranges[
+            Math.min(this.highlightedText.emphasizeIdx, ranges.length - 1)
+          ], 'search-current');
+        }
+      }
+    }
+  }
+
+  private textCache: SearchText[] | false = false;
+  public async getText(): Promise<SearchText[]> {
+    if (this.textCache === false) {
+      this.textCache = [];
+      const scale = 1;
+      const { height } = this.page.getViewport({ scale: 1 });
+      const textContent = await this.page.getTextContent();
+      for (const item of textContent.items) {
+        if ('type' in item || item.str.trim() === '') continue;
+        this.textCache.push({
+          str: item.str,
+          rect: {
+            // https://github.com/mozilla/pdf.js/issues/5643#issuecomment-239993212
+            x: item.transform[4] * scale,
+            y: height - ((item.transform[5] + item.height) * scale),
+            width: item.width * scale,
+            height: item.height* scale,
+          }
+        });
+      }
+    }
+    return this.textCache;
+  }
 
   private genLoadingBackground(): SVGSVGElement {
     const dim = this.getDimensionsPx();

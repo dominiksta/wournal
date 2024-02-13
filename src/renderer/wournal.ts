@@ -32,6 +32,7 @@ import PDFExporter from 'pdf/PDFExporter';
 import { OutlineContainer } from 'app/outline';
 import openSystemDebugInfo from 'app/debug-info';
 import setupAutosave from 'document/autosave';
+import { SearchBox } from 'app/search-box';
 
 @Component.register
 export default class Wournal extends Component {
@@ -46,6 +47,8 @@ export default class Wournal extends Component {
 
   private readonly outlineRef = this.ref<OutlineContainer>();
   private hideSideBar = new rx.State(true);
+  private hideSearchBox = new rx.State(true);
+  private searchBoxRef = this.ref<SearchBox>();
 
   private toast = this.provideContext(ToastCtx, {
     open: async (msg: string) => {
@@ -436,7 +439,7 @@ export default class Wournal extends Component {
 
     this.onRendered(async () => {
       this.shortcutsCtx.addEl(await this.query('#toolbar'));
-      this.shortcutsCtx.addEl(await this.query('#document'));
+      // this.shortcutsCtx.addEl(await this.query('#document-wrapper'));
     });
 
     this.subscribe(this.configCtx.partial('invertDocument'), i => {
@@ -542,16 +545,32 @@ export default class Wournal extends Component {
         h.div({
           fields: { id: 'seperator', hidden: this.hideSideBar },
         }),
-        h.div({
-          ref: this.documentRef,
-          fields: { id: 'document' },
-          style: { display: 'inline-block' },
-          events: {
-            scroll: () => {
-              this.doc.value.setActivePageForCurrentScroll();
-            }
-          }
-        }, this.doc),
+        h.div(
+          { fields: { id: 'main-right' } },
+          [
+            h.div(
+              {
+                fields: { id: 'search-box', hidden: this.hideSearchBox },
+              },
+              SearchBox.t({
+                ref: this.searchBoxRef,
+                events: {
+                  'search-stop': _ => this.hideSearchBox.next(true),
+                }
+              }),
+            ),
+            h.div({
+              ref: this.documentRef,
+              fields: { id: 'document-wrapper' },
+              events: {
+                scroll: () => {
+                  this.doc.value.setActivePageForCurrentScroll();
+                }
+              }
+            },
+              this.doc
+            )
+          ]),
       ]),
     ]
   }
@@ -879,10 +898,23 @@ export default class Wournal extends Component {
       shortcut: 'F12',
     },
 
+    'search_box_show': {
+      human_name: 'Search Document',
+      func: () => {
+        this.hideSearchBox.next(false);
+        this.searchBoxRef.current.focus();
+      },
+      shortcut: 'Ctrl+F',
+    },
+    'search_box_hide': {
+      human_name: 'Stop Searching Document',
+      func: () => this.hideSearchBox.next(true),
+    },
+
     'system_show_debug_info': {
       human_name: 'System Debug Information',
       func: () => openSystemDebugInfo(this.dialog.openDialog),
-    }
+    },
   });
 
   static styles = style.sheet({
@@ -905,12 +937,21 @@ export default class Wournal extends Component {
       borderRadius: '3px',
       backgroundColor: ui5.Theme.BaseColor,
     },
-    '#document': {
-      background: theme.documentBackground,
-      overflow: 'auto',
+    '#main-right': {
+      display: 'flex',
+      flexDirection: 'column',
       flexGrow: '1',
+      overflowX: 'auto',
+      // height: '100%',
     },
-    '#document > div': {
+    '#document-wrapper': {
+      background: theme.documentBackground,
+      // height: '100%',
+      flexGrow: '1',
+      // width: '100%',
+      overflowY: 'auto',
+    },
+    '#document-wrapper > div': {
       overflow: 'auto',
       height: '100%',
       width: '100%',
