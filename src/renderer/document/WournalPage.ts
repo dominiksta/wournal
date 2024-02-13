@@ -587,10 +587,11 @@ export class WournalPage {
   // ------------------------------------------------------------
 
   public async highlightText(
-    text: string, emphasizeIdx: number | false = false
+    text: string, emphasizeIdx: number | false = false,
+    matchCase = true,
   ) {
     const els = this.canvas.querySelectorAll('tspan');
-    const ranges = getTextRanges(text, els);
+    const ranges = getTextRanges(text, els, matchCase);
     if (ranges.length !== 0) {
       ranges.forEach(r => Highlights.add(r, 'search'));
       if (emphasizeIdx !== false && ranges.length > emphasizeIdx) {
@@ -604,7 +605,8 @@ export class WournalPage {
         text,
         (emphasizeIdx !== false && emphasizeIdx >= ranges.length)
           ? emphasizeIdx - ranges.length
-          : false
+          : false,
+        matchCase
       );
     }
   }

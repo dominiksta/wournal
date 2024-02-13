@@ -167,10 +167,12 @@ export class WournalPDFPageView {
   public getZoom(): number { return this.zoom; }
 
   private highlightedText:
-    { text: string, emphasizeIdx: number | false } | false = false;
+    { text: string, emphasizeIdx: number | false, matchCase: boolean } | false = false;
 
-  public async highlightText(text: string, emphasizeIdx: number | false = false) {
-    this.highlightedText = { text, emphasizeIdx };
+  public async highlightText(
+    text: string, emphasizeIdx: number | false = false, matchCase = true,
+  ) {
+    this.highlightedText = { text, emphasizeIdx, matchCase };
     if (this.isVisible()) {
       await this.drawOrFree();
       this.doHighlightText();
@@ -180,26 +182,25 @@ export class WournalPDFPageView {
   private doHighlightText() {
     if (!this.viewer) return;
     if (this.highlightedText !== false) {
-      const t = this.highlightedText.text;
+      const { text, matchCase, emphasizeIdx } = this.highlightedText;
       const textLayer = this.viewer.viewer.textLayer.div;
-      if (textLayer.textContent.indexOf(t) === -1) return;
+      const textLayerContent = matchCase
+        ? textLayer.textContent
+        : textLayer.textContent.toLowerCase();
+      if (textLayerContent.indexOf(matchCase ? text : text.toLowerCase()) === -1) return;
       const spans = Array.from(
         textLayer.querySelectorAll<HTMLSpanElement>('span:not(:has(span))')
       ).filter(el => el.innerText != '');
-      const ranges = getTextRanges(this.highlightedText.text, spans);
+      const ranges = getTextRanges(text, spans, matchCase);
       if (ranges.length !== 0) {
         ranges.forEach(r => Highlights.add(r, 'search'));
-        if (
-          this.highlightedText.emphasizeIdx !== false
-        ) {
-          // console.debug(ranges, this.highlightedText.emphasizeIdx);
-          console.assert(this.highlightedText.emphasizeIdx < ranges.length, {
-            emphIdx: this.highlightedText.emphasizeIdx,
-            ranges,
-          });
-          Highlights.add(ranges[
-            Math.min(this.highlightedText.emphasizeIdx, ranges.length - 1)
-          ], 'search-current');
+        if (emphasizeIdx !== false) {
+          console.assert(
+            emphasizeIdx < ranges.length, { emphIdx: emphasizeIdx, ranges }
+          );
+          Highlights.add(
+            ranges[Math.min(emphasizeIdx, ranges.length - 1)], 'search-current'
+          );
         }
       }
     }

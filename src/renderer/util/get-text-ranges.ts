@@ -26,19 +26,30 @@ const debug = false;
    ```
  */
 export default function getTextRanges(
-  needle: string, els: Element[] | NodeListOf<Element>
+  needle: string, els: Element[] | NodeListOf<Element>,
+  matchCase: boolean = true,
 ): Range[] {
   // algorithm outline:
   // - we go through each element and set it to be the start of the range
   // - we then go through the needle char by char starting from the starting
   //   element and see at which ending element we end up
 
+  log(`search for '${needle}' (matchCase: ${matchCase}) in `, els);
+
+  const trim = (s: string) => {
+    let ret = s.replaceAll('\n', '').replaceAll(' ', '');
+    if (!matchCase) ret = ret.toLowerCase();
+    return ret;
+  }
+
+  const maybeDownCase = (s: string) => matchCase ? s : s.toLowerCase();
+
   if (needle.length === 0) return [];
 
   els = Array.from(els).filter(el => trim(el.textContent).length !== 0);
 
   const ranges: Range[] = [];
-  const needleOrig = needle;
+  const needleOrig = maybeDownCase(needle);
   needle = trim(needle);
 
   // outer loop per starting element
@@ -57,7 +68,8 @@ export default function getTextRanges(
     // simplest case: full needle is in one element
     // ============================================================
     {
-      const fullIdx = els[startElIdx].textContent.indexOf(needleOrig, startElOffset);
+      const fullIdx = maybeDownCase(els[startElIdx].textContent)
+        .indexOf(needleOrig, startElOffset);
       if (fullIdx !== -1) {
         log('found full string in one element');
         const range = document.createRange();
@@ -156,7 +168,7 @@ export default function getTextRanges(
     // look for start again, this time without replacing whitespace
     // ------------------------------------------------------------
     {
-      const txt = els[startElIdx].textContent;
+      const txt = maybeDownCase(els[startElIdx].textContent);
       for (let i = 0; i < needle.length; i++) {
         const found = txt.lastIndexOf(needle.slice(0, i));
         if (found === -1) break;
@@ -168,7 +180,7 @@ export default function getTextRanges(
     // ------------------------------------------------------------
     let end = 0;
     {
-      const txt = els[endElIdx].textContent;
+      const txt = maybeDownCase(els[endElIdx].textContent);
       for (let i = 0; i < txt.length; i++) {
         const found = needleOrig.lastIndexOf(txt.slice(0, i));
         if (found === -1) break;
@@ -196,9 +208,9 @@ export default function getTextRanges(
   return ranges;
 }
 
-const trim = (s: string) => s.replaceAll('\n', '').replaceAll(' ', '');
 
 export function testGetTextRanges() {
+  const trim = (s: string) => s.replaceAll('\n', '').replaceAll(' ', '');
 
   const assert = (cond: boolean, msg?: string) => { if (!cond) throw msg; }
 
@@ -254,6 +266,18 @@ export function testGetTextRanges() {
   found = getTextRanges('my', els);
   assert(found.length === 4, 'find multiple in one el');
   assert(trim(found[0].toString()) === 'my', 'find multiple in one el');
+
+  document.body.innerHTML = `
+  <span>hello Match my </span>
+  <i>Case</i>
+  `;
+  els = document.body.querySelectorAll('*');
+
+  found = getTextRanges('match my case', els, false);
+  assert(found.length === 1, 'disable match case');
+
+  found = getTextRanges('match my case', els, true);
+  assert(found.length === 0, 'enable match case');
 }
 
 const log = debug ? console.log : ((..._: any[]): null => null);

@@ -20,7 +20,7 @@ export class SearchBox extends Component<{
     const searchIdx = new rx.State<number>(0);
     const loading = new rx.State(false);
     const active = new rx.State(false);
-    const matchCase = new rx.State(true);
+    const matchCase = new rx.State(false);
 
     const doc = this.getContext(DocumentCtx);
     const api = this.getContext(ApiCtx);
@@ -55,7 +55,11 @@ export class SearchBox extends Component<{
       searchIdx.next(0);
       loading.next(true);
       const allText = await Promise.all(doc.value.pages.value.map(p => p.getText()));
-      const trim = (s: string) => s.replaceAll('\n', '').replaceAll('  ', ' ');
+      const trim = (s: string) => {
+        let ret = s.replaceAll('\n', '').replaceAll('  ', ' ');
+        if (!matchCase.value) ret = ret.toLowerCase();
+        return ret;
+      }
       found.next(allText.map(
         (page, pageI) => {
           let pageText = '';
@@ -78,7 +82,7 @@ export class SearchBox extends Component<{
           return ret;
         }
       ));
-      console.debug(found.value);
+      // console.debug(found.value);
       loading.next(false);
 
       if (api.getCurrentPageNr() !== 1)
@@ -92,6 +96,11 @@ export class SearchBox extends Component<{
       Highlights.clear('search');
       highlightAndJump();
     }
+
+    this.subscribe(matchCase.pipe(rx.skip(1)), _ => {
+      if (searchText.value.length < 2) return;
+      startSearch();
+    });
 
     function highlightAndJump() {
       let foundPage = 0, foundPageOffset = 0;
@@ -119,6 +128,7 @@ export class SearchBox extends Component<{
         doc.value.pages.value[i].highlightText(
           activeSearchText as string,
           i == foundPage ? foundPageOffset : false,
+          matchCase.value,
         )
       }
 
@@ -199,9 +209,9 @@ export class SearchBox extends Component<{
         ui5.toggleButton({
           fields: {
             icon: 'business-suite/icon-match-case', design: 'Transparent',
-            tooltip: 'Match Case (Alt+C)', pressed: rx.bind(matchCase),
+            tooltip: 'Match Case (Alt+C)', pressed: matchCase,
           },
-          events: { click: _ => toast.open('Not yet implemented') },
+          events: { click: _ => matchCase.next(v => !v) },
         }),
         ui5.button({
           fields: {
