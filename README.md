@@ -27,6 +27,12 @@ thing still missing is an *Android version*.
 
 <details>
   <summary>Development Roadmap</summary>
+  
+  **Known Issues**:
+  
+  - High DPI / Scaling is not Ideal
+    - Zooming PDF Documents Looks a Bit Weird
+    - Text Rendering on Default Zoom Level can be Slightly Blurry
 
   **Before Beta**:
 
@@ -48,6 +54,8 @@ thing still missing is an *Android version*.
 
   **Before 1.0**
 
+  - [ ] DPI Calibration for Default Zoom Level. See Xournal++
+  - [ ] Drag&Drop From File Manager to Open
   - [ ] Lasso Select
   - [ ] Set Default Paper Style
   - [ ] Vertical Space Tool
@@ -61,7 +69,6 @@ thing still missing is an *Android version*.
     - [ ] Two Pages (Continuous)
   - [ ] Annotate Multiple PDFs in one Wournal Document
   - [ ] Import XOJ (from Xournal)
-  - [ ] DPI Calibration for Default Zoom Level. See Xournal++
   - [ ] Apply New Page Style to All Pages
   - [ ] Page Thumbnails in Left Panel
   - [ ] Put Text Marker Strokes on a Separate Layer to Always Have Text In Front

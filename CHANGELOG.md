@@ -4,26 +4,27 @@ Changelog
 `0.0.5` - _unreleased_
 ----------------------------------------------------------------------
 
-### Added
+#### Added
 
 - Follow links in PDF documents
 - Show PDF popup notes (can be turned off in settings)
 
-### Fixed
+#### Fixed
 
 - Test pages are no longer created for every new document
 
 `0.0.4` - _2024-02-13_
 ----------------------------------------------------------------------
+**Outlines and Text Selection**
 
-### Added
+#### Added
 
 - Full Text Search
 - Highlight, underline and strike through text in PDF with mouse selection
 - Autosaves
 - Error Dialog
 
-### Fixed
+#### Fixed
 
 - An error on startup when the "loading document" dialog was displayed "too
   early"
@@ -31,15 +32,16 @@ Changelog
 
 `0.0.3` - _2024-01-24_
 ----------------------------------------------------------------------
+**Full Text Search and Right Click to Highlight Text**
 
-### Added
+#### Added
 
 - Create and edit an outline of bookmarks
   - Automatically imported from PDF if available
   - Exports to PDF
 - Select text in PDF
 
-### Fixed
+#### Fixed
 
 - Shortcuts are no longer triggered when writing in a text field
 - PDF annotations popups are no longer displayed. Maybe a seperate mode to
@@ -48,13 +50,14 @@ Changelog
 
 `0.0.2` - _2024-01-21_
 ----------------------------------------------------------------------
+**PDF Annotation and Export**
 
-### Added
+#### Added
 
 - Open and annotate PDF files (using [pdf.js](https://mozilla.github.io/pdf.js/))
 - Export to PDF (using [pdf-lib](https://pdf-lib.js.org/))
 
-### Fixed
+#### Fixed
 
 - Zooming no longer scrolls the document
 - Default SVG background for files created through the CLI was black
@@ -62,8 +65,9 @@ Changelog
 
 `0.0.1` - _2024-01-08_
 ----------------------------------------------------------------------
+**Hello, World!**
 
-### Outline of Initial Features
+#### Outline of Initial Features
 
 - Tools:
   - Pen
