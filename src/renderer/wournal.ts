@@ -524,7 +524,7 @@ export default class Wournal extends Component {
     })
 
     // for (let i = 0; i < 100; i++) this.api.createTestPages();
-    this.api.createTestPages();
+    // this.api.createTestPages();
     this.doc.value.undoStack.clear();
 
     return [

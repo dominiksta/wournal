@@ -9,6 +9,10 @@ Changelog
 - Follow links in PDF documents
 - Show PDF popup notes (can be turned off in settings)
 
+### Fixed
+
+- Test pages are no longer created for every new document
+
 `0.0.4` - _2024-02-13_
 ----------------------------------------------------------------------
 
