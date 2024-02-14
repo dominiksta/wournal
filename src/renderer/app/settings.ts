@@ -83,12 +83,16 @@ export class Settings extends Component {
           }),
         ]),
         ui5.panel({ fields: { headerText: 'PDF Annotation', collapsed: true }}, [
-          ui5.label({ fields: { for: 'auto-open-woj' }}),
-          ui5.checkbox({ fields: {
+          h.div(ui5.checkbox({ fields: {
             checked: rx.bind(conf.partial('autoOpenWojWithSameNameAsPDF')),
             wrappingType: 'Normal',
             text: 'Auto open WOJ file for PDF if found',
-          }})
+          }})),
+          h.div(ui5.checkbox({ fields: {
+            checked: rx.bind(conf.partial('hideAnnotations')),
+            wrappingType: 'Normal',
+            text: 'Hide PDF annotations made with other programs (including links)',
+          }})),
         ]),
         ui5.panel({ fields: { headerText: 'Autosaving', collapsed: true }}, [
           AutosaveSettings.t({ props: {

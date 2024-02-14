@@ -2266,9 +2266,4 @@ css += `
 .textLayer span {
     min-height: 2em !important;
 }
-
-/* hide annotation layer popups but keep non-popup annotations visible */
-.annotationLayer * {
-  display: none;
-}
 `;

@@ -1,5 +1,4 @@
 import { rx } from "@mvui/core";
-import { inject } from "dependency-injection";
 import { theme } from "global-styles";
 import { WournalPDFPageView } from "pdf/WournalPDFPageView";
 import { DOMUtils } from "util/DOMUtils";
@@ -16,6 +15,7 @@ import { Rect, SearchText } from "./types";
 import getTextRanges from "util/get-text-ranges";
 import { Highlights } from "util/highlights";
 import { SVGUtils } from "util/SVGUtils";
+import { PDFDocumentProxy, RefProxy } from "pdfjs-dist/types/src/display/api";
 
 /**
  * The attribute defining a "layer" element for wournal. Really they are just
@@ -161,6 +161,11 @@ export class WournalPage {
       if (!this.pdfViewer) return;
       this.pdfViewer.setAllowTextSelection(passthrough);
     });
+
+    doc.config?.subscribe(cfg => {
+      if (!this.pdfViewer) return;
+      this.pdfViewer.setAnnotationVisility(!cfg.hideAnnotations);
+    })
   }
 
   // ------------------------------------------------------------
@@ -315,8 +320,25 @@ export class WournalPage {
     this.pdfViewer = new WournalPDFPageView(
       await resp.getPage(this.pdfMode.pageNr),
       this.isVisible.bind(this),
-      this.zoom
+      async dest => {
+        const doc = resp as PDFDocumentProxy;
+        let ref: RefProxy;
+        if (typeof dest === 'string') {
+          const destinations = await doc.getDestinations();
+          if (!(dest in destinations)) throw new Error(
+            'Destination Not Found', { cause: { dest, destinations } }
+          );
+          ref = destinations[dest][0];
+        } else {
+          ref = dest[0];
+        }
+        const page = await (resp as PDFDocumentProxy).getPageIndex(ref) + 1;
+        console.log(`Scrolling to Linked Page: ${page}`);
+        this.doc.api.scrollPage(page);
+      },
+      this.zoom,
     );
+    if (this.doc.config.value.hideAnnotations) this.pdfViewer.setAnnotationVisility(false);
     if (this.doc.pdfSelectionPassthrough.value) this.pdfViewer.setAllowTextSelection(true);
     this.setPageSize(this.pdfViewer.getDimensionsPx());
     this._setLayerVisible('Background', false, false);

@@ -5,7 +5,7 @@ import 'pdfjs-dist/webpack';
 import * as pdfjs from 'pdfjs-dist';
 import * as pdfjsViewer from 'pdfjs-dist/web/pdf_viewer.mjs';
 import { css } from './pdf_viewer.css';
-import type { PDFPageProxy } from 'pdfjs-dist/types/src/display/api';
+import type { PDFPageProxy, RefProxy } from 'pdfjs-dist/types/src/display/api';
 import { PDFPageView } from 'pdfjs-dist/web/pdf_viewer.mjs';
 import { DEFAULT_ZOOM_FACTOR } from 'document/WournalPageSize';
 import { debounce } from 'lodash';
@@ -39,11 +39,16 @@ export class WournalPDFPageView {
     style: 'position: absolute; pointerEvents: none; width: 100%; height: 100%',
   });
 
+  private readonly annotations: Promise<PDFPageAnnotation[]>;
+
   constructor(
     private page: PDFPageProxy,
     private isVisible: () => boolean,
+    private scrollToDest: (dest: PDFDestination) => void,
     initialZoom?: number,
   ) {
+    this.annotations = page.getAnnotations();
+
     this.zoom = initialZoom ?? 1;
 
     this.display = document.createElement('div');
@@ -90,6 +95,7 @@ export class WournalPDFPageView {
     const viewer = new pdfjsViewer.PDFPageView({
       container: container,
       id: 1,
+      imageResourcesPath: 'res/pdf-js-annotation-layer/',
       defaultViewport: this.page.getViewport({
         scale: WournalPDFPageView.DEFAULT_ZOOM_ADJUSTED
       }),
@@ -104,8 +110,18 @@ export class WournalPDFPageView {
     return { viewer, container };
   }
 
+  private allowTextSelection: boolean = false;
   public setAllowTextSelection(allow: boolean) {
-    this.display.style.pointerEvents = allow ? 'unset' : 'none';
+    this.allowTextSelection = allow;
+    this.display.style.pointerEvents = allow ? '' : 'none';
+
+    if (this.viewer) {
+      const annotEls =
+        this.viewer.viewer.annotationLayer.div.querySelectorAll<HTMLElement>(
+          'section[data-annotation-id]'
+        );
+      for (const el of annotEls) el.style.pointerEvents = allow ? '' : 'none';
+    }
   }
 
   public async free() {
@@ -133,6 +149,8 @@ export class WournalPDFPageView {
     await resp;
     this.disableZoomPreview();
     this.doHighlightText();
+    this.setAllowTextSelection(this.allowTextSelection);
+    await this.setupAnnotationEventListeners(this.viewer.viewer);
     return;
   }
 
@@ -295,5 +313,84 @@ export class WournalPDFPageView {
     }
   }
 
+  private hideAnnotations: boolean = false;
+  public setAnnotationVisility(visible: boolean) {
+    this.hideAnnotations = !visible;
+    if (this.viewer) {
+      this.viewer.viewer.annotationLayer.div.style.display = visible ? 'block' : 'none';
+    }
+  }
+
+  private async setupAnnotationEventListeners(
+    viewer: PDFPageView | undefined
+  ) {
+    if (!viewer) return;
+    this.setAnnotationVisility(!this.hideAnnotations);
+
+    const annotations = await this.annotations;
+
+    const annotEls = viewer.annotationLayer.div.querySelectorAll<HTMLElement>(
+      'section[data-annotation-id]'
+    );
+
+    const allowHoverFor = [
+      AnnotationType.TEXT, AnnotationType.POPUP, AnnotationType.LINK,
+    ];
+
+    for (const annotEl of annotEls) {
+      const id = annotEl.getAttribute('data-annotation-id');
+      if (id.startsWith('popup_')) continue;
+
+      const annot = annotations.find(a => a.id === id);
+      if (annot === undefined) throw new Error(
+        'Could not find annotation for DOM el', { cause: { id, annotations } }
+      );
+
+      if (!allowHoverFor.includes(annot.annotationType))
+        annotEl.style.display = 'none';
+
+      annotEl.addEventListener('click', e => {
+        e.preventDefault();
+        console.log('Annotation Click: ', annot)
+
+        if (!('subtype' in annot && annot.subtype === 'Link')) return;
+
+        if ('unsafeUrl' in annot) window.open(annot.unsafeUrl);  // external link
+        else if ('dest' in annot) this.scrollToDest(annot.dest); // internal link
+
+      }, true);
+    }
+  }
 
 }
+
+// see https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/PDF32000_2008.pdf
+// page 373 aka 365
+type PDFDestination =
+  string | // named destination
+  [ // explicit destination
+    RefProxy,
+    { name: string },
+    number, number, number,
+  ];
+
+interface PDFPageAnnotation {
+  // incomplete
+  id: string;
+  annotationType: AnnotationType;
+  subtype?: 'Link' | string;
+  dest?: PDFDestination;
+
+  // only for external links. no idea that the difference is.
+  unsafeUrl?: string;
+  url?: string;
+}
+
+// copied from pdf.image_decoders.mjs
+enum AnnotationType {
+  TEXT = 1, LINK = 2, FREETEXT = 3, LINE = 4, SQUARE = 5, CIRCLE = 6, POLYGON = 7,
+  POLYLINE = 8, HIGHLIGHT = 9, UNDERLINE = 10, SQUIGGLY = 11, STRIKEOUT = 12,
+  STAMP = 13, CARET = 14, INK = 15, POPUP = 16, FILEATTACHMENT = 17, SOUND = 18,
+  MOVIE = 19, WIDGET = 20, SCREEN = 21, PRINTERMARK = 22, TRAPNET = 23, WATERMARK = 24,
+  THREED = 25, REDACT = 26,
+};

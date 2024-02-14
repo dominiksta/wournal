@@ -131,6 +131,7 @@ const ConfigDTOSchema = {
       }
     },
     autoOpenWojWithSameNameAsPDF: { type: 'boolean' },
+    hideAnnotations: { type: 'boolean' },
     tools: CanvasToolConfigSchema,
     autosave: AutosaveConfigSchema,
   }
@@ -189,6 +190,15 @@ export const ConfigDTOVersioner = new DTOVersioner<ConfigDTO>({
       };
     },
 
+    // ver 0.6 -- show/hide annotations
+    // ----------------------------------------------------------------------
+    0.6: (ver0_5: any) => {
+      return {
+        ...ver0_5, version: 0.5,
+        hideAnnotations: false,
+      };
+    },
+
   }
 })
 
@@ -221,6 +231,7 @@ export function defaultConfig(): ConfigDTO {
       { name: "White", color: "#FFFFFF" },
     ],
     autoOpenWojWithSameNameAsPDF: true,
+    hideAnnotations: false,
     autosave: {
       intervalSeconds: 3 * 60,
       enable: true,
