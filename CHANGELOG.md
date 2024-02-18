@@ -9,6 +9,7 @@ Changelog
 - Follow links in PDF documents
 - Show PDF popup notes (can be turned off in settings)
 - Allow setting a default zoom level for both UI and documents
+- Drag and drop files from native file manager into wournal to open
 
 #### Fixed
 

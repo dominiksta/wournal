@@ -537,7 +537,13 @@ export default class Wournal extends Component {
       h.div(this.dialog.dialogs),
       Settings.t({ props: { open: rx.bind(this.settingsOpen) } }),
       ui5.toast({ fields: { id: 'toast', placement: 'BottomEnd' } }),
-      h.div({ fields: { id: 'main' } }, [
+      h.div({
+        fields: { id: 'main' },
+        events: {
+          drop: this.handleDrop.bind(this),
+          dragover: e => e.preventDefault(),
+        }
+      }, [
         h.div({
           fields: { id: 'sidebar', hidden: this.hideSideBar },
         }, [OutlineContainer.t({ ref: this.outlineRef })]),
@@ -957,6 +963,27 @@ export default class Wournal extends Component {
     },
     ...customScrollbar,
   });
+
+  private async handleDrop(e: DragEvent) {
+    e.preventDefault();
+    for (const item of e.dataTransfer.items) {
+      if (item.kind !== 'file') continue;
+      const path: string = (item.getAsFile() as any).path
+      const ext = FileUtils.fileExtension(path).toLowerCase();
+      if (ext !== 'woj' && ext !== 'svg' && ext !== 'pdf') {
+        this.dialog.infoBox(
+          `Unsupported File Extension '${ext.toUpperCase()}'`,
+          `The file '${path}' has an extension that is not compatible ` +
+          `with Wournal.`,
+          'Error',
+        );
+        break;
+      }
+      if (await this.api.promptClosingUnsaved()) return;
+      this.api.loadDocument(path);
+      break;
+    }
+  }
 }
 
 function updateTitle(doc: WournalDocument) {

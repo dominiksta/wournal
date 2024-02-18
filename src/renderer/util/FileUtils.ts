@@ -183,4 +183,8 @@ export const FileUtils = {
     return path.slice(0, path.lastIndexOf('.'));
   },
 
+  fileExtension: function(path: string): string {
+    return path.slice(path.lastIndexOf('.') + 1, path.length)
+  }
+
 }

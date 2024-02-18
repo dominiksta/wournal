@@ -55,7 +55,7 @@ thing still missing is an *Android version*.
   **Before 1.0**
 
   - [x] Default Document Zoom Level Config Option
-  - [ ] Drag&Drop From File Manager to Open
+  - [x] Drag&Drop From File Manager to Open
   - [ ] Lasso Select
   - [ ] Set Default Paper Style
   - [ ] Vertical Space Tool
