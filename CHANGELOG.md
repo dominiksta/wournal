@@ -12,6 +12,7 @@ Changelog
 #### Fixed
 
 - Test pages are no longer created for every new document
+- PDF zoom preview scaling on high dpi displays
 
 `0.0.4` - _2024-02-13_
 ----------------------------------------------------------------------

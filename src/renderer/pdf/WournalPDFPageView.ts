@@ -284,6 +284,8 @@ export class WournalPDFPageView {
     const viewer = this.viewer.viewer.canvas;
     this.zoomPreview.height = viewer.height;
     this.zoomPreview.width = viewer.width;
+    this.zoomPreview.style.height = viewer.style.height;
+    this.zoomPreview.style.width = viewer.style.width;
     const factor = newZoom / oldZoom;
     this.zoomPreview.style.transform = `scale(${factor})`;
     this.zoomPreview.style.transformOrigin = '0 0';
