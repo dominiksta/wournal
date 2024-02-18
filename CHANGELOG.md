@@ -8,6 +8,7 @@ Changelog
 
 - Follow links in PDF documents
 - Show PDF popup notes (can be turned off in settings)
+- Allow setting a default zoom level for both UI and documents
 
 #### Fixed
 

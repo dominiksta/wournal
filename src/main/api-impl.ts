@@ -102,8 +102,10 @@ export function registerApiHandlers() {
     'window:setTitle': async (e, title) => {
       instances.get(e.sender)!.win.setTitle(title);
     },
-
     'window:destroy': async (e) => { instances.get(e.sender)!.win.destroy(); },
+    'window:setZoom': async (e, zoom) => {
+      instances.get(e.sender)!.win.webContents.setZoomFactor(zoom);
+    },
 
     'clipboard:writeWournal': async (_, d) => clipboard.writeBuffer(
       'image/wournal', Buffer.from(JSON.stringify(d), 'utf-8')

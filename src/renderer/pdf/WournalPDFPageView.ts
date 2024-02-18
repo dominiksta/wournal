@@ -46,6 +46,7 @@ export class WournalPDFPageView {
     private isVisible: () => boolean,
     private scrollToDest: (dest: PDFDestination) => void,
     initialZoom?: number,
+    private defaultZoom: number = 1,
   ) {
     this.annotations = page.getAnnotations();
 
@@ -97,9 +98,9 @@ export class WournalPDFPageView {
       id: 1,
       imageResourcesPath: 'res/pdf-js-annotation-layer/',
       defaultViewport: this.page.getViewport({
-        scale: WournalPDFPageView.DEFAULT_ZOOM_ADJUSTED
+        scale: WournalPDFPageView.DEFAULT_ZOOM_ADJUSTED * this.defaultZoom
       }),
-      scale: this.zoom / DEFAULT_ZOOM_FACTOR,
+      scale: this.zoom / DEFAULT_ZOOM_FACTOR * this.defaultZoom,
       eventBus: new pdfjsViewer.EventBus(),
       textLayerMode: 1,
       isOffscreenCanvasSupported: false
@@ -156,7 +157,7 @@ export class WournalPDFPageView {
 
   public getDimensionsPx(): { width: number, height: number } {
     const { width, height } = this.page.getViewport({
-      scale: WournalPDFPageView.DEFAULT_ZOOM_ADJUSTED
+      scale: WournalPDFPageView.DEFAULT_ZOOM_ADJUSTED * this.defaultZoom
     });
     return {
       width: parseFloat(width.toFixed(2)),
@@ -175,7 +176,9 @@ export class WournalPDFPageView {
   }
 
   private _setZoomRerender(zoom: number) {
-    if (this.viewer) this.viewer.viewer.update({ scale: zoom / DEFAULT_ZOOM_FACTOR });
+    if (this.viewer) this.viewer.viewer.update({
+      scale: zoom / DEFAULT_ZOOM_FACTOR * this.defaultZoom
+    });
     this.zoom = zoom;
     this.needsDrawing = true;
     if (this.isVisible()) this.drawOrFree();

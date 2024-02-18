@@ -134,6 +134,8 @@ const ConfigDTOSchema = {
     hideAnnotations: { type: 'boolean' },
     tools: CanvasToolConfigSchema,
     autosave: AutosaveConfigSchema,
+    defaultZoomDocument: { type: 'float32' },
+    zoomUI: { type: 'float32' },
   }
 } as const;
 
@@ -194,8 +196,18 @@ export const ConfigDTOVersioner = new DTOVersioner<ConfigDTO>({
     // ----------------------------------------------------------------------
     0.6: (ver0_5: any) => {
       return {
-        ...ver0_5, version: 0.5,
+        ...ver0_5, version: 0.6,
         hideAnnotations: false,
+      };
+    },
+
+    // ver 0.7 -- document and ui zoom
+    // ----------------------------------------------------------------------
+    0.7: (ver0_6: any) => {
+      return {
+        ...ver0_6, version: 0.7,
+        defaultZoomDocument: 1.0,
+        zoomUI: 1.0,
       };
     },
 
@@ -237,6 +249,8 @@ export function defaultConfig(): ConfigDTO {
       enable: true,
       keepFiles: 300,
     },
+    defaultZoomDocument: 1.0,
+    zoomUI: 1.0,
     tools: {
       CanvasToolPen: {
         color: "#000000",

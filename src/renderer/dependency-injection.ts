@@ -1,9 +1,11 @@
 import FileSystem from "persistence/FileSystem";
 import SystemClipboard from "util/SystemClipboard";
+import { ConfigRepositoryLocalStorage } from 'persistence/ConfigRepositoryLocalStorage';
 
 type Dependencies = {
   'FileSystem': FileSystem,
   'SystemClipboard': SystemClipboard,
+  'ConfigRepository': ConfigRepositoryLocalStorage,
 };
 
 export function provideDependencies(providers: Dependencies): void {

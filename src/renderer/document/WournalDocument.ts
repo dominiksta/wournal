@@ -471,7 +471,9 @@ export class WournalDocument extends Component {
     page: WournalPage, addAfterPageNr: number = -1,
     undoable = true
   ) {
-    page.setZoom(this.zoom * DEFAULT_ZOOM_FACTOR);
+    page.setZoom(
+      this.zoom * DEFAULT_ZOOM_FACTOR * this.config.value.defaultZoomDocument
+    );
 
     if (addAfterPageNr === -1) {
       this.display.appendChild(page.display);
@@ -685,7 +687,8 @@ export class WournalDocument extends Component {
     zoom: number,
     keepViewportPos: { x: number, y: number } = { x: -1, y: -1 } // -1 = center
   ) {
-    const zoomActual = zoom * DEFAULT_ZOOM_FACTOR;
+    const zoomActual =
+      zoom * DEFAULT_ZOOM_FACTOR * this.config.value.defaultZoomDocument;
 
     if (keepViewportPos.x === -1 || keepViewportPos.y === -1) {
       const r = this.parentElement.getBoundingClientRect();

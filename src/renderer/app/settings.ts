@@ -60,10 +60,12 @@ export class Settings extends Component {
           ]
         }
       }, [
-        ui5.panel({ fields: { headerText: 'Theme', collapsed: true }}, [
-          ThemeSettings.t({ props: {
+        ui5.panel({ fields: { headerText: 'User Interface', collapsed: true }}, [
+          UserInterfaceSettings.t({ props: {
             invert: rx.bind(conf.partial('invertDocument')),
             theme: rx.bind(conf.partial('theme')),
+            zoomUi: rx.bind(conf.partial('zoomUI')),
+            defaultZoomDocument: rx.bind(conf.partial('defaultZoomDocument')),
           }})
         ]),
         ui5.panel({ fields: { headerText: 'Default Tool Settings', collapsed: true }}, [
@@ -206,10 +208,12 @@ class ToolSelect extends Component {
 }
 
 @Component.register
-class ThemeSettings extends Component {
+class UserInterfaceSettings extends Component {
   props = {
     invert: rx.prop<boolean>(),
     theme: rx.prop<ConfigDTO['theme']>(),
+    zoomUi: rx.prop<number>(),
+    defaultZoomDocument: rx.prop<number>(),
   }
 
   render() {
@@ -223,28 +227,58 @@ class ThemeSettings extends Component {
     }
 
     return [
-      ui5.select({
-        events: {
-          change: e => {
-            const t = e.detail.selectedOption.value as ConfigDTO['theme'];
-            this.props.theme.next(t);
+      ui5.title({ fields: { level: 'H5' }}, 'Theme'),
+      h.hr(),
+      h.p([
+        ui5.select({
+          events: {
+            change: e => {
+              const t = e.detail.selectedOption.value as ConfigDTO['theme'];
+              this.props.theme.next(t);
+            }
           }
-        }
-      }, [
-        ...DSUtils.objKeys(themeNames).map(k => ui5.option({
+        }, [
+          ...DSUtils.objKeys(themeNames).map(k => ui5.option({
+            fields: {
+              value: k,
+              selected: this.props.theme.derive(t => t === k),
+            }
+          }, themeNames[k]))
+        ]),
+        h.div(ui5.checkbox({
           fields: {
-            value: k,
-            selected: this.props.theme.derive(t => t === k),
+            checked: rx.bind(this.props.invert),
+            wrappingType: 'Normal',
+            text: 'Invert Document Colors for Dark Themes',
           }
-        }, themeNames[k]))
+        }))
       ]),
-      h.div(ui5.checkbox({
-        fields: {
-          checked: rx.bind(this.props.invert),
-          wrappingType: 'Normal',
-          text: 'Invert Document Colors for Dark Themes',
-        }
-      })),
+
+      ui5.title({ fields: { level: 'H5' }}, 'Zoom'),
+      h.hr(),
+      h.p([
+        h.table([
+          h.tr([
+            h.td(ui5.label('Default Document Zoom*')),
+            h.td(ui5.stepInput({
+              fields: {
+                value: rx.bind(this.props.defaultZoomDocument),
+                step: 0.1, min: 0, max: 10, valuePrecision: 2,
+              }
+            })),
+          ]),
+          h.tr([
+            h.td(ui5.label('User Interface Zoom*')),
+            h.td(ui5.stepInput({
+              fields: {
+                value: rx.bind(this.props.zoomUi),
+                step: 0.1, min: 0, max: 10, valuePrecision: 2,
+              }
+            })),
+          ]),
+        ]),
+      ]),
+      h.p(h.i('*: Restart Required'))
     ]
   }
 }

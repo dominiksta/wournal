@@ -5,7 +5,6 @@ import * as ui5 from "@mvui/ui5";
 import Toolbars from 'app/toolbars';
 import { customScrollbar, darkTheme, lightTheme, theme } from "./global-styles";
 import { WournalDocument } from "document/WournalDocument";
-import { ConfigRepositoryLocalStorage } from 'persistence/ConfigRepositoryLocalStorage';
 import { WournalPageSize } from 'document/WournalPageSize';
 import { ConfigCtx } from 'app/config-context';
 import { Settings } from 'app/settings';
@@ -38,7 +37,7 @@ import { SearchBox } from 'app/search-box';
 export default class Wournal extends Component {
 
   private fileSystem = inject('FileSystem');
-  private confRepo = ConfigRepositoryLocalStorage.getInstance();
+  private confRepo = inject('ConfigRepository');
 
   private configCtx = this.provideContext(
     ConfigCtx, new rx.State(ConfigDTOVersioner.updateToCurrent(this.confRepo.load()))

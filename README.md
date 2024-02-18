@@ -54,7 +54,7 @@ thing still missing is an *Android version*.
 
   **Before 1.0**
 
-  - [ ] DPI Calibration for Default Zoom Level. See Xournal++
+  - [x] Default Document Zoom Level Config Option
   - [ ] Drag&Drop From File Manager to Open
   - [ ] Lasso Select
   - [ ] Set Default Paper Style

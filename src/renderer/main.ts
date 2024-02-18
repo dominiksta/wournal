@@ -1,4 +1,4 @@
-import { provideDependencies } from "dependency-injection";
+import { inject, provideDependencies } from "dependency-injection";
 import { BackgroundStyleT } from "document/BackgroundGenerators";
 import FileSystemElectron from "persistence/FileSystemElectron";
 import { SystemClipboardElectron } from "util/SystemClipboardElectron";
@@ -8,6 +8,7 @@ import { ApiClient } from "./electron-api-client";
 import { ErrorPopup } from "app/error-popup";
 import { overwriteConsoleLogFunctions } from "util/Logging";
 import { waitInitUi5 } from "util/ui5-boot";
+import { ConfigRepositoryLocalStorage } from "persistence/ConfigRepositoryLocalStorage";
 
 overwriteConsoleLogFunctions();
 
@@ -28,6 +29,7 @@ overwriteConsoleLogFunctions();
 provideDependencies({
   'FileSystem': FileSystemElectron,
   'SystemClipboard': SystemClipboardElectron,
+  'ConfigRepository': ConfigRepositoryLocalStorage.getInstance(),
 })
 
 const wournal = new Wournal();
@@ -59,8 +61,12 @@ window.electron.on["window:close"](async () => {
   }
 })
 
+function setUiZoom() {
+  ApiClient['window:setZoom'](inject('ConfigRepository').load().zoomUI);
+}
 
 async function main() {
+  setUiZoom();
   const l = document.createElement('div');
   l.innerText = 'loading...';
   document.body.appendChild(l);
