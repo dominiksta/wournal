@@ -45,6 +45,7 @@
     "webpack-dev-server": "^4.11.1"
   },
   "scripts": {
+    "postinstall": "cd vendor/mvui && npm install",
     "dev": "npm run dev:renderer",
     "dev:renderer": "cross-env NODE_ENV=development webpack serve --config webpack/config.renderer.dev.js",
     "dev:preload": "cross-env NODE_ENV=development webpack --config webpack/config.preload.dev.js",
