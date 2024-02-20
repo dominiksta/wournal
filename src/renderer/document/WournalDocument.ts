@@ -301,7 +301,12 @@ export class WournalDocument extends Component {
   // selection
   // ------------------------------------------------------------
 
-  public selection = new CanvasSelection(this._undoStack);
+  public selection = new CanvasSelection(
+    this._undoStack,
+    () => this.selectionCut(),
+    () => this.selectionCopy(),
+    () => this.selectionCut(true),
+  );
 
   public selectionCut(noCopy: boolean = false): void {
     if (this.selection.selection.length === 0) return;
@@ -717,6 +722,7 @@ export class WournalDocument extends Component {
     this.api.scrollPos(top + pointDiff.y, left + pointDiff.x);
 
     this.zoom = zoom;
+    this.selection.showButtons(true);
   }
   public getZoom(): number { return this.zoom; }
 

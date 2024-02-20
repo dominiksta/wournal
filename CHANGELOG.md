@@ -16,6 +16,11 @@ Changelog
 - Test pages are no longer created for every new document
 - PDF zoom preview scaling on high dpi displays
 
+### Changed
+
+- 'Copy' and 'Cut' buttons are no longer displayed in the toolbar since they now
+  pop up dynamically above an active selection
+
 `0.0.4` - _2024-02-13_
 ----------------------------------------------------------------------
 **Outlines and Text Selection**

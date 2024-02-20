@@ -3,6 +3,7 @@ import { LOG } from "../util/Logging";
 import { SVGUtils } from "../util/SVGUtils";
 import { CanvasElement, CanvasElementDTO } from "./CanvasElement";
 import { CanvasElementFactory } from "./CanvasElementFactory";
+import CanvasSelectionButtons from "./CanvasSelectionButtons";
 import { CanvasSelectionDisplay } from "./CanvasSelectionDisplay";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
 import { UndoStack } from "./UndoStack";
@@ -26,11 +27,23 @@ export class CanvasSelection {
     return this.state === "resizing" || this.state === "moving";
   }
 
-
   private _selection: { el: CanvasElement<any>, savedData: CanvasElementDTO }[] = [];
   get selection(): CanvasElement<any>[] { return this._selection.map(e => e.el); }
 
-  constructor(private undoStack: UndoStack) { }
+  private selectionButtons: CanvasSelectionButtons;
+
+  constructor(
+    private undoStack: UndoStack,
+    private onCut: () => void,
+    private onCopy: () => void,
+    private onDelete: () => void,
+  ) {
+    this.selectionButtons = new CanvasSelectionButtons(
+      this.onCut,
+      () => { this.onCopy(); this.clear(); },
+      this.onDelete,
+    )
+  }
 
   public init(page: WournalPage) {
     this._selection = [];
@@ -43,16 +56,48 @@ export class CanvasSelection {
     this._page.toolLayer.appendChild(this._selectionDisplay.svgElem);
   }
 
+  public async showButtons(show: boolean) {
+    if (show) {
+      if (!this._page.display.contains(this.selectionButtons))
+        this._page.display.appendChild(this.selectionButtons);
+      this.selectionButtons.style.position = 'absolute';
+      await new Promise(requestAnimationFrame);
+      const pad = 10;
+
+      const selRect        = this.selectionDisplay.mainRect.getBoundingClientRect();
+      const pageRect       = this.page.display.getBoundingClientRect();
+      const docWrapperRect = this.page.doc.parentElement.getBoundingClientRect();
+      const buttonsRect    = this.selectionButtons.getBoundingClientRect();
+      const pos = {
+        y: selRect.y - pageRect.y,
+        x: selRect.x - pageRect.x - 4, // 5 for page margin
+      }
+      pos.x += (selRect.width / 2) - (buttonsRect.width / 2);
+      pos.x = Math.min(pageRect.width - buttonsRect.width - 20, Math.max(0, pos.x));
+      const bottom = (selRect.y - docWrapperRect.y) < (pad * 4);
+      console.log(docWrapperRect.y - selRect.y);
+      if (bottom) pos.y += pad + selRect.height;
+      else pos.y -= pad + buttonsRect.height;
+
+      this.selectionButtons.style.top = `${pos.y}px`;
+      this.selectionButtons.style.left = `${pos.x}px`;
+    } else {
+      this.selectionButtons.remove();
+    }
+  }
+
   /** Remove all elements from given `page` */
   public clear() {
     this._selection = [];
     this._available.next(false);
     this._selectionDisplay?.destroy(true);
+    this.showButtons(false);
   }
 
   public onMouseDown(e: MouseEvent): void {
     e.stopPropagation();
     const mouse = this.page.viewportCoordsToCanvas(e);
+    this.showButtons(false);
 
     switch (this.state) {
       case "idle":
@@ -156,6 +201,7 @@ export class CanvasSelection {
         ));
         this._selectionDisplay.writeTransform();
         this.state = "idle";
+        this.showButtons(true);
         break;
     }
   }
@@ -177,6 +223,7 @@ export class CanvasSelection {
     this._selection = els.map(e => { return { el: e, savedData: e.serialize() } });
     this._selectionDisplay.setCursorState("idle");
     this._available.next(true);
+    this.showButtons(true);
   }
 
   public setSelectionFromCurrentRect() {

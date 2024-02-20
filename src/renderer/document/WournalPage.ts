@@ -132,9 +132,9 @@ export class WournalPage {
     this.display.style.position = 'relative';
     this.display.style.border = "3px solid white";
     this.display.style.margin = "10px auto 10px auto";
-    this.display.style.filter = theme.invert;
 
     this.svgWrapperEl = document.createElement("div");
+    this.svgWrapperEl.style.filter = theme.invert;
     this.svgWrapperEl.style.transformOrigin = "0 0";
     this.display.appendChild(this.svgWrapperEl);
 
@@ -338,6 +338,7 @@ export class WournalPage {
       },
       this.zoom,
     );
+    this.pdfViewer.display.style.filter = theme.invert;
     if (this.doc.config.value.hideAnnotations) this.pdfViewer.setAnnotationVisility(false);
     if (this.doc.pdfSelectionPassthrough.value) this.pdfViewer.setAllowTextSelection(true);
     this.setPageSize(this.pdfViewer.getDimensionsPx());

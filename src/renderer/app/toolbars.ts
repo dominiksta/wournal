@@ -413,21 +413,6 @@ export default class Toolbars extends Component {
             },
             events: { click: api.redo }
           }),
-          ToolbarSeperator.t(),
-          ToolbarButton.t({
-            props: {
-              img: 'icon:scissors', alt: 'Cut Selection',
-              disabled: noSelection,
-            },
-            events: { click: api.cutSelection }
-          }),
-          ToolbarButton.t({
-            props: {
-              img: 'icon:copy', alt: 'Copy Selection',
-              disabled: noSelection,
-            },
-            events: { click: api.copySelection }
-          }),
           ToolbarButton.t({
             props: {
               img: 'icon:paste', alt: 'Paste Selection/Clipboard',
