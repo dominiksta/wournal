@@ -722,7 +722,7 @@ export class WournalDocument extends Component {
     this.api.scrollPos(top + pointDiff.y, left + pointDiff.x);
 
     this.zoom = zoom;
-    this.selection.showButtons(true);
+    if (this.selection.available.value) this.selection.showButtons(true);
   }
   public getZoom(): number { return this.zoom; }
 
