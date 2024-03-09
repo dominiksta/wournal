@@ -376,26 +376,30 @@ export default class Toolbars extends Component {
           ToolbarSeperator.t(),
           ToolbarButton.t({
             props: {
-              img: 'icon:save', alt: 'Save',
+              img: 'icon:save',
+              alt: `Save (${globalCmnds['file_save'].shortcut})`,
             },
             events: { click: globalCmnds.file_save.func }
           }),
           ToolbarButton.t({
             props: {
-              img: 'icon:document', alt: 'New',
+              img: 'icon:document',
+              alt: `New (${globalCmnds['file_new'].shortcut})`,
             },
             events: { click: () => api.newDocument() }
           }),
           ToolbarButton.t({
             props: {
-              img: 'icon:open-folder', alt: 'Load',
+              img: 'icon:open-folder',
+              alt: `Load (${globalCmnds['file_load'].shortcut})`,
             },
             events: { click: api.loadDocumentPrompt }
           }),
           ToolbarSeperator.t(),
           ToolbarButton.t({
             props: {
-              img: 'icon:undo', alt: 'Undo',
+              img: 'icon:undo',
+              alt: `Undo (${globalCmnds['history_undo'].shortcut})`,
               disabled: d.pipe(
                 rx.switchMap(doc => doc.undoStack.undoAvailable),
                 rx.map(v => !v),
@@ -405,7 +409,8 @@ export default class Toolbars extends Component {
           }),
           ToolbarButton.t({
             props: {
-              img: 'icon:redo', alt: 'Redo',
+              img: 'icon:redo',
+              alt: `Redo (${globalCmnds['history_redo'].shortcut})`,
               disabled: d.pipe(
                 rx.switchMap(doc => doc.undoStack.redoAvailable),
                 rx.map(v => !v),
@@ -415,7 +420,9 @@ export default class Toolbars extends Component {
           }),
           ToolbarButton.t({
             props: {
-              img: 'icon:paste', alt: 'Paste Selection/Clipboard',
+              img: 'icon:paste',
+              alt: `Paste Selection/Clipboard ` +
+                `(${globalCmnds['clipboard_paste'].shortcut})`,
             },
             events: { click: api.pasteClipboard }
           }),
@@ -423,31 +430,37 @@ export default class Toolbars extends Component {
           ToolbarSeperator.t(),
           ToolbarButton.t({
             props: {
-              img: 'icon:zoom-in', alt: 'Zoom In',
+              img: 'icon:zoom-in',
+              alt: `Zoom In (${globalCmnds['zoom_in'].shortcut})`,
             },
             events: { click: _ => api.setZoom(api.getZoom() + 0.1) }
           }),
           ToolbarButton.t({
             props: {
-              img: 'icon:reset', alt: 'Reset Zoom',
+              img: 'icon:reset',
+              alt: `Reset Zoom (${globalCmnds['zoom_reset'].shortcut})`,
             },
             events: { click: _ => api.setZoom(1) }
           }),
           ToolbarButton.t({
             props: {
-              img: 'icon:border', alt: 'Zoom to Fit to Width',
+              img: 'icon:border',
+              alt: `Zoom to Fit to Width (${globalCmnds['zoom_fit_width'].shortcut})`,
             },
             events: { click: _ => api.setZoomFitWidth() }
           }),
           ToolbarButton.t({
             props: {
-              img: 'icon:zoom-out', alt: 'Zoom Out',
+              img: 'icon:zoom-out',
+              alt: `Zoom Out (${globalCmnds['zoom_out'].shortcut})`,
             },
             events: { click: _ => api.setZoom(api.getZoom() - 0.1) }
           }),
           ToolbarButton.t({
             props: {
-              img: 'icon:full-screen', alt: 'Toggle Fullscreen',
+              img: 'icon:full-screen',
+              alt: `Toggle Fullscreen ` +
+                `(${globalCmnds['fullscreen_toggle'].shortcut})`,
             },
             events: {
               click: _ => {
@@ -474,28 +487,32 @@ export default class Toolbars extends Component {
         Toolbar.t([
           ToolbarButton.t({
             props: {
-              img: 'icon:edit', alt: 'Pen',
+              img: 'icon:edit',
+              alt: `Pen (${globalCmnds['tool_pen'].shortcut})`,
               current: isCurrentTool(CanvasToolPen),
             },
             events: { click: _ => api.setTool('CanvasToolPen') }
           }),
           ToolbarButton.t({
             props: {
-              img: 'icon:wournal/highlighter', alt: 'Highlighter',
+              img: 'icon:wournal/highlighter',
+              alt: `Highlighter (${globalCmnds['tool_highlighter'].shortcut})`,
               current: isCurrentTool(CanvasToolHighlighter),
             },
             events: { click: _ => api.setTool('CanvasToolHighlighter') }
           }),
           ToolbarButton.t({
             props: {
-              img: 'icon:eraser', alt: 'Eraser',
+              img: 'icon:eraser',
+              alt: `Highlighter (${globalCmnds['tool_eraser'].shortcut})`,
               current: isCurrentTool(CanvasToolEraser),
             },
             events: { click: _ => api.setTool('CanvasToolEraser') }
           }),
           ToolbarButton.t({
             props: {
-              img: 'icon:text', alt: 'Text',
+              img: 'icon:text',
+              alt: `Text (${globalCmnds['tool_text'].shortcut})`,
               current: isCurrentTool(CanvasToolText),
             },
             events: { click: _ => api.setTool('CanvasToolText') }
@@ -509,28 +526,32 @@ export default class Toolbars extends Component {
           }),
           ToolbarButton.t({
             props: {
-              img: 'icon:draw-rectangle', alt: 'Rectangle',
+              img: 'icon:draw-rectangle',
+              alt: `Rectangle (${globalCmnds['tool_rectangle'].shortcut})`,
               current: isCurrentTool(CanvasToolRectangle),
             },
             events: { click: _ => api.setTool('CanvasToolRectangle') }
           }),
           ToolbarButton.t({
             props: {
-              img: 'icon:tnt/unit', alt: 'Ruler',
+              img: 'icon:tnt/unit',
+              alt: `Ruler (${globalCmnds['tool_ruler'].shortcut})`,
               current: isCurrentTool(CanvasToolRuler),
             },
             events: { click: _ => api.setTool('CanvasToolRuler') }
           }),
           ToolbarButton.t({
             props: {
-              img: 'icon:circle-task', alt: 'Ellipse',
+              img: 'icon:circle-task',
+              alt: `Ruler (${globalCmnds['tool_ellipse'].shortcut})`,
               current: isCurrentTool(CanvasToolEllipse),
             },
             events: { click: _ => api.setTool('CanvasToolEllipse') }
           }),
           ToolbarButton.t({
             props: {
-              img: 'icon:touch', alt: 'Toggle Hand',
+              img: 'icon:touch',
+              alt: `Toggle Hand (${globalCmnds['tool_hand'].shortcut})`,
               current: isCurrentTool(CanvasToolHand),
             },
             events: { click: _ => globalCmnds.tool_hand.func() }
@@ -540,14 +561,16 @@ export default class Toolbars extends Component {
 
           ToolbarButton.t({
             props: {
-              img: 'icon:cursor-arrow', alt: 'Select Rectangle',
+              img: 'icon:cursor-arrow',
+              alt: `Select Rectangle (${globalCmnds['tool_select_rectangle'].shortcut})`,
               current: isCurrentTool(CanvasToolSelectRectangle),
             },
             events: { click: _ => api.setTool('CanvasToolSelectRectangle') }
           }),
           ToolbarButton.t({
             props: {
-              img: 'icon:text-align-justified', alt: 'Select Text',
+              img: 'icon:text-align-justified',
+              alt: `Select Text (${globalCmnds['tool_select_text'].shortcut})`,
               current: isCurrentTool(CanvasToolSelectText),
             },
             events: { click: _ => api.setTool('CanvasToolSelectText') }
@@ -558,7 +581,7 @@ export default class Toolbars extends Component {
           ToolbarButton.t({
             props: {
               img: 'img:res/icon/material/autorenew.svg',
-              alt: globalCmnds.tool_current_default.human_name,
+              alt: 'Reset Tool to Default',
             },
             events: {
               click: _ => globalCmnds.tool_current_default.func()
@@ -567,7 +590,7 @@ export default class Toolbars extends Component {
           ToolbarButton.t({
             props: {
               img: 'img:res/icon/custom/default-pen.svg',
-              alt: globalCmnds.tool_default_pen.human_name,
+              alt: 'Default Pen',
             },
             events: {
               click: _ => globalCmnds.tool_default_pen.func()

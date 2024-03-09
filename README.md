@@ -49,6 +49,7 @@ thing still missing is an *Android version*.
   - [ ] Android Version with Cordova or Capacitor
   - [x] Stack Trace & Bug Report Dialog
   - [x] Auto Saves
+  - [ ] Single Click to Select
   - [ ] Polish Icon (especially lower resolution versions)
   - [ ] Simple Website with some Documentation with GitHub Pages
 
@@ -56,6 +57,8 @@ thing still missing is an *Android version*.
 
   - [x] Default Document Zoom Level Config Option
   - [x] Drag&Drop From File Manager to Open
+  - [ ] Jumplist
+  - [ ] Customizable Pen Cursor Angle Change (Especially for Lefties)
   - [ ] Lasso Select
   - [ ] Set Default Paper Style
   - [ ] Vertical Space Tool
@@ -69,7 +72,10 @@ thing still missing is an *Android version*.
     - [ ] Two Pages (Continuous)
   - [ ] Annotate Multiple PDFs in one Wournal Document
   - [ ] Import XOJ (from Xournal)
+  - [ ] Import Annotations from a PDF (at least a bit)
   - [ ] Apply New Page Style to All Pages
+  - [ ] Custom "Sticker" or "Element" Collections (like Google Material Icons or
+        Cisco Networking Diagram Thingies)
   - [ ] Page Thumbnails in Left Panel
   - [ ] Put Text Marker Strokes on a Separate Layer to Always Have Text In Front
     - Xournal does not do this, Xournal++ and PDF Annotator do
