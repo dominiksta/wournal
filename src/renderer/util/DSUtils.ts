@@ -53,5 +53,18 @@ export const DSUtils = {
     } catch {
       return '<Not Serializable>';
     }
+  },
+
+  waitNotEq: async function(
+    getter: () => any, eq: any = null, waitMs: number = 200,
+    maxAttempt: number = 5,
+  ): Promise<boolean> {
+    let attempts = 0;
+    while (getter() === eq) {
+      attempts++;
+      if (attempts >= maxAttempt) throw new Error(`var is still not ${eq}`);
+      await new Promise(resolve => setTimeout(resolve, waitMs));
+    }
+    return true;
   }
 }

@@ -14,6 +14,7 @@ import { SearchText } from 'document/types';
 import { SVGUtils } from 'util/SVGUtils';
 import getTextRanges from 'util/get-text-ranges';
 import { Highlights } from 'util/highlights';
+import { DSUtils } from 'util/DSUtils';
 
 export const PDF_CTX_MENU = new WournalPDFPageViewContextMenu();
 document.body.append(PDF_CTX_MENU);
@@ -150,6 +151,12 @@ export class WournalPDFPageView {
     await resp;
     this.disableZoomPreview();
     this.doHighlightText();
+
+    // the annotationlayer div is created asynchronously after the viewer is
+    // already returned. this seems to be the only real way to ensure it exists
+    await DSUtils.waitNotEq(
+      () => (this.viewer as any).viewer.annotationLayer.div, null
+    );
     this.setAllowTextSelection(this.allowTextSelection);
     await this.setupAnnotationEventListeners(this.viewer.viewer);
     return;

@@ -17,6 +17,8 @@ Changelog
 
 - Test pages are no longer created for every new document
 - PDF zoom preview scaling on high dpi displays
+- Occasionally opening a document would produce an error (there was a race
+  condition where elements may have not existed)
 
 ### Changed
 
