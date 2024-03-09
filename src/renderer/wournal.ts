@@ -32,6 +32,7 @@ import { OutlineContainer } from 'app/outline';
 import openSystemDebugInfo from 'app/debug-info';
 import setupAutosave from 'document/autosave';
 import { SearchBox } from 'app/search-box';
+import RecentFiles from 'persistence/recent-files';
 
 @Component.register
 export default class Wournal extends Component {
@@ -112,6 +113,7 @@ export default class Wournal extends Component {
       return true;
     },
     loadDocument: async (fileName) => {
+      RecentFiles.add(fileName);
       this.doc.next(WournalDocument.create(this.getContext.bind(this)));
       const closePleaseWait = this.dialog.pleaseWait(
         'Loading Document',

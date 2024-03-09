@@ -1,4 +1,5 @@
 import {
+    app,
   BrowserWindow, clipboard, dialog, ipcMain, IpcMainInvokeEvent, shell
 } from 'electron';
 import type { ElectronApi, ApiSpec, ApiRouteName, ElectronCallbacks } from './api';
@@ -30,6 +31,9 @@ export function registerApiHandlers() {
     'shell:open': async (_, path) => {
       path = normalize(path.replace(/^~/, homedir));
       shell.openPath(path);
+    },
+    'shell:addRecentDocument': async (_, path) => {
+      app.addRecentDocument(path);
     },
 
     'file:read': async (_, path) => {

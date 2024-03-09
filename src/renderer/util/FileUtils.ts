@@ -185,6 +185,26 @@ export const FileUtils = {
 
   fileExtension: function(path: string): string {
     return path.slice(path.lastIndexOf('.') + 1, path.length)
-  }
+  },
+
+  shorterReadablePath: function(path: string): string {
+    const sep = navigator.userAgent.includes('Windows') ? '\\' : '/';
+    const parts = path.split(sep);
+
+    try {
+      for (let i = 1; i < parts.length - 1; i++) {
+        parts[i] = parts[i][0];
+      }
+      let start = parts.slice(0, parts.length - 2).join(sep);
+      console.log(start, start.length);
+      if (start.length > 10)
+        start = '...' + sep + path.split(sep)[parts.length - 2];
+
+      return start + sep + parts[parts.length - 1];
+    } catch (e) {
+      console.warn(`oopsie when shortening path: ${path}`, e);
+      return path;
+    }
+  },
 
 }

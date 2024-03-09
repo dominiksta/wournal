@@ -22,6 +22,8 @@ import { CanvasToolEllipse } from "document/CanvasToolEllipse";
 import { CanvasToolHand } from "document/CanvasToolHand";
 import { CanvasToolImage } from "document/CanvasToolImage";
 import { CanvasToolSelectText } from "document/CanvasToolSelectText";
+import { FileUtils } from "util/FileUtils";
+import RecentFiles from "persistence/recent-files";
 
 @Component.register
 export default class Toolbars extends Component {
@@ -74,6 +76,8 @@ export default class Toolbars extends Component {
       additionalText: globalCmnds[id].shortcut ?? '',
     });
 
+    const recentFiles = new rx.State(RecentFiles.getPaths());
+
     return [
       h.div({ fields: { className: 'topbar' } }, [
         // menu
@@ -81,13 +85,18 @@ export default class Toolbars extends Component {
         ui5.menu({
           fields: { id: 'menu' },
           events: {
+            'after-open': _ => {
+              recentFiles.next(RecentFiles.getPaths());
+            },
             'item-click': e => {
               const id = e.detail.item.id as GlobalCommandIdT | '';
               if (id.startsWith('color:')) {
                 api.setColorByHex(id.split('color:')[1]);
                 return;
-              }
-              if (id === '') return;
+              } else if (id.startsWith('recent:')) {
+                api.loadDocument(id.split('recent:')[1]);
+                return;
+              } else if (id === '') return;
               console.assert(GlobalCommandId.indexOf(id) !== -1);
               globalCmnds[id].func();
             }
@@ -104,6 +113,22 @@ export default class Toolbars extends Component {
                 icon: 'open-folder', ...globalCmdMenuItem('file_load'),
               }
             }),
+            ui5.menuItem({
+              fields: {
+                icon: 'history', id: '',
+                text: 'Recent Documents',
+              }
+            }, recentFiles.derive(rf => {
+              if (rf.length === 0) return [ui5.menuItem({
+                fields: { id: '', text: 'No Recent Documents' }
+              })];
+              return rf.map(path => ui5.menuItem({
+                fields: {
+                  id: 'recent:' + path,
+                  text: FileUtils.shorterReadablePath(path),
+                }
+              }))
+            })),
             ui5.menuItem({
               fields: {
                 icon: 'save', ...globalCmdMenuItem('file_save'),

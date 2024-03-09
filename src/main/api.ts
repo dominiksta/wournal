@@ -10,6 +10,7 @@ export const ApiRouteNames = [
   'debug:binTest',
 
   'shell:open',
+  'shell:addRecentDocument',
 
   'file:read',
   'file:loadPrompt',
@@ -43,6 +44,7 @@ export interface ElectronApi extends ApiSpec<ApiRouteName> {
   'debug:binTest': () => Promise<Uint8Array>;
 
   'shell:open': (path: string) => Promise<void>;
+  'shell:addRecentDocument': (path: string) => Promise<void>,
 
   'file:read': (path: string) => Promise<ArrayBuffer | false>;
   'file:loadPrompt': (filters?: Filters) => Promise<string | false>;
