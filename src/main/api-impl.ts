@@ -90,7 +90,7 @@ export function registerApiHandlers() {
     },
     'file:rm': async (_, fileName) => {
       const allowedDir = process.platform === 'win32'
-        ? '~/AppDat/Local/Wournal'
+        ? '~/AppData/Local/Wournal'
         : '~/.cache/wournal/';
       if (!fileName.startsWith(allowedDir))
         throw new Error(`Cannot rm in dir: ${fileName}`);
