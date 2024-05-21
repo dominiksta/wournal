@@ -12,6 +12,7 @@ Changelog
 - Drag and drop files from native file manager into wournal to open
 - Tooltip for shortcuts in toolbar buttons (not just in menu)
 - List of recent files in menu and in taskbar
+- Zoom with Ctrl+Wheel
 
 #### Fixed
 

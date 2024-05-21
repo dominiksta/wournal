@@ -155,7 +155,10 @@ export class WournalPDFPageView {
     // the annotationlayer div is created asynchronously after the viewer is
     // already returned. this seems to be the only real way to ensure it exists
     await DSUtils.waitNotEq(
-      () => (this.viewer as any).viewer.annotationLayer.div, null
+      () => (this.viewer as any).viewer.annotationLayer, undefined, 1000
+    );
+    await DSUtils.waitNotEq(
+      () => (this.viewer as any).viewer.annotationLayer.div, null, 1000
     );
     this.setAllowTextSelection(this.allowTextSelection);
     await this.setupAnnotationEventListeners(this.viewer.viewer);

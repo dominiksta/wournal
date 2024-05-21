@@ -33,6 +33,7 @@ import openSystemDebugInfo from 'app/debug-info';
 import setupAutosave from 'document/autosave';
 import { SearchBox } from 'app/search-box';
 import RecentFiles from 'persistence/recent-files';
+import { debounce } from 'lodash';
 
 @Component.register
 export default class Wournal extends Component {
@@ -418,6 +419,39 @@ export default class Wournal extends Component {
 
   private documentRef = this.ref<HTMLDivElement>();
 
+  private setupShortcuts() {
+    const globalCmds = this.#globalCmds;
+    for (const cmd in globalCmds) {
+      const k = cmd as keyof typeof globalCmds;
+      if (!globalCmds[k].shortcut) continue;
+      this.shortcutsCtx.addShortcut(Shortcut.fromId(
+        globalCmds[k].shortcut, globalCmds[k].func
+      ));
+    }
+
+    let currentScrollZoom = 0;
+    const maybeScrollZoom = debounce((pos: {x: number, y: number}) => {
+      this.doc.value.setZoom(
+        Math.max(0.1, this.api.getZoom() + currentScrollZoom * 0.1),
+        pos
+      );
+      currentScrollZoom = 0;
+    }, 150);
+    this.subscribe(
+      rx.fromEvent(document.body, 'wheel'),
+      we => {
+        if (!we.ctrlKey) return;
+        currentScrollZoom += we.deltaY > 0 ? -1 : 1;
+        maybeScrollZoom(we);
+      }
+    )
+
+    this.onRendered(async () => {
+      this.shortcutsCtx.addEl(await this.query('#toolbar'));
+      // this.shortcutsCtx.addEl(await this.query('#document-wrapper'));
+    });
+  }
+
   render() {
     this.setAttribute('data-ui5-compact-size', 'true');
 
@@ -429,19 +463,7 @@ export default class Wournal extends Component {
       this.onRemoved(stopAutoSave);
     })
 
-    const globalCmds = this.#globalCmds;
-    for (const cmd in globalCmds) {
-      const k = cmd as keyof typeof globalCmds;
-      if (!globalCmds[k].shortcut) continue;
-      this.shortcutsCtx.addShortcut(Shortcut.fromId(
-        globalCmds[k].shortcut, globalCmds[k].func
-      ));
-    }
-
-    this.onRendered(async () => {
-      this.shortcutsCtx.addEl(await this.query('#toolbar'));
-      // this.shortcutsCtx.addEl(await this.query('#document-wrapper'));
-    });
+    this.setupShortcuts();
 
     this.subscribe(this.configCtx.partial('invertDocument'), i => {
       darkTheme.invert = i ? 'invert(1)' : '';

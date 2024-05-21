@@ -692,6 +692,7 @@ export class WournalDocument extends Component {
     zoom: number,
     keepViewportPos: { x: number, y: number } = { x: -1, y: -1 } // -1 = center
   ) {
+    if (zoom < 0.01) return;
     const zoomActual =
       zoom * DEFAULT_ZOOM_FACTOR * this.config.value.defaultZoomDocument;
 

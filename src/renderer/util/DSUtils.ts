@@ -62,7 +62,7 @@ export const DSUtils = {
     let attempts = 0;
     while (getter() === eq) {
       attempts++;
-      if (attempts >= maxAttempt) throw new Error(`var is still not ${eq}`);
+      if (attempts >= maxAttempt) throw new Error(`var is still ${eq}`);
       await new Promise(resolve => setTimeout(resolve, waitMs));
     }
     return true;

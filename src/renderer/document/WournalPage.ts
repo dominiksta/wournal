@@ -16,6 +16,7 @@ import getTextRanges from "util/get-text-ranges";
 import { Highlights } from "util/highlights";
 import { SVGUtils } from "util/SVGUtils";
 import { PDFDocumentProxy, RefProxy } from "pdfjs-dist/types/src/display/api";
+import { debounce } from "lodash";
 
 /**
  * The attribute defining a "layer" element for wournal. Really they are just
@@ -286,10 +287,10 @@ export class WournalPage {
     return Math.abs(activeIdx - thisIdx) < canFit;
   }
 
-  public async renderPDFIfNeeded() {
+  public renderPDFIfNeeded = debounce(async () => {
     if (!this.pdfViewer || !this.doc.readyToRenderPDF) return;
     return await this.pdfViewer.drawOrFree();
-  }
+  }, 500);
 
   private async maybeLoadPDFPage(
     pdfNotFoundAction?: string | false,
