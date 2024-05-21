@@ -13,6 +13,7 @@ Changelog
 - Tooltip for shortcuts in toolbar buttons (not just in menu)
 - List of recent files in menu and in taskbar
 - Zoom with Ctrl+Wheel
+- Notify on new updates
 
 #### Fixed
 

@@ -66,6 +66,7 @@ export class Settings extends Component {
             theme: rx.bind(conf.partial('theme')),
             zoomUi: rx.bind(conf.partial('zoomUI')),
             defaultZoomDocument: rx.bind(conf.partial('defaultZoomDocument')),
+            checkUpdatesOnStartup: rx.bind(conf.partial('checkUpdatesOnStartup')),
           }})
         ]),
         ui5.panel({ fields: { headerText: 'Default Tool Settings', collapsed: true }}, [
@@ -214,6 +215,7 @@ class UserInterfaceSettings extends Component {
     theme: rx.prop<ConfigDTO['theme']>(),
     zoomUi: rx.prop<number>(),
     defaultZoomDocument: rx.prop<number>(),
+    checkUpdatesOnStartup: rx.prop<boolean>(),
   }
 
   render() {
@@ -278,7 +280,18 @@ class UserInterfaceSettings extends Component {
           ]),
         ]),
       ]),
-      h.p(h.i('*: Restart Required'))
+
+      ui5.title({ fields: { level: 'H5' }}, 'Updates'),
+      h.hr(),
+      h.div(ui5.checkbox({
+        fields: {
+          checked: rx.bind(this.props.checkUpdatesOnStartup),
+          wrappingType: 'Normal',
+          text: 'Periodically Check for Updates on Startup',
+        }
+      })),
+
+      h.p(h.i('*: Restart Required')),
     ]
   }
 }

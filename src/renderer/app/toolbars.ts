@@ -378,9 +378,14 @@ export default class Toolbars extends Component {
           ]),
 
           ui5.menuItem({ fields: { text: 'Help' } }, [
-            ui5.menuItem({ fields: { ...globalCmdMenuItem('help_website') } }),
-            ui5.menuItem({ fields: { ...globalCmdMenuItem('help_about') } }),
-            ui5.menuItem({ fields: { ...globalCmdMenuItem('system_show_debug_info') } }),
+            ui5.menuItem({ fields: { icon: 'world',
+                                     ...globalCmdMenuItem('help_website') } }),
+            ui5.menuItem({ fields: { icon: 'future',
+                                     ...globalCmdMenuItem('system_update') } }),
+            ui5.menuItem({ fields: { icon: 'hint',
+                                     ...globalCmdMenuItem('system_show_debug_info') } }),
+            ui5.menuItem({ fields: { icon: 'sys-help',
+                                     ...globalCmdMenuItem('help_about') } }),
           ]),
         ]),
 

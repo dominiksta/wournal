@@ -113,6 +113,7 @@ export type AutosaveConfig = JTDDataType<typeof AutosaveConfigSchema>;
 const ConfigDTOSchema = {
   properties: {
     version: { type: 'float32' },
+    checkUpdatesOnStartup: { type: 'boolean' },
     theme: { enum: [
       'light', 'dark',
       'light_high_contrast', 'dark_high_contrast',
@@ -211,6 +212,14 @@ export const ConfigDTOVersioner = new DTOVersioner<ConfigDTO>({
       };
     },
 
+    // ver 0.7 -- check for updates on startup
+    // ----------------------------------------------------------------------
+    0.8: (ver0_7: any) => {
+      return {
+        ...ver0_7, version: 0.8,
+        checkUpdatesOnStartup: true,
+      };
+    },
   }
 })
 
@@ -219,6 +228,7 @@ export const CONFIG_CURRENT_VERSION = ConfigDTOVersioner.maxVersion();
 export function defaultConfig(): ConfigDTO {
   return {
     version: CONFIG_CURRENT_VERSION,
+    checkUpdatesOnStartup: true,
     // NOTE(dominiksta): While automatically inverting colors could be
     // considered unintuitive and therefore bad default behaviour, I want
     // this to be set for further development. Once wournal launches, the

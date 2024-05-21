@@ -180,7 +180,7 @@ const mkInfoBox = (openDialog: OpenDialog) => (
     content, heading, state, maxWidth,
     buttons: [
       {
-        name: 'OK', design: 'Positive', action: () => {
+        name: 'OK', design: 'Default', action: () => {
           close();
         }
       },

@@ -34,6 +34,8 @@ import setupAutosave from 'document/autosave';
 import { SearchBox } from 'app/search-box';
 import RecentFiles from 'persistence/recent-files';
 import { debounce } from 'lodash';
+import { checkDisplayUpdates, compareVersionStrings, getGithubReleases } from 'app/updater';
+import PackageJson from 'PackageJson';
 
 @Component.register
 export default class Wournal extends Component {
@@ -550,6 +552,9 @@ export default class Wournal extends Component {
     // this.api.createTestPages();
     this.doc.value.undoStack.clear();
 
+    if (this.configCtx.value.checkUpdatesOnStartup)
+      checkDisplayUpdates(this.dialog.openDialog);
+
     return [
       Toolbars.t({
         fields: { id: 'toolbar' },
@@ -944,6 +949,28 @@ export default class Wournal extends Component {
       human_name: 'System Debug Information',
       func: () => openSystemDebugInfo(this.dialog.openDialog),
     },
+
+    'system_update': {
+      human_name: 'Check for Updates',
+      func: async () => {
+        const closePleaseWait = this.dialog.pleaseWait('Fetching Updates');
+        const releases = await getGithubReleases();
+        closePleaseWait();
+        if (releases === false) {
+          this.dialog.infoBox(
+            'Error',
+            'Could not fetch updates. Perhaps there is no internet connection?',
+            'Error',
+          )
+        } else {
+          if (compareVersionStrings(PackageJson.version, releases[0].ver) >= 0) {
+            this.dialog.infoBox('Information', 'No updates available');
+          } else {
+            checkDisplayUpdates(this.dialog.openDialog, releases, true);
+          }
+        }
+      }
+    }
   });
 
   static styles = style.sheet({

@@ -69,6 +69,7 @@ export const GlobalCommandId = [
   'search_box_hide',
 
   'system_show_debug_info',
+  'system_update',
 
   // 'layer_new',
   // 'layer_current_delete',
