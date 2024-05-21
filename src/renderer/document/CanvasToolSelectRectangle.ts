@@ -37,8 +37,8 @@ export class CanvasToolSelectRectangle extends CanvasTool {
         this.toolUseStartPage.toolLayer.style.cursor = "crosshair";
         break;
       case "selecting":
-        LOG.error("onMouseDown called in selecting state - " +
-          "state set incorrectly?")
+        throw new Error("onMouseDown called in selecting state - " +
+          "state set incorrectly?");
         break;
     }
   }

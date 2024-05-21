@@ -253,6 +253,7 @@ export class WournalDocument extends Component {
 
   private readonly listeners = {
     'mouseup': this.onMouseUp.bind(this),
+    'mouseleave': this.onMouseUp.bind(this),
     'mousedown': this.onMouseDown.bind(this),
     'mousemove': this.onMouseMove.bind(this),
     'contextmenu': (e: any) => e.preventDefault(),

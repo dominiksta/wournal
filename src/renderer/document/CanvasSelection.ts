@@ -112,7 +112,7 @@ export class CanvasSelection {
         break;
       case "moving":
       case "resizing":
-        LOG.error(`onMouseDown called in ${this.state} state`)
+        throw new Error(`onMouseDown called in ${this.state} state`);
         break;
     }
   }

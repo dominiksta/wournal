@@ -21,6 +21,8 @@ Changelog
 - PDF zoom preview scaling on high dpi displays
 - Occasionally opening a document would produce an error (there was a race
   condition where elements may have not existed)
+- Mouse leaving wournal while held down now properly terminates current action
+  (drawing, moving selection, etc.)
 
 ### Changed
 
