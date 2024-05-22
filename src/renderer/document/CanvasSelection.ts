@@ -232,12 +232,15 @@ export class CanvasSelection {
 
     const canvasEls = Array
       .from(this.page.activePaintLayer.children)
-      .filter(el =>
-        (el instanceof SVGGraphicsElement) &&
-        SVGUtils.rectInRect(
-          selRect, this.page.viewportDOMRectToCanvas(el.getBoundingClientRect())
-        )
-      )
+      .filter(el => {
+        if (!(el instanceof SVGGraphicsElement)) return false;
+        const elRect = this.page.viewportDOMRectToCanvas(el.getBoundingClientRect());
+        if (selRect.width < 5 && selRect.height < 5) { // "click to select"
+          return SVGUtils.rectIntersect(selRect, elRect);
+        } else { // actual rectangle
+          return SVGUtils.rectInRect(selRect, elRect);
+        }
+      })
       .map(el => CanvasElementFactory.fromSvgElem(el as SVGGraphicsElement))
 
     this.setSelectionFromElements(this.page, canvasEls);

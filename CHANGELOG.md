@@ -1,6 +1,13 @@
 Changelog
 ======================================================================
 
+`0.0.6` - _unreleased_
+----------------------------------------------------------------------
+
+### Added
+
+- Clicking on an element with the rectangle selection tool will now select it
+
 `0.0.5` - _2024-05-22_
 ----------------------------------------------------------------------
 **Support for PDF Links and Popup Notes & Many Small Things**

@@ -35,6 +35,9 @@ export class CanvasToolSelectRectangle extends CanvasTool {
         this.savedMouse.beforeSelect = { x: mouse.x, y: mouse.y }
         this.selection.init(this.toolUseStartPage);
         this.toolUseStartPage.toolLayer.style.cursor = "crosshair";
+        this.selection.selectionDisplay.setDimension(DOMRect.fromRect({
+          x: mouse.x, y: mouse.y, width: 1, height: 1,
+        }));
         break;
       case "selecting":
         throw new Error("onMouseDown called in selecting state - " +
@@ -67,13 +70,12 @@ export class CanvasToolSelectRectangle extends CanvasTool {
 
     switch (this.state) {
       case "selecting":
-        let s = DOMRect.fromRect({
+        this.selection.selectionDisplay.setDimension(DOMRect.fromRect({
           x: Math.min(mouse.x, this.savedMouse.beforeSelect.x),
           y: Math.min(mouse.y, this.savedMouse.beforeSelect.y),
           width: Math.abs(mouse.x - this.savedMouse.beforeSelect.x),
           height: Math.abs(mouse.y - this.savedMouse.beforeSelect.y),
-        });
-        this.selection.selectionDisplay.setDimension(s);
+        }));
         break;
     }
   }
