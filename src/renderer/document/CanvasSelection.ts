@@ -113,13 +113,13 @@ export class CanvasSelection {
       case "moving":
       case "resizing":
         throw new Error(`onMouseDown called in ${this.state} state`);
-        break;
     }
   }
 
   public onMouseMove(e: MouseEvent): void {
     if (this.state === "idle") return;
     e.stopPropagation();
+    this.page.refreshClientRect();
     const mouse = this.page.viewportCoordsToCanvas(e);
 
     switch (this.state) {

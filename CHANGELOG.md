@@ -24,6 +24,7 @@ Changelog
   condition where elements may have not existed)
 - Mouse leaving wournal while held down now properly terminates current action
   (drawing, moving selection, etc.)
+- Scrolling while moving a selection (#6)
 
 ### Changed
 
