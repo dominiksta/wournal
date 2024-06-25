@@ -33,6 +33,9 @@ import {
 import PackageJson from 'PackageJson';
 import { pairwise } from "util/rx";
 import { PDF_CTX_MENU } from "pdf/WournalPDFPageView";
+import { getLogger } from "util/Logging";
+
+const LOG = getLogger(__filename);
 
 @Component.register
 export class WournalDocument extends Component {
@@ -79,7 +82,7 @@ export class WournalDocument extends Component {
     });
 
     this.subscribe(this.activePage, p => {
-      console.log('active page: ', this.pages.value.indexOf(p));
+      LOG.debug('active page: ', this.pages.value.indexOf(p));
       this.renderPDFIfNeeded();
     });
 
@@ -562,7 +565,7 @@ export class WournalDocument extends Component {
       const traverse = (o: OutlineNode) => {
         const page = prev[o.pageNr - 1];
         const newIdx = curr.indexOf(page);
-        // console.debug(`${o.pageNr} -> ${newIdx + 1}`)
+        // LOG.debug(`${o.pageNr} -> ${newIdx + 1}`)
         if (newIdx === -1) {
           const selfArr = getOutlineCtx(copy, o);
           if (selfArr) selfArr.splice(selfArr.indexOf(o), 1);
@@ -615,7 +618,7 @@ export class WournalDocument extends Component {
         // filling horizontal gaps
         // --------------------------------------------------
 
-        console.log(selRects);
+        // LOG.debug(selRects);
         const yDiffPx = 5;
 
         const yBatched = selRects.map(r => r.y)
@@ -718,7 +721,7 @@ export class WournalDocument extends Component {
       x: pointAfter.x - pointBefore.x,
       y: pointAfter.y - pointBefore.y,
     }
-    // console.log(pointDiff);
+    // LOG.debug(pointDiff);
 
     const { top, left } = this.api.getScrollPos();
     this.api.scrollPos(top + pointDiff.y, left + pointDiff.x);

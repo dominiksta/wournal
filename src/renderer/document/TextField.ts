@@ -116,7 +116,7 @@ export class TextField {
 
   private onBlur() {
     this.textarea.blur();
-    // console.debug('focus shortcuts: blur textfield')
+    // LOG.debug('focus shortcuts: blur textfield')
     this.page.doc.shortcuts.focus();
   }
 
@@ -152,7 +152,7 @@ export class TextField {
 
   public focus(): void {
     requestAnimationFrame(() => {
-      // console.debug('focus textfield');
+      // LOG.debug('focus textfield');
       this.textarea.focus();
     })
   }

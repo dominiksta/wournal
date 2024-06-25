@@ -1,7 +1,10 @@
 import { inject } from "dependency-injection";
 import { AutosaveConfig } from "persistence/ConfigDTO";
 import { FileUtils } from "util/FileUtils";
+import { getLogger } from "util/Logging";
 import { WournalDocument } from "./WournalDocument";
+
+const LOG = getLogger(__filename);
 
 export const AUTOSAVE_DIR = navigator.userAgent.indexOf('Windows') !== -1
   ? '~/AppData/Local/Wournal/autosave/'
@@ -12,7 +15,7 @@ export default function setupAutosave(
   currentDoc: () => WournalDocument,
 ): () => void {
   const fs = inject('FileSystem');
-  console.log(
+  LOG.info(
     `Autosave initialized with ${cfg.intervalSeconds}s interval`
   );
 
@@ -20,7 +23,7 @@ export default function setupAutosave(
   const parseDate = (fileName: string): { fileName: string, date: Date | false } => {
     const re = /^\d\d\d\d-\d\d-\d\d_\d\d-\d\d-\d\d_/;
     if (!re.test(fileName)) {
-      console.warn(`Could not parse autosave filename: ${fileName}`);
+      LOG.warn(`Could not parse autosave filename: ${fileName}`);
       return { fileName, date: false };
     }
     const date = new Date(Date.parse(fileName.slice(0, 10)));
@@ -51,11 +54,11 @@ export default function setupAutosave(
   }
 
   const interval = setInterval(async () => {
-    console.log('Checking Autosave...');
+    LOG.info('Checking Autosave...');
 
     const doc = currentDoc();
     if (!doc.dirty) {
-      console.log('Autosave skipped because document is not dirty');
+      LOG.info('Autosave skipped because document is not dirty');
       return;
     }
 
@@ -64,34 +67,34 @@ export default function setupAutosave(
       const existing = await fs.ls(AUTOSAVE_DIR);
       if (existing.length > cfg.keepFiles) {
         // smaller (-> older) first
-        console.log(existing);
+        LOG.info(existing);
         const sorted = existing
           .map(parseDate)
           .filter(el => el.date !== false)
           .sort() as { fileName: string, date: Date }[];
         if (sorted.length <= cfg.keepFiles) {
-          console.log('No autosave files found to delete')
+          LOG.info('No autosave files found to delete')
           return;
         }
         for (const f of sorted.slice(0, sorted.length - cfg.keepFiles)) {
-          console.log(`Deleting autosave ${f.fileName}`)
+          LOG.info(`Deleting autosave ${f.fileName}`)
           await fs.rm(AUTOSAVE_DIR + f.fileName);
         }
       }
     } catch(e) {
-      console.warn(`Could not delete autosaves`, e);
+      LOG.warn(`Could not delete autosaves`, e);
     }
 
     const now = new Date();
     now.getFullYear()
     const fileName = autosaveFileName(doc);
-    console.log(`Saving autosave ${fileName}`);
+    LOG.info(`Saving autosave ${fileName}`);
     fs.write(AUTOSAVE_DIR + fileName, await doc.toFile());
 
   }, cfg.intervalSeconds * 1000) as any as number;
 
   return () => {
-    console.warn('Disabling autosave');
+    LOG.warn('Disabling autosave');
     clearInterval(interval);
   };
 }

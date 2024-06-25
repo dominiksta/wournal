@@ -15,6 +15,9 @@ import { SVGUtils } from 'util/SVGUtils';
 import getTextRanges from 'util/get-text-ranges';
 import { Highlights } from 'util/highlights';
 import { DSUtils } from 'util/DSUtils';
+import { getLogger } from 'util/Logging';
+
+const LOG = getLogger(__filename);
 
 export const PDF_CTX_MENU = new WournalPDFPageViewContextMenu();
 document.body.append(PDF_CTX_MENU);
@@ -89,7 +92,7 @@ export class WournalPDFPageView {
   }
 
   private createViewer() {
-    console.debug(`Creating PDF Viewer for Page ${this.page.pageNumber}`);
+    LOG.debug(`Creating PDF Viewer for Page ${this.page.pageNumber}`);
 
     const container = document.createElement('div');
     container.id = 'container';
@@ -128,7 +131,7 @@ export class WournalPDFPageView {
 
   public async free() {
     if (!this.viewer) return;
-    console.debug(`Freeing PDF Viewer for Page ${this.page.pageNumber}`);
+    LOG.debug(`Freeing PDF Viewer for Page ${this.page.pageNumber}`);
     this.viewer.viewer.destroy();
     this.setLoading(true);
     this.viewer = false;
@@ -145,7 +148,7 @@ export class WournalPDFPageView {
       this.viewer = this.createViewer();
       this.setLoading(false);
     }
-    console.debug(`Drawing PDF Viewer for Page ${this.page.pageNumber}`);
+    LOG.debug(`Drawing PDF Viewer for Page ${this.page.pageNumber}`);
     const resp = this.viewer.viewer.draw();
     this.needsDrawing = false;
     await resp;
@@ -366,7 +369,7 @@ export class WournalPDFPageView {
 
       annotEl.addEventListener('click', e => {
         e.preventDefault();
-        console.log('Annotation Click: ', annot)
+        LOG.info('Annotation Click: ', annot)
 
         if (!('subtype' in annot && annot.subtype === 'Link')) return;
 

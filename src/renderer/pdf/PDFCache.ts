@@ -1,6 +1,9 @@
 import { PDFDocumentProxy } from "pdfjs-dist/types/src/display/api";
 import * as pdfjs from 'pdfjs-dist';
 import { inject } from "dependency-injection";
+import { getLogger } from "util/Logging";
+
+const LOG = getLogger(__filename);
 
 const loadedPDFs: { [fileName: string]: PDFDocumentProxy } = {};
 
@@ -17,7 +20,7 @@ export const PDFCache = {
     blob: Blob, fileName: string
   ): Promise<PDFDocumentProxy> {
     if (!(fileName in loadedPDFs)) {
-      console.debug(`Loading PDF: ${fileName}`);
+      LOG.debug(`Loading PDF: ${fileName}`);
       const pdf = await pdfjs.getDocument(await blob.arrayBuffer()).promise;
       loadedPDFs[fileName] = pdf;
     }
@@ -40,7 +43,7 @@ export const PDFCache = {
     fileName: string
   ): Promise<void> {
     if (!(fileName in loadedPDFs)) return;
-    console.debug(`Freeing PDF: ${fileName}`);
+    LOG.debug(`Freeing PDF: ${fileName}`);
     const resp = await loadedPDFs[fileName].destroy();
     delete loadedPDFs[fileName];
     return resp;

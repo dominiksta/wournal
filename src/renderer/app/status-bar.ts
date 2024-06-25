@@ -159,9 +159,9 @@ class LayerEditor extends Component {
     const dialog = this.getContext(BasicDialogManagerContext);
 
     // const layers = new rx.State<any>([]);
-    // layers.subscribe(l => console.log(l.map(l => l.name)));
+    // layers.subscribe(l => LOG.info(l.map(l => l.name)));
     // setInterval(() => {
-    //   console.log(page.value.layers.value);
+    //   LOG.info(page.value.layers.value);
     // }, 1000)
     //
     return [

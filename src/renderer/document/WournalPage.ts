@@ -17,6 +17,9 @@ import { Highlights } from "util/highlights";
 import { SVGUtils } from "util/SVGUtils";
 import { PDFDocumentProxy, RefProxy } from "pdfjs-dist/types/src/display/api";
 import { debounce } from "lodash";
+import { getLogger } from "util/Logging";
+
+const LOG = getLogger(__filename);
 
 /**
  * The attribute defining a "layer" element for wournal. Really they are just
@@ -334,7 +337,7 @@ export class WournalPage {
           ref = dest[0];
         }
         const page = await (resp as PDFDocumentProxy).getPageIndex(ref) + 1;
-        console.log(`Scrolling to Linked Page: ${page}`);
+        LOG.info(`Scrolling to Linked Page: ${page}`);
         this.doc.api.scrollPage(page);
       },
       this.zoom,
@@ -441,11 +444,11 @@ export class WournalPage {
   }
 
   public setLayerVisible(name: string, visible: boolean, undoable = true) {
+    LOG.info(`set layer ${name} visible = ${visible}`);
     if (this.pdfMode !== undefined && name === 'Background' && this.pdfViewer) {
       // HACK: toggling visibility of pdf layer is not undoable
       this.pdfViewer.display.hidden = !visible;
       this.updateLayerList();
-      console.log('set visible = ', visible);
     } else {
       this._setLayerVisible(name, visible, undoable);
     }

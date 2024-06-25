@@ -36,6 +36,9 @@ import RecentFiles from 'persistence/recent-files';
 import { debounce } from 'lodash';
 import { checkDisplayUpdates, compareVersionStrings, getGithubReleases } from 'app/updater';
 import PackageJson from 'PackageJson';
+import { getLogger } from 'util/Logging';
+
+const LOG = getLogger(__filename);
 
 @Component.register
 export default class Wournal extends Component {
@@ -167,7 +170,7 @@ export default class Wournal extends Component {
           ],
         })));
         pdfNotFoundActions.push({ fileName: doc.fileName, replaceOrRemove: resp  });
-        console.log(pdfNotFoundActions);
+        LOG.info('pdfNotFoundActions', pdfNotFoundActions);
         doc = await WournalDocument.fromFile(
           this.getContext.bind(this), fileName, blob, pdfNotFoundActions
         );
@@ -191,7 +194,7 @@ export default class Wournal extends Component {
         doc.fileName = identification;
         updateTitle(doc);
         doc.isSinglePage = identification.endsWith('.svg');
-        console.log(identification, doc.isSinglePage);
+        LOG.info('new document', [ identification, doc.isSinglePage ]);
       }
     },
     createTestPages: () => {

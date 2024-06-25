@@ -1,9 +1,11 @@
 import { DOMUtils } from "../util/DOMUtils";
-import { LOG } from "../util/Logging";
+import { getLogger } from "../util/Logging";
 import { UndoAction } from "./UndoStack";
 import { CanvasElementFactory } from "./CanvasElementFactory";
 import { WournalDocument } from "./WournalDocument";
 import { CanvasElementDTO } from "./CanvasElement";
+
+const LOG = getLogger(__filename);
 
 export class UndoActionCanvasElements implements UndoAction {
 
@@ -34,7 +36,7 @@ export class UndoActionCanvasElements implements UndoAction {
     const enrich = (source: SVGGraphicsElement[]) => {
       return source.map(v => {
         if (!(v.parentNode instanceof SVGGElement)) {
-          console.warn(v);
+          LOG.warn(v);
           throw new Error(
             "could not find layer for element pushed to undo stack"
           )

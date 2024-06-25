@@ -39,7 +39,7 @@ export class UndoActionLayer implements UndoAction {
   private setListAttributes(
     list: { name: string, current: boolean, visible: boolean }[]
   ) {
-    // console.log(list);
+    // LOG.info(list);
     for (let i = 0; i < list.length; i++) {
       const layer = this.pageCanvas.children[i];
       layer.setAttribute(WOURNAL_SVG_LAYER_CURRENT_ATTR, String(list[i].current));

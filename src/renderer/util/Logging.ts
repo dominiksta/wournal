@@ -17,11 +17,13 @@ import { rx } from '@mvui/core';
    the app to also catch console.* calls in the history.
  */
 
+export type ToStringable = { toString: () => string };
+
 type Logger = {
-  debug: (msg: string, data?: object) => void,
-  info: (msg: string, data?: object) => void,
-  warn: (msg: string, data?: object) => void,
-  error: (msg: string, e?: object) => void,
+  debug: (msg: ToStringable, data?: any) => void,
+  info: (msg: ToStringable, data?: any) => void,
+  warn: (msg: ToStringable, data?: any) => void,
+  error: (msg: ToStringable, e?: any) => void,
 }
 
 type LogLevel = keyof Logger;
@@ -105,13 +107,13 @@ function getErrorName(e: any) {
 }
 
 function log(
-  level: LogLevel, msg: string, data?: object,
+  level: LogLevel, msg: ToStringable, data?: object,
 ) {
   if (data !== undefined) LOG_BUILTIN[level](msg, data);
   else LOG_BUILTIN[level](msg);
 
   const logMsg: LogMessage = {
-    time: (new Date()).toISOString(), level, msg,
+    time: (new Date()).toISOString(), level, msg: msg.toString(),
   }
   if (data !== undefined) {
     if (level === 'error') {
@@ -129,21 +131,21 @@ function log(
 }
 
 const LOG_PROD = {
-  debug: (msg: string, data?: object) => log('debug', msg, data),
-  info: (msg: string, data?: object) => log('info', msg, data),
-  warn: (msg: string, data?: object) => log('warn', msg, data),
-  error: (msg: string, data?: object) => log('error', msg, data),
+  debug: (msg: ToStringable, data?: object) => log('debug', msg, data),
+  info: (msg: ToStringable, data?: object) => log('info', msg, data),
+  warn: (msg: ToStringable, data?: object) => log('warn', msg, data),
+  error: (msg: ToStringable, data?: object) => log('error', msg, data),
 };
 
 /**
    A replacement for the console.* logging functions. See module description for
    details.
  */
-export const LOG: Logger = !environment.production ? LOG_PROD : LOG_BUILTIN;
+export const LOG: Logger = environment.production ? LOG_PROD : LOG_BUILTIN;
 
 const getLoggerSingle = (name: string, lvl: keyof Logger) => {
   return LOG === LOG_PROD
-    ? (msg: string, data?: object) => {
+    ? (msg: ToStringable, data?: object) => {
 
       // if name looks like a file path, shorten to just file name
       if (name.includes('src') && name.includes('/'))

@@ -3,6 +3,9 @@ import {
 } from "@mvui/core";
 import * as ui5 from "@mvui/ui5";
 import { DSUtils } from "util/DSUtils";
+import { getLogger } from "util/Logging";
+
+const LOG = getLogger(__filename);
 
 type ButtonDesign =
   'Default' | 'Positive' | 'Negative' | 'Transparent' | 'Emphasized' | 'Attention';
@@ -67,7 +70,7 @@ export class BasicDialog extends Component<{
   render() {
     const { buttons, heading, state, maxWidth } = this.props;
 
-    console.log(`showing dialog with heading ${DSUtils.trySerialize(heading)}`);
+    LOG.info(`showing dialog with heading ${DSUtils.trySerialize(heading)}`);
 
     const buttonTemplate = buttons.derive(btns => {
       if (btns === undefined) return [
@@ -92,8 +95,6 @@ export class BasicDialog extends Component<{
 
     const dialogRef = this.ref<ui5.types.Dialog>();
     this.onRendered(() => {
-      console.log(dialogRef.current);
-      console.log(dialogRef.current.constructor.name);
       dialogRef.current.show()
     });
 
@@ -240,6 +241,7 @@ const mkPromptInput = (openDialog: OpenDialog) => (
         {
           name: 'OK', design: 'Emphasized', action: () => {
             resolve(value.value); close();
+            LOG.info(`Input dialog closed with value '${value.value}'`);
           }
         },
         {

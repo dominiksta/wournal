@@ -78,11 +78,11 @@ export class SearchBox extends Component<{
             const found = page[nextSmallestIdx(idx, pageIdxs)];
             ret.push(found)
           }
-          // if (pageI === 2) console.debug({ pageText, pageIdxs, page, foundIdxs, ret });
+          // if (pageI === 2) LOG.debug({ pageText, pageIdxs, page, foundIdxs, ret });
           return ret;
         }
       ));
-      // console.debug(found.value);
+      // LOG.debug(found.value);
       loading.next(false);
 
       if (api.getCurrentPageNr() !== 1)
@@ -119,7 +119,7 @@ export class SearchBox extends Component<{
       }
 
       Highlights.clear('search-current');
-      // console.debug(
+      // LOG.debug(
       //   foundPage, foundPageOffset,
       //   found.value[foundPage][foundPageOffset], found.value[foundPage]
       // );
@@ -143,7 +143,7 @@ export class SearchBox extends Component<{
 
       // TODO: scroll to element
       // const topOfEl = topOfPage + elRect.y;
-      // console.log(found.value[foundPage][foundPageOffset].rect, elRect.y);
+      // LOG.info(found.value[foundPage][foundPageOffset].rect, elRect.y);
       if (foundPage !== api.getCurrentPageNr() - 1) api.scrollPos(topOfPage, 0);
     }
 
@@ -268,7 +268,6 @@ function allIndexesOf(needle: string, haystack: string): number[] {
   while (true) {
     foundIdx = haystack.indexOf(needle, foundIdx + 1);
     if (foundIdx === -1) break;
-    (ret.length % 100 == 0) && console.log(ret.length);
     ret.push(foundIdx);
   }
 

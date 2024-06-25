@@ -9,7 +9,7 @@ export class ShortcutManager {
 
   /** Focus the main shortcut context element. */
   public focus(): void {
-    // console.debug('focus shortcuts')
+    // LOG.debug('focus shortcuts')
     for (const el of this.focusEls) {
       if (el instanceof HTMLElement) el.focus();
     }

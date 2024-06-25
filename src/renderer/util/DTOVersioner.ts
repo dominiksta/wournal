@@ -1,3 +1,7 @@
+import { getLogger } from "./Logging";
+
+const LOG = getLogger(__filename);
+
 export default class DTOVersioner<T> {
 
   constructor(
@@ -39,7 +43,7 @@ export default class DTOVersioner<T> {
     if (toVersion === -1) toVersion = maxVersion;
 
     const startingVersion = getVersion(obj);
-    console.log(
+    LOG.info(
       `got ${name} version ${startingVersion}, wanted ${toVersion}`
     );
 
@@ -57,10 +61,10 @@ export default class DTOVersioner<T> {
     let newObj: object = obj;
 
     const toUpdate = versions.filter(ver => ver > startingVersion);
-    console.log(`Versions to Update: ${toUpdate}`);
+    LOG.info(`Versions to Update: ${toUpdate}`);
 
     for (const ver of toUpdate) {
-      console.log(`updating ${name} to version ${ver}`);
+      LOG.info(`updating ${name} to version ${ver}`);
       newObj = updateFunctions[ver](newObj);
     }
 

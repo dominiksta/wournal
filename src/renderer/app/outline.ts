@@ -7,6 +7,9 @@ import { ApiCtx } from 'app/api-context';
 import { DocumentCtx } from 'app/document-context';
 import { GlobalCommandsCtx } from './global-commands';
 import { customScrollbar } from 'global-styles';
+import { getLogger } from 'util/Logging';
+
+const LOG = getLogger(__filename);
 
 @Component.register
 export class OutlineContainer extends Component {
@@ -262,7 +265,7 @@ class Outline extends Component {
         } as any,
         events: {
           'click': e => {
-            console.log(`outline click ${o.title}`);
+            LOG.info(`outline click ${o.title}`);
             api.scrollPage(o.pageNr);
             findElForOutlineNode(o).focus();
             e.stopPropagation();

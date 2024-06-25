@@ -1,5 +1,8 @@
 import { boot as ui5Boot } from '@ui5/webcomponents-base/dist/Boot';
 import "@ui5/webcomponents/dist/Button.js";
+import { getLogger } from './Logging';
+
+const LOG = getLogger(__filename);
 
 /**
    This is kind of awful. When importing ui5 web components, they do not
@@ -19,10 +22,10 @@ export async function waitInitUi5() {
     await new Promise(r => setTimeout(r, 50));
     waitingFor += 50;
     if (waitingFor > 3000) {
-      console.warn('did not finish waiting for ui5');
+      LOG.warn('did not finish waiting for ui5');
       break;
     }
   }
-  console.log('ui5 boot complete');
+  LOG.info('ui5 boot complete');
   testEl.remove();
 }

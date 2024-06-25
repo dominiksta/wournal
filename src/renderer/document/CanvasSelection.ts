@@ -75,7 +75,7 @@ export class CanvasSelection {
       pos.x += (selRect.width / 2) - (buttonsRect.width / 2);
       pos.x = Math.min(pageRect.width - buttonsRect.width - 20, Math.max(0, pos.x));
       const bottom = (selRect.y - docWrapperRect.y) < (pad * 4);
-      console.log(docWrapperRect.y - selRect.y);
+      // LOG.info(docWrapperRect.y - selRect.y);
       if (bottom) pos.y += pad + selRect.height;
       else pos.y -= pad + buttonsRect.height;
 

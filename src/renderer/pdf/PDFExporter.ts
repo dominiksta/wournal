@@ -8,6 +8,9 @@ import { SVGUtils } from 'util/SVGUtils';
 import { CanvasImage } from 'document/CanvasImage';
 import { setOutline } from './set-outline';
 import { OutlineNode } from 'persistence/DocumentMeta';
+import { getLogger } from 'util/Logging';
+
+const LOG = getLogger(__filename);
 
 const AvailableFonts = ['Roboto', 'Roboto Mono'] as const;
 type AvailableFont = 'Roboto' | 'Roboto Mono';
@@ -26,10 +29,6 @@ export default class PDFExporter {
 
   private readonly fs = inject('FileSystem');
 
-  constructor() {
-
-  }
-
   async exportDocument(doc: WournalDocument): Promise<ArrayBuffer> {
     const pdfDocuments: { [fileName: string]: PDFEmbeddedPage[] } = {};
     const ret = await PDFDocument.create();
@@ -37,7 +36,7 @@ export default class PDFExporter {
     const fonts = await this.embedFonts(ret);
 
     for (const page of doc.pages.value) {
-      console.log(`exporting page ${doc.pages.value.indexOf(page)}`);
+      LOG.info(`exporting page ${doc.pages.value.indexOf(page)}`);
       const pdfPage = PDFPage.create(ret);
       const pageProps = page.getPageProps();
       pdfPage.setSize(pageProps.width, pageProps.height);
@@ -82,7 +81,7 @@ export default class PDFExporter {
             pdfPage.moveTo(0, pdfPage.getHeight());
             if (el instanceof SVGRectElement) continue;
             if (!(el instanceof SVGPathElement)) {
-              console.warn(
+              LOG.warn(
                 `Unsupported SVG Element in Background Export: ${el.constructor}`
               );
               continue;
@@ -108,7 +107,7 @@ export default class PDFExporter {
               const style = canvasText.getFontStyle();
               const weight = canvasText.getFontWeight();
               if (AvailableFonts.indexOf(family as any) === -1) {
-                console.warn(`Font Not Available: ${family}`);
+                LOG.warn(`Font Not Available: ${family}`);
                 return fonts.Roboto[style][weight];
               }
               return (fonts as any)[family][style][weight];
@@ -156,7 +155,7 @@ export default class PDFExporter {
               height: canvasImg.rect.height,
             });
           } else {
-            console.error(el);
+            LOG.error(el);
             throw new Error('Unsupported Svg Element!');
           }
         }
@@ -168,9 +167,9 @@ export default class PDFExporter {
 
     await setOutline(ret, doc.meta.value.outline);
 
-    console.log('Creating PDF ArrayBuffer...');
+    LOG.info('Creating PDF ArrayBuffer...');
     const uint8array = await ret.save()
-    console.log('Done Creating PDF ArrayBuffer');
+    LOG.info('Done Creating PDF ArrayBuffer');
     return uint8array.buffer.slice(
       uint8array.byteOffset, uint8array.byteLength + uint8array.byteOffset
     );

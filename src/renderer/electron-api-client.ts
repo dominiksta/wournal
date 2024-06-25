@@ -1,4 +1,7 @@
+import { getLogger } from 'util/Logging';
 import { ApiRouteNames, ElectronApi } from '../main/api';
+
+const LOG = getLogger(__filename);
 
 export let ApiClient: ElectronApi = {} as any;
 
@@ -27,9 +30,9 @@ function mkApiClient() {
     ApiClient[routeName] = (...args: any[]) => {
       const promise = window.electron.invoke(routeName, ...args);
       promise.then((val: any) => {
-        console.log(
+        LOG.info(
           `Electron API call: ${routeName}\n`,
-          args, '\n', val instanceof ArrayBuffer ? 'ArrayBuffer' : val
+          [ args, val instanceof ArrayBuffer ? 'ArrayBuffer' : val ]
         )
       })
       return promise

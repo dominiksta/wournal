@@ -166,9 +166,6 @@ export default class Toolbars extends Component {
               fields: {
                 icon: 'scissors', startsSection: true,
                 ...globalCmdMenuItem('selection_cut')
-              },
-              events: {
-                click: console.log,
               }
             }),
             ui5.menuItem({

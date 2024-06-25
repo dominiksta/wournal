@@ -32,7 +32,7 @@ export const DOMUtils = {
 
   insertNodeBeforeIndex: function(node: Node, parent: Node, idx: number) {
     const c = parent.childNodes;
-    // console.log(idx, c.length, parent.childNodes[idx-1]);
+    // LOG.info(idx, c.length, parent.childNodes[idx-1]);
     console.assert(idx >= 0 && idx < c.length + 1, `${idx}, ${c.length}`);
     if (idx === c.length) parent.appendChild(node);
     else if (idx === 0 && parent.firstChild) parent.insertBefore(node, parent.firstChild);

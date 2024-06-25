@@ -1,5 +1,8 @@
 import { rx } from "@mvui/core";
+import { getLogger } from "util/Logging";
 import { WournalDocument } from "./WournalDocument";
+
+const LOG = getLogger(__filename);
 
 export interface UndoAction {
   undo(doc: WournalDocument): void;
@@ -31,7 +34,7 @@ export class UndoStack {
     this.undoable.push(action);
     if (this.undoable.length > MAX_UNDO_ACTIONS)
       this.undoable.splice(0, 1)
-    // console.debug('Undoable action pushed', action);
+    // LOG.debug('Undoable action pushed', action);
     this.notifyAvailable();
   }
 
@@ -40,7 +43,7 @@ export class UndoStack {
     let action = this.undoable.pop();
     action.undo(this.doc);
     this.redoable.push(action);
-    // console.debug('Undo:', action);
+    // LOG.debug('Undo:', action);
     this.notifyAvailable();
   }
 
@@ -49,12 +52,12 @@ export class UndoStack {
     let action = this.redoable.pop();
     action.redo(this.doc);
     this.undoable.push(action);
-    // console.debug('Redo:', action);
+    // LOG.debug('Redo:', action);
     this.notifyAvailable();
   }
 
   public clear(): void {
-    console.debug('Undo stack cleared');
+    LOG.debug('Undo stack cleared');
     this.redoable = [];
     this.undoable = [];
     this.notifyAvailable();

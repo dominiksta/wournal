@@ -4,9 +4,12 @@ import * as ui5 from '@mvui/ui5';
 import PackageJson from 'PackageJson';
 import { sanitize } from "dompurify";
 import { marked } from "marked";
+import { getLogger } from "util/Logging";
 
 const GITHUB_REPO_NAME = 'dominiksta/wournal';
 const REMIND_AFTER_DAYS = 2;
+
+const LOG = getLogger('updater');
 
 export async function checkDisplayUpdates(
   openDialog: OpenDialog,
@@ -97,16 +100,16 @@ export function compareVersionStrings(va: string, vb: string): number {
 }
 
 export async function getGithubReleases(): Promise<Release[] | false> {
-  console.log('Fetching Github releases');
+  LOG.info('Fetching Github releases');
   let resp: Response;
   try {
     resp = await fetch(`https://api.github.com/repos/${GITHUB_REPO_NAME}/releases`);
     if (resp.status !== 200) {
-      console.warn(resp);
+      LOG.warn('HTTP ' + resp.status, resp);
       return false;
     }
   } catch (e) {
-    console.warn(e);
+    LOG.warn('HTTP Error', e);
     return false;
   }
 
@@ -120,7 +123,7 @@ export async function getGithubReleases(): Promise<Release[] | false> {
     }));
 
   const ret = releases.sort((a, b) => compareVersionStrings(a.ver, b.ver)).reverse();
-  console.log(
+  LOG.info(
     `Got latest release: ${releases[0].ver}, ` +
     `current version: ${PackageJson.version}`
   );

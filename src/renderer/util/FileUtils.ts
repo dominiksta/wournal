@@ -1,4 +1,6 @@
-import { LOG } from "./Logging";
+import { getLogger } from "./Logging";
+
+const LOG = getLogger(__filename);
 
 export const FileUtils = {
   /** 'Download' given `text` as a UTF-8 file with `filename`. */
@@ -159,7 +161,7 @@ export const FileUtils = {
   firstSvgElFromXmlFileString: function(s: string): SVGSVGElement {
     let parser = new DOMParser();
     let xmlDoc = parser.parseFromString(s, "image/svg+xml");
-    console.warn(xmlDoc.firstElementChild);
+    LOG.warn(xmlDoc.firstElementChild);
     return xmlDoc.firstElementChild as SVGSVGElement;
   },
 
@@ -196,13 +198,13 @@ export const FileUtils = {
         parts[i] = parts[i][0];
       }
       let start = parts.slice(0, parts.length - 2).join(sep);
-      console.log(start, start.length);
+      LOG.info(start, start.length);
       if (start.length > 10)
         start = '...' + sep + path.split(sep)[parts.length - 2];
 
       return start + sep + parts[parts.length - 1];
     } catch (e) {
-      console.warn(`oopsie when shortening path: ${path}`, e);
+      LOG.warn(`oopsie when shortening path: ${path}`, e);
       return path;
     }
   },
