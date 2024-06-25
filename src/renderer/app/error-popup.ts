@@ -3,13 +3,33 @@ import * as ui5 from '@mvui/ui5';
 import environment from 'environment';
 import PackageJson from 'PackageJson';
 import { DSUtils } from 'util/DSUtils';
-import { getLogHistory } from 'util/Logging';
+import { getLogHistoryText } from 'util/Logging';
+import * as ErrorStackParser from 'error-stack-parser';
+import { SourceMapConsumer } from 'source-map';
+
+(SourceMapConsumer as any).initialize({
+  'lib/mappings.wasm': 'res/source-map/mappings.wasm'
+});
+
+async function getMainSourceMap(): Promise<SourceMapConsumer> {
+  const map = await (await fetch('script/main.js.map')).text();
+  return new Promise(resolve => {
+    SourceMapConsumer.with(map, null, consumer => resolve(consumer));
+  })
+}
+
+let mainSourceMap: SourceMapConsumer | undefined = undefined;
 
 @Component.register
 export class ErrorPopup extends Component {
 
   private readonly dialogRef = this.ref<ui5.types.Dialog>();
   private readonly error = new rx.State<any>(null);
+
+  constructor() {
+    super();
+    if (!mainSourceMap) getMainSourceMap().then(map => mainSourceMap = map);
+  }
 
   async show(error: any) {
     this.error.next(error);
@@ -27,7 +47,7 @@ export class ErrorPopup extends Component {
 
     this.setAttribute('data-ui5-compact-size', 'true');
 
-    const displayCopied = new rx.State(false);
+    const displayCopied = new rx.State(false, 'ErrorPopup:displayCopied');
     const errString = this.error.derive(errorDetails);
 
     return [
@@ -139,6 +159,59 @@ const prettyStack = (stack: any) => {
   }
 }
 
+const parseMapStack = (e: Error) => {
+  try {
+    const stack = ErrorStackParser.parse(e);
+    if (!mainSourceMap) return [
+      '<Source map was not downloaded yet!>',
+      ...stack.map(frame => frame.toString()),
+    ];
+
+    try {
+      interface Pos {
+        file: string,
+        function: string,
+        line?: number,
+        column?: number,
+      }
+
+      const shortenFile = (f: string) =>
+        f.startsWith('webpack://') ? f.slice(10) : f;
+
+      const parsed: Pos[] = stack.map(frame => {
+        if (frame.lineNumber && frame.columnNumber) {
+          const mapped = mainSourceMap.originalPositionFor({
+            line: frame.lineNumber,
+            column: frame.columnNumber,
+          });
+          return {
+            function: frame.functionName, file: shortenFile(mapped.source),
+            column: mapped.column, line: mapped.line,
+          };
+        } else {
+          return {
+            function: frame.functionName, file: shortenFile(frame.fileName),
+            line: undefined, column: undefined,
+          };
+        }
+      });
+
+      return parsed.map(pos => (
+        `${pos.file} [${pos.function}] at ${pos.line ?? '?'}:${pos.column ?? '?'}`
+      ));
+
+    } catch {
+      return [
+        '<Could not map stack!>',
+        ...stack.map(frame => frame.toString()),
+      ];
+    }
+
+  } catch {
+    return [ '<Could not parse stack!>', e.stack ];
+  }
+}
+
 const { trySerialize, checkSerialize } = DSUtils;
 
 function errorDetails(error: any): string {
@@ -166,6 +239,7 @@ function errorDetails(error: any): string {
         ret['error']['message'] = error.message;
         ret['error']['cause'] = checkSerialize(error.cause);
         ret['error']['stack'] = prettyStack(error.stack);
+        ret['error']['stackParsed'] = parseMapStack(error);
       }
       for (const key of Object.keys(error)) {
         ret['error'][key] = checkSerialize((error as any)[key]);
@@ -176,10 +250,7 @@ function errorDetails(error: any): string {
   } catch { }
 
   try {
-    ret['logs'] = getLogHistory().map(
-      l => `${l.time} [${l.level}]: ${trySerialize(l.msg)}` +
-        (l.data !== undefined ? ` -- ${trySerialize(l.data)}` : '')
-    );
+    ret['logs'] = getLogHistoryText();
   } catch {
     ret['logs'] = '<Could Not Get Logs>';
   }

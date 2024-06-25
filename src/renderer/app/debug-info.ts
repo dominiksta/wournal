@@ -1,7 +1,7 @@
 import { Component, h, rx } from "@mvui/core";
 import { OpenDialog } from "common/dialog-manager";
 import * as ui5 from '@mvui/ui5';
-import { getLogHistory } from "util/Logging";
+import { getLogHistoryText } from "util/Logging";
 import environment from "environment";
 import PackageJson from 'PackageJson';
 
@@ -15,7 +15,7 @@ const trySerialize = (data: any): string | '<Not Serializable>' => {
 }
 
 export default function openSystemDebugInfo(openDialog: OpenDialog) {
-  const displayCopied = new rx.State(false);
+  const displayCopied = new rx.State(false, 'openSystemDebugInfo:displayCopied');
 
   const sysInfo = (withLogs = true) => JSON.stringify({
     buildInfo: {
@@ -25,12 +25,7 @@ export default function openSystemDebugInfo(openDialog: OpenDialog) {
       production: environment.production,
       userAgent: navigator.userAgent,
     },
-    logs: withLogs
-      ? getLogHistory().map(
-        l => `${l.time} [${l.level}]: ${trySerialize(l.msg)}` +
-          (l.data !== undefined ? ` -- ${trySerialize(l.data)}` : '')
-      )
-      : '<Omitted By User>',
+    logs: withLogs ? getLogHistoryText() : '<Omitted By User>',
   }, null, 2);
 
   openDialog(close => ({
@@ -107,6 +102,18 @@ export default function openSystemDebugInfo(openDialog: OpenDialog) {
           sysInfo()
         )
       ),
+
+      !environment.production && ui5.button(
+        {
+          fields: { design: 'Negative' },
+          events: {
+            click: () => {
+              throw new Error('Error for Testing');
+            }
+          }
+        },
+        'Generate Error For Testing',
+      )
     ],
 
     buttons: [{ name: 'Close', action: close }]

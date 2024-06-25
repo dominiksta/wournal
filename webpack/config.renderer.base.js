@@ -29,6 +29,10 @@ module.exports = {
     modules: [path.resolve(__dirname, '../src/renderer'), 'node_modules'],
     alias: {
       PackageJson: path.resolve(__dirname, '../package.json'),
+    },
+    fallback: {
+      'path': require.resolve('path-browserify'),
+      'fs': false,
     }
   },
 };

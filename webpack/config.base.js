@@ -21,7 +21,7 @@ module.exports = {
       'WOURNAL_ENV.buildTime': JSON.stringify(new Date().toISOString()),
     }),
   ],
-  node: { __dirname: false, __filename: false },
+  node: { __dirname: false, __filename: true },
   // living life on the edge
   performance: {
     hints: false,

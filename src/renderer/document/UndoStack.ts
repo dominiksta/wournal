@@ -16,8 +16,8 @@ export class UndoStack {
     private doc: WournalDocument
   ) { }
 
-  public redoAvailable = new rx.State(false);
-  public undoAvailable = new rx.State(false);
+  public redoAvailable = new rx.State(false, 'UndoStack:redoAvailable');
+  public undoAvailable = new rx.State(false, 'UndoStack:undoAvailable');
 
   private notifyAvailable() {
     if (this.undoAvailable.value !== this.undoable.length > 0)

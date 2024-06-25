@@ -3,7 +3,7 @@ const path = require('path');
 const base = require('./config.base');
 
 module.exports = {
-  devtool: 'inline-source-map',
+  devtool: 'eval-source-map',
   mode: 'development',
   target: 'electron-preload',
   entry: './src/main/preload.ts',

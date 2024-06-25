@@ -49,8 +49,8 @@ export default class Wournal extends Component {
   public shortcutsCtx = this.provideContext(ShortcutsCtx, new ShortcutManager());
 
   private readonly outlineRef = this.ref<OutlineContainer>();
-  private hideSideBar = new rx.State(true);
-  private hideSearchBox = new rx.State(true);
+  private hideSideBar = new rx.State(true, 'Wournal:hideSideBar');
+  private hideSearchBox = new rx.State(true, 'Wournal:hideSearchBox');
   private searchBoxRef = this.ref<SearchBox>();
 
   private toast = this.provideContext(ToastCtx, {
@@ -412,10 +412,14 @@ export default class Wournal extends Component {
   }
 
   private doc = this.provideContext(
-    DocumentCtx, new rx.State(WournalDocument.create(this.getContext.bind(this)))
+    DocumentCtx,
+    new rx.State(
+      WournalDocument.create(this.getContext.bind(this)),
+      'Wournal:doc'
+    )
   );
 
-  private settingsOpen = new rx.State(false);
+  private settingsOpen = new rx.State(false, 'Wournal:settingsOpen');
 
   private dialog = this.provideContext(BasicDialogManagerContext);
 

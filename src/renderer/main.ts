@@ -6,11 +6,13 @@ import Wournal from "wournal";
 import './electron-api-client';
 import { ApiClient } from "./electron-api-client";
 import { ErrorPopup } from "app/error-popup";
-import { overwriteConsoleLogFunctions } from "util/Logging";
+import { getLogger, setupLogging } from "util/Logging";
 import { waitInitUi5 } from "util/ui5-boot";
 import { ConfigRepositoryLocalStorage } from "persistence/ConfigRepositoryLocalStorage";
 
-overwriteConsoleLogFunctions();
+setupLogging();
+
+const LOG = getLogger(__filename);
 
 {
   const errorDialog = new ErrorPopup();
@@ -54,9 +56,9 @@ async function maybeLoadArgvDoc() {
 }
 
 window.electron.on["window:close"](async () => {
-  console.log('OS attempting to close window');
+  LOG.info('OS attempting to close window');
   if (!(await wournal.api.promptClosingUnsaved())) {
-    console.log('Closing Window');
+    LOG.info('Closing Window');
     ApiClient["window:destroy"]();
   }
 })
@@ -75,6 +77,7 @@ async function main() {
 
   document.body.appendChild(wournal);
   maybeLoadArgvDoc();
+  LOG.info('Startup Complete')
 }
 
 main();

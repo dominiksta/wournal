@@ -1,4 +1,5 @@
 import environment from "environment";
+import { rx } from '@mvui/core';
 
 /**
    Use `LOG` instead of the the console.* logging functions. Example: Instead of
@@ -23,7 +24,7 @@ type Logger = {
   error: (msg: string, e?: object) => void,
 }
 
-type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+type LogLevel = keyof Logger;
 
 type LogMessage = {
   time: string, // ISO format
@@ -35,11 +36,8 @@ type LogMessage = {
 const LOG_HISTORY_LENGTH = 200;
 let LOG_HISTORY_CURRENT = 0;
 const LOG_HISTORY: LogMessage[] = new Array(LOG_HISTORY_LENGTH);
-/**
-   Get a history of logs. This only works in production (see module
-   description).
- */
-export function getLogHistory(): LogMessage[] {
+
+function getLogHistory(): LogMessage[] {
   const ret: LogMessage[] = [];
   for (let i = 0; i < LOG_HISTORY_LENGTH; i++) {
     const msg = LOG_HISTORY[(LOG_HISTORY_CURRENT + i) % LOG_HISTORY_LENGTH];
@@ -49,6 +47,35 @@ export function getLogHistory(): LogMessage[] {
     ret.push({ ...msg, data: data })
   }
   return ret;
+}
+
+/**
+   Get a history of logs. This only works in production (see module
+   description).
+ */
+export const getLogHistoryText = (): string[] => {
+  const lvlOut: { [Prop in keyof Logger]: string } =
+    { 'info': 'INF', 'debug': 'DBG', 'warn': 'WRN', 'error': 'ERR' };
+
+  const pad = (s: number) => s.toString().padStart(2, '0');
+
+  return getLogHistory().map(
+    l => {
+      const d = new Date(l.time);
+
+      return (
+        d.getUTCFullYear().toString().slice(2) + '-' +
+        pad(d.getUTCMonth()) + '-' +
+        pad(d.getUTCDate()) + ' ' +
+        pad(d.getUTCHours()) + ':' +
+        pad(d.getUTCMinutes()) + ':' +
+        pad(d.getUTCSeconds()) + ' ' +
+        lvlOut[l.level] + ' ' +
+        checkSerializable(l.msg) +
+        (l.data !== undefined ? ` -- ${checkSerializable(l.data)}` : '')
+      );
+    }
+  )
 }
 
 const LOG_BUILTIN: Logger = {
@@ -68,6 +95,8 @@ function checkSerializable<T>(obj: T): T | NotSerializable {
     return { not_serializable: e };
   }
 }
+
+const isScalar = (x: any) => typeof x !== 'object' && typeof x !== 'function';
 
 function getErrorName(e: any) {
   if (e instanceof Error && e.name !== 'Error') return e.name;
@@ -110,10 +139,34 @@ const LOG_PROD = {
    A replacement for the console.* logging functions. See module description for
    details.
  */
-export const LOG: Logger = environment.production ? LOG_PROD : LOG_BUILTIN;
+export const LOG: Logger = !environment.production ? LOG_PROD : LOG_BUILTIN;
+
+const getLoggerSingle = (name: string, lvl: keyof Logger) => {
+  return LOG === LOG_PROD
+    ? (msg: string, data?: object) => {
+
+      // if name looks like a file path, shorten to just file name
+      if (name.includes('src') && name.includes('/'))
+        name = name.slice(name.lastIndexOf('/') + 1, name.lastIndexOf('.'));
+
+      const args: any = [`[${name}] ${msg}`];
+      if (data !== undefined) args.push(data);
+      return LOG[lvl].apply(console, args);
+    }
+    : LOG[lvl];
+}
+
+export const getLogger = (name: string): Logger => {
+  return {
+    debug: getLoggerSingle(name, 'debug'),
+    info: getLoggerSingle(name, 'info'),
+    warn: getLoggerSingle(name, 'warn'),
+    error: getLoggerSingle(name, 'error'),
+  }
+}
 
 /** Overwrite built-in console.log functions to point to `LOG`. */
-export function overwriteConsoleLogFunctions() {
+function overwriteConsoleLogFunctions() {
   const w = window as any;
   if (LOG === LOG_PROD) {
     w.console.orig = LOG_BUILTIN;
@@ -125,4 +178,60 @@ export function overwriteConsoleLogFunctions() {
   }
 
   LOG.info('Logging initialized');
+}
+
+function setupMvuiStateLogging() {
+  rx.State.loggingCallback = (name, prev, next) => {
+    const prevScalar = isScalar(prev);
+    const nextScalar = isScalar(prev);
+    const msg = `[State Change] <${name}>`;
+
+    if (!prevScalar && !nextScalar) {
+      LOG.debug(msg);
+    } else {
+      LOG.debug(msg, {
+        prev: prevScalar ? prev : `[${typeof prev}]`,
+        next: nextScalar ? next : `[${typeof next}]`,
+      });
+    }
+  };
+}
+
+function maybeShorten(s: string, len: number = 20): string {
+  if (s.length > 20) return s.slice(0, 20) + '...';
+  else return s;
+}
+
+function logAllClicks() {
+  window.onclick = (e: MouseEvent) => {
+    const path = e.composedPath().filter(
+      el => (
+        el instanceof HTMLElement &&
+          (
+            el.tagName.includes('-') || // custom element
+            el.innerText || el.title
+          )
+      )
+    ) as HTMLElement[];
+
+    if (path[0].tagName.includes('WOURNAL-DOCUMENT')) return;
+
+    const pathStr = path.map(el => {
+      let ret = el.tagName.toLowerCase();
+      if (el.innerText)
+        ret += ` [${maybeShorten(el.innerText.replace('\n', ' '))}]`;
+      else if (el.title)
+        ret += ` [${maybeShorten(el.title)}]`;
+      return ret
+    });
+
+    LOG.debug(`[Click] ${pathStr.join(' > ')}`);
+  }
+}
+
+
+export function setupLogging() {
+  overwriteConsoleLogFunctions();
+  setupMvuiStateLogging();
+  logAllClicks();
 }

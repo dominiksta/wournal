@@ -17,10 +17,10 @@ export class SearchBox extends Component<{
 
   render() {
     const searchText = new rx.State('');
-    const searchIdx = new rx.State<number>(0);
-    const loading = new rx.State(false);
-    const active = new rx.State(false);
-    const matchCase = new rx.State(false);
+    const searchIdx = new rx.State<number>(0, 'SearchBox:searchIdx');
+    const loading = new rx.State(false, 'SearchBox:loading');
+    const active = new rx.State(false, 'SearchBox:active');
+    const matchCase = new rx.State(false, 'SearchBox:matchCase');
 
     const doc = this.getContext(DocumentCtx);
     const api = this.getContext(ApiCtx);
@@ -32,7 +32,7 @@ export class SearchBox extends Component<{
     })
 
     let activeSearchText: string | false = false;
-    const found = new rx.State<SearchText[][]>([]);
+    const found = new rx.State<SearchText[][]>([], 'SearchBox:found');
     const foundLen = found.derive(
       found => found.map(page => page.length).reduce((a, b) => a + b, 0)
     );

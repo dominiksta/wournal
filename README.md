@@ -49,7 +49,7 @@ thing still missing is an *Android version*.
   - [ ] Android Version with Cordova or Capacitor
   - [x] Stack Trace & Bug Report Dialog
   - [x] Auto Saves
-  - [ ] Single Click to Select
+  - [x] Single Click to Select
   - [ ] Polish Icon (especially lower resolution versions)
   - [ ] Simple Website with some Documentation with GitHub Pages
 
@@ -63,7 +63,7 @@ thing still missing is an *Android version*.
   - [ ] Set Default Paper Style
   - [ ] Vertical Space Tool
   - [ ] Rotate Selection
-  - [ ] Notify Update & Display Changelog
+  - [x] Notify Update & Display Changelog
 
   **(Probably/Maybe) After 1.0**
 
@@ -74,6 +74,7 @@ thing still missing is an *Android version*.
   - [ ] Import XOJ (from Xournal)
   - [ ] Import Annotations from a PDF (at least a bit)
   - [ ] Apply New Page Style to All Pages
+  - [ ] Laser Pointer
   - [ ] Custom "Sticker" or "Element" Collections (like Google Material Icons or
         Cisco Networking Diagram Thingies)
   - [ ] Page Thumbnails in Left Panel

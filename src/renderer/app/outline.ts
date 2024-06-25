@@ -15,7 +15,7 @@ export class OutlineContainer extends Component {
   public add() { this.outlineRef.current.add() }
 
   render() {
-    const editMode = new rx.State(false);
+    const editMode = new rx.State(false, 'OutlineContainer:editMode');
     const globalCmds = this.getContext(GlobalCommandsCtx);
 
     return [
@@ -116,7 +116,7 @@ class Outline extends Component {
   render() {
     const { editMode } = this.props;
     const doc = this.getContext(DocumentCtx);
-    const outline = new rx.State<OutlineNode[]>([]);
+    const outline = new rx.State<OutlineNode[]>([], 'Outline:outline');
 
     {
       // HACK: maybe we want a "synchronous switchmap" in mvui?
@@ -132,8 +132,9 @@ class Outline extends Component {
     const dialog = this.getContext(BasicDialogManagerContext);
     const api = this.getContext(ApiCtx);
 
-    const focus =
-      new rx.State<{ o: OutlineNode, el: ui5.types.TreeItemCustom } | false>(false);
+    const focus = new rx.State<{
+      o: OutlineNode, el: ui5.types.TreeItemCustom
+    } | false>(false, 'Outline:focus');
     const focusIsFirst = focus.derive(f => {
       if (f === false) return true;
       return getOutlineCtx(f.o).selfChildren.indexOf(f.o) === 0;
