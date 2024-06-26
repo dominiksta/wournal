@@ -44,8 +44,10 @@ function getLogHistory(): LogMessage[] {
   for (let i = 0; i < LOG_HISTORY_LENGTH; i++) {
     const msg = LOG_HISTORY[(LOG_HISTORY_CURRENT + i) % LOG_HISTORY_LENGTH];
     if (msg === undefined) continue;
-    let data: any = '<Not Serializable>';
-    try { data = JSON.stringify(msg.data) } catch {}
+    let data: any = undefined;
+    if (msg.data !== undefined)
+      try { data = `${JSON.stringify(msg.data)}`.replaceAll('"', "'") }
+      catch { data = '<Not Serializable>' }
     ret.push({ ...msg, data: data })
   }
   return ret;
@@ -99,6 +101,11 @@ function checkSerializable<T>(obj: T): T | NotSerializable {
 }
 
 const isScalar = (x: any) => typeof x !== 'object' && typeof x !== 'function';
+
+function maybeSerialize(obj: any): string {
+  if (isScalar(obj)) return obj.toString();
+  return JSON.stringify(checkSerializable(obj));
+}
 
 function getErrorName(e: any) {
   if (e instanceof Error && e.name !== 'Error') return e.name;
@@ -186,7 +193,7 @@ function setupMvuiStateLogging() {
   rx.State.loggingCallback = (name, prev, next) => {
     const prevScalar = isScalar(prev);
     const nextScalar = isScalar(prev);
-    const msg = `[State Change] <${name}>`;
+    const msg = `[state-change] <${name}>`;
 
     if (!prevScalar && !nextScalar) {
       LOG.debug(msg);
@@ -199,8 +206,12 @@ function setupMvuiStateLogging() {
   };
 }
 
+// ----------------------------------------------------------------------
+// setup
+// ----------------------------------------------------------------------
+
 function maybeShorten(s: string, len: number = 20): string {
-  if (s.length > 20) return s.slice(0, 20) + '...';
+  if (s.length > 20) return s.slice(0, len) + '...';
   else return s;
 }
 
@@ -227,13 +238,42 @@ function logAllClicks() {
       return ret
     });
 
-    LOG.debug(`[Click] ${pathStr.join(' > ')}`);
+    LOG.debug(`[click] ${pathStr.join(' > ')}`);
   }
 }
-
 
 export function setupLogging() {
   overwriteConsoleLogFunctions();
   setupMvuiStateLogging();
   logAllClicks();
+}
+
+
+// ----------------------------------------------------------------------
+// helpers
+// ----------------------------------------------------------------------
+
+export function logFunction<T extends Function>(
+  f: T,
+  name?: string,
+  log: (msg: string) => void = LOG.debug,
+  logCall: (name: string, args: any[]) => void = (n, args) => log(
+    `${n}(${args.map(maybeSerialize).join(', ')})`
+  ),
+): T {
+  let orig = f;
+  return ((...args: any[]) => {
+    logCall(name ?? f.name, args);
+    return orig.apply(orig, args);
+  }) as any as T;
+}
+
+export function logObject<T extends { [key: string]: Function }>(
+  o: T,
+  name?: string,
+  log: (msg: string) => void = getLogger(name).debug,
+  logCall?: (name: string, args: any[]) => void,
+): T {
+  for (const key in o) o[key] = logFunction(o[key], undefined, log, logCall);
+  return o;
 }

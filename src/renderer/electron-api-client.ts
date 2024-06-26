@@ -30,7 +30,7 @@ function mkApiClient() {
     ApiClient[routeName] = (...args: any[]) => {
       const promise = window.electron.invoke(routeName, ...args);
       promise.then((val: any) => {
-        LOG.info(
+        LOG.debug(
           `Electron API call: ${routeName}\n`,
           [ args, val instanceof ArrayBuffer ? 'ArrayBuffer' : val ]
         )

@@ -8,6 +8,11 @@ Changelog
 
 - Clicking on an element with the rectangle selection tool will now select it
 
+### Fixed
+
+- Significantly improved logging. While this not technically a bugfix, it should
+  help reproducing and fixing future bugs.
+
 `0.0.5` - _2024-05-22_
 ----------------------------------------------------------------------
 **Support for PDF Links and Popup Notes & Many Small Things**

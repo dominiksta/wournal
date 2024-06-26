@@ -161,7 +161,7 @@ export const FileUtils = {
   firstSvgElFromXmlFileString: function(s: string): SVGSVGElement {
     let parser = new DOMParser();
     let xmlDoc = parser.parseFromString(s, "image/svg+xml");
-    LOG.warn(xmlDoc.firstElementChild);
+    // LOG.warn(xmlDoc.firstElementChild);
     return xmlDoc.firstElementChild as SVGSVGElement;
   },
 
@@ -198,7 +198,7 @@ export const FileUtils = {
         parts[i] = parts[i][0];
       }
       let start = parts.slice(0, parts.length - 2).join(sep);
-      LOG.info(start, start.length);
+      // LOG.info(start, start.length);
       if (start.length > 10)
         start = '...' + sep + path.split(sep)[parts.length - 2];
 

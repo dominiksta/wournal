@@ -27,5 +27,6 @@ export async function getPDFOutline(doc: PDFDocumentProxy): Promise<OutlineNode[
 
   let ret: OutlineNode[] = [];
   for (const r of resp) ret.push(await format(r));
+  LOG.debug('Got PDF Outline', ret);
   return ret;
 }

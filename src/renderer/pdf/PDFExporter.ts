@@ -2,12 +2,13 @@ import { inject } from 'dependency-injection';
 import { CanvasPath } from 'document/CanvasPath';
 import { CanvasText } from 'document/CanvasText';
 import { WournalDocument } from 'document/WournalDocument';
-import { PDFDocument, PDFPage, RGB, ColorTypes, LineCapStyle, PDFFont, PDFEmbeddedPage, PDFImage } from 'pdf-lib';
+import {
+  PDFDocument, PDFPage, RGB, ColorTypes, LineCapStyle, PDFFont,
+  PDFEmbeddedPage, PDFImage
+} from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
-import { SVGUtils } from 'util/SVGUtils';
 import { CanvasImage } from 'document/CanvasImage';
 import { setOutline } from './set-outline';
-import { OutlineNode } from 'persistence/DocumentMeta';
 import { getLogger } from 'util/Logging';
 
 const LOG = getLogger(__filename);

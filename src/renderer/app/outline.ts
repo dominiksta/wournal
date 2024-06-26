@@ -222,6 +222,7 @@ class Outline extends Component {
         'Delete Bookmark?',
         `Are you sure you want to delete the bookmark "${o.title}"?`
       ))) return;
+      LOG.info(`Removing bookmark '${o.title}' at page ${o.pageNr}`);
       const arr = getOutlineCtx(o).selfChildren;
       const idx = arr.indexOf(o);
       arr.splice(arr.indexOf(o), 1);
@@ -235,6 +236,7 @@ class Outline extends Component {
     this.add = async () => {
       const pageNr = api.getCurrentPageNr();
       const title = await dialog.promptInput('Add Bookmark');
+      LOG.info(`Adding bookmark '${title}' at page ${pageNr}`);
       if (!title) return;
       const newO: OutlineNode = { title, pageNr, expanded: false, children: [] };
       if (outline.value.length === 0 || !focus.value) {

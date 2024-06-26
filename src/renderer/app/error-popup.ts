@@ -3,9 +3,11 @@ import * as ui5 from '@mvui/ui5';
 import environment from 'environment';
 import PackageJson from 'PackageJson';
 import { DSUtils } from 'util/DSUtils';
-import { getLogHistoryText } from 'util/Logging';
+import { getLogger, getLogHistoryText } from 'util/Logging';
 import * as ErrorStackParser from 'error-stack-parser';
 import { SourceMapConsumer } from 'source-map';
+
+const LOG = getLogger(__filename);
 
 (SourceMapConsumer as any).initialize({
   'lib/mappings.wasm': 'res/source-map/mappings.wasm'
@@ -32,6 +34,7 @@ export class ErrorPopup extends Component {
   }
 
   async show(error: any) {
+    LOG.error('Displaying uncaught error');
     this.error.next(error);
     try {
       await new Promise(requestAnimationFrame);
@@ -176,7 +179,7 @@ const parseMapStack = (e: Error) => {
       }
 
       const shortenFile = (f: string) =>
-        f.startsWith('webpack://') ? f.slice(10) : f;
+        f.startsWith('webpack://wournal') ? f.slice(10) : f;
 
       const parsed: Pos[] = stack.map(frame => {
         if (frame.lineNumber && frame.columnNumber) {

@@ -81,8 +81,8 @@ export class WournalDocument extends Component {
       p.display.classList.add('active');
     });
 
-    this.subscribe(this.activePage, p => {
-      LOG.debug('active page: ', this.pages.value.indexOf(p));
+    this.subscribe(this.activePage, _ => {
+      // LOG.debug('active page: ', this.pages.value.indexOf(p));
       this.renderPDFIfNeeded();
     });
 
@@ -831,6 +831,7 @@ export class WournalDocument extends Component {
   }
 
   private onMouseDown(e: MouseEvent) {
+    LOG.debug(`Using tool ${(this.currentTool.value as any).constructor.name}`);
     (document.activeElement instanceof HTMLElement) && document.activeElement.blur();
     e.preventDefault();
     if (this.activePage) this.activePage.value.refreshClientRect();

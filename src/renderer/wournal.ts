@@ -14,7 +14,7 @@ import { ShortcutsCtx } from 'app/shortcuts-context';
 import { WournalApi } from 'api';
 import { ApiCtx } from 'app/api-context';
 import { DocumentCtx } from 'app/document-context';
-import { GlobalCommandsCtx } from 'app/global-commands';
+import { GlobalCommand, GlobalCommandIdT, GlobalCommandsCtx } from 'app/global-commands';
 import { CanvasToolName } from 'document/CanvasTool';
 import { CanvasToolFactory } from 'document/CanvasToolFactory';
 import { StatusBar } from 'app/status-bar';
@@ -26,7 +26,7 @@ import { ApiClient } from 'electron-api-client';
 import { inject } from 'dependency-injection';
 import About from 'app/about';
 import { FileNotFoundError } from 'pdf/PDFCache';
-import { ConfigDTOVersioner } from 'persistence/ConfigDTO';
+import { CanvasToolStrokeWidth, ConfigDTOVersioner } from 'persistence/ConfigDTO';
 import PDFExporter from 'pdf/PDFExporter';
 import { OutlineContainer } from 'app/outline';
 import openSystemDebugInfo from 'app/debug-info';
@@ -36,7 +36,8 @@ import RecentFiles from 'persistence/recent-files';
 import { debounce } from 'lodash';
 import { checkDisplayUpdates, compareVersionStrings, getGithubReleases } from 'app/updater';
 import PackageJson from 'PackageJson';
-import { getLogger } from 'util/Logging';
+import { getLogger, logFunction, logObject } from 'util/Logging';
+import { PageProps } from 'document/WournalPage';
 
 const LOG = getLogger(__filename);
 
@@ -58,16 +59,17 @@ export default class Wournal extends Component {
 
   private toast = this.provideContext(ToastCtx, {
     open: async (msg: string) => {
+      LOG.debug(`Showing Toast Message: ${msg}`);
       const toast = await this.query<ui5.types.Toast>('#toast');
       toast.innerText = msg;
       toast.show();
     }
   });
 
-  public api: WournalApi = this.provideContext(ApiCtx, {
+  public api: WournalApi = this.provideContext(ApiCtx, logObject({
     // document
     // ----------------------------------------------------------------------
-    saveDocumentPromptSinglePage: async (defaultIdentification) => {
+    saveDocumentPromptSinglePage: async (defaultIdentification: string) => {
       const doc = this.doc.value
       if (doc.pages.value.length > 1) {
         this.dialog.infoBox(
@@ -87,7 +89,7 @@ export default class Wournal extends Component {
       await this.api.saveDocument(resp);
       return resp;
     },
-    saveDocumentPromptMultiPage: async (defaultIdentification) => {
+    saveDocumentPromptMultiPage: async (defaultIdentification: string) => {
       const resp = await this.fileSystem.savePrompt(defaultIdentification, [
         { extensions: ['woj'], name: 'Wournal File (Multi-Page) (.woj)' },
         { extensions: ['*'], name: 'All Files' },
@@ -96,7 +98,7 @@ export default class Wournal extends Component {
       await this.api.saveDocument(resp);
       return resp;
     },
-    saveDocument: async (identification) => {
+    saveDocument: async (identification: string) => {
       const doc = this.doc.value;
       await this.fileSystem.write(identification, await doc.toFile());
       doc.fileName = identification;
@@ -118,7 +120,7 @@ export default class Wournal extends Component {
       await this.api.loadDocument(userResp);
       return true;
     },
-    loadDocument: async (fileName) => {
+    loadDocument: async (fileName: string) => {
       RecentFiles.add(fileName);
       this.doc.next(WournalDocument.create(this.getContext.bind(this)));
       const closePleaseWait = this.dialog.pleaseWait(
@@ -185,7 +187,7 @@ export default class Wournal extends Component {
       this.shortcutsCtx.focus();
       return true;
     },
-    newDocument: async (props, identification) => {
+    newDocument: async (props: PageProps, identification: string) => {
       if (await this.api.promptClosingUnsaved()) return;
       const doc = WournalDocument.create(this.getContext.bind(this), props);
       await this.doc.value.free();
@@ -216,7 +218,7 @@ export default class Wournal extends Component {
     promptClosingUnsaved: async () => {
       const doc = this.doc.value;
       if (!doc.dirty) return false;
-      return new Promise(resolve => {
+      return new Promise<boolean>(resolve => {
         this.dialog.openDialog(close => ({
           heading: 'Warning',
           state: 'Warning',
@@ -278,7 +280,7 @@ export default class Wournal extends Component {
 
     // zoom
     // ----------------------------------------------------------------------
-    setZoom: (zoom) => { this.doc.value.setZoom(zoom) },
+    setZoom: (zoom: number) => { this.doc.value.setZoom(zoom) },
     getZoom: () => { return this.doc.value.getZoom(); },
     setZoomFitWidth: () => {
       const idx = this.api.getCurrentPageNr();
@@ -295,7 +297,9 @@ export default class Wournal extends Component {
     getTool: () => {
       return this.doc.value.currentTool.value.name;
     },
-    setStrokeWidth: (width) => { this.doc.value.setStrokeWidth(width) },
+    setStrokeWidth: (width: CanvasToolStrokeWidth) => {
+      this.doc.value.setStrokeWidth(width);
+    },
     setColorByName: (name: string) => {
       this.doc.value.setColor(
         this.configCtx.value.colorPalette.find(c => c.name === name).color
@@ -304,7 +308,10 @@ export default class Wournal extends Component {
     setColorByHex: (color: string) => {
       this.doc.value.setColor(color);
     },
-    setFont: (opt) => {
+    setFont: (opt: {
+      family: string, size: number, weight: 'normal' | 'bold',
+      style: 'normal' | 'italic'
+    }) => {
       const newCfg = DSUtils.copyObj(this.doc.value.toolConfig.value);
       newCfg.CanvasToolText.fontFamily = opt.family;
       newCfg.CanvasToolText.fontSize = opt.size;
@@ -324,14 +331,14 @@ export default class Wournal extends Component {
 
     // scroll
     // ----------------------------------------------------------------------
-    scrollPage: page => {
+    scrollPage: (page: number) => {
       page -= 1;
       const doc = this.doc.value; const pages = doc.pages.value;
       if (page < 0 || page >= pages.length) return;
       doc.activePage.next(pages[page]);
       doc.activePage.value.display.scrollIntoView();
     },
-    scrollPos: (top, left) => {
+    scrollPos: (top: number, left: number) => {
       this.documentRef.current.scrollTop = top;
       this.documentRef.current.scrollLeft = left;
     },
@@ -344,25 +351,25 @@ export default class Wournal extends Component {
 
     // layers
     // ----------------------------------------------------------------------
-    newLayer: (name) => {
+    newLayer: (name: string) => {
       this.doc.value.activePage.value.addLayer(name);
     },
-    setActiveLayer: (name) => {
+    setActiveLayer: (name: string) => {
       this.doc.value.activePage.value.setActivePaintLayer(name);
     },
     getLayerStatus: () => {
       return this.doc.value.activePage.value.layers.value;
     },
-    setLayerVisible: (name, visible) => {
+    setLayerVisible: (name: string, visible: boolean) => {
       return this.doc.value.activePage.value.setLayerVisible(name, visible);
     },
-    deleteLayer: (name) => {
+    deleteLayer: (name: string) => {
       return this.doc.value.activePage.value.deleteLayer(name);
     },
-    moveLayer: (name, direction) => {
+    moveLayer: (name: string, direction: 'up' | 'down') => {
       return this.doc.value.activePage.value.moveLayer(name, direction);
     },
-    renameLayer: (name, newName) => {
+    renameLayer: (name: string, newName: string) => {
       this.doc.value.activePage.value.renameLayer(name, newName);
     },
 
@@ -374,7 +381,7 @@ export default class Wournal extends Component {
     getPageCount: () => {
       return this.doc.value.pages.value.length;
     },
-    setPageProps: props => {
+    setPageProps: (props: PageProps) => {
       this.doc.value.activePage.value.setPageProps(props);
     },
     setPagePropsPrompt: async () => {
@@ -384,23 +391,23 @@ export default class Wournal extends Component {
       );
       if (resp) this.api.setPageProps(resp);
     },
-    addPage: (addAfterPageNr, props) => {
+    addPage: (addAfterPageNr: number, props: PageProps) => {
       if (!this.checkSinglePage()) return;
       this.doc.value.addNewPage(props, addAfterPageNr);
     },
-    deletePage: pageNr => {
+    deletePage: (pageNr: number) => {
       if (!this.checkSinglePage()) return;
       this.doc.value.deletePage(pageNr);
     },
-    getPageProps: pageNr => {
+    getPageProps: (pageNr: number) => {
       const page = this.doc.value.pages.value[pageNr - 1];
       return page.getPageProps();
     },
-    movePage: (pageNr, direction) => {
+    movePage: (pageNr: number, direction: 'up' | 'down') => {
       if (!this.checkSinglePage()) return;
       this.doc.value.movePage(pageNr, direction);
     },
-  })
+  }, 'wournal-api-call'))
 
   private checkSinglePage() {
     if (this.doc.value.isSinglePage) {
@@ -616,7 +623,16 @@ export default class Wournal extends Component {
     ]
   }
 
-  #globalCmds = this.provideContext(GlobalCommandsCtx, {
+
+  #logGlobalCmds(cmds: { [key in GlobalCommandIdT]: GlobalCommand }) {
+    const keys = Object.keys(cmds) as GlobalCommandIdT[];
+    const LOG = getLogger('global-cmds');
+    for (const cmd of keys)
+      cmds[cmd].func = logFunction(cmds[cmd].func, cmd, LOG.debug);
+    return cmds;
+  }
+
+  #globalCmds = this.provideContext(GlobalCommandsCtx, this.#logGlobalCmds({
     'file_new': {
       human_name: 'New File',
       func: this.api.newDocument,
@@ -978,7 +994,7 @@ export default class Wournal extends Component {
         }
       }
     }
-  });
+  }));
 
   static styles = style.sheet({
     ':host': {
@@ -1023,6 +1039,7 @@ export default class Wournal extends Component {
   });
 
   private async handleDrop(e: DragEvent) {
+    LOG.info('Handling File Drop');
     e.preventDefault();
     for (const item of e.dataTransfer.items) {
       if (item.kind !== 'file') continue;

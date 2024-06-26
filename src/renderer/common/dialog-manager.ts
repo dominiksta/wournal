@@ -154,6 +154,7 @@ function mkDialogManagerCtx() {
     const num = newDialogId();
     const close = mkCloseDialog(num);
     const { heading, content, buttons, state, maxWidth } = decl(close);
+    LOG.info(`Opening dialogue with heading '${heading}'`);
     const dialog = BasicDialog.t({
       props: { heading, buttons, num, state, maxWidth },
       events: { close }
@@ -183,6 +184,7 @@ const mkInfoBox = (openDialog: OpenDialog) => (
       {
         name: 'OK', design: 'Default', action: () => {
           close();
+          LOG.info('InfoBox acknowledged');
         }
       },
     ]
@@ -202,11 +204,13 @@ const mkPromptYesOrNo = (openDialog: OpenDialog) => (
         {
           name: 'Yes', design: 'Positive', action: () => {
             resolve(true); close();
+            LOG.info('YesOrNo confirmed');
           }
         },
         {
           name: 'No', design: 'Negative', action: () => {
             resolve(false); close();
+            LOG.info('YesOrNo denied');
           }
         },
       ]
@@ -232,6 +236,7 @@ const mkPromptInput = (openDialog: OpenDialog) => (
             keypress: e => {
               if (e.key === 'Enter') {
                 resolve(value.value); close();
+                LOG.info(`Input dialog submitted with value '${value.value}'`);
               }
             }
           }
@@ -241,12 +246,13 @@ const mkPromptInput = (openDialog: OpenDialog) => (
         {
           name: 'OK', design: 'Emphasized', action: () => {
             resolve(value.value); close();
-            LOG.info(`Input dialog closed with value '${value.value}'`);
+            LOG.info(`Input dialog submitted with value '${value.value}'`);
           }
         },
         {
           name: 'Cancel', design: 'Default', action: () => {
             resolve(undefined); close();
+            LOG.info(`Input dialog cancelled (with value '${value.value}')`);
           }
         },
       ]
@@ -260,9 +266,13 @@ const mkPleaseWait = (openDialog: OpenDialog) => (
   state?: ui5.types.Dialog['state'],
   maxWidth?: string,
 ) => {
+  LOG.info(`PleaseWait opened`);
   let _close: () => void;
   openDialog(close => {
-    _close = close;
+    _close = () => {
+      LOG.info(`PleaseWait closed`);
+      close();
+    };
     return {
       heading, maxWidth,
       state: state ?? 'Information',
