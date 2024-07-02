@@ -11,6 +11,7 @@ Changelog
 
 ### Fixed
 
+- PDF text selection in dark mode with inverted document
 - Significantly improved logging. While this not technically a bugfix, it should
   help reproducing and fixing future bugs.
 

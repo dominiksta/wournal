@@ -1,3 +1,5 @@
+import { theme } from "global-styles";
+
 // copied from from pdfjs-dist/web/pdf_viewer.css
 export let css = `
 
@@ -2265,5 +2267,9 @@ css += `
 /* its a bit scary that this seems necessary, but oh well */
 .textLayer span {
     min-height: 2em !important;
+}
+
+.canvasWrapper > canvas {
+    filter: ${theme.invert};
 }
 `;

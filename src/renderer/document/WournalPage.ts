@@ -342,7 +342,6 @@ export class WournalPage {
       },
       this.zoom,
     );
-    this.pdfViewer.display.style.filter = theme.invert;
     if (this.doc.config.value.hideAnnotations) this.pdfViewer.setAnnotationVisility(false);
     if (this.doc.pdfSelectionPassthrough.value) this.pdfViewer.setAllowTextSelection(true);
     this.setPageSize(this.pdfViewer.getDimensionsPx());

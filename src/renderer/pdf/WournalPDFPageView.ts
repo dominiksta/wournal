@@ -16,6 +16,7 @@ import getTextRanges from 'util/get-text-ranges';
 import { Highlights } from 'util/highlights';
 import { DSUtils } from 'util/DSUtils';
 import { getLogger } from 'util/Logging';
+import { theme } from 'global-styles';
 
 const LOG = getLogger(__filename);
 
@@ -269,6 +270,7 @@ export class WournalPDFPageView {
     const width = dim.width * this.zoom, height = dim.height * this.zoom;
     const center = { x: width / 2, y: height / 2 };
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.style.filter = theme.invert;
     svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
     svg.setAttribute('width', `${width}px`);
     svg.setAttribute('height', `${height}px`);
