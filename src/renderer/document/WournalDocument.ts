@@ -653,6 +653,7 @@ export class WournalDocument extends Component {
 
         // add paths
         // --------------------------------------------------
+        const pathPointDiff = 5;
 
         const added: SVGPathElement[] = [];
         for (let rect of selRects) {
@@ -660,23 +661,25 @@ export class WournalDocument extends Component {
           const strokeWidth = {
             'fine': 1, 'medium': 3, 'thick': 10,
           }[this.toolConfig.value.CanvasToolSelectText.strokeWidth];
+
+          const startX = rect.left;
+          const endX = rect.right;
+          const y = {
+            'highlight': yMid , 'strikethrough': yMid + strokeWidth / 2,
+            'underline': rect.bottom,
+          }[e.type];
+
+          let d = `M${startX} ${y}`;
+          for (let i = startX; i < endX; i+=pathPointDiff) d += ` L${i} ${y}`;
+          d += ` L${endX} ${y}`
+
           const path = SVGUtils.create('path', {
             'stroke': this.toolConfig.value.CanvasToolSelectText.color,
             'stroke-width': strokeWidth,
             ...{
-              'highlight': {
-                'd': `M${rect.left} ${yMid} L${rect.right} ${yMid}`,
-                'stroke-opacity': 0.4, 'stroke-width': rect.height,
-              },
-              'strikethrough': {
-                'd': (
-                  `M${rect.left} ${yMid + strokeWidth / 2} ` +
-                  `L${rect.right} ${yMid + strokeWidth / 2}`
-                )
-              },
-              'underline': {
-                'd': `M${rect.left} ${rect.bottom} L${rect.right} ${rect.bottom}`,
-              },
+              'highlight': { d, 'stroke-opacity': 0.4, 'stroke-width': rect.height },
+              'strikethrough': { d },
+              'underline': { d },
             }[e.type]
           });
           added.push(path);

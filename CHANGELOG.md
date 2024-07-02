@@ -8,15 +8,17 @@ Changelog
 
 - Clicking on an element with the rectangle selection tool will now select it
 - Toggle dark mode temporarily with Ctrl+I
+- PDF annotations created by right clicking selected text can now be erased
+  gradually
 
 ### Fixed
 
 - Scrolling a PDF too fast would sometimes display an error (#13)
+- A potential future issue where an update to wournal may have caused a
+  temporary error on first startup (#8)
 - PDF text selection in dark mode with inverted document
 - Significantly improved logging. While this not technically a bugfix, it should
   help reproducing and fixing future bugs.
-- A potential future issue where an update to wournal may have caused a
-  temporary error on first startup (#8)
 
 `0.0.5` - _2024-05-22_
 ----------------------------------------------------------------------
