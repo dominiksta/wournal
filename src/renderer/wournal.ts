@@ -144,7 +144,10 @@ export default class Wournal extends Component {
       }
 
       const blob = await this.fileSystem.read(fileName);
-      if (!blob) return false;
+      if (!blob) {
+        closePleaseWait();
+        return false;
+      }
       let pdfNotFoundActions: {
         fileName: string, replaceOrRemove: string | false
       }[] = [];
