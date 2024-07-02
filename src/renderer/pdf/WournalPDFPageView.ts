@@ -156,17 +156,42 @@ export class WournalPDFPageView {
     this.disableZoomPreview();
     this.doHighlightText();
 
-    // the annotationlayer div is created asynchronously after the viewer is
-    // already returned. this seems to be the only real way to ensure it exists
-    await DSUtils.waitNotEq(
-      () => (this.viewer as any).viewer.annotationLayer, undefined, 1000
-    );
-    await DSUtils.waitNotEq(
-      () => (this.viewer as any).viewer.annotationLayer.div, null, 1000
-    );
-    this.setAllowTextSelection(this.allowTextSelection);
-    await this.setupAnnotationEventListeners(this.viewer.viewer);
+    if (await this.waitAnnotationLayerRendered()) {
+      // if the annotation layer is not present here, the page has been freed
+      // before it was completely rendered. this can happen when the user
+      // scrolls around a lot.
+      this.setAllowTextSelection(this.allowTextSelection);
+      await this.setupAnnotationEventListeners(this.viewer.viewer);
+    }
     return;
+  }
+
+  private async waitAnnotationLayerRendered() {
+    // HACK: the annotationlayer div is created asynchronously after the viewer
+    // is already returned. this seems to be the only real way to ensure it
+    // exists
+    if (!(await DSUtils.waitNotEq(
+      () => typeof this.viewer === 'object' && 'viewer' in this.viewer,
+      false, 100, 100
+    ))) {
+      LOG.warn('"viewer" not in this.viewer');
+      return false;
+    }
+    if (!(await DSUtils.waitNotEq(
+      () => (this.viewer as any).viewer.annotationLayer,
+      undefined, 100, 10
+    ))) {
+      LOG.warn('"annotationLayer" not in this.viewer.viewer');
+      return false;
+    }
+    if (!(await DSUtils.waitNotEq(
+      () => (this.viewer as any).viewer.annotationLayer.div,
+      null, 100, 10
+    ))) {
+      LOG.warn('"div" not in this.viewer.viewer.annotationLayer');
+      return false;
+    }
+    return true;
   }
 
   public getDimensionsPx(): { width: number, height: number } {

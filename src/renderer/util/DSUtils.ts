@@ -57,12 +57,15 @@ export const DSUtils = {
 
   waitNotEq: async function(
     getter: () => any, eq: any = null, waitMs: number = 200,
-    maxAttempt: number = 5,
+    maxAttempt: number = 5, doThrow = false,
   ): Promise<boolean> {
     let attempts = 0;
     while (getter() === eq) {
       attempts++;
-      if (attempts >= maxAttempt) throw new Error(`var is still ${eq}`);
+      if (attempts >= maxAttempt) {
+        if (doThrow) throw new Error(`var is still ${eq}`);
+        else return false;
+      }
       await new Promise(resolve => setTimeout(resolve, waitMs));
     }
     return true;
