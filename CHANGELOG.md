@@ -15,6 +15,8 @@ Changelog
 - PDF text selection in dark mode with inverted document
 - Significantly improved logging. While this not technically a bugfix, it should
   help reproducing and fixing future bugs.
+- A potential future issue where an update to wournal may have caused a
+  temporary error on first startup (#8)
 
 `0.0.5` - _2024-05-22_
 ----------------------------------------------------------------------
