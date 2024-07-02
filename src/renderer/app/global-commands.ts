@@ -36,6 +36,7 @@ export const GlobalCommandId = [
   'page_move_up',
 
   'preferences_open',
+  'toggle_dark_mode_temp',
 
   'tool_current_default',
   'tool_pen',

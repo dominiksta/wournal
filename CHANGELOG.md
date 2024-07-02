@@ -7,6 +7,7 @@ Changelog
 ### Added
 
 - Clicking on an element with the rectangle selection tool will now select it
+- Toggle dark mode temporarily with Ctrl+I
 
 ### Fixed
 

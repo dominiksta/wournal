@@ -221,6 +221,11 @@ export default class Toolbars extends Component {
             }),
             ui5.menuItem({
               fields: {
+                icon: 'dark-mode', ...globalCmdMenuItem('toggle_dark_mode_temp')
+              }
+            }),
+            ui5.menuItem({
+              fields: {
                 icon: 'bookmark-2', ...globalCmdMenuItem('bookmark_display_toggle')
               }
             }),
@@ -597,7 +602,7 @@ export default class Toolbars extends Component {
           ToolbarButton.t({
             props: {
               img: 'icon:text-align-justified',
-              alt: `Select Text (${globalCmnds['tool_select_text'].shortcut})`,
+              alt: `Select Text in PDF (${globalCmnds['tool_select_text'].shortcut})`,
               current: isCurrentTool(CanvasToolSelectText),
             },
             events: { click: _ => api.setTool('CanvasToolSelectText') }

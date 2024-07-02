@@ -38,6 +38,7 @@ import { checkDisplayUpdates, compareVersionStrings, getGithubReleases } from 'a
 import PackageJson from 'PackageJson';
 import { getLogger, logFunction, logObject } from 'util/Logging';
 import { PageProps } from 'document/WournalPage';
+import environment from 'environment';
 
 const LOG = getLogger(__filename);
 
@@ -566,7 +567,7 @@ export default class Wournal extends Component {
     // this.api.createTestPages();
     this.doc.value.undoStack.clear();
 
-    if (this.configCtx.value.checkUpdatesOnStartup)
+    if (this.configCtx.value.checkUpdatesOnStartup && environment.production)
       checkDisplayUpdates(this.dialog.openDialog);
 
     return [
@@ -762,6 +763,24 @@ export default class Wournal extends Component {
       human_name: 'Open Preferences',
       func: () => this.settingsOpen.next(true),
       shortcut: 'Ctrl+,'
+    },
+
+    'toggle_dark_mode_temp': {
+      human_name: 'Temporarily Toggle Dark Mode',
+      func: () => {
+        const currLight = style.getTheme('wournal') === lightTheme;
+        const isHC = this.configCtx.value.theme.includes('high_contrast');
+        if (currLight) {
+          if (isHC) ui5.config.setTheme('sap_horizon_hcb');
+          else ui5.config.setTheme('sap_horizon_dark');
+          style.setTheme('wournal', darkTheme);
+        } else {
+          if (isHC) ui5.config.setTheme('sap_horizon_hcw');
+          else ui5.config.setTheme('sap_horizon');
+          style.setTheme('wournal', lightTheme);
+        }
+      },
+      shortcut: 'Ctrl+I',
     },
 
     'zoom_in': {

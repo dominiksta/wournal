@@ -12,6 +12,7 @@ import {
 } from "persistence/ConfigDTO";
 import { DSUtils } from "util/DSUtils";
 import ColorPaletteEditor, { ColorPicker } from "./color-palette-editor";
+import { GlobalCommandsCtx } from "./global-commands";
 import { ToastCtx } from "./toast-context";
 
 @Component.register
@@ -227,6 +228,7 @@ class UserInterfaceSettings extends Component {
       light_high_contrast : 'Light (High Contrast)',
       auto_high_contrast  : 'Auto (High Contrast)',
     }
+    const globalCmds = this.getContext(GlobalCommandsCtx);
 
     return [
       ui5.title({ fields: { level: 'H5' }}, 'Theme'),
@@ -253,7 +255,12 @@ class UserInterfaceSettings extends Component {
             wrappingType: 'Normal',
             text: 'Invert Document Colors for Dark Themes',
           }
-        }))
+        })),
+        h.p([
+          'Note that you can temporarily toggle dark mode using ',
+          h.i(globalCmds.toggle_dark_mode_temp.shortcut), '.'
+        ]),
+
       ]),
 
       ui5.title({ fields: { level: 'H5' }}, 'Zoom'),
@@ -435,7 +442,7 @@ class ToolDefaultSettings extends Component {
         ]),
       ]),
       h.fieldset([
-        h.legend('Select Text'),
+        h.legend('Select Text in PDF'),
         h.table([
           h.tr([
             h.td(ui5.label('Color')),
