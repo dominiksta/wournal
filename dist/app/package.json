@@ -1,6 +1,6 @@
 {
   "name": "wournal",
-  "version": "0.0.5",
+  "version": "0.0.6-dev",
   "description": "An SVG Editor for Handwritten Documents",
   "main": "main/main.js",
   "author": "dominiksta",
