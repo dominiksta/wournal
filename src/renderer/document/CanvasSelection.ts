@@ -3,6 +3,7 @@ import { LOG } from "../util/Logging";
 import { SVGUtils } from "../util/SVGUtils";
 import { CanvasElement, CanvasElementDTO } from "./CanvasElement";
 import { CanvasElementFactory } from "./CanvasElementFactory";
+import { CanvasPath } from "./CanvasPath";
 import CanvasSelectionButtons from "./CanvasSelectionButtons";
 import { CanvasSelectionDisplay } from "./CanvasSelectionDisplay";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
@@ -236,7 +237,14 @@ export class CanvasSelection {
         if (!(el instanceof SVGGraphicsElement)) return false;
         const elRect = this.page.viewportDOMRectToCanvas(el.getBoundingClientRect());
         if (selRect.width < 5 && selRect.height < 5) { // "click to select"
-          return SVGUtils.rectIntersect(selRect, elRect);
+          const dim = 7;
+          const fakeSelRect = DOMRect.fromRect({
+            x: selRect.x - dim, y: selRect.y - dim,
+            width: dim * 2, height: dim * 2,
+          });
+          return (el instanceof SVGPathElement)
+            ? new CanvasPath(el).isTouchingRect(fakeSelRect)
+            : SVGUtils.rectIntersect(selRect, elRect);
         } else { // actual rectangle
           return SVGUtils.rectInRect(selRect, elRect);
         }
