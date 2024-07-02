@@ -122,6 +122,7 @@ export default class Wournal extends Component {
       return true;
     },
     loadDocument: async (fileName: string) => {
+      LOG.info('loading file: ' + fileName);
       RecentFiles.add(fileName);
       this.doc.next(WournalDocument.create(this.getContext.bind(this)));
       const closePleaseWait = this.dialog.pleaseWait(
@@ -155,27 +156,44 @@ export default class Wournal extends Component {
         this.getContext.bind(this), fileName, blob, pdfNotFoundActions
       );
       while (doc instanceof FileNotFoundError) {
-        const file = doc.fileName;
-        const resp = await new Promise<string | false>(resolve => this.dialog.openDialog(_close => ({
-          heading: 'PDF Not Found!',
-          state: 'Error',
-          content: h.section([
-            `The PDF file "${file}" was not found. ` +
-            'It may have been moved, deleted or renamed.'
-          ]),
-          buttons: [
-            {
-              name: 'Choose other PDF', action: async () => {
-                resolve(await this.fileSystem.loadPrompt([
-                  { extensions: ['pdf'], name: 'Portable Document Format (PDF)' },
-                  { extensions: ['*'], name: 'All Files' },
-                ]));
-              }
-            },
-            { name: 'Remove PDF Background', action: () => resolve(false) },
-          ],
-        })));
-        pdfNotFoundActions.push({ fileName: doc.fileName, replaceOrRemove: resp  });
+        const pdfFile =
+          FileUtils.fileNameBase(FileUtils.fileNameNoPath(fileName)) + '.pdf';
+        const wojDir = FileUtils.fileNamePath(fileName);
+
+        const inDir = (await this.fileSystem.ls(wojDir)).map(FileUtils.fileNameNoPath);
+        LOG.info('pdf not found: ' + doc.fileName);
+        if (inDir.includes(pdfFile)) {
+          LOG.info('pdf found in same dir: ', { fileName, wojDir, pdfFile });
+          pdfNotFoundActions.push({
+            fileName: doc.fileName,
+            replaceOrRemove: wojDir + FileUtils.SEP + pdfFile,
+          });
+        } else {
+          LOG.info('prompting user for new pdf location');
+          const resp = await new Promise<string | false>(resolve => this.dialog.openDialog(
+            _close => ({
+              heading: 'PDF Not Found!',
+              state: 'Error',
+              content: h.section([
+                `The PDF file "${doc.fileName}" was not found. ` +
+                'It may have been moved, deleted or renamed.'
+              ]),
+              buttons: [
+                {
+                  name: 'Choose other PDF', action: async () => {
+                    resolve(await this.fileSystem.loadPrompt([
+                      { extensions: ['pdf'], name: 'Portable Document Format (PDF)' },
+                      { extensions: ['*'], name: 'All Files' },
+                    ]));
+                  }
+                },
+                { name: 'Remove PDF Background', action: () => resolve(false) },
+              ],
+            })
+          ));
+          pdfNotFoundActions.push({ fileName: doc.fileName, replaceOrRemove: resp });
+        }
+
         LOG.info('pdfNotFoundActions', pdfNotFoundActions);
         doc = await WournalDocument.fromFile(
           this.getContext.bind(this), fileName, blob, pdfNotFoundActions

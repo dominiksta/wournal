@@ -176,6 +176,13 @@ export const FileUtils = {
     return header + s;
   },
 
+  SEP: navigator.userAgent.includes('Windows') ? '\\' : '/',
+
+  fileNamePath: function(path: string): string {
+    const split = path.split(/[/\\]/);
+    return split.slice(0, split.length - 1).join(FileUtils.SEP);
+  },
+
   fileNameNoPath: function(path: string): string {
     const split = path.split(/[/\\]/);
     return split[split.length - 1];
@@ -190,19 +197,18 @@ export const FileUtils = {
   },
 
   shorterReadablePath: function(path: string): string {
-    const sep = navigator.userAgent.includes('Windows') ? '\\' : '/';
-    const parts = path.split(sep);
+    const parts = path.split(FileUtils.SEP);
 
     try {
       for (let i = 1; i < parts.length - 1; i++) {
         parts[i] = parts[i][0];
       }
-      let start = parts.slice(0, parts.length - 2).join(sep);
+      let start = parts.slice(0, parts.length - 2).join(FileUtils.SEP);
       // LOG.info(start, start.length);
-      if (start.length > 10)
-        start = '...' + sep + path.split(sep)[parts.length - 2];
+      if (start.length > 10) start =
+        '...' + FileUtils.SEP + path.split(FileUtils.SEP)[parts.length - 2];
 
-      return start + sep + parts[parts.length - 1];
+      return start + FileUtils.SEP + parts[parts.length - 1];
     } catch (e) {
       LOG.warn(`oopsie when shortening path: ${path}`, e);
       return path;

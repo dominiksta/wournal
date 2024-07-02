@@ -10,6 +10,8 @@ Changelog
 - Toggle dark mode temporarily with Ctrl+I
 - PDF annotations created by right clicking selected text can now be erased
   gradually
+- When a WOJ file is moved and/or renamed with its corresponding PDF, Wournal
+  will now look for the PDF with the same name and/or the same new directory.
 
 ### Fixed
 
