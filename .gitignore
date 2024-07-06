@@ -1,11 +1,7 @@
-/node_modules
+node_modules/
+.webpack/
 
-/dist/**/*
-!/dist/app/
-!/dist/app/package.json
-
-# misc
-.DS_Store
 npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+.DS_Store
+
+out/

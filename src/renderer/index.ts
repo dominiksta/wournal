@@ -10,6 +10,7 @@ import { getLogger, setupLogging } from "util/Logging";
 import { waitInitUi5 } from "util/ui5-boot";
 import { ConfigRepositoryLocalStorage } from "persistence/ConfigRepositoryLocalStorage";
 import { ConfigDTOVersioner } from "persistence/ConfigDTO";
+import environment from "environment";
 
 setupLogging();
 
@@ -42,6 +43,9 @@ const wournal = new Wournal();
 wournal.shortcutsCtx.addEl(document);
 
 async function maybeLoadArgvDoc() {
+  // electron-forge seems to run wournal with an argv of "." by default
+  if (!environment.production) return;
+
   const argv = await ApiClient["process:argv"]();
   if (argv.positionals.length > 3) return; // dev
   if (argv.positionals.length > 1) {

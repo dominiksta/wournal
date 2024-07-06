@@ -14,7 +14,7 @@ const LOG = getLogger(__filename);
 });
 
 async function getMainSourceMap(): Promise<SourceMapConsumer> {
-  const map = await (await fetch('script/main.js.map')).text();
+  const map = await (await fetch('main_window/index.js.map')).text();
   return new Promise(resolve => {
     SourceMapConsumer.with(map, null, consumer => resolve(consumer));
   })
