@@ -2,7 +2,7 @@ import { CanvasPath } from "./CanvasPath";
 import { CanvasTool } from "./CanvasTool";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
 import { WournalPage } from "./WournalPage";
-
+import imgIdleCursor from 'res/icon/custom/pen.png';
 
 export class CanvasToolPen extends CanvasTool {
   #conf() {
@@ -20,7 +20,7 @@ export class CanvasToolPen extends CanvasTool {
   /** The svg path for the current line */
   private path: CanvasPath = null;
 
-  public idleCursor = "url('res/icon/custom/pen.png'), auto";
+  public idleCursor = `url('${imgIdleCursor}'), auto`;
 
   public override canSetStrokeWidth = true;
   public override canSetColor = true;

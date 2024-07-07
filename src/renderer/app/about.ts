@@ -1,6 +1,7 @@
 import { Component, h, style } from '@mvui/core';
 import * as ui5 from '@mvui/ui5';
 import PackageJson from 'PackageJson';
+import imgLogo from 'res/icon/wournal/logo.png';
 
 @Component.register
 export default class About extends Component {
@@ -9,7 +10,7 @@ export default class About extends Component {
       ui5.link({ fields: { href: url, target: '_blank' }}, text ?? url);
 
     return [
-      h.section(h.img({ fields: { src: 'res/icon/wournal/logo.png', width: 128 }})),
+      h.section(h.img({ fields: { src: imgLogo, width: 128 }})),
 
       ui5.title('Wournal'),
 

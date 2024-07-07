@@ -18,4 +18,11 @@ export const rules: Required<ModuleOptions>['rules'] = [
       },
     },
   },
+  {
+    test: /\.(png|svg|jpe?g|gif|wasm|ttf|woff2?)$/,
+    type: 'asset/resource',
+    generator: {
+      filename: 'res/[name][hash][ext]'
+    }
+  },
 ];

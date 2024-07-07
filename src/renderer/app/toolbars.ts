@@ -24,6 +24,8 @@ import { CanvasToolImage } from "document/CanvasToolImage";
 import { CanvasToolSelectText } from "document/CanvasToolSelectText";
 import { FileUtils } from "util/FileUtils";
 import RecentFiles from "persistence/recent-files";
+import imgAutorenew from 'res/icon/material/autorenew.svg';
+import imgDefaultPen from 'res/icon/custom/default-pen.svg';
 
 @Component.register
 export default class Toolbars extends Component {
@@ -612,7 +614,7 @@ export default class Toolbars extends Component {
 
           ToolbarButton.t({
             props: {
-              img: 'img:res/icon/material/autorenew.svg',
+              img: `img:${imgAutorenew}`,
               alt: 'Reset Tool to Default',
             },
             events: {
@@ -621,7 +623,7 @@ export default class Toolbars extends Component {
           }),
           ToolbarButton.t({
             props: {
-              img: 'img:res/icon/custom/default-pen.svg',
+              img: `img:${imgDefaultPen}`,
               alt: 'Default Pen',
             },
             events: {

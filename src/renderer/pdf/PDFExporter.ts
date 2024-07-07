@@ -10,6 +10,7 @@ import fontkit from '@pdf-lib/fontkit';
 import { CanvasImage } from 'document/CanvasImage';
 import { setOutline } from './set-outline';
 import { getLogger } from 'util/Logging';
+import * as roboto from 'res/font/roboto';
 
 const LOG = getLogger(__filename);
 
@@ -209,22 +210,22 @@ export default class PDFExporter {
   private static readonly FONT_LOCATIONS: Record<AvailableFont, FontLocation> = {
     'Roboto': {
       'normal': {
-        'normal' : 'res/font/roboto/roboto-v29-latin-ext-regular.ttf',
-        'bold'   : 'res/font/roboto/roboto-v29-latin-ext-700.ttf',
+        'normal' : roboto.robotoNormalNormal,
+        'bold'   : roboto.robotoNormalBold,
       },
       'italic': {
-        'normal' : 'res/font/roboto/roboto-v29-latin-ext-italic.ttf',
-        'bold'   : 'res/font/roboto/roboto-v29-latin-ext-700italic.ttf',
+        'normal' : roboto.robotoItalicNormal,
+        'bold'   : roboto.robotoItalicBold,
       },
     },
     'Roboto Mono': {
       'normal': {
-        'normal' : 'res/font/roboto-mono/roboto-mono-v13-latin-ext-regular.ttf',
-        'bold'   : 'res/font/roboto-mono/roboto-mono-v13-latin-ext-700.ttf',
+        'normal' : roboto.robotoMonoNormalNormal,
+        'bold'   : roboto.robotoMonoNormalBold,
       },
       'italic': {
-        'normal' : 'res/font/roboto-mono/roboto-mono-v13-latin-ext-italic.ttf',
-        'bold'   : 'res/font/roboto-mono/roboto-mono-v13-latin-ext-700italic.ttf',
+        'normal' : roboto.robotoMonoItalicNormal,
+        'bold'   : roboto.robotoMonoItalicBold,
       },
     }
   };

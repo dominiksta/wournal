@@ -6,11 +6,12 @@ import { DSUtils } from 'util/DSUtils';
 import { getLogger, getLogHistoryText } from 'util/Logging';
 import * as ErrorStackParser from 'error-stack-parser';
 import { SourceMapConsumer } from 'source-map';
+import sourceMapWasm from 'res/source-map/mappings.wasm';
 
 const LOG = getLogger(__filename);
 
 (SourceMapConsumer as any).initialize({
-  'lib/mappings.wasm': 'res/source-map/mappings.wasm'
+  'lib/mappings.wasm': sourceMapWasm
 });
 
 async function getMainSourceMap(): Promise<SourceMapConsumer> {

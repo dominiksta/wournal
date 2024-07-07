@@ -4,16 +4,17 @@ import { ForkTsCheckerWebpackPlugin, plugins } from './webpack.plugins';
 import path from 'path';
 import TerserPlugin from 'terser-webpack-plugin';
 
-rules.push({
-  test: /\.css$/,
-  use: [{ loader: 'style-loader' }, { loader: 'css-loader' }],
-});
-
 export const rendererConfig: Configuration = {
   devtool: 'source-map',
   target: 'web',
   module: {
-    rules,
+    rules: [
+      ...rules,
+      {
+        test: /\.css$/,
+        use: [{ loader: 'style-loader' }, { loader: 'css-loader' }],
+      }
+    ],
   },
   plugins: [
     ...plugins,
@@ -33,7 +34,12 @@ export const rendererConfig: Configuration = {
   },
   resolve: {
     modules: ['./src/renderer', 'node_modules'],
-    extensions: ['.js', '.mjs', '.ts', '.jsx', '.tsx', '.css'],
+    extensions: [
+      '.js', '.mjs', '.ts', '.jsx', '.tsx',
+      '.css',
+      '.svg', '.png', '.jpg', '.jpeg', '.gif',
+      '.wasm',
+    ],
     alias: {
       PackageJson: path.resolve(__dirname, './package.json'),
     },

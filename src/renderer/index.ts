@@ -12,6 +12,9 @@ import { ConfigRepositoryLocalStorage } from "persistence/ConfigRepositoryLocalS
 import { ConfigDTOVersioner } from "persistence/ConfigDTO";
 import environment from "environment";
 
+import 'res/font/roboto.css';
+import 'res/font/roboto-mono.css';
+
 setupLogging();
 
 const LOG = getLogger(__filename);
