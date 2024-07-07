@@ -108,7 +108,7 @@ export class WournalPDFPageView {
       scale: this.zoom / DEFAULT_ZOOM_FACTOR * this.defaultZoom,
       eventBus: new pdfjsViewer.EventBus(),
       textLayerMode: 1,
-      isOffscreenCanvasSupported: false
+      // isOffscreenCanvasSupported: false
     });
 
     viewer.setPdfPage(this.page);

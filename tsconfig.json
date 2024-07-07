@@ -6,6 +6,7 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
 
+    "strictBindCallApply": true,
     "noImplicitAny": true,
 
     "sourceMap": true,

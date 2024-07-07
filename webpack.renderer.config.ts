@@ -2,6 +2,7 @@ import type { Configuration } from 'webpack';
 import { rules } from './webpack.rules';
 import { ForkTsCheckerWebpackPlugin, plugins } from './webpack.plugins';
 import path from 'path';
+import TerserPlugin from 'terser-webpack-plugin';
 
 rules.push({
   test: /\.css$/,
@@ -16,13 +17,20 @@ export const rendererConfig: Configuration = {
   },
   plugins: [
     ...plugins,
-    new ForkTsCheckerWebpackPlugin({
-      logger: 'webpack-infrastructure',
-      typescript: {
-        configFile: './src/renderer/tsconfig.json',
-      }
-    }),
   ],
+  optimization: {
+    minimize: true,
+    minimizer: [new TerserPlugin({
+      terserOptions: {
+        // mvui's component registration can be done via strings, but its much
+        // more convenient to use the class names
+        keep_classnames: true,
+      },
+    })],
+  },
+  cache: {
+    type: 'filesystem'
+  },
   resolve: {
     modules: ['./src/renderer', 'node_modules'],
     extensions: ['.js', '.mjs', '.ts', '.jsx', '.tsx', '.css'],

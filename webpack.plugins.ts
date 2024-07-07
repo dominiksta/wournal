@@ -16,4 +16,10 @@ export const plugins = [
     'WOURNAL_ENV.buildTime': JSON.stringify(new Date().toISOString()),
   }),
   new CopyWebpackPlugin({ patterns: [{ from: './public/res', to: 'res' }] }),
+  new ForkTsCheckerWebpackPlugin({
+    logger: 'webpack-infrastructure',
+    typescript: {
+      configFile: './src/renderer/tsconfig.json',
+    }
+  }),
 ];
