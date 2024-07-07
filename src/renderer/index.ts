@@ -19,7 +19,7 @@ setupLogging();
 
 const LOG = getLogger(__filename);
 
-{
+function setupErrorPopup() {
   const errorDialog = new ErrorPopup();
   document.body.appendChild(errorDialog);
 
@@ -30,22 +30,10 @@ const LOG = getLogger(__filename);
 
   window.addEventListener('unhandledrejection', e => {
     errorDialog.show(e.reason);
-  })
+  });
 }
 
-provideDependencies({
-  'FileSystem': FileSystemElectron,
-  'SystemClipboard': SystemClipboardElectron,
-  'ConfigRepository': ConfigRepositoryLocalStorage.getInstance(),
-})
-
-const config =
-  ConfigDTOVersioner.updateToCurrent(inject('ConfigRepository').load());
-const wournal = new Wournal();
-
-wournal.shortcutsCtx.addEl(document);
-
-async function maybeLoadArgvDoc() {
+async function maybeLoadArgvDoc(wournal: Wournal) {
   // electron-forge seems to run wournal with an argv of "." by default
   if (!environment.production) return;
 
@@ -65,15 +53,33 @@ async function maybeLoadArgvDoc() {
   }
 }
 
-window.electron.on["window:close"](async () => {
-  LOG.info('OS attempting to close window');
-  if (!(await wournal.api.promptClosingUnsaved())) {
-    LOG.info('Closing Window');
-    ApiClient["window:destroy"]();
-  }
-})
-
 async function main() {
+
+  provideDependencies({
+    'FileSystem': FileSystemElectron,
+    'SystemClipboard': SystemClipboardElectron,
+    'ConfigRepository': ConfigRepositoryLocalStorage.getInstance(),
+    'sourceLocation': await ApiClient["process:getRendererSourceDir"](),
+  })
+
+  setupErrorPopup();
+
+  console.log(inject('sourceLocation'));
+
+  const config =
+    ConfigDTOVersioner.updateToCurrent(inject('ConfigRepository').load());
+  const wournal = new Wournal();
+
+  window.electron.on["window:close"](async () => {
+    LOG.info('OS attempting to close window');
+    if (!(await wournal.api.promptClosingUnsaved())) {
+      LOG.info('Closing Window');
+      ApiClient["window:destroy"]();
+    }
+  })
+
+  wournal.shortcutsCtx.addEl(document);
+
   ApiClient['window:setZoom'](config.zoomUI);
   const l = document.createElement('div');
   l.innerText = 'loading...';
@@ -81,8 +87,9 @@ async function main() {
   await waitInitUi5();
   l.remove();
 
+
   document.body.appendChild(wournal);
-  maybeLoadArgvDoc();
+  maybeLoadArgvDoc(wournal);
   LOG.info('Startup Complete')
 }
 

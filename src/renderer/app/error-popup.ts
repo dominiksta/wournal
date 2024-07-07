@@ -7,6 +7,7 @@ import { getLogger, getLogHistoryText } from 'util/Logging';
 import * as ErrorStackParser from 'error-stack-parser';
 import { SourceMapConsumer } from 'source-map';
 import sourceMapWasm from 'res/source-map/mappings.wasm';
+import { inject } from 'dependency-injection';
 
 const LOG = getLogger(__filename);
 
@@ -15,7 +16,7 @@ const LOG = getLogger(__filename);
 });
 
 async function getMainSourceMap(): Promise<SourceMapConsumer> {
-  const map = await (await fetch('main_window/index.js.map')).text();
+  const map = await (await fetch(`${inject('sourceLocation')}/index.js.map`)).text();
   return new Promise(resolve => {
     SourceMapConsumer.with(map, null, consumer => resolve(consumer));
   })

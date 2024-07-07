@@ -17,6 +17,7 @@ import { Highlights } from 'util/highlights';
 import { DSUtils } from 'util/DSUtils';
 import { getLogger } from 'util/Logging';
 import { theme } from 'global-styles';
+import { inject } from 'dependency-injection';
 
 const LOG = getLogger(__filename);
 
@@ -101,7 +102,7 @@ export class WournalPDFPageView {
     const viewer = new pdfjsViewer.PDFPageView({
       container: container,
       id: 1,
-      imageResourcesPath: 'res/pdf-js-annotation-layer/',
+      imageResourcesPath: `${inject('sourceLocation')}/../res/pdf-js-annotation-layer/`,
       defaultViewport: this.page.getViewport({
         scale: WournalPDFPageView.DEFAULT_ZOOM_ADJUSTED * this.defaultZoom
       }),

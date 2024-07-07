@@ -3,6 +3,7 @@ import { rules } from './webpack.rules';
 import { ForkTsCheckerWebpackPlugin, plugins } from './webpack.plugins';
 import path from 'path';
 import TerserPlugin from 'terser-webpack-plugin';
+import CopyWebpackPlugin from 'copy-webpack-plugin';
 
 export const rendererConfig: Configuration = {
   devtool: 'source-map',
@@ -18,6 +19,10 @@ export const rendererConfig: Configuration = {
   },
   plugins: [
     ...plugins,
+    new CopyWebpackPlugin({ patterns: [{
+      from: './src/renderer/res/pdf-js-annotation-layer',
+      to: 'res/pdf-js-annotation-layer'
+    }]}),
   ],
   optimization: {
     minimize: true,
@@ -28,9 +33,6 @@ export const rendererConfig: Configuration = {
         keep_classnames: true,
       },
     })],
-  },
-  cache: {
-    type: 'filesystem'
   },
   resolve: {
     modules: ['./src/renderer', 'node_modules'],

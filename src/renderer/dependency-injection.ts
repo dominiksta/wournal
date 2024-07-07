@@ -6,6 +6,7 @@ type Dependencies = {
   'FileSystem': FileSystem,
   'SystemClipboard': SystemClipboard,
   'ConfigRepository': ConfigRepositoryLocalStorage,
+  'sourceLocation': string,
 };
 
 export function provideDependencies(providers: Dependencies): void {

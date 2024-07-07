@@ -102,6 +102,13 @@ export function registerApiHandlers() {
       const argv = instances.get(e.sender)!.argv;
       return parseArgs({ args: argv, ...argvParseSpec});
     },
+    'process:getRendererSourceDir': async () => {
+      // @ts-ignore
+      const entry: string = MAIN_WINDOW_WEBPACK_ENTRY;
+      return entry.endsWith('/index.html')
+        ? entry.split('/index.html')[0]
+        : entry;
+    },
 
     'window:setTitle': async (e, title) => {
       instances.get(e.sender)!.win.setTitle(title);
