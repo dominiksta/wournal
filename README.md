@@ -149,7 +149,18 @@ npm run dev
 
 ### Building
 
-```{bash}
-npm run package # build linux on linux
-npm run package:wine # # build windows through docker
+Building for Windows on GNU/Linux is possible by installing `wine` and `mono`.
+On Ubuntu, installing `win64` and `mono-complete` speifically should work.
+Building for GNU/Linux on Windows can be achieved through WSL2. See the
+[Electron Forge documentation][EFD] for details.
+
+[EFD]: https://www.electronforge.io/core-concepts/build-lifecycle
+
+```bash
+npm run package # build binary for current os
+
+npm run make # build distributables for current os
+
+npm run make -- --platform=linux # build distributables for linux
+npm run make -- --platform=win32 # build distributables for windows
 ```

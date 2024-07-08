@@ -105,9 +105,10 @@ export function registerApiHandlers() {
     'process:getRendererSourceDir': async () => {
       // @ts-ignore
       const entry: string = MAIN_WINDOW_WEBPACK_ENTRY;
-      return entry.endsWith('/index.html')
-        ? entry.split('/index.html')[0]
+      const path = entry.endsWith('index.html')
+        ? entry.split('index.html')[0]
         : entry;
+      return path.slice(0, path.length - 1);
     },
 
     'window:setTitle': async (e, title) => {

@@ -15,11 +15,10 @@
   "license": "LGPL-2.1",
   "main": ".webpack/main",
   "scripts": {
+    "dev": "npm run start",
     "start": "cross-env NODE_ENV=development electron-forge start",
     "package": "electron-forge package",
-    "make": "electron-forge make",
-    "publish": "electron-forge publish",
-    "lint": "eslint --ext .ts,.tsx ."
+    "make": "electron-forge make"
   },
   "dependencies": {
     "@mvui/core": "file:vendor/mvui/packages/core",
