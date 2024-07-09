@@ -71,5 +71,8 @@
     "ts-node": "^10.9.2",
     "typescript": "^4.9.5"
   },
+  "overrides": {
+    "canvas": "npm:dry-uninstall"
+  },
   "keywords": []
 }
