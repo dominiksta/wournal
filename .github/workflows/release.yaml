@@ -20,6 +20,12 @@ jobs:
       - name: Electron Forge Publish
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          # This is *extremely* silly, but this should fix an issue where
+          # colorette produces a stack overflow when the error output is too
+          # large. Coloring console output causes a bug because someone decided
+          # to use recursion because wouldnt that be a fun idea in a language
+          # without tail call optimization. I love the js ecosystem.
+          NO_COLOR: true
         run: npm run publish
 
   release-windows:
@@ -41,4 +47,5 @@ jobs:
       - name: Electron Forge Publish
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          NO_COLOR: true
         run: npm run publish
