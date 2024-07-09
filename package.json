@@ -19,6 +19,7 @@
     "dev": "npm run start",
     "start": "cross-env NODE_ENV=development electron-forge start",
     "package": "electron-forge package",
+    "publish": "electron-forge publish",
     "make": "electron-forge make"
   },
   "dependencies": {
@@ -48,6 +49,7 @@
     "@electron-forge/plugin-auto-unpack-natives": "^7.4.0",
     "@electron-forge/plugin-fuses": "^7.4.0",
     "@electron-forge/plugin-webpack": "^7.4.0",
+    "@electron-forge/publisher-github": "^7.4.0",
     "@electron/fuses": "^1.8.0",
     "@reforged/maker-appimage": "^3.3.2",
     "@types/dompurify": "^3.0.5",

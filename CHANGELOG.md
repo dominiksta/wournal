@@ -4,6 +4,11 @@ Changelog
 `0.0.6` - _unreleased_
 ----------------------------------------------------------------------
 
+**NOTICE**: The Windows installer has switched internally from `nsis` to
+`squirrel`. For users of the installable windows version, please **first
+uninstall the old version**, then run the new installer. Users of the windows
+portable version or GNU/Linux versions are not affected.
+
 ### Added
 
 - Clicking on an element with the rectangle selection tool will now select it

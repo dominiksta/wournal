@@ -1,11 +1,13 @@
 import type { ForgeConfig } from '@electron-forge/shared-types';
 import { MakerAppImage } from '@reforged/maker-appimage';
+import { MakerSquirrel } from '@electron-forge/maker-squirrel';
 import { MakerWix } from '@electron-forge/maker-wix';
 import { MakerZIP } from '@electron-forge/maker-zip';
 import { AutoUnpackNativesPlugin } from '@electron-forge/plugin-auto-unpack-natives';
 import { WebpackPlugin } from '@electron-forge/plugin-webpack';
 import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
+import PublisherGitHub from '@electron-forge/publisher-github';
 
 import { mainConfig } from './webpack.main.config';
 import { rendererConfig } from './webpack.renderer.config';
@@ -20,9 +22,15 @@ const config: ForgeConfig = {
   makers: [
     new MakerZIP({}, ['linux', 'win32']),
     new MakerWix({
-      appUserModelId: 'me.dominiksta.wournal',
-      upgradeCode: '4688d0da-d0d8-4255-90cb-8b05f233d909',
+      name: 'Wournal',
+      upgradeCode: '4557647c-871f-43d8-9fc4-2c0729f27e16',
+      ui: { chooseDirectory: true },
     }),
+    // new MakerSquirrel({
+    //   // iconUrl: '' TODO
+    //   setupIcon: 'src/renderer/res/icon/wournal/logo.ico',
+    // }),
+    // new MakerNSIS(),
     new MakerAppImage({
       options: {
         bin: 'Wournal',
@@ -62,6 +70,14 @@ const config: ForgeConfig = {
       [FuseV1Options.OnlyLoadAppFromAsar]: true,
     }),
   ],
+
+  publishers: [
+    new PublisherGitHub({
+      repository: { owner: 'dominiksta', name: 'wournal' },
+      draft: true,
+      tagPrefix: '',
+    })
+  ]
 };
 
 export default config;

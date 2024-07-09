@@ -1,4 +1,4 @@
-<img src="public/res/icon/wournal/logo.png" height="128" align="right"/>
+<img src="src/renderer/res/icon/wournal/logo.png" height="128" align="right"/>
 
 # Wournal
 
@@ -149,9 +149,9 @@ npm run dev
 
 ### Building
 
-Building for Windows on GNU/Linux is possible by installing `wine` and `mono`.
-On Ubuntu, installing `win64` and `mono-complete` speifically should work.
-Building for GNU/Linux on Windows can be achieved through WSL2. See the
+Building for Windows on GNU/Linux is possible by installing `wine` and
+`mono`. On Ubuntu, installing `wine64` and `mono-complete` speifically should
+work. Building for GNU/Linux on Windows can be achieved through WSL2. See the
 [Electron Forge documentation][EFD] for details.
 
 [EFD]: https://www.electronforge.io/core-concepts/build-lifecycle
@@ -161,6 +161,8 @@ npm run package # build binary for current os
 
 npm run make # build distributables for current os
 
-npm run make -- --platform=linux # build distributables for linux
-npm run make -- --platform=win32 # build distributables for windows
+# for building windows on linux/wsl (ubuntu 22.04 lts specifically)
+sudo apt install wine64 mono-complete
+npm run make -- --platform=win32 --targets=zip
+# the `wix` target can only be built on a real windows machine
 ```

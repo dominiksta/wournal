@@ -12,6 +12,8 @@ declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 // exposing node directly and (b) sanitizing all loaded svg with dompurify.
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 
+if (require('electron-squirrel-startup')) app.quit();
+
 export const instances: Map<WebContents, {
   win: BrowserWindow, pwd: string, argv: string[]
 }> = new Map();

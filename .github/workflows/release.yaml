@@ -1,0 +1,40 @@
+name: Release app
+
+on:
+  workflow_dispatch:
+
+jobs:
+
+  release-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: npm ci
+      - name: Electron Forge Publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: npm run publish
+
+  release-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: npm ci
+      # add wix toolkit to path
+      # see https://github.com/mistermicheels/current-task/blob/master/.github/workflows/build-for-windows.yml#L19
+      # see https://github.com/electron-userland/electron-wix-msi/issues/1#issuecomment-1086842461
+      - run: echo "${env:path};${env:wix}bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8
+      - name: Electron Forge Publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: npm run publish
