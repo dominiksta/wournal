@@ -19,7 +19,7 @@ jobs:
       - run: npm ci
       - name: Electron Forge Publish
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # This is *extremely* silly, but this should fix an issue where
           # colorette produces a stack overflow when the error output is too
           # large. Coloring console output causes a bug because someone decided
@@ -46,6 +46,6 @@ jobs:
       - run: echo "${env:path};${env:wix}bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8
       - name: Electron Forge Publish
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NO_COLOR: true
         run: npm run publish
