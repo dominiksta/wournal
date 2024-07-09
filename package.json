@@ -1,5 +1,6 @@
 {
   "name": "wournal",
+  "productName": "Wournal",
   "version": "0.0.6-dev",
   "description": "An SVG Editor for Handwritten Documents",
   "author": {
@@ -42,11 +43,13 @@
     "@electron-forge/maker-deb": "^7.4.0",
     "@electron-forge/maker-rpm": "^7.4.0",
     "@electron-forge/maker-squirrel": "^7.4.0",
+    "@electron-forge/maker-wix": "^7.4.0",
     "@electron-forge/maker-zip": "^7.4.0",
     "@electron-forge/plugin-auto-unpack-natives": "^7.4.0",
     "@electron-forge/plugin-fuses": "^7.4.0",
     "@electron-forge/plugin-webpack": "^7.4.0",
     "@electron/fuses": "^1.8.0",
+    "@reforged/maker-appimage": "^3.3.2",
     "@types/dompurify": "^3.0.5",
     "@types/lodash": "^4.17.6",
     "@typescript-eslint/eslint-plugin": "^5.62.0",

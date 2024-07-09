@@ -1,5 +1,6 @@
 import type { ForgeConfig } from '@electron-forge/shared-types';
-import { MakerSquirrel } from '@electron-forge/maker-squirrel';
+import { MakerAppImage } from '@reforged/maker-appimage';
+import { MakerWix } from '@electron-forge/maker-wix';
 import { MakerZIP } from '@electron-forge/maker-zip';
 import { AutoUnpackNativesPlugin } from '@electron-forge/plugin-auto-unpack-natives';
 import { WebpackPlugin } from '@electron-forge/plugin-webpack';
@@ -12,12 +13,23 @@ import { rendererConfig } from './webpack.renderer.config';
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
-    icon: 'src/renderer/res/icon/wournal/logo'
+    icon: 'src/renderer/res/icon/wournal/logo',
+    appBundleId: 'me.dominiksta.wournal',
   },
   rebuildConfig: {},
   makers: [
     new MakerZIP({}, ['linux', 'win32']),
-    // new MakerSquirrel({}),
+    new MakerWix({
+      appUserModelId: 'me.dominiksta.wournal',
+      upgradeCode: '4688d0da-d0d8-4255-90cb-8b05f233d909',
+    }),
+    new MakerAppImage({
+      options: {
+        bin: 'Wournal',
+        icon: 'src/renderer/res/icon/wournal/logo.png',
+        categories: ['Education', 'Graphics', 'Office', 'VectorGraphics']
+      },
+    }),
   ],
   plugins: [
     new AutoUnpackNativesPlugin({}),
