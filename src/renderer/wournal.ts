@@ -26,7 +26,7 @@ import { ApiClient } from 'electron-api-client';
 import { inject } from 'dependency-injection';
 import About from 'app/about';
 import { FileNotFoundError } from 'pdf/PDFCache';
-import { CanvasToolStrokeWidth, ConfigDTOVersioner } from 'persistence/ConfigDTO';
+import { CanvasToolStrokeWidth, ConfigDTO, defaultConfig } from 'persistence/ConfigDTO';
 import PDFExporter from 'pdf/PDFExporter';
 import { OutlineContainer } from 'app/outline';
 import openSystemDebugInfo from 'app/debug-info';
@@ -45,13 +45,18 @@ const LOG = getLogger(__filename);
 @Component.register
 export default class Wournal extends Component {
 
+  constructor(config: ConfigDTO) {
+    super();
+    this.configCtx.next(config);
+  }
+
   private fileSystem = inject('FileSystem');
   private confRepo = inject('ConfigRepository');
 
-  private configCtx = this.provideContext(
-    ConfigCtx, new rx.State(ConfigDTOVersioner.updateToCurrent(this.confRepo.load()))
-  );
-  public shortcutsCtx = this.provideContext(ShortcutsCtx, new ShortcutManager());
+  private configCtx =
+    this.provideContext(ConfigCtx, new rx.State(defaultConfig()));
+  public shortcutsCtx =
+    this.provideContext(ShortcutsCtx, new ShortcutManager());
 
   private readonly outlineRef = this.ref<OutlineContainer>();
   private hideSideBar = new rx.State(true, 'Wournal:hideSideBar');

@@ -9,7 +9,6 @@ import { ErrorPopup } from "app/error-popup";
 import { getLogger, setupLogging } from "util/Logging";
 import { waitInitUi5 } from "util/ui5-boot";
 import { ConfigRepositoryLocalStorage } from "persistence/ConfigRepositoryLocalStorage";
-import { ConfigDTOVersioner } from "persistence/ConfigDTO";
 import environment from "environment";
 
 import 'res/font/roboto.css';
@@ -66,9 +65,8 @@ async function main() {
 
   console.log(inject('sourceLocation'));
 
-  const config =
-    ConfigDTOVersioner.updateToCurrent(inject('ConfigRepository').load());
-  const wournal = new Wournal();
+  const config = await inject('ConfigRepository').load();
+  const wournal = new Wournal(config);
 
   window.electron.on["window:close"](async () => {
     LOG.info('OS attempting to close window');

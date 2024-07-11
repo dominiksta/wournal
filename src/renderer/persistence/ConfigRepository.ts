@@ -1,6 +1,6 @@
 import { ConfigDTO } from "./ConfigDTO";
 
-export abstract class ConfigRepository {
-  public abstract load(): ConfigDTO;
-  public abstract save(dto: ConfigDTO): void;
+export interface ConfigRepository {
+  load(): Promise<ConfigDTO>;
+  save(dto: ConfigDTO): Promise<void>;
 }
