@@ -27,6 +27,10 @@ jobs:
           # without tail call optimization. I love the js ecosystem.
           NO_COLOR: true
         run: npm run publish
+      - name: Rename Artifacts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node .github/util-scripts/rename-release-assets.js
 
   release-windows:
     runs-on: windows-latest
@@ -40,12 +44,12 @@ jobs:
         with:
           node-version: 18
       - run: npm ci
-      # add wix toolkit to path
-      # see https://github.com/mistermicheels/current-task/blob/master/.github/workflows/build-for-windows.yml#L19
-      # see https://github.com/electron-userland/electron-wix-msi/issues/1#issuecomment-1086842461
-      - run: echo "${env:path};${env:wix}bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8
       - name: Electron Forge Publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NO_COLOR: true
         run: npm run publish
+      - name: Rename Artifacts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node .github/util-scripts/rename-release-assets.js
