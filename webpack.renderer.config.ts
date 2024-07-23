@@ -24,7 +24,7 @@ export const rendererConfig: Configuration = {
       to: 'res/pdf-js-annotation-layer'
     }]}),
   ],
-  optimization: {
+  optimization: process.env.NODE_ENV !== 'development' ? {
     minimize: true,
     minimizer: [new TerserPlugin({
       terserOptions: {
@@ -33,7 +33,7 @@ export const rendererConfig: Configuration = {
         keep_classnames: true,
       },
     })],
-  },
+  } : {},
   resolve: {
     modules: ['./src/renderer', 'node_modules'],
     extensions: [
