@@ -227,6 +227,8 @@ function logAllClicks() {
       )
     ) as HTMLElement[];
 
+    if (path[0] === undefined) return; // drag outside of window
+
     if (path[0].tagName.includes('WOURNAL-DOCUMENT')) return;
 
     const pathStr = path.map(el => {
