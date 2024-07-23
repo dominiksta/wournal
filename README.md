@@ -36,7 +36,7 @@ thing still missing is an *Android version*.
 
   **Before Beta**:
 
-  - [ ] Store Config as File Instead of in LocalStorage
+  - [x] Store Config as File Instead of in LocalStorage
   - [ ] PDF Annotation with [pdf-js](https://mozilla.github.io/pdf.js/)
     - [x] Viewing & Annotating
     - [x] Highlight Text

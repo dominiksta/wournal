@@ -2,12 +2,15 @@ import { Component, h, style } from '@mvui/core';
 import * as ui5 from '@mvui/ui5';
 import PackageJson from 'PackageJson';
 import imgLogo from 'res/icon/wournal/logo.png';
+import environment from 'Shared/environment';
 
 @Component.register
 export default class About extends Component {
   render() {
     const link = (url: string, text?: string) =>
       ui5.link({ fields: { href: url, target: '_blank' }}, text ?? url);
+
+    const ver = PackageJson.version;
 
     return [
       h.section(h.img({ fields: { src: imgLogo, width: 128 }})),
@@ -18,7 +21,18 @@ export default class About extends Component {
 
       h.section(
         h.table([
-          h.tr([h.td('Version'), h.td(PackageJson.version)]),
+          h.tr([
+            h.td('Version'),
+            h.td(
+              ver +
+              (environment.pkgPortable ? ' Portable' : '') +
+              (ver.includes('dev') ? ` ${environment.gitVersion}` : '')
+            )
+          ]),
+          h.tr([
+            h.td('Build Time'),
+            h.td(new Date(environment.buildTime).toISOString())
+          ]),
           h.tr([h.td('Website'), h.td(link('https://github.com/dominiksta/wournal'))]),
           h.tr([h.td('License'), h.td(
             link(

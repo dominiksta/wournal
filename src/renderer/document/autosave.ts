@@ -7,8 +7,8 @@ import { WournalDocument } from "./WournalDocument";
 const LOG = getLogger(__filename);
 
 export const AUTOSAVE_DIR = navigator.userAgent.indexOf('Windows') !== -1
-  ? '~/AppData/Local/Wournal/autosave/'
-  : '~/.cache/wournal/autosave/';
+  ? '~/AppData/Roaming/Wournal/autosave/'
+  : '~/.cache/Wournal/autosave/';
 
 export default function setupAutosave(
   cfg: AutosaveConfig,

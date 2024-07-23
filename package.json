@@ -19,8 +19,9 @@
     "postinstall": "cd vendor/mvui && npm install",
     "dev": "npm run start",
     "start": "cross-env NODE_ENV=development electron-forge start",
+    "package:portable": "cross-env PKG_PORTABLE=true electron-forge package",
     "package": "electron-forge package",
-    "publish": "electron-forge publish",
+    "make:portable": "cross-env PKG_PORTABLE=true electron-forge make --targets=zip",
     "make": "electron-forge make"
   },
   "dependencies": {
@@ -100,12 +101,13 @@
         "nsis"
       ],
       "icon": "src/renderer/res/icon/wournal/logo.ico",
-      "publish": []
+      "publish": null
     },
     "nsis": {
       "oneClick": "false",
       "allowToChangeInstallationDirectory": true,
-      "license": "LICENSE"
+      "license": "LICENSE",
+      "publish": null
     }
   }
 }

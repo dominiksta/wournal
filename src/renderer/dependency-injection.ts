@@ -1,11 +1,11 @@
 import FileSystem from "persistence/FileSystem";
 import SystemClipboard from "util/SystemClipboard";
-import { ConfigRepositoryLocalStorage } from 'persistence/ConfigRepositoryLocalStorage';
+import { ConfigRepository } from "persistence/ConfigRepository";
 
 type Dependencies = {
   'FileSystem': FileSystem,
   'SystemClipboard': SystemClipboard,
-  'ConfigRepository': ConfigRepositoryLocalStorage,
+  'ConfigRepository': ConfigRepository,
   'sourceLocation': string,
 };
 

@@ -136,7 +136,7 @@ export class BasicDialog extends Component<{
   });
 }
 
-function mkDialogManagerCtx() {
+export function mkDialogManagerCtx() {
   const dialogs = new rx.State<ComponentTemplateElement<BasicDialog>[]>([]);
   const mkCloseDialog = (num: number) => () => {
     dialogs.next(dialogs => dialogs.filter(d => d.params.props.num !== num));

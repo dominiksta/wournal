@@ -1,7 +1,7 @@
 import { ConfigDTO, ConfigDTOVersioner, defaultConfig } from "./ConfigDTO";
 import { ConfigRepository } from "./ConfigRepository";
 
-const CONFIG_LOCALSTORAGE_KEY = "wournal_config";
+export const CONFIG_LOCALSTORAGE_KEY = "wournal_config";
 
 export class ConfigRepositoryLocalStorage implements ConfigRepository {
 

@@ -38,7 +38,7 @@ import { checkDisplayUpdates, compareVersionStrings, getGithubReleases } from 'a
 import PackageJson from 'PackageJson';
 import { getLogger, logFunction, logObject } from 'util/Logging';
 import { PageProps } from 'document/WournalPage';
-import environment from 'environment';
+import environment from 'Shared/environment';
 
 const LOG = getLogger(__filename);
 
@@ -981,6 +981,7 @@ export default class Wournal extends Component {
         'About',
         About.t(),
       ),
+      shortcut: 'Ctrl+F1',
     },
 
     'bookmark_add': {

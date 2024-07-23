@@ -1,4 +1,4 @@
-import environment from "environment";
+import environment from "Shared/environment";
 import { rx } from '@mvui/core';
 
 /**

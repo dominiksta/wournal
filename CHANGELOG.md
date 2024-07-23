@@ -19,6 +19,9 @@ Changelog
 - A potential future issue where an update to wournal may have caused a
   temporary error on first startup (#8)
 - PDF text selection in dark mode with inverted document
+- Portable versions of Wournal are now *actually* portable, in the sense that
+  they store all configuration in a subdirectory of the executable. Before
+  0.0.6, all versions of Wournal would share a system wide configuration.
 - "Please Wait" prompt would never go away when creating a new document from CLI
 - Significantly improved logging. While this not technically a bugfix, it should
   help reproducing and fixing future bugs.

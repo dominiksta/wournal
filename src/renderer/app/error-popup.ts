@@ -1,6 +1,6 @@
 import { Component, h, rx, style } from '@mvui/core';
 import * as ui5 from '@mvui/ui5';
-import environment from 'environment';
+import environment from 'Shared/environment';
 import PackageJson from 'PackageJson';
 import { DSUtils } from 'util/DSUtils';
 import { getLogger, getLogHistoryText } from 'util/Logging';

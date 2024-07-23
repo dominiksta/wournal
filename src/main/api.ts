@@ -23,6 +23,7 @@ export const ApiRouteNames = [
 
   'process:argv',
   'process:getRendererSourceDir',
+  'process:getAppDir',
 
   'window:setTitle',
   'window:destroy',
@@ -60,6 +61,7 @@ export interface ElectronApi extends ApiSpec<ApiRouteName> {
 
   'process:argv': () => Promise<ArgvParsed>;
   'process:getRendererSourceDir': () => Promise<string>;
+  'process:getAppDir': () => Promise<string>;
 
   'window:setTitle': (title: string) => Promise<void>;
   'window:destroy': () => Promise<void>;

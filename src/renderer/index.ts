@@ -1,3 +1,4 @@
+import { Component, h } from "@mvui/core";
 import { inject, provideDependencies } from "dependency-injection";
 import { BackgroundStyleT } from "document/BackgroundGenerators";
 import FileSystemElectron from "persistence/FileSystemElectron";
@@ -8,8 +9,10 @@ import { ApiClient } from "./electron-api-client";
 import { ErrorPopup } from "app/error-popup";
 import { getLogger, setupLogging } from "util/Logging";
 import { waitInitUi5 } from "util/ui5-boot";
-import { ConfigRepositoryLocalStorage } from "persistence/ConfigRepositoryLocalStorage";
-import environment from "environment";
+import environment from "Shared/environment";
+import { mkConfigRepositoryElectronFS } from "persistence/ConfigRepositoryElectronFS";
+import { mkDialogManagerCtx, OpenDialog } from "common/dialog-manager";
+import { ConfigDTO, defaultConfig } from "persistence/ConfigDTO";
 
 import 'res/font/roboto.css';
 import 'res/font/roboto-mono.css';
@@ -52,12 +55,62 @@ async function maybeLoadArgvDoc(wournal: Wournal) {
   }
 }
 
+function setupEarlyDialogs() {
+  @Component.register
+  class DialogManager extends Component {
+    public dialog = mkDialogManagerCtx();
+    render() { return [ h.div(this.dialog.dialogs) ]; }
+  }
+  const d = new DialogManager();
+  d.id = 'early-dialogs';
+  document.body.appendChild(d);
+  return d.dialog;
+}
+
+async function loadConfigOrPromptOnError(openDialog: OpenDialog) {
+  try {
+    return await inject('ConfigRepository').load();
+  } catch {
+    LOG.warn('Config was damaged');
+    return new Promise<ConfigDTO>(resolve => {
+      openDialog(close => ({
+        state: 'Warning',
+        heading: 'Broken Configuration File',
+        content: (
+          'Wournal was unable to load the configuration file. ' +
+          'It may have been damaged or lost. ' +
+          'You can either regenerate the default configuration or ' +
+          'close Wournal to attempt to fix the problem yourself.'
+        ),
+        buttons: [
+          {
+            name: 'Regenerate Default Configuration File',
+            design: 'Attention',
+            action: async () => {
+              const config = defaultConfig();
+              resolve(config);
+              await inject('ConfigRepository').save(config);
+              close();
+            }
+          },
+          {
+            name: 'Close Wournal',
+            design: 'Default',
+            action: () => { close(); ApiClient['window:destroy'](); }
+          },
+        ]
+      }));
+    });
+  }
+}
+
 async function main() {
+  const dialogs = setupEarlyDialogs();
 
   provideDependencies({
     'FileSystem': FileSystemElectron,
     'SystemClipboard': SystemClipboardElectron,
-    'ConfigRepository': ConfigRepositoryLocalStorage.getInstance(),
+    'ConfigRepository': await mkConfigRepositoryElectronFS(),
     'sourceLocation': await ApiClient["process:getRendererSourceDir"](),
   })
 
@@ -65,7 +118,7 @@ async function main() {
 
   console.log(inject('sourceLocation'));
 
-  const config = await inject('ConfigRepository').load();
+  const config = await loadConfigOrPromptOnError(dialogs.openDialog);
   const wournal = new Wournal(config);
 
   window.electron.on["window:close"](async () => {

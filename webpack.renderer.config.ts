@@ -44,6 +44,7 @@ export const rendererConfig: Configuration = {
     ],
     alias: {
       PackageJson: path.resolve(__dirname, './package.json'),
+      Shared: path.resolve(__dirname, './src'),
     },
     fallback: {
       'path': require.resolve('path-browserify'),

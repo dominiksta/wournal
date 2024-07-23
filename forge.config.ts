@@ -70,26 +70,6 @@ const config: ForgeConfig = {
       force: true,
     })
   ],
-
-  hooks: {
-    postMake: async (_, results) => {
-      const filters = [
-        'latest.yml',
-        '.Setup.',
-        '.blockmap',
-      ];
-
-      for (const result of results) {
-        console.log('before', result.artifacts);
-        result.artifacts = result.artifacts.filter(
-          a => !filters.some(f => a.includes(f))
-        );
-        console.log('after', result.artifacts);
-      }
-
-      return results;
-    }
-  }
 };
 
 export default config;

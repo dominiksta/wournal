@@ -8,7 +8,7 @@ import { instances } from './main';
 import { parseArgs } from 'node:util';
 import { argvParseSpec } from './argv';
 import { homedir } from 'os';
-import { normalize } from 'path';
+import path from 'path';
 
 type ApiImpl<T extends ApiSpec<ApiRouteName>> = {
   [K in ApiRouteName]: (e: IpcMainInvokeEvent, ...args: Parameters<T[K]>) => ReturnType<T[K]>
@@ -29,7 +29,7 @@ export function registerApiHandlers() {
     },
 
     'shell:open': async (_, path) => {
-      path = normalize(path.replace(/^~/, homedir));
+      path = path.normalize(path.replace(/^~/, homedir));
       shell.openPath(path);
     },
     'shell:addRecentDocument': async (_, path) => {
@@ -115,6 +115,8 @@ export function registerApiHandlers() {
 
       return entry;
     },
+    'process:getAppDir': async () =>
+      path.normalize(path.resolve(path.dirname(app.getAppPath()), '..', 'user')),
 
     'window:setTitle': async (e, title) => {
       instances.get(e.sender)!.win.setTitle(title);
