@@ -1,7 +1,7 @@
-import { Component, h, rx, style } from '@mvui/core';
+import { Component, h, rx, style } from '@mvuijs/core';
 import './global-styles';
 import './app/debugger';
-import * as ui5 from "@mvui/ui5";
+import * as ui5 from "@mvuijs/ui5";
 import Toolbars from 'app/toolbars';
 import { customScrollbar, darkTheme, lightTheme, theme } from "./global-styles";
 import { WournalDocument } from "document/WournalDocument";

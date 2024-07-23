@@ -1,5 +1,5 @@
-import { Component, h, http, rx, style, TemplateElementChild } from "@mvui/core";
-import * as ui5 from "@mvui/ui5";
+import { Component, h, http, rx, style, TemplateElementChild } from "@mvuijs/core";
+import * as ui5 from "@mvuijs/ui5";
 import { theme } from "global-styles";
 
 export const toolbarButtonStyle = {

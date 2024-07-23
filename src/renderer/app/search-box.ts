@@ -1,5 +1,5 @@
-import { Component, h, rx, style } from "@mvui/core";
-import * as ui5 from '@mvui/ui5';
+import { Component, h, rx, style } from "@mvuijs/core";
+import * as ui5 from '@mvuijs/ui5';
 import { SearchText } from "document/types";
 import _ from "lodash";
 import { Highlights } from "util/highlights";

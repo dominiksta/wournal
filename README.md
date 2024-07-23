@@ -142,7 +142,7 @@ fun. You should really not be scared to contribute because of this, you can
 reproduce most common React patterns in mvui.
 
 ```{bash}
-git clone --recurse-submodules https://github.com/dominiksta/wournal/
+git clone https://github.com/dominiksta/wournal/
 npm i
 npm run dev
 ```

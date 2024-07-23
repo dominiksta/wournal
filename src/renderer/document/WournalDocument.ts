@@ -13,7 +13,7 @@ import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
 import { UndoAction, UndoStack } from "./UndoStack";
 import { PageProps, WournalPage } from "./WournalPage";
 import { DEFAULT_ZOOM_FACTOR, WournalPageSize } from "./WournalPageSize";
-import { Component, h, rx, style } from "@mvui/core";
+import { Component, h, rx, style } from "@mvuijs/core";
 import { theme } from "global-styles";
 import { ShortcutManager } from "app/shortcuts";
 import { DOMUtils } from "util/DOMUtils";

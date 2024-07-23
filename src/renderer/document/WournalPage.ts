@@ -1,4 +1,4 @@
-import { rx } from "@mvui/core";
+import { rx } from "@mvuijs/core";
 import { theme } from "global-styles";
 import { WournalPDFPageView } from "pdf/WournalPDFPageView";
 import { DOMUtils } from "util/DOMUtils";

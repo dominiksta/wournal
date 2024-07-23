@@ -1,5 +1,5 @@
-import { Component, h, rx, style } from "@mvui/core";
-import * as ui5 from "@mvui/ui5";
+import { Component, h, rx, style } from "@mvuijs/core";
+import * as ui5 from "@mvuijs/ui5";
 import { ApiCtx } from "app/api-context";
 import { DSUtils } from "util/DSUtils";
 import { BasicDialogManagerContext } from "./dialog-manager";

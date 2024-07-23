@@ -1,7 +1,6 @@
-import { rx } from "@mvui/core";
-import { OperatorFunction } from "@mvui/core/dist/types/rx/stream";
+import { rx } from "@mvuijs/core";
 
-export function pairwise<T>(): OperatorFunction<T, [T | undefined, T]> {
+export function pairwise<T>(): rx.OperatorFunction<T, [T | undefined, T]> {
   return orig => new rx.Stream(observer => {
     let previousValue: T | undefined = undefined
 

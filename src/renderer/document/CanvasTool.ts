@@ -1,4 +1,4 @@
-import { rx } from "@mvui/core";
+import { rx } from "@mvuijs/core";
 import { CanvasToolStrokeWidth } from "../persistence/ConfigDTO";
 import { CanvasSelection } from "./CanvasSelection";
 import { UndoStack } from "./UndoStack";

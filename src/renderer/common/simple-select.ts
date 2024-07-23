@@ -1,5 +1,5 @@
-import { rx, TemplateElementChild } from "@mvui/core";
-import * as ui5 from "@mvui/ui5";
+import { rx, TemplateElementChild } from "@mvuijs/core";
+import * as ui5 from "@mvuijs/ui5";
 
 export function SimpleSelect<T extends string>(
   value: rx.State<T>,

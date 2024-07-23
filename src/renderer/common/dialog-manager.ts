@@ -1,7 +1,7 @@
 import {
   Component, ComponentTemplateElement, h, rx, style, TemplateElementChild
-} from "@mvui/core";
-import * as ui5 from "@mvui/ui5";
+} from "@mvuijs/core";
+import * as ui5 from "@mvuijs/ui5";
 import { DSUtils } from "util/DSUtils";
 import { getLogger } from "util/Logging";
 

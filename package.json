@@ -16,7 +16,6 @@
   "license": "LGPL-2.1",
   "main": ".webpack/main",
   "scripts": {
-    "postinstall": "cd vendor/mvui && npm install",
     "dev": "npm run start",
     "start": "cross-env NODE_ENV=development electron-forge start",
     "package:portable": "cross-env PKG_PORTABLE=true electron-forge package",
@@ -25,8 +24,9 @@
     "make": "electron-forge make"
   },
   "dependencies": {
-    "@mvui/core": "file:vendor/mvui/packages/core",
-    "@mvui/ui5": "file:vendor/mvui/packages/ui5",
+    "@mvuijs/core": "0.0.2",
+    "@mvuijs/ui5": "1.19.0",
+    "@ui5/webcomponents": "1.19.0",
     "@pdf-lib/fontkit": "^1.1.1",
     "ajv": "^8.12.0",
     "dompurify": "^3.0.6",

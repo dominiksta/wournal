@@ -1,6 +1,6 @@
-import { Component, h, rx } from "@mvui/core";
+import { Component, h, rx } from "@mvuijs/core";
 import { OpenDialog } from "common/dialog-manager";
-import * as ui5 from '@mvui/ui5';
+import * as ui5 from '@mvuijs/ui5';
 import { getLogger, getLogHistoryText } from "util/Logging";
 import environment from "Shared/environment";
 import PackageJson from 'PackageJson';

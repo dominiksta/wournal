@@ -1,6 +1,5 @@
-import { style } from "@mvui/core";
-import { MvuiCSSDeclarations } from "@mvui/core/dist/types/style";
-import * as ui5 from "@mvui/ui5";
+import { style } from "@mvuijs/core";
+import * as ui5 from "@mvuijs/ui5";
 import "./icons";
 
 type WournalTheme = {
@@ -29,7 +28,7 @@ export const darkTheme: WournalTheme = {
 
 export const theme = style.themeVariables('wournal', lightTheme);
 
-export const customScrollbar: { [selector: string]: MvuiCSSDeclarations } = {
+export const customScrollbar: { [selector: string]: style.MvuiCSSDeclarations } = {
   '*::-webkit-scrollbar': {
     // background: ui5.Theme.ScrollBar_TrackColor,
     background: 'transparent',

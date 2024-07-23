@@ -1,6 +1,6 @@
-import { Component, rx, h } from "@mvui/core";
+import { Component, rx, h } from "@mvuijs/core";
 import { OpenDialog } from 'common/dialog-manager';
-import * as ui5 from '@mvui/ui5';
+import * as ui5 from '@mvuijs/ui5';
 import PackageJson from 'PackageJson';
 import { sanitize } from "dompurify";
 import { marked } from "marked";

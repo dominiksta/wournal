@@ -1,4 +1,4 @@
-import { rx } from "@mvui/core";
+import { rx } from "@mvuijs/core";
 
 export type GlobalCommand = {
   human_name: string,

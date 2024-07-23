@@ -1,4 +1,4 @@
-import { rx } from "@mvui/core";
+import { rx } from "@mvuijs/core";
 import { getLogger } from "util/Logging";
 import { WournalDocument } from "./WournalDocument";
 

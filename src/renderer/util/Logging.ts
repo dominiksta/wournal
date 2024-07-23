@@ -1,5 +1,5 @@
 import environment from "Shared/environment";
-import { rx } from '@mvui/core';
+import { rx } from '@mvuijs/core';
 
 /**
    Use `LOG` instead of the the console.* logging functions. Example: Instead of

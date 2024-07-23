@@ -1,4 +1,4 @@
-import { rx } from "@mvui/core";
+import { rx } from "@mvuijs/core";
 import { LOG } from "../util/Logging";
 import { SVGUtils } from "../util/SVGUtils";
 import { CanvasElement, CanvasElementDTO } from "./CanvasElement";

@@ -1,5 +1,5 @@
-import { Component, h, rx, style, TemplateElementChild } from '@mvui/core';
-import * as ui5 from '@mvui/ui5';
+import { Component, h, rx, style, TemplateElementChild } from '@mvuijs/core';
+import * as ui5 from '@mvuijs/ui5';
 import { BasicDialogManagerContext } from 'common/dialog-manager';
 import { OutlineNode } from 'persistence/DocumentMeta';
 import { DSUtils } from 'util/DSUtils';

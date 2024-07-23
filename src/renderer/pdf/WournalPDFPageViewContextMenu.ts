@@ -1,5 +1,5 @@
-import { Component, rx } from '@mvui/core';
-import * as ui5 from '@mvui/ui5';
+import { Component, rx } from '@mvuijs/core';
+import * as ui5 from '@mvuijs/ui5';
 
 @Component.register
 export default class WournalPDFPageViewContextMenu extends Component {

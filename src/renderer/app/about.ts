@@ -1,5 +1,5 @@
-import { Component, h, style } from '@mvui/core';
-import * as ui5 from '@mvui/ui5';
+import { Component, h, style } from '@mvuijs/core';
+import * as ui5 from '@mvuijs/ui5';
 import PackageJson from 'PackageJson';
 import imgLogo from 'res/icon/wournal/logo.png';
 import environment from 'Shared/environment';

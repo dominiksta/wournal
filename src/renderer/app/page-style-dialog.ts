@@ -1,5 +1,5 @@
-import { Component, h, rx, style } from "@mvui/core";
-import * as ui5 from "@mvui/ui5";
+import { Component, h, rx, style } from "@mvuijs/core";
+import * as ui5 from "@mvuijs/ui5";
 import { OpenDialog } from "common/dialog-manager";
 import { BackgroundStyle, BackgroundStyleT } from "document/BackgroundGenerators";
 import { PagePDFMode, PageProps } from "document/WournalPage";

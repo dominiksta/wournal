@@ -1,5 +1,5 @@
-import { Component, rx, h, style } from "@mvui/core";
-import * as ui5 from "@mvui/ui5";
+import { Component, rx, h, style } from "@mvuijs/core";
+import * as ui5 from "@mvuijs/ui5";
 import { BasicDialogManagerContext } from "common/dialog-manager";
 import { WournalDocument } from "document/WournalDocument";
 import { WournalPage } from "document/WournalPage";

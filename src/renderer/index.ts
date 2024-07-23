@@ -1,4 +1,4 @@
-import { Component, h } from "@mvui/core";
+import { Component, h } from "@mvuijs/core";
 import { inject, provideDependencies } from "dependency-injection";
 import { BackgroundStyleT } from "document/BackgroundGenerators";
 import FileSystemElectron from "persistence/FileSystemElectron";

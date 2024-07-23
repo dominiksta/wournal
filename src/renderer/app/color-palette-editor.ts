@@ -1,5 +1,5 @@
-import { Component, h, rx, style } from "@mvui/core";
-import * as ui5 from "@mvui/ui5";
+import { Component, h, rx, style } from "@mvuijs/core";
+import * as ui5 from "@mvuijs/ui5";
 import { ConfigCtx } from "./config-context";
 
 @Component.register
