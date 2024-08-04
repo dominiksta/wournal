@@ -123,6 +123,7 @@ export class WournalPDFPageView {
     this.display.style.pointerEvents = allow ? '' : 'none';
 
     if (this.viewer) {
+      // TODO: div may be undefined
       const annotEls =
         this.viewer.viewer.annotationLayer.div.querySelectorAll<HTMLElement>(
           'section[data-annotation-id]'

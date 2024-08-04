@@ -24,6 +24,8 @@ Changelog
   they store all configuration in a subdirectory of the executable. Before
   0.0.6, all versions of Wournal would share a system wide configuration.
 - "Please Wait" prompt would never go away when creating a new document from CLI
+- In rare cases, Wournal could accidentally produce a stroke with no points/path
+  data. This would confuse and crash other parts of Wournal.
 - Significantly improved logging. While this not technically a bugfix, it should
   help reproducing and fixing future bugs.
 

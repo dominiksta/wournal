@@ -268,6 +268,7 @@ export class WournalPage {
     if (maybePdf !== true) return maybePdf;
 
     page.updateDisplaySize();
+    for (const action of CLEANUP_ACTIONS) action(page, page.canvas);
     return page;
   }
 
@@ -736,3 +737,16 @@ class UndoActionPageProps implements UndoAction {
     this.page.setPageProps(this.propsBefore, false);
   }
 }
+
+type PageCleanupAction = (page: WournalPage, canvas: SVGSVGElement) => void;
+
+const CLEANUP_ACTIONS: PageCleanupAction[] = [
+
+  function pageCleanupEmptyPaths(_, canvas) {
+    for (const path of canvas.querySelectorAll('path')) {
+      const d = path.getAttribute('d');
+      if (d === undefined || d === null || d.trim() === '') path.remove();
+    }
+  },
+
+]
