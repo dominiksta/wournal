@@ -514,7 +514,7 @@ export default class Wournal extends Component {
       // re-apply a possible change to invert
       if (cfgTheme.startsWith('dark')) style.setTheme('wournal', darkTheme);
       if (
-        style.currentTheme$.value === 'dark'
+        style.currentTheme.value === 'dark'
         && (cfgTheme.startsWith('auto') || cfgTheme.startsWith('dark'))
       ) style.setTheme('wournal', darkTheme);
     });
@@ -522,7 +522,7 @@ export default class Wournal extends Component {
     this.subscribe(this.configCtx.partial('theme'), t => {
       if (t.startsWith('light')) style.setTheme('wournal', lightTheme);
       if (t.startsWith('dark')) style.setTheme('wournal', darkTheme);
-      const currLight = style.currentTheme$.value === 'light';
+      const currLight = style.currentTheme.value === 'light';
       ui5.config.setTheme(({
         'auto': currLight ? 'sap_horizon' : 'sap_horizon_dark',
         'light': 'sap_horizon',
@@ -541,7 +541,7 @@ export default class Wournal extends Component {
       })[t] as any)
     })
 
-    this.subscribe(style.currentTheme$, theme => {
+    this.subscribe(style.currentTheme, theme => {
       if (this.configCtx.value.theme === 'auto') {
         ui5.config.setTheme(theme === 'light' ? 'sap_horizon' : 'sap_horizon_dark');
         style.setTheme('wournal', theme === 'light' ? lightTheme : darkTheme);

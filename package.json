@@ -24,7 +24,7 @@
     "make": "electron-forge make"
   },
   "dependencies": {
-    "@mvuijs/core": "0.0.2",
+    "@mvuijs/core": "0.0.3",
     "@mvuijs/ui5": "1.19.0",
     "@ui5/webcomponents": "1.19.0",
     "@pdf-lib/fontkit": "^1.1.1",

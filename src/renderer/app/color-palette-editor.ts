@@ -12,7 +12,7 @@ export default class ColorPaletteEditor extends Component {
     const { palette } = this.props;
 
     const cfg = this.getContext(ConfigCtx);
-    const darkInverts = rx.derive(cfg, style.currentTheme$, (cfg, curr) =>
+    const darkInverts = rx.derive(cfg, style.currentTheme, (cfg, curr) =>
       cfg.invertDocument && (
         (
           cfg.theme.startsWith('auto') &&
