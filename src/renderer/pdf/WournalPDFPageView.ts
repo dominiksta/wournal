@@ -18,6 +18,7 @@ import { DSUtils } from 'util/DSUtils';
 import { getLogger } from 'util/Logging';
 import { theme } from 'global-styles';
 import { inject } from 'dependency-injection';
+import { style } from '@mvuijs/core';
 
 const LOG = getLogger(__filename);
 
@@ -72,9 +73,10 @@ export class WournalPDFPageView {
 
       PDF_CTX_MENU.show(e, sel);
     });
-    this.setAllowTextSelection(false);
 
     this.shadow = this.display.attachShadow({ mode: 'open' });
+
+    this.setAllowTextSelection(false);
 
     this.loadingEl = this.genLoadingBackground();
 
@@ -119,18 +121,15 @@ export class WournalPDFPageView {
 
   private allowTextSelection: boolean = false;
   public async setAllowTextSelection(allow: boolean) {
-    if (!(await this.waitAnnotationLayerRendered())) return;
     this.allowTextSelection = allow;
-    this.display.style.pointerEvents = allow ? '' : 'none';
-
-    if (this.viewer) {
-      // TODO: div may be undefined
-      const annotEls =
-        this.viewer.viewer.annotationLayer.div.querySelectorAll<HTMLElement>(
-          'section[data-annotation-id]'
-        );
-      for (const el of annotEls) el.style.pointerEvents = allow ? '' : 'none';
-    }
+    style.util.applySheetAsAdopted(style.sheet({
+      ':host': {
+        pointerEvents: allow ? '' : 'none',
+      },
+      'section[data-annotation-id]': {
+        pointerEvents: allow ? '' : 'none',
+      }
+    }), this.shadow, 'allow-text-selection');
   }
 
   public async free() {
@@ -159,13 +158,14 @@ export class WournalPDFPageView {
     this.disableZoomPreview();
     this.doHighlightText();
 
-    if (await this.waitAnnotationLayerRendered()) {
-      // if the annotation layer is not present here, the page has been freed
-      // before it was completely rendered. this can happen when the user
-      // scrolls around a lot.
-      this.setAllowTextSelection(this.allowTextSelection);
+    this.setAllowTextSelection(this.allowTextSelection);
+
+    // if the annotation layer is not present here, the page has been freed
+    // before it was completely rendered. this can happen when the user scrolls
+    // around a lot.
+    if (await this.waitAnnotationLayerRendered())
       await this.setupAnnotationEventListeners(this.viewer.viewer);
-    }
+
     return;
   }
 
@@ -364,9 +364,11 @@ export class WournalPDFPageView {
   private hideAnnotations: boolean = false;
   public setAnnotationVisility(visible: boolean) {
     this.hideAnnotations = !visible;
-    if (this.viewer) {
-      this.viewer.viewer.annotationLayer.div.style.display = visible ? 'block' : 'none';
-    }
+    style.util.applySheetAsAdopted(style.sheet({
+      '.annotationLayer': {
+        display: visible ? 'block' : 'none'
+      }
+    }), this.shadow, 'annotation-visibility');
   }
 
   private async setupAnnotationEventListeners(
