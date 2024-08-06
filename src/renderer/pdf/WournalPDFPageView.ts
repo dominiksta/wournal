@@ -118,7 +118,8 @@ export class WournalPDFPageView {
   }
 
   private allowTextSelection: boolean = false;
-  public setAllowTextSelection(allow: boolean) {
+  public async setAllowTextSelection(allow: boolean) {
+    if (!(await this.waitAnnotationLayerRendered())) return;
     this.allowTextSelection = allow;
     this.display.style.pointerEvents = allow ? '' : 'none';
 
