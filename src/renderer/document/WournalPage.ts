@@ -134,7 +134,7 @@ export class WournalPage {
     })
 
     this.display.style.position = 'relative';
-    this.display.style.border = "3px solid white";
+    this.display.style.border = `3px solid ${theme.pageInactive}`;
     this.display.style.margin = "10px auto 10px auto";
 
     this.svgWrapperEl = document.createElement("div");

@@ -4,7 +4,8 @@ import "./icons";
 
 type WournalTheme = {
   documentBackground: string,
-  documentActive: string,
+  pageActive: string,
+  pageInactive: string,
   scrollbar: string,
   scrollbarHover: string,
   invert: string,
@@ -14,7 +15,8 @@ export const lightTheme: WournalTheme = {
   scrollbar: '#888888',
   scrollbarHover: '#666666',
   documentBackground: '#a1a1a1',
-  documentActive: '#666666',
+  pageActive: '#666666',
+  pageInactive: '#AAAAAA',
   invert: ''
 }
 
@@ -22,7 +24,8 @@ export const darkTheme: WournalTheme = {
   scrollbar: '#555555',
   scrollbarHover: '#777777',
   documentBackground: '#191B1D',
-  documentActive: '#888888',
+  pageActive: '#AAAAAA',
+  pageInactive: '#666666',
   invert: 'invert(1)',
 }
 

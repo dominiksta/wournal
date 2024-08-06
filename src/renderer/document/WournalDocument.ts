@@ -101,7 +101,7 @@ export class WournalDocument extends Component {
 
   static styles = style.sheet({
     '.wournal-page.active': {
-      borderColor: `${theme.documentActive} !important`,
+      borderColor: `${theme.pageActive} !important`,
     }
   })
 
