@@ -19,6 +19,8 @@ Changelog
 - Scrolling a PDF too fast would sometimes display an error (#13)
 - A potential future issue where an update to wournal may have caused a
   temporary error on first startup (#8)
+- Clicking on an outline item in a large(-ish) PDF would scroll the main
+  document viewport slightly out of position.
 - PDF text selection in dark mode with inverted document
 - Portable versions of Wournal are now *actually* portable, in the sense that
   they store all configuration in a subdirectory of the executable. Before

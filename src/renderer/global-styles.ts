@@ -51,7 +51,7 @@ export const customScrollbar: { [selector: string]: style.MvuiCSSDeclarations } 
 }
 
 style.util.applySheetAsStyleTag(document.body, style.sheet({
-  'body': {
+  'body, html': {
     margin: '0px',
     width: '100vw',
     height: '100vh',
