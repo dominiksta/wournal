@@ -545,7 +545,7 @@ export class WournalDocument extends Component {
         this, [{ page, idx: idx }], [{ page, idx: idx+1 }]
       ));
     }
-    page.display.scrollIntoView();
+    this.api.scrollPage(this.pages.value.indexOf(page) + 1);
   }
 
   private setupListenChangeOutlinePages() {

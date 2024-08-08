@@ -39,6 +39,7 @@ import PackageJson from 'PackageJson';
 import { getLogger, logFunction, logObject } from 'util/Logging';
 import { PageProps } from 'document/WournalPage';
 import environment from 'Shared/environment';
+import { SVGUtils } from 'util/SVGUtils';
 
 const LOG = getLogger(__filename);
 
@@ -369,7 +370,12 @@ export default class Wournal extends Component {
       const doc = this.doc.value; const pages = doc.pages.value;
       if (page < 0 || page >= pages.length) return;
       doc.activePage.next(pages[page]);
-      doc.activePage.value.display.scrollIntoView();
+      const prevScrollPos = this.api.getScrollPos();
+      const pagePos = pages[page].display.getBoundingClientRect();
+      const viewport = this.documentRef.current.getBoundingClientRect();
+      if (SVGUtils.rectIntersect(viewport, pagePos)) return;
+      const pagePosInViewPort = pagePos.top - viewport.top;
+      this.api.scrollPos(prevScrollPos.top + pagePosInViewPort, prevScrollPos.left);
     },
     scrollPos: (top: number, left: number) => {
       this.documentRef.current.scrollTop = top;
