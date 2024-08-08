@@ -27,15 +27,18 @@ registerDevToolsShortcut();
 
 function mkApiClient() {
   for (const routeName of ApiRouteNames) {
-    ApiClient[routeName] = (...args: any[]) => {
-      const promise = window.electron.invoke(routeName, ...args);
-      promise.then((val: any) => {
+    ApiClient[routeName] = async (...args: any[]) => {
+      try {
+        const ret = await window.electron.invoke(routeName, ...args);
         LOG.debug(
           `Electron API call: ${routeName}\n`,
-          [ args, val instanceof ArrayBuffer ? 'ArrayBuffer' : val ]
-        )
-      })
-      return promise
+          [args, ret instanceof ArrayBuffer ? 'ArrayBuffer' : ret]
+        );
+        return ret;
+      } catch(e) {
+        LOG.warn(`Failed electron API call: ${routeName}\n`, [args]);
+        throw e;
+      }
     };
   }
 }

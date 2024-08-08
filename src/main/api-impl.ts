@@ -28,9 +28,9 @@ export function registerApiHandlers() {
       return new Uint8Array([1, 2, 3]);
     },
 
-    'shell:open': async (_, path) => {
-      path = path.normalize(path.replace(/^~/, homedir));
-      shell.openPath(path);
+    'shell:open': async (_, filePath) => {
+      filePath = path.normalize(filePath.replace(/^~/, homedir));
+      shell.openPath(filePath);
     },
     'shell:addRecentDocument': async (_, path) => {
       app.addRecentDocument(path);

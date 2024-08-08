@@ -1,6 +1,13 @@
 Changelog
 ======================================================================
 
+`0.0.7` - _unreleased_
+----------------------------------------------------------------------
+
+### Fixed
+
+- Opening the autosave directory from settings would throw an error
+
 `0.0.6` - _2024-08-08_
 ----------------------------------------------------------------------
 **Jumplist, Toggle Dark Mode, Click to Select and Various Fixes**
