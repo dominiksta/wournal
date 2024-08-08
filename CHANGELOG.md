@@ -1,9 +1,9 @@
 Changelog
 ======================================================================
 
-`0.0.6` - _2024-07-24_
+`0.0.6` - _2024-08-08_
 ----------------------------------------------------------------------
-**Toggle Dark Mode, Click to Select and Various Fixes**
+**Jumplist, Toggle Dark Mode, Click to Select and Various Fixes**
 
 ### Added
 
