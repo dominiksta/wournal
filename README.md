@@ -19,11 +19,13 @@ matter.
 
 ## Current Project Status
 
-Wournal just released (2024-01-07) as an alpha version. There may still be some
-bugs creeping around, but it should be mostly stable.
+Wournal is currently still considered alpha software. While that means that
+there may still be some bugs creeping around, it should be mostly stable.
 
-There are lots of things planned for the future (see below), but the biggest
-thing still missing is an *Android version*.
+The plan is to first create an *Android version* and to wait a while for bug
+reports before releasing it as beta. The Android release will require a somewhat
+significant rewrite of many UI components, so the look and feel will change
+quite a bit when that happens.
 
 <details>
   <summary>Development Roadmap</summary>
@@ -57,7 +59,7 @@ thing still missing is an *Android version*.
 
   - [x] Default Document Zoom Level Config Option
   - [x] Drag&Drop From File Manager to Open
-  - [ ] Jumplist
+  - [x] Jumplist
   - [ ] Customizable Pen Cursor Angle Change (Especially for Lefties)
   - [ ] Lasso Select
   - [ ] Set Default Paper Style
