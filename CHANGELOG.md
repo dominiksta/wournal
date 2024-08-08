@@ -30,6 +30,8 @@ Changelog
   threw an error.
 - In rare cases, Wournal could accidentally produce a stroke with no points/path
   data. This would confuse and crash other parts of Wournal.
+- When right clicking text in a PDF to copy or highlight, the page would jump
+  around to varying degrees.
 - Significantly improved logging. While this not technically a bugfix, it should
   help reproducing and fixing future bugs.
 

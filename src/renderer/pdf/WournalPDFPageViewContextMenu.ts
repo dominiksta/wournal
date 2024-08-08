@@ -1,12 +1,14 @@
-import { Component, rx } from '@mvuijs/core';
+import { Component, rx, h, style } from '@mvuijs/core';
 import * as ui5 from '@mvuijs/ui5';
+import { theme } from 'global-styles';
 
 @Component.register
 export default class WournalPDFPageViewContextMenu extends Component {
-  private readonly menuRef = this.ref<ui5.types.Menu>();
   private lastMousePos: { x: number, y: number } = { x: 0, y: 0 };
   private lastSelection = '';
   private lastSelectionDim: DOMRect[] = [];
+
+  private shown = new rx.State(false, 'shown');
 
   public events = new rx.MulticastStream<
     { mouse: { x: number, y: number } } &
@@ -22,45 +24,74 @@ export default class WournalPDFPageViewContextMenu extends Component {
     )
   >();
 
+  static styles = style.sheet({
+    ':host': {
+      position: 'absolute',
+      zIndex: '10',
+    },
+    '#main': {
+      background: ui5.Theme.Button_Background,
+      border: (
+        ui5.Theme.Button_BorderWidth + ' solid ' +
+        ui5.Theme.Button_BorderColor
+      ),
+      borderRadius: ui5.Theme.Button_BorderCornerRadius,
+    },
+    '#main > ui5-button': {
+      display: 'block',
+    },
+    'ui5-button::part(button)': {
+      justifyContent: 'left',
+    }
+  });
+
   render() {
+    // hide on click outside
+    this.subscribe(rx.fromEvent(document.body, 'click'), e => {
+      if (e.target instanceof HTMLElement && !e.target.contains(this))
+        this.shown.next(false);
+    });
+
+    const hide = () => {
+      this.shown.next(false);
+      document.getSelection().removeAllRanges();
+    }
+
+    const annotate = (type: 'highlight' | 'underline' | 'strikethrough') => {
+      this.events.next({
+        mouse: this.lastMousePos,
+        type,
+        data: { dim: this.lastSelectionDim, text: this.lastSelection },
+      });
+      hide();
+    };
+
     return [
-      ui5.menu({
-        ref: this.menuRef,
-        events: {
-          'item-click': e => {
-            const id = e.detail.item.id;
-            switch(id) {
-              case 'copy':
-                this.events.next({
-                  mouse: this.lastMousePos, type: 'copy', data: this.lastSelection
-                });
-                break;
-              case 'highlight':
-              case 'underline':
-              case 'strikethrough':
-                this.events.next({
-                  mouse: this.lastMousePos,
-                  type: id,
-                  data: { dim: this.lastSelectionDim, text: this.lastSelection }
-                });
-                break;
-              default: throw new Error();
+      h.div({
+        fields: { id: 'main' },
+        style: { display: this.shown.ifelse({ if: 'block', else: 'none' }) },
+      }, [
+        ui5.button({
+          fields: { icon: 'copy', id: 'copy', design: 'Transparent' },
+          events: {
+            click: e => {
+              this.events.next({ mouse: e, type: 'copy', data: this.lastSelection });
+              hide();
             }
           }
-        }
-      }, [
-        ui5.menuItem({ fields: {
-          icon: 'copy', id: 'copy', text: 'Copy',
-        }}),
-        ui5.menuItem({ fields: {
-          icon: 'wournal/highlighter', id: 'highlight', text: 'Highlight',
-        }}),
-        ui5.menuItem({ fields: {
-          icon: 'underline-text', id: 'underline', text: 'Underline',
-        }}),
-        ui5.menuItem({ fields: {
-          icon: 'strikethrough', id: 'strikethrough', text: 'Strikethrough',
-        }}),
+        }, 'Copy'),
+        ui5.button({
+          fields: { icon: 'wournal/highlighter', id: 'highlight', design: 'Transparent' },
+          events: { click: _ => annotate('highlight') },
+        }, 'Highlight'),
+        ui5.button({
+          fields: { icon: 'underline-text', id: 'underline', design: 'Transparent' },
+          events: { click: _ => annotate('underline') },
+        }, 'Underline'),
+        ui5.button({
+          fields: { icon: 'strikethrough', id: 'strikethrough', design: 'Transparent' },
+          events: { click: _ => annotate('strikethrough') },
+        }, 'Strikethrough'),
       ])
     ]
   }
@@ -70,17 +101,9 @@ export default class WournalPDFPageViewContextMenu extends Component {
     this.lastSelection = sel.toString();
     this.lastSelectionDim = Array.from(sel.getRangeAt(0).getClientRects());
     this.lastMousePos = point;
-    // hacky hack hack
-    const fiction = document.createElement('div');
-    fiction.style.position = 'fixed';
-    fiction.style.top = `${point.y}px`;
-    fiction.style.left = `${point.x}px`;
-    document.body.append(fiction);
 
-    this.menuRef.current.showAt(fiction);
-
-    setTimeout(() => {
-      fiction.remove();
-    }, 500);
+    this.style.left = `${point.x}px`;
+    this.style.top = `${point.y}px`;
+    this.shown.next(true);
   }
 }
