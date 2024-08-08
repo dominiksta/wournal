@@ -34,6 +34,7 @@ import PackageJson from 'PackageJson';
 import { pairwise } from "util/rx";
 import { PDF_CTX_MENU } from "pdf/WournalPDFPageView";
 import { getLogger } from "util/Logging";
+import { ToastCtx } from "app/toast-context";
 
 const LOG = getLogger(__filename);
 
@@ -834,7 +835,7 @@ export class WournalDocument extends Component {
   }
 
   private onMouseDown(e: MouseEvent) {
-    LOG.debug(`Using tool ${(this.currentTool.value as any).constructor.name}`);
+    if (e.button === 3 || e.button === 4) return; // back & forward buttons
     (document.activeElement instanceof HTMLElement) && document.activeElement.blur();
     e.preventDefault();
     if (this.activePage) this.activePage.value.refreshClientRect();
@@ -845,6 +846,7 @@ export class WournalDocument extends Component {
         this.selection.onMouseDown(e);
       } else {
         this.selection.clear();
+        LOG.debug(`Using tool ${(this.currentTool.value as any).constructor.name}`);
         this.currentTool.value.onMouseDown(e);
       }
     } else {
@@ -855,6 +857,7 @@ export class WournalDocument extends Component {
         this.toolBeforeTmpTool = this.currentTool.value.name;
         this.setTool(CanvasToolFactory.forName(this.config.value.binds.middleClick));
       }
+      LOG.debug(`Using tool ${(this.currentTool.value as any).constructor.name}`);
       this.currentTool.value.onMouseDown(e);
     }
   }
@@ -876,6 +879,58 @@ export class WournalDocument extends Component {
       this.selection.onMouseMove(e)
     else
       this.currentTool.value.onMouseMove(e);
+  }
+
+  // ----------------------------------------------------------------------
+  // jumplist
+  // ----------------------------------------------------------------------
+
+  private static MAX_JUMPLIST = 100;
+  private jumplistBack: WournalPage[] = [];
+  private jumplistForward: WournalPage[] = [];
+
+  public jumplistAdd(page: WournalPage) {
+    const pos = this.pages.value.indexOf(page) + 1;
+    if (pos === 0) throw new Error('Trying to add non-existing page to jumplist');
+    // dont add double pages
+    if (
+      this.jumplistBack.length !== 0
+      && this.jumplistBack[this.jumplistBack.length - 1] === page
+    ) return;
+    this.jumplistForward = [];
+    LOG.info(`Jumplist Push: Page ${pos}`);
+    this.jumplistBack.push(page);
+    if (this.jumplistBack.length > WournalDocument.MAX_JUMPLIST)
+      this.jumplistBack.splice(0, 1);
+  }
+
+  public jumplistPrev() {
+    const [ pages, activePage ] = [ this.pages.value, this.activePage.value ];
+    if (this.jumplistBack.length === 0) return;
+    const page = this.jumplistBack.pop();
+    const pos = pages.indexOf(page) + 1;
+    // skip and remove page that is no longer in doc
+    if (pos === 0) { this.jumplistPrev(); return; }
+    // when "entering" a jump "chain", the current page should be added
+    if (page !== activePage) this.jumplistForward.push(activePage);
+    this.jumplistForward.push(page);
+    // skip if current page is jump
+    if (page == activePage) { this.jumplistPrev(); return; }
+    LOG.info(`Jumplist Prev: Page ${pos}`);
+    this.api.scrollPage(pos);
+  }
+
+  public jumplistNext() {
+    if (this.jumplistForward.length === 0) return;
+    const page = this.jumplistForward.pop();
+    const pos = this.pages.value.indexOf(page) + 1;
+    // skip and remove page that is no longer in doc
+    if (pos === 0) { this.jumplistNext(); return; }
+    this.jumplistBack.push(page);
+    // skip if current page is jump
+    if (page == this.activePage.value) { this.jumplistNext(); return; }
+    LOG.info(`Jumplist Next: Page ${pos}`);
+    this.api.scrollPage(pos);
   }
 
   // ----------------------------------------------------------------------

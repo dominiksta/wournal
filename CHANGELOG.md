@@ -9,6 +9,8 @@ Changelog
 
 - Clicking on an element with the rectangle selection tool will now select it
 - Toggle dark mode temporarily with Ctrl+I
+- Use mouse prev/next buttons or Alt+Left/Right to jump between document
+  positions, for example to go back when clicking a link in a PDF.
 - PDF annotations created by right clicking selected text can now be erased
   gradually
 - When a WOJ file is moved and/or renamed with its corresponding PDF, Wournal

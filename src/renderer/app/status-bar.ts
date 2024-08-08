@@ -4,9 +4,7 @@ import { BasicDialogManagerContext } from "common/dialog-manager";
 import { WournalDocument } from "document/WournalDocument";
 import { WournalPage } from "document/WournalPage";
 import { ApiCtx } from "./api-context";
-import { GlobalCommand, GlobalCommandIdT, GlobalCommandsCtx } from "./global-commands";
-import { pageStyleDialog } from "./page-style-dialog";
-import { ShortcutsCtx } from "./shortcuts-context";
+import { GlobalCommandIdT, GlobalCommandsCtx } from "./global-commands";
 
 @Component.register
 export class StatusBar extends Component {
@@ -29,7 +27,6 @@ export class StatusBar extends Component {
     const activePageNr =
       rx.combineLatest(activePage, pages).map(([act, p]) => p.indexOf(act) + 1);
 
-    const shortcutCtx = this.getContext(ShortcutsCtx);
     const globalCmds = this.getContext(GlobalCommandsCtx);
     const api = this.getContext(ApiCtx);
 
@@ -67,8 +64,9 @@ export class StatusBar extends Component {
             let n = parseFloat(target.value);
             if (isNaN(n)) n = api.getCurrentPageNr();
             const newNr = Math.max(1, Math.min(n, api.getPageCount()));
+            api.jumplistMark();
             api.scrollPage(newNr);
-            shortcutCtx.focus();
+            this.gotoPageRef.current.blur();
           }
         },
         style: {

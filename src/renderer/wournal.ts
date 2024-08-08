@@ -305,6 +305,12 @@ export default class Wournal extends Component {
     copySelection: () => { this.doc.value.selectionCopy() },
     deleteSelection: () => { this.doc.value.selectionCut(true) },
 
+    // jumplist
+    // ----------------------------------------------------------------------
+    jumplistPrev: () => { this.doc.value.jumplistPrev() },
+    jumplistNext: () => { this.doc.value.jumplistNext() },
+    jumplistMark: () => { this.doc.value.jumplistAdd(this.doc.value.activePage.value) },
+
     // zoom
     // ----------------------------------------------------------------------
     setZoom: (zoom: number) => { this.doc.value.setZoom(zoom) },
@@ -961,12 +967,18 @@ export default class Wournal extends Component {
     },
     'scroll_page_last': {
       human_name: 'Scroll to Last Page',
-      func: () => this.api.scrollPage(this.api.getPageCount()),
+      func: () => {
+        this.api.jumplistMark();
+        this.api.scrollPage(this.api.getPageCount());
+      },
       shortcut: 'End',
     },
     'scroll_page_first': {
       human_name: 'Scroll to First Page',
-      func: () => this.api.scrollPage(1),
+      func: () => {
+        this.api.jumplistMark();
+        this.api.scrollPage(1);
+      },
       shortcut: 'Home',
     },
 
@@ -1012,6 +1024,25 @@ export default class Wournal extends Component {
     'search_box_hide': {
       human_name: 'Stop Searching Document',
       func: () => this.hideSearchBox.next(true),
+    },
+
+    'jumplist_prev': {
+      human_name: 'Jump to Previous Marked Position',
+      func: () => this.api.jumplistPrev(),
+      shortcut: 'Alt+LeftArrow',
+    },
+    'jumplist_next': {
+      human_name: 'Jump to Next Marked Position',
+      func: () => this.api.jumplistNext(),
+      shortcut: 'Alt+RightArrow',
+    },
+    'jumplist_mark': {
+      human_name: 'Mark Current Position',
+      func: () => {
+        this.toast.open('Current Position Marked');
+        this.api.jumplistMark();
+      },
+      shortcut: 'Alt+DownArrow',
     },
 
     'system_show_debug_info': {

@@ -218,6 +218,21 @@ export default class Toolbars extends Component {
             }),
             ui5.menuItem({
               fields: {
+                icon: 'navigation-left-arrow', ...globalCmdMenuItem('jumplist_prev')
+              }
+            }),
+            ui5.menuItem({
+              fields: {
+                icon: 'navigation-right-arrow', ...globalCmdMenuItem('jumplist_next')
+              }
+            }),
+            ui5.menuItem({
+              fields: {
+                icon: 'navigation-down-arrow', ...globalCmdMenuItem('jumplist_mark')
+              }
+            }),
+            ui5.menuItem({
+              fields: {
                 icon: 'full-screen', ...globalCmdMenuItem('fullscreen_toggle')
               }
             }),

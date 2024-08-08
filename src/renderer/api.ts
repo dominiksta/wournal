@@ -33,6 +33,12 @@ export interface WournalApi {
   copySelection(): void;
   deleteSelection(): void;
 
+  // jumplist
+  // ----------------------------------------------------------------------
+  jumplistPrev(): void;
+  jumplistNext(): void;
+  jumplistMark(): void;
+
   // zoom
   // ----------------------------------------------------------------------
   setZoom(zoom: number): void;

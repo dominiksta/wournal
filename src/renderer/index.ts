@@ -138,6 +138,21 @@ async function main() {
   await waitInitUi5();
   l.remove();
 
+  document.addEventListener('mouseup', e => {
+    switch (e.button) {
+      case 3: wournal.api.jumplistPrev(); break;
+      case 4: wournal.api.jumplistNext(); break;
+    }
+  });
+
+  document.addEventListener('keyup', e => {
+    if (!e.altKey) return;
+    switch (e.key) {
+      case 'ArrowLeft': wournal.api.jumplistPrev(); break;
+      case 'ArrowRight': wournal.api.jumplistNext(); break;
+      case 'ArrowDown': wournal.api.jumplistMark(); break;
+    }
+  });
 
   document.body.appendChild(wournal);
   maybeLoadArgvDoc(wournal);

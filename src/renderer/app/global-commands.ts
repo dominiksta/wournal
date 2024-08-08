@@ -69,6 +69,10 @@ export const GlobalCommandId = [
   'search_box_show',
   'search_box_hide',
 
+  'jumplist_prev',
+  'jumplist_next',
+  'jumplist_mark',
+
   'system_show_debug_info',
   'system_update',
 

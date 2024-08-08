@@ -337,6 +337,7 @@ export class WournalPage {
         } else {
           ref = dest[0];
         }
+        this.doc.jumplistAdd(this);
         const page = await (resp as PDFDocumentProxy).getPageIndex(ref) + 1;
         LOG.info(`Scrolling to Linked Page: ${page}`);
         this.doc.api.scrollPage(page);
