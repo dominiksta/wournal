@@ -688,8 +688,6 @@ export default class Toolbars extends Component {
 
   static styles = style.sheet({
     ':host': {
-      position: 'fixed',
-      top: '0',
       width: '100%',
       zIndex: '2',
       outline: 'none',

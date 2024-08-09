@@ -609,55 +609,57 @@ export default class Wournal extends Component {
       checkDisplayUpdates(this.dialog.openDialog);
 
     return [
-      Toolbars.t({
-        fields: { id: 'toolbar' },
-        props: { doc: this.doc },
-      }),
-      StatusBar.t({
-        props: { doc: this.doc },
-      }),
       h.div(this.dialog.dialogs),
       Settings.t({ props: { open: rx.bind(this.settingsOpen) } }),
       ui5.toast({ fields: { id: 'toast', placement: 'BottomEnd' } }),
-      h.div({
-        fields: { id: 'main' },
-        events: {
-          drop: this.handleDrop.bind(this),
-          dragover: e => e.preventDefault(),
-        }
-      }, [
-        h.div({
-          fields: { id: 'sidebar', hidden: this.hideSideBar },
-        }, [OutlineContainer.t({ ref: this.outlineRef })]),
-        h.div({
-          fields: { id: 'seperator', hidden: this.hideSideBar },
+      h.div({ fields: { id: 'app' } }, [
+        Toolbars.t({
+          fields: { id: 'toolbar' },
+          props: { doc: this.doc },
         }),
-        h.div(
-          { fields: { id: 'main-right' } },
-          [
-            h.div(
-              {
-                fields: { id: 'search-box', hidden: this.hideSearchBox },
-              },
-              SearchBox.t({
-                ref: this.searchBoxRef,
+        h.div({
+          fields: { id: 'main' },
+          events: {
+            drop: this.handleDrop.bind(this),
+            dragover: e => e.preventDefault(),
+          }
+        }, [
+          h.div({
+            fields: { id: 'sidebar', hidden: this.hideSideBar },
+          }, [OutlineContainer.t({ ref: this.outlineRef })]),
+          h.div({
+            fields: { id: 'seperator', hidden: this.hideSideBar },
+          }),
+          h.div(
+            { fields: { id: 'main-right' } },
+            [
+              h.div(
+                {
+                  fields: { id: 'search-box', hidden: this.hideSearchBox },
+                },
+                SearchBox.t({
+                  ref: this.searchBoxRef,
+                  events: {
+                    'search-stop': _ => this.hideSearchBox.next(true),
+                  }
+                }),
+              ),
+              h.div({
+                ref: this.documentRef,
+                fields: { id: 'document-wrapper' },
                 events: {
-                  'search-stop': _ => this.hideSearchBox.next(true),
+                  scroll: () => {
+                    this.doc.value.setActivePageForCurrentScroll();
+                  }
                 }
-              }),
-            ),
-            h.div({
-              ref: this.documentRef,
-              fields: { id: 'document-wrapper' },
-              events: {
-                scroll: () => {
-                  this.doc.value.setActivePageForCurrentScroll();
-                }
-              }
-            },
-              this.doc
-            )
-          ]),
+              },
+                this.doc
+              )
+            ]),
+        ]),
+        StatusBar.t({
+          props: { doc: this.doc },
+        }),
       ]),
     ]
   }
@@ -1085,11 +1087,13 @@ export default class Wournal extends Component {
       display: 'block',
       height: '100%',
     },
-    '#main': {
-      position: 'relative',
-      top: '87px',
+    '#app': {
       display: 'flex',
-      marginBottom: '100px',
+      flexDirection: 'column',
+      height: '100%',
+    },
+    '#main': {
+      display: 'flex',
       height: 'calc(100% - 87px - 35px)',
       width: '100%',
     },
