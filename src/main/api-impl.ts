@@ -32,15 +32,15 @@ export function registerApiHandlers() {
       filePath = path.normalize(filePath.replace(/^~/, homedir));
       shell.openPath(filePath);
     },
-    'shell:addRecentDocument': async (_, path) => {
-      app.addRecentDocument(path);
+    'shell:addRecentDocument': async (_, filePath) => {
+      app.addRecentDocument(filePath);
     },
 
-    'file:read': async (_, path) => {
-      path = path.replace(/^~/, homedir);
-      console.log(`Loading file: ${path}`);
-      if (!fs.existsSync(path)) return false;
-      const b = fs.readFileSync(path, { encoding: null });
+    'file:read': async (_, filePath) => {
+      filePath = filePath.replace(/^~/, homedir);
+      console.log(`Loading file: ${filePath}`);
+      if (!fs.existsSync(filePath)) return false;
+      const b = fs.readFileSync(filePath, { encoding: null });
       // Jesus chist node. This is why nobody likes javascript.
       //
       // A node `Buffer` has a `buffer` property, which exposes the an
@@ -63,10 +63,10 @@ export function registerApiHandlers() {
       if (!ret) return false;
       return ret[0];
     },
-    'file:write': async (_, path, data) => {
-      path = path.replace(/^~/, homedir);
-      console.log(`Writing file: ${path}`);
-      fs.writeFileSync(path, new DataView(data), { encoding: null });
+    'file:write': async (_, filePath, data) => {
+      filePath = filePath.replace(/^~/, homedir);
+      console.log(`Writing file: ${filePath}`);
+      fs.writeFileSync(filePath, new DataView(data), { encoding: null });
     },
     'file:savePrompt': async (e, defaultPath, filters) => {
       const win = instances.get(e.sender)!.win;
@@ -80,9 +80,9 @@ export function registerApiHandlers() {
       fileName = fileName.replace(/^~/, homedir);
       return fs.existsSync(fileName);
     },
-    'file:mkdir': async (_, path) => {
-      path = path.replace(/^~/, homedir);
-      fs.mkdirSync(path, { recursive: true });
+    'file:mkdir': async (_, filePath) => {
+      filePath = filePath.replace(/^~/, homedir);
+      fs.mkdirSync(filePath, { recursive: true });
     },
     'file:ls': async (_, dirName) => {
       dirName = dirName.replace(/^~/, homedir);
@@ -90,7 +90,7 @@ export function registerApiHandlers() {
     },
     'file:rm': async (_, fileName) => {
       const allowedDir = process.platform === 'win32'
-        ? '~/AppData/Local/Wournal'
+        ? '~/AppData/Roaming/Wournal/'
         : '~/.cache/wournal/';
       if (!fileName.startsWith(allowedDir))
         throw new Error(`Cannot rm in dir: ${fileName}`);

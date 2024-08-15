@@ -1,5 +1,6 @@
 import { inject } from "dependency-injection";
 import { AutosaveConfig } from "persistence/ConfigDTO";
+import { DSUtils } from "util/DSUtils";
 import { FileUtils } from "util/FileUtils";
 import { getLogger } from "util/Logging";
 import { WournalDocument } from "./WournalDocument";
@@ -13,6 +14,7 @@ export const AUTOSAVE_DIR = navigator.userAgent.indexOf('Windows') !== -1
 export default function setupAutosave(
   cfg: AutosaveConfig,
   currentDoc: () => WournalDocument,
+  notify: (msg: string) => void,
 ): () => void {
   const fs = inject('FileSystem');
   LOG.info(
@@ -82,19 +84,34 @@ export default function setupAutosave(
         }
       }
     } catch(e) {
-      LOG.warn(`Could not delete autosaves`, e);
+      const msg = 'Could not delete autosaves';
+      notify(`${msg}. Error: ${DSUtils.trySerialize(e)}`);
+      LOG.warn(msg, e);
+      stop();
     }
 
     const now = new Date();
     now.getFullYear()
     const fileName = autosaveFileName(doc);
     LOG.info(`Saving autosave ${fileName}`);
-    fs.write(AUTOSAVE_DIR + fileName, await doc.toFile());
+    try {
+      fs.write(AUTOSAVE_DIR + fileName, await doc.toFile());
+    } catch (e) {
+      const msg = 'Could not write autosave';
+      notify(`${msg}. Error: ${DSUtils.trySerialize(e)}`);
+      LOG.warn(msg, e);
+      stop();
+    }
 
   }, cfg.intervalSeconds * 1000) as any as number;
 
+  function stop() {
+    clearInterval(interval);
+    LOG.info('Autosaves Stopped');
+  }
+
   return () => {
     LOG.warn('Disabling autosave');
-    clearInterval(interval);
+    stop();
   };
 }

@@ -513,8 +513,19 @@ export default class Wournal extends Component {
     this.subscribe(this.configCtx, v => this.confRepo.save(v));
 
     this.onRendered(() => {
-      const stopAutoSave =
-        setupAutosave(this.configCtx.value.autosave, () => this.doc.value);
+      const stopAutoSave = setupAutosave(
+        this.configCtx.value.autosave, () => this.doc.value,
+        msg => this.dialog.infoBox('Autosave Error', [
+          h.p([
+            'Something went wrong with the autosave system.',
+            'Please check file permissions on the autosave directory',
+            '(%USERPROFILE%\AppData\Roaming\Wournal\autosave on Windows, ',
+            '~/.cache/wournal/autosave/ on linux). If the error persists, ',
+            'you can disable the autosave system in the settings panel.',
+          ]),
+          h.p(['The error message was: ', msg]),
+        ], 'Warning'),
+      );
       this.onRemoved(stopAutoSave);
     })
 

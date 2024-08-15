@@ -38,11 +38,27 @@ export const DSUtils = {
   },
 
   trySerialize: function (data: any): string | '<Not Serializable>' {
+    if (data instanceof Error) {
+      return JSON.stringify({
+        'message': data.message,
+        'cause': data.cause ?? '<none>',
+        'error': data.toString(),
+        'stack': data.stack ?? '<none>',
+      });
+    }
     if (typeof data === 'string') return data;
     try {
       return JSON.stringify(data, null, 2);
     } catch {
-      return '<Not Serializable>';
+      if (typeof data === 'object' && 'toString' in data) {
+        try {
+          return data.toString();
+        } catch {
+          return '<Not Serializable>';
+        }
+      } else {
+        return '<Not Serializable>';
+      }
     }
   },
 

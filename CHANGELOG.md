@@ -6,6 +6,7 @@ Changelog
 
 ### Fixed
 
+- Autosave on Windows
 - Opening the autosave directory from settings would throw an error
 
 `0.0.6` - _2024-08-08_
