@@ -1,4 +1,4 @@
-import { Component, h, rx } from "@mvuijs/core";
+import { h, rx } from "@mvuijs/core";
 import { OpenDialog } from "common/dialog-manager";
 import * as ui5 from '@mvuijs/ui5';
 import { getLogger, getLogHistoryText } from "util/Logging";
@@ -6,15 +6,6 @@ import environment from "Shared/environment";
 import PackageJson from 'PackageJson';
 
 const LOG = getLogger(__filename);
-
-const trySerialize = (data: any): string | '<Not Serializable>' => {
-  if (typeof data === 'string') return data;
-  try {
-    return JSON.stringify(data, null, 2);
-  } catch {
-    return '<Not Serializable>';
-  }
-}
 
 export default function openSystemDebugInfo(openDialog: OpenDialog) {
   const displayCopied = new rx.State(false);
