@@ -50,7 +50,7 @@ class TabButton extends Component<{
       margin: '.2em',
       fontFamily: ui5.Theme.FontFamily,
       cursor: 'default',
-      minWidth: '10em',
+      width: '10em',
       padding: '.3em',
     },
     '#container': {
@@ -75,6 +75,9 @@ class TabButton extends Component<{
     '#title': {
       marginLeft: '.2em',
       flexGrow: '1',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
     },
     '#title, #close': {
       // display: 'block',
