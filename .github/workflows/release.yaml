@@ -10,6 +10,10 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+      - name: Set Version Env Var
+        run: echo "WOURNAL_VERSION=$(jq -r '.version' package.json)" >> $GITHUB_ENV
+      - name: Test Print Version
+        run: echo "Wournal Version is $WOURNAL_VERSION"
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
@@ -21,16 +25,31 @@ jobs:
         run: npm run make -- --targets=zip
       - name: Make AppImage Release
         run: npm run make -- --targets=AppImage
-      - name: Upload Artifacts
+      - name: Upload Artifacts (Release Artifacts)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node .github/util-scripts/upload-artifacts.js
+
+      - name: Upload Artifacts [linux-portable] (Actions Artifacts)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Wournal-GNU-Linux-Portable-${{env.WOURNAL_VERSION}}.zip
+          path: out/make/zip/linux/x64/Wournal-linux-x64-${{env.WOURNAL_VERSION}}.zip
+      - name: Upload Artifacts [linux-appimage] (Actions Artifacts)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Wournal-GNU-Linux-${{env.WOURNAL_VERSION}}.AppImage
+          path: out/make/AppImage/x64/Wournal-${{env.WOURNAL_VERSION}}-x64.AppImage
 
   release-windows:
     runs-on: windows-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+      - name: Set Version Env Var
+        run: echo "WOURNAL_VERSION=$((Get-Content package.json | ConvertFrom-Json).version)" >> $env:GITHUB_ENV
+      - name: Test Print Version
+        run: echo "Wournal Version is $env:WOURNAL_VERSION"
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
@@ -46,3 +65,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node .github/util-scripts/upload-artifacts.js
+
+      - name: Upload Artifacts [windows-portable] (Actions Artifacts)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Wournal-Windows-Portable-${{env.WOURNAL_VERSION}}.zip
+          path: out/make/zip/win32/x64/Wournal-win32-x64-${{env.WOURNAL_VERSION}}.zip
+      - name: Upload Artifacts [windows-setup] (Actions Artifacts)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Wournal-Windows-Setup-${{env.WOURNAL_VERSION}}.exe
+          path: out/make/nsis/x64/Wournal Setup ${{env.WOURNAL_VERSION}}.exe
