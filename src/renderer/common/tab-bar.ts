@@ -69,7 +69,7 @@ class TabButton extends Component<{
       display: 'none',
       marginLeft: '.3em',
     },
-    '#container:hover > #close': {
+    '#container.active:hover > #close': {
       display: 'unset',
     },
     '#title': {
@@ -111,14 +111,20 @@ export class TabBar extends Component<{
   render() {
     const { tabs } = this.props;
     const activeTab = new rx.State<string | false>(false);
+    const lastClosed = new rx.State<number>(0);
 
     // select tab 0 if no other is selected. disable tab display if
     // there are no longer any tabs
     tabs.subscribe(tabs => {
-      if (activeTab.value !== false) return;
+      if (tabs.find(t => t.id === activeTab.value) !== undefined) return;
       if (tabs.length === 0) activeTab.next(false);
-      else activeTab.next(tabs[0].id);
-    })
+      else {
+        if (lastClosed.value > 1)
+          activeTab.next(tabs[lastClosed.value-1].id);
+        else
+          activeTab.next(tabs[0].id);
+      }
+    });
 
     return [
       h.div(
@@ -130,7 +136,10 @@ export class TabBar extends Component<{
           },
           events: {
             select: ({ detail }) => activeTab.next(detail),
-            close: ({ detail }) => this.dispatch('close', detail),
+            close: ({ detail }) => {
+              lastClosed.next(tabs.findIndex(t => t.id === detail));
+              this.dispatch('close', detail);
+            },
           }
         })))
       ),

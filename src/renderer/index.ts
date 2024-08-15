@@ -4,6 +4,7 @@ import { TabBar, TabDef } from 'common/tab-bar';
 @Component.register
 export class App extends Component {
   render() {
+    const counter = new rx.State(0);
     const tabs = new rx.State<TabDef[]>([
       {
         title: 'Tab 1',
@@ -13,7 +14,12 @@ export class App extends Component {
       {
         title: 'Tab 2',
         id: 't2',
-        template: h.p('Content Tab 2'),
+        template: h.p([
+          h.button(
+            { events: { click: _ => counter.next(v => v + 1) }}, 'inc'
+          ),
+          h.span(counter),
+        ]),
       },
       {
         title: 'Tab 3 loooooong name',
