@@ -119,7 +119,8 @@ function log(
   else LOG_BUILTIN[level](msg);
 
   const logMsg: LogMessage = {
-    time: (new Date()).toISOString(), level, msg: msg.toString(),
+    time: (new Date()).toISOString(), level,
+    msg: msg !== undefined ? msg.toString() : '<undefined>',
   }
   if (data !== undefined) {
     if (level === 'error') {
@@ -147,7 +148,7 @@ const LOG_PROD = {
    A replacement for the console.* logging functions. See module description for
    details.
  */
-export const LOG: Logger = !environment.production ? LOG_PROD : LOG_BUILTIN;
+export const LOG: Logger = environment.production ? LOG_PROD : LOG_BUILTIN;
 
 const getLoggerSingle = (name: string, lvl: keyof Logger) => {
   return LOG === LOG_PROD

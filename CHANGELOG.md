@@ -8,6 +8,7 @@ Changelog
 
 - When closing Wournal, it will now remember the size and maximized state and
   apply that to any new windows.
+- Remember the last page when reopening a document.
 
 ### Fixed
 

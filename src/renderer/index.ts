@@ -17,6 +17,7 @@ import { ConfigDTO, defaultConfig } from "persistence/ConfigDTO";
 
 import 'res/font/roboto.css';
 import 'res/font/roboto-mono.css';
+import { LastPages } from "document/last-pages";
 
 {
   loggingOverwriteConsoleLogFunctions();
@@ -128,6 +129,12 @@ async function main() {
 
   window.electron.on["window:close"](async () => {
     LOG.info('OS attempting to close window');
+
+    LastPages.read();
+    const docId = wournal.api.getDocumentId();
+    if (docId !== false) LastPages.set(docId, wournal.api.getCurrentPageNr())
+    LastPages.write();
+
     if (!(await wournal.api.promptClosingUnsaved())) {
       LOG.info('Closing Window');
       ApiClient["window:destroy"]();
