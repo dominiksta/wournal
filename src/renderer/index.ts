@@ -7,7 +7,8 @@ import Wournal from "wournal";
 import './electron-api-client';
 import { ApiClient } from "./electron-api-client";
 import { ErrorPopup } from "app/error-popup";
-import { getLogger, setupLogging } from "util/Logging";
+import { getLogger, loggingOverwriteConsoleLogFunctions } from "util/Logging";
+import { logAllClicks, setupMvuiStateLogging } from "util/logging-frontend";
 import { waitInitUi5 } from "util/ui5-boot";
 import environment from "Shared/environment";
 import { mkConfigRepositoryElectronFS } from "persistence/ConfigRepositoryElectronFS";
@@ -17,7 +18,11 @@ import { ConfigDTO, defaultConfig } from "persistence/ConfigDTO";
 import 'res/font/roboto.css';
 import 'res/font/roboto-mono.css';
 
-setupLogging();
+{
+  loggingOverwriteConsoleLogFunctions();
+  setupMvuiStateLogging();
+  logAllClicks();
+}
 
 const LOG = getLogger(__filename);
 
