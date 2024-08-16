@@ -3,6 +3,7 @@ import { app, BrowserWindow, shell, WebContents } from 'electron';
 import path from 'node:path';
 import environment from 'Shared/environment';
 import { loggingOverwriteConsoleLogFunctions } from 'Shared/logging';
+import { getTempConfig, TEMP_CONFIG_CURRENT_VERSION, writeTempConfig } from './temp-config';
 
 {
   loggingOverwriteConsoleLogFunctions();
@@ -29,14 +30,17 @@ export const instances: Map<WebContents, {
 }> = new Map();
 
 function createWindow(argv: string[], pwd: string) {
+  const tempCfg = getTempConfig();
   const win = new BrowserWindow({
-    // width: 1200,
-    // height: 800,
+    width: tempCfg.windowWidth,
+    height: tempCfg.windowHeight,
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
     },
   })
   win.setMenu(null);
+  if (tempCfg.maximized) win.maximize();
+
 
   if (!app.isPackaged) win.webContents.openDevTools();
   if (process.argv.indexOf('--dev-tools') !== -1)
@@ -56,6 +60,16 @@ function createWindow(argv: string[], pwd: string) {
   }
 
   instances.set(win.webContents, { win, argv, pwd });
+
+  win.on('close', () => {
+    writeTempConfig({
+      version: TEMP_CONFIG_CURRENT_VERSION,
+      windowHeight: win.getBounds().height,
+      windowWidth: win.getBounds().width,
+      maximized: win.isMaximized(),
+    })
+  });
+
   win.show();
 }
 
@@ -66,5 +80,8 @@ if (!gotTheLock) {
   registerApiHandlers();
   app.whenReady().then(() => createWindow(process.argv, process.cwd()));
   app.on('second-instance', (_, argv, pwd) => createWindow(argv, pwd));
-  app.on('window-all-closed', () => app.quit());
+  app.on('window-all-closed', () => {
+    app.quit();
+
+  });
 }

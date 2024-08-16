@@ -2,10 +2,10 @@ import environment from "./environment";
 import { HOST_OS, runningInElectronMain, runningInElectronRenderer } from "./util";
 
 export const APP_CACHE_DIR = HOST_OS === 'windows'
-  ? '~/AppData/Roaming/Wournal/'
-  : '~/.cache/Wournal/'
+  ? '~/AppData/Roaming/Wournal'
+  : '~/.cache/Wournal'
 
-export const AUTOSAVE_DIR = APP_CACHE_DIR + 'autosave/';
+export const AUTOSAVE_DIR = APP_CACHE_DIR + '/autosave';
 
 export async function getAppDir(): Promise<string> {
   if (runningInElectronRenderer()) {

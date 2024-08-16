@@ -77,7 +77,7 @@ export default function setupAutosave(
         }
         for (const f of sorted.slice(0, sorted.length - cfg.keepFiles)) {
           LOG.info(`Deleting autosave ${f.fileName}`)
-          await fs.rm(AUTOSAVE_DIR + f.fileName);
+          await fs.rm(`${AUTOSAVE_DIR}/${f.fileName}`);
         }
       }
     } catch(e) {
@@ -92,7 +92,7 @@ export default function setupAutosave(
     const fileName = autosaveFileName(doc);
     LOG.info(`Saving autosave ${fileName}`);
     try {
-      fs.write(AUTOSAVE_DIR + fileName, await doc.toFile());
+      fs.write(`${AUTOSAVE_DIR}/${fileName}`, await doc.toFile());
     } catch (e) {
       const msg = 'Could not write autosave';
       notify(`${msg}. Error: ${DSUtils.trySerialize(e)}`);

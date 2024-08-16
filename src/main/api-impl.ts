@@ -93,7 +93,7 @@ export function registerApiHandlers() {
       return fs.readdirSync(dirName);
     },
     'file:rm': async (_, fileName) => {
-      if (!fileName.startsWith(APP_CACHE_DIR))
+      if (!fileName.startsWith(`${APP_CACHE_DIR}/`))
         throw new Error(
           `Cannot rm in dir: ${fileName}, allowed is ${APP_CACHE_DIR}`
         );
