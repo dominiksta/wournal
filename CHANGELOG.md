@@ -6,9 +6,11 @@ Changelog
 
 ### Added
 
+- A new option (intended for left-handed users) in settings for changing the
+  angle of the pen cursor
 - When closing Wournal, it will now remember the size and maximized state and
-  apply that to any new windows.
-- Remember the last page when reopening a document.
+  apply that to any new windows
+- Remember the last page when reopening a document
 
 ### Fixed
 

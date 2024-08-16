@@ -68,6 +68,7 @@ export class Settings extends Component {
             zoomUi: rx.bind(conf.partial('zoomUI')),
             defaultZoomDocument: rx.bind(conf.partial('defaultZoomDocument')),
             checkUpdatesOnStartup: rx.bind(conf.partial('checkUpdatesOnStartup')),
+            penCursorLeftAngle: rx.bind(conf.partial('penCursorLeftAngle')),
           }})
         ]),
         ui5.panel({ fields: { headerText: 'Default Tool Settings', collapsed: true }}, [
@@ -217,6 +218,7 @@ class UserInterfaceSettings extends Component {
     zoomUi: rx.prop<number>(),
     defaultZoomDocument: rx.prop<number>(),
     checkUpdatesOnStartup: rx.prop<boolean>(),
+    penCursorLeftAngle: rx.prop<boolean>(),
   }
 
   render() {
@@ -260,7 +262,13 @@ class UserInterfaceSettings extends Component {
           'Note that you can temporarily toggle dark mode using ',
           h.i(globalCmds.toggle_dark_mode_temp.shortcut), '.'
         ]),
-
+        h.div(ui5.checkbox({
+          fields: {
+            checked: rx.bind(this.props.penCursorLeftAngle),
+            wrappingType: 'Normal',
+            text: 'Swap Angle of Pen Cursor (May be Desirable for Lefties)',
+          }
+        })),
       ]),
 
       ui5.title({ fields: { level: 'H5' }}, 'Zoom'),
