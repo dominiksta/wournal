@@ -4,13 +4,18 @@ import { TabBar, TabDef } from 'common/tab-bar';
 @Component.register
 export class App extends Component {
   render() {
+    this.setAttribute('data-ui5-compact-size', 'true');
+
     const counter = new rx.State(0);
+
+    const mkBasicTab = (n: number) => ({
+      title: `Tab ${n}`,
+      id: `t${n}`,
+      template: h.p(`Content Tab ${n}`),
+    });
+
     const tabs = new rx.State<TabDef[]>([
-      {
-        title: 'Tab 1',
-        id: 't1',
-        template: h.p('Content Tab 1'),
-      },
+      mkBasicTab(1),
       {
         title: 'Tab 2',
         id: 't2',
@@ -26,6 +31,7 @@ export class App extends Component {
         id: 't3',
         template: h.p('Content Tab 3'),
       },
+      ...[4, 5, 6, 7].map(mkBasicTab)
     ]);
 
 
