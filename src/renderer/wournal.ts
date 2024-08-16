@@ -36,7 +36,7 @@ import RecentFiles from 'persistence/recent-files';
 import { debounce } from 'lodash';
 import { checkDisplayUpdates, compareVersionStrings, getGithubReleases } from 'app/updater';
 import PackageJson from 'PackageJson';
-import { getLogger, logFunction, logObject } from 'util/Logging';
+import { getLogger, logFunction, logObject } from 'Shared/logging';
 import { PageProps } from 'document/WournalPage';
 import environment from 'Shared/environment';
 import { SVGUtils } from 'util/SVGUtils';

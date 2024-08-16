@@ -7,7 +7,7 @@ import { ApiCtx } from 'app/api-context';
 import { DocumentCtx } from 'app/document-context';
 import { GlobalCommandsCtx } from './global-commands';
 import { customScrollbar } from 'global-styles';
-import { getLogger } from 'util/Logging';
+import { getLogger } from 'Shared/logging';
 
 const LOG = getLogger(__filename);
 

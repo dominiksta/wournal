@@ -3,7 +3,7 @@ import * as ui5 from '@mvuijs/ui5';
 import environment from 'Shared/environment';
 import PackageJson from 'PackageJson';
 import { DSUtils } from 'util/DSUtils';
-import { getLogger, getLogHistoryText } from 'util/Logging';
+import { getLogger, getLogHistoryText } from 'Shared/logging';
 import * as ErrorStackParser from 'error-stack-parser';
 import { SourceMapConsumer } from 'source-map';
 import sourceMapWasm from 'res/source-map/mappings.wasm';

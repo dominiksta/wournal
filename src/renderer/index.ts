@@ -7,7 +7,7 @@ import Wournal from "wournal";
 import './electron-api-client';
 import { ApiClient } from "./electron-api-client";
 import { ErrorPopup } from "app/error-popup";
-import { getLogger, loggingOverwriteConsoleLogFunctions } from "util/Logging";
+import { getLogger, loggingOverwriteConsoleLogFunctions } from "Shared/logging";
 import { logAllClicks, setupMvuiStateLogging } from "util/logging-frontend";
 import { waitInitUi5 } from "util/ui5-boot";
 import environment from "Shared/environment";

@@ -1,4 +1,4 @@
-import { getLogger } from "./Logging";
+import { getLogger } from "Shared/logging";
 
 const LOG = getLogger(__filename);
 

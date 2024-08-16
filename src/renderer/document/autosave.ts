@@ -3,7 +3,7 @@ import { AutosaveConfig } from "persistence/ConfigDTO";
 import { AUTOSAVE_DIR } from "Shared/const";
 import { DSUtils } from "util/DSUtils";
 import { FileUtils } from "util/FileUtils";
-import { getLogger } from "util/Logging";
+import { getLogger } from "Shared/logging";
 import { WournalDocument } from "./WournalDocument";
 
 const LOG = getLogger(__filename);

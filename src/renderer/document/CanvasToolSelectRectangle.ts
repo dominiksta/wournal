@@ -1,5 +1,5 @@
 import { CanvasToolStrokeWidth } from "../persistence/ConfigDTO";
-import { LOG } from "../util/Logging";
+import { LOG } from "Shared/logging";
 import { CanvasTool } from "./CanvasTool";
 import { WournalPage } from "./WournalPage";
 

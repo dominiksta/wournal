@@ -1,5 +1,5 @@
 import { getConfigFileDir } from "Shared/const";
-import { getLogger } from "util/Logging";
+import { getLogger } from "Shared/logging";
 import { ConfigDTO, ConfigDTOVersioner, defaultConfig } from "./ConfigDTO";
 import { ConfigRepository } from "./ConfigRepository";
 import { ConfigRepositoryLocalStorage, CONFIG_LOCALSTORAGE_KEY } from "./ConfigRepositoryLocalStorage";

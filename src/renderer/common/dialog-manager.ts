@@ -3,7 +3,7 @@ import {
 } from "@mvuijs/core";
 import * as ui5 from "@mvuijs/ui5";
 import { DSUtils } from "util/DSUtils";
-import { getLogger } from "util/Logging";
+import { getLogger } from "Shared/logging";
 
 const LOG = getLogger(__filename);
 

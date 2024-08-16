@@ -1,7 +1,7 @@
 import { PDFDocumentProxy } from "pdfjs-dist/types/src/display/api";
 import * as pdfjs from 'pdfjs-dist';
 import { inject } from "dependency-injection";
-import { getLogger } from "util/Logging";
+import { getLogger } from "Shared/logging";
 
 const LOG = getLogger(__filename);
 

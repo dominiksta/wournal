@@ -1,4 +1,4 @@
-import { getLogger } from 'util/Logging';
+import { getLogger } from 'Shared/logging';
 import { ApiRouteNames, ElectronApi } from '../main/api';
 
 const LOG = getLogger(__filename);

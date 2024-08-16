@@ -1,5 +1,5 @@
 import { DOMUtils } from "../util/DOMUtils";
-import { LOG } from "../util/Logging";
+import { LOG } from "Shared/logging";
 
 export abstract class TransformableSVGElement {
 

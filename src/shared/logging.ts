@@ -147,7 +147,7 @@ const LOG_PROD = {
    A replacement for the console.* logging functions. See module description for
    details.
  */
-export const LOG: Logger = environment.production ? LOG_PROD : LOG_BUILTIN;
+export const LOG: Logger = !environment.production ? LOG_PROD : LOG_BUILTIN;
 
 const getLoggerSingle = (name: string, lvl: keyof Logger) => {
   return LOG === LOG_PROD
@@ -179,14 +179,14 @@ export const getLogger = (name: string): Logger => {
 
 /** Overwrite built-in console.log functions to point to `LOG`. */
 export function loggingOverwriteConsoleLogFunctions() {
-  const w = window as any;
+  const c = console as any;
   if (LOG === LOG_PROD) {
-    w.console.orig = LOG_BUILTIN;
+    c.orig = LOG_BUILTIN;
 
-    w.console.debug = LOG_PROD.debug;
-    w.console.log = LOG_PROD.info;
-    w.console.warn = LOG_PROD.warn;
-    w.console.error = LOG_PROD.error;
+    c.debug = LOG_PROD.debug;
+    c.log = LOG_PROD.info;
+    c.warn = LOG_PROD.warn;
+    c.error = LOG_PROD.error;
   }
 
   LOG.info('Logging initialized');

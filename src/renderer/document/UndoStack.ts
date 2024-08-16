@@ -1,5 +1,5 @@
 import { rx } from "@mvuijs/core";
-import { getLogger } from "util/Logging";
+import { getLogger } from "Shared/logging";
 import { WournalDocument } from "./WournalDocument";
 
 const LOG = getLogger(__filename);

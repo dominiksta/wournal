@@ -1,6 +1,6 @@
 import { DOMUtils } from "../util/DOMUtils";
 import { DSUtils } from "../util/DSUtils";
-import { LOG } from "../util/Logging";
+import { LOG } from "Shared/logging";
 import { SVGUtils } from "../util/SVGUtils";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
 import { CanvasElement, CanvasElementDTO } from "./CanvasElement";

@@ -21,4 +21,5 @@ export const mainConfig: Configuration = {
       Shared: path.resolve(__dirname, './src/shared'),
     },
   },
+  node: { __dirname: false, __filename: true },
 };

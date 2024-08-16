@@ -1,6 +1,6 @@
 import { PDFDocumentProxy } from "pdfjs-dist";
 import { OutlineNode } from "persistence/DocumentMeta";
-import { getLogger } from "util/Logging";
+import { getLogger } from "Shared/logging";
 
 const LOG = getLogger(__filename);
 

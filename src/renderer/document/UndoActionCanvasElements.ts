@@ -1,5 +1,5 @@
 import { DOMUtils } from "../util/DOMUtils";
-import { getLogger } from "../util/Logging";
+import { getLogger } from "Shared/logging";
 import { UndoAction } from "./UndoStack";
 import { CanvasElementFactory } from "./CanvasElementFactory";
 import { WournalDocument } from "./WournalDocument";
