@@ -91,9 +91,11 @@ export function registerApiHandlers() {
     'file:rm': async (_, fileName) => {
       const allowedDir = process.platform === 'win32'
         ? '~/AppData/Roaming/Wournal/'
-        : '~/.cache/wournal/';
+        : '~/.cache/Wournal/';
       if (!fileName.startsWith(allowedDir))
-        throw new Error(`Cannot rm in dir: ${fileName}`);
+        throw new Error(
+          `Cannot rm in dir: ${fileName}, allowed is ${allowedDir}`
+        );
       fileName = fileName.replace(/^~/, homedir);
       return fs.rmSync(fileName);
     },

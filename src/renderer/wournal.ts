@@ -520,7 +520,7 @@ export default class Wournal extends Component {
             'Something went wrong with the autosave system.',
             'Please check file permissions on the autosave directory',
             '(%USERPROFILE%\AppData\Roaming\Wournal\autosave on Windows, ',
-            '~/.cache/wournal/autosave/ on linux). If the error persists, ',
+            '~/.cache/Wournal/autosave/ on linux). If the error persists, ',
             'you can disable the autosave system in the settings panel.',
           ]),
           h.p(['The error message was: ', msg]),
