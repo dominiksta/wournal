@@ -50,11 +50,16 @@ class TabButton extends Component<{
       display: 'inline-block',
       margin: '.2em',
       fontFamily: ui5.Theme.FontFamily,
+      fontSize: ui5.Theme.FontSize,
       cursor: 'default',
       width: '10em',
       padding: '.3em',
     },
+    '#container:hover': {
+      background: ui5.Theme.Button_Hover_Background,
+    },
     '#container': {
+      borderRadius: '.2em',
       width: '100%',
       padding: '.3em',
       display: 'flex',
