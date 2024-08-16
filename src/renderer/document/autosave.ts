@@ -1,15 +1,12 @@
 import { inject } from "dependency-injection";
 import { AutosaveConfig } from "persistence/ConfigDTO";
+import { AUTOSAVE_DIR } from "Shared/const";
 import { DSUtils } from "util/DSUtils";
 import { FileUtils } from "util/FileUtils";
 import { getLogger } from "util/Logging";
 import { WournalDocument } from "./WournalDocument";
 
 const LOG = getLogger(__filename);
-
-export const AUTOSAVE_DIR = navigator.userAgent.indexOf('Windows') !== -1
-  ? '~/AppData/Roaming/Wournal/autosave/'
-  : '~/.cache/Wournal/autosave/';
 
 export default function setupAutosave(
   cfg: AutosaveConfig,

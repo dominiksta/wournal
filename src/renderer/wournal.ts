@@ -40,6 +40,7 @@ import { getLogger, logFunction, logObject } from 'util/Logging';
 import { PageProps } from 'document/WournalPage';
 import environment from 'Shared/environment';
 import { SVGUtils } from 'util/SVGUtils';
+import { AUTOSAVE_DIR } from 'Shared/const';
 
 const LOG = getLogger(__filename);
 
@@ -517,11 +518,10 @@ export default class Wournal extends Component {
         this.configCtx.value.autosave, () => this.doc.value,
         msg => this.dialog.infoBox('Autosave Error', [
           h.p([
-            'Something went wrong with the autosave system.',
-            'Please check file permissions on the autosave directory',
-            '(%USERPROFILE%\AppData\Roaming\Wournal\autosave on Windows, ',
-            '~/.cache/Wournal/autosave/ on linux). If the error persists, ',
-            'you can disable the autosave system in the settings panel.',
+            `Something went wrong with the autosave system.`,
+            `Please check file permissions on the autosave directory`,
+            `(${AUTOSAVE_DIR}). If the error persists, you can disable`,
+            `the autosave system in the settings panel.`,
           ]),
           h.p(['The error message was: ', msg]),
         ], 'Warning'),

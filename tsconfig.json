@@ -3,7 +3,7 @@
     "target": "ES6",
     "allowJs": true,
     "module": "commonjs",
-    "skipLibCheck": true,
+    "lib": [ "es2022", "dom", "dom.iterable" ],
     "esModuleInterop": true,
 
     "strictBindCallApply": true,
@@ -17,7 +17,7 @@
     "paths": {
       "*": ["node_modules/*"],
       "PackageJson": ["./package.json"],
-      "Shared/*": ["./src/*"]
+      "Shared/*": ["./src/shared/*"]
     }
   },
   "include": ["src/**/*"]

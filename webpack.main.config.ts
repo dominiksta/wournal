@@ -18,7 +18,7 @@ export const mainConfig: Configuration = {
     extensions: ['.js', '.ts', '.jsx', '.tsx', '.css', '.json'],
     alias: {
       PackageJson: path.resolve(__dirname, './package.json'),
-      Shared: path.resolve(__dirname, './src'),
+      Shared: path.resolve(__dirname, './src/shared'),
     },
   },
 };

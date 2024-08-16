@@ -3,13 +3,13 @@ import * as ui5 from "@mvuijs/ui5";
 import { ConfigCtx } from "app/config-context";
 import { FontPicker } from "common/font-picker";
 import { SimpleSelect } from "common/simple-select";
-import { AUTOSAVE_DIR } from "document/autosave";
 import { CanvasToolName, CanvasToolNames } from "document/CanvasTool";
 import { ApiClient } from "electron-api-client";
 import {
     AutosaveConfig,
   CanvasToolConfig, CanvasToolStrokeWidth, ConfigDTO, defaultConfig
 } from "persistence/ConfigDTO";
+import { AUTOSAVE_DIR } from "Shared/const";
 import { DSUtils } from "util/DSUtils";
 import ColorPaletteEditor, { ColorPicker } from "./color-palette-editor";
 import { GlobalCommandsCtx } from "./global-commands";

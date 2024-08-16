@@ -9,6 +9,7 @@ import { parseArgs } from 'node:util';
 import { argvParseSpec } from './argv';
 import { homedir } from 'os';
 import path from 'path';
+import { APP_CACHE_DIR, getAppDir } from 'Shared/const';
 
 type ApiImpl<T extends ApiSpec<ApiRouteName>> = {
   [K in ApiRouteName]: (e: IpcMainInvokeEvent, ...args: Parameters<T[K]>) => ReturnType<T[K]>
@@ -89,12 +90,9 @@ export function registerApiHandlers() {
       return fs.readdirSync(dirName);
     },
     'file:rm': async (_, fileName) => {
-      const allowedDir = process.platform === 'win32'
-        ? '~/AppData/Roaming/Wournal/'
-        : '~/.cache/Wournal/';
-      if (!fileName.startsWith(allowedDir))
+      if (!fileName.startsWith(APP_CACHE_DIR))
         throw new Error(
-          `Cannot rm in dir: ${fileName}, allowed is ${allowedDir}`
+          `Cannot rm in dir: ${fileName}, allowed is ${APP_CACHE_DIR}`
         );
       fileName = fileName.replace(/^~/, homedir);
       return fs.rmSync(fileName);
@@ -117,9 +115,7 @@ export function registerApiHandlers() {
 
       return entry;
     },
-    'process:getAppDir': async () =>
-      path.normalize(path.resolve(path.dirname(app.getAppPath()), '..', 'user')),
-
+    'process:getAppDir': async () => getAppDir(),
     'window:setTitle': async (e, title) => {
       instances.get(e.sender)!.win.setTitle(title);
     },
