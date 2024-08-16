@@ -124,10 +124,10 @@ export class WournalPDFPageView {
     this.allowTextSelection = allow;
     style.util.applySheetAsAdopted(style.sheet({
       ':host': {
-        pointerEvents: allow ? '' : 'none',
+        pointerEvents: allow ? 'auto' : 'none !important',
       },
       'section[data-annotation-id]': {
-        pointerEvents: allow ? '' : 'none',
+        pointerEvents: allow ? 'auto' : 'none !important',
       }
     }), this.shadow, 'allow-text-selection');
   }
