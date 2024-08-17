@@ -1,15 +1,12 @@
 import { inject } from "dependency-injection";
 import { AutosaveConfig } from "persistence/ConfigDTO";
+import { AUTOSAVE_DIR } from "Shared/const";
 import { DSUtils } from "util/DSUtils";
 import { FileUtils } from "util/FileUtils";
-import { getLogger } from "util/Logging";
+import { getLogger } from "Shared/logging";
 import { WournalDocument } from "./WournalDocument";
 
 const LOG = getLogger(__filename);
-
-export const AUTOSAVE_DIR = navigator.userAgent.indexOf('Windows') !== -1
-  ? '~/AppData/Roaming/Wournal/autosave/'
-  : '~/.cache/Wournal/autosave/';
 
 export default function setupAutosave(
   cfg: AutosaveConfig,
@@ -80,7 +77,7 @@ export default function setupAutosave(
         }
         for (const f of sorted.slice(0, sorted.length - cfg.keepFiles)) {
           LOG.info(`Deleting autosave ${f.fileName}`)
-          await fs.rm(AUTOSAVE_DIR + f.fileName);
+          await fs.rm(`${AUTOSAVE_DIR}/${f.fileName}`);
         }
       }
     } catch(e) {
@@ -95,7 +92,7 @@ export default function setupAutosave(
     const fileName = autosaveFileName(doc);
     LOG.info(`Saving autosave ${fileName}`);
     try {
-      fs.write(AUTOSAVE_DIR + fileName, await doc.toFile());
+      fs.write(`${AUTOSAVE_DIR}/${fileName}`, await doc.toFile());
     } catch (e) {
       const msg = 'Could not write autosave';
       notify(`${msg}. Error: ${DSUtils.trySerialize(e)}`);

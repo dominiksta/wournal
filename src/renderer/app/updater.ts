@@ -4,7 +4,7 @@ import * as ui5 from '@mvuijs/ui5';
 import PackageJson from 'PackageJson';
 import { sanitize } from "dompurify";
 import { marked } from "marked";
-import { getLogger } from "util/Logging";
+import { getLogger } from "Shared/logging";
 
 const GITHUB_REPO_NAME = 'dominiksta/wournal';
 const REMIND_AFTER_DAYS = 2;

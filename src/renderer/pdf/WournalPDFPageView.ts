@@ -15,7 +15,7 @@ import { SVGUtils } from 'util/SVGUtils';
 import getTextRanges from 'util/get-text-ranges';
 import { Highlights } from 'util/highlights';
 import { DSUtils } from 'util/DSUtils';
-import { getLogger } from 'util/Logging';
+import { getLogger } from 'Shared/logging';
 import { theme } from 'global-styles';
 import { inject } from 'dependency-injection';
 import { style } from '@mvuijs/core';
@@ -124,10 +124,10 @@ export class WournalPDFPageView {
     this.allowTextSelection = allow;
     style.util.applySheetAsAdopted(style.sheet({
       ':host': {
-        pointerEvents: allow ? '' : 'none',
+        pointerEvents: allow ? 'auto' : 'none !important',
       },
       'section[data-annotation-id]': {
-        pointerEvents: allow ? '' : 'none',
+        pointerEvents: allow ? 'auto' : 'none !important',
       }
     }), this.shadow, 'allow-text-selection');
   }

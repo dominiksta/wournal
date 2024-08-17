@@ -1,4 +1,4 @@
-import { getLogger } from "./Logging";
+import { getLogger } from "Shared/logging";
 
 const LOG = getLogger(__filename);
 
@@ -19,6 +19,7 @@ export default class DTOVersioner<T> {
 
   public maxVersion() {
     const versions = Object.keys(this.props.updateFunctions).map(parseFloat);
+    if (versions.length === 0) return 0.0;
     return Math.max(...versions);
   }
 
@@ -39,7 +40,7 @@ export default class DTOVersioner<T> {
       this.props;
 
     const versions = Object.keys(updateFunctions).map(parseFloat);
-    const maxVersion = Math.max(...versions);
+    const maxVersion = this.maxVersion();
     if (toVersion === -1) toVersion = maxVersion;
 
     const startingVersion = getVersion(obj);

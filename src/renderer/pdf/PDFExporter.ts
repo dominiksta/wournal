@@ -9,7 +9,7 @@ import {
 import fontkit from '@pdf-lib/fontkit';
 import { CanvasImage } from 'document/CanvasImage';
 import { setOutline } from './set-outline';
-import { getLogger } from 'util/Logging';
+import { getLogger } from 'Shared/logging';
 import * as roboto from 'res/font/roboto';
 
 const LOG = getLogger(__filename);

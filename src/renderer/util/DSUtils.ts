@@ -71,6 +71,8 @@ export const DSUtils = {
     }
   },
 
+  isScalar: (x: any) => typeof x !== 'object' && typeof x !== 'function',
+
   waitNotEq: async function(
     getter: () => any, eq: any = null, waitMs: number = 200,
     maxAttempt: number = 5, doThrow = false,

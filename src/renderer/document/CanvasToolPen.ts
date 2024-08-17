@@ -3,6 +3,7 @@ import { CanvasTool } from "./CanvasTool";
 import { UndoActionCanvasElements } from "./UndoActionCanvasElements";
 import { WournalPage } from "./WournalPage";
 import imgIdleCursor from 'res/icon/custom/pen.png';
+import imgIdleCursorLeftie from 'res/icon/custom/pen-leftie.png';
 
 export class CanvasToolPen extends CanvasTool {
   #conf() {
@@ -20,7 +21,11 @@ export class CanvasToolPen extends CanvasTool {
   /** The svg path for the current line */
   private path: CanvasPath = null;
 
-  public idleCursor = `url('${imgIdleCursor}'), auto`;
+  public get idleCursor() {
+    return this.activePage.value.doc.config.value.penCursorLeftAngle
+      ? `url('${imgIdleCursorLeftie}') 20 0, default`
+      : `url('${imgIdleCursor}'), default`;
+  }
 
   public override canSetStrokeWidth = true;
   public override canSetColor = true;

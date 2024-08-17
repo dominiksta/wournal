@@ -1,6 +1,6 @@
 import { boot as ui5Boot } from '@ui5/webcomponents-base/dist/Boot';
 import "@ui5/webcomponents/dist/Button.js";
-import { getLogger } from './Logging';
+import { getLogger } from 'Shared/logging';
 
 const LOG = getLogger(__filename);
 

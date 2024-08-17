@@ -1,5 +1,5 @@
 import { JTDDataType } from "ajv/dist/core";
-import DTOVersioner from "util/DTOVersioner";
+import DTOVersioner from "Shared/dto-versioner";
 import { CanvasToolNames } from "../document/CanvasTool"
 import Ajv from 'ajv/dist/jtd';
 
@@ -120,6 +120,7 @@ const ConfigDTOSchema = {
       'auto', 'auto_high_contrast',
     ] },
     invertDocument: { type: 'boolean' },
+    penCursorLeftAngle: { type: 'boolean' },
     colorPalette: {
       elements: {
         properties: { color: { type: 'string' }, name: { type: 'string' } }
@@ -212,12 +213,21 @@ export const ConfigDTOVersioner = new DTOVersioner<ConfigDTO>({
       };
     },
 
-    // ver 0.7 -- check for updates on startup
+    // ver 0.8 -- check for updates on startup
     // ----------------------------------------------------------------------
     0.8: (ver0_7: any) => {
       return {
         ...ver0_7, version: 0.8,
         checkUpdatesOnStartup: true,
+      };
+    },
+
+    // ver 0.9 -- customize pen cursor angle
+    // ----------------------------------------------------------------------
+    0.9: (ver0_8: any) => {
+      return {
+        ...ver0_8, version: 0.9,
+        penCursorLeftAngle: false,
       };
     },
   }
@@ -235,6 +245,7 @@ export function defaultConfig(): ConfigDTO {
     // theme should likely be set to "light" by default.
     theme: "auto",
     invertDocument: true,
+    penCursorLeftAngle: false,
     binds: {
       rightClick: "CanvasToolEraser",
       middleClick: "CanvasToolHand",

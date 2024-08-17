@@ -1,5 +1,4 @@
 import environment from "Shared/environment";
-import { rx } from '@mvuijs/core';
 
 /**
    Use `LOG` instead of the the console.* logging functions. Example: Instead of
@@ -120,7 +119,8 @@ function log(
   else LOG_BUILTIN[level](msg);
 
   const logMsg: LogMessage = {
-    time: (new Date()).toISOString(), level, msg: msg.toString(),
+    time: (new Date()).toISOString(), level,
+    msg: msg !== undefined ? msg.toString() : '<undefined>',
   }
   if (data !== undefined) {
     if (level === 'error') {
@@ -174,82 +174,24 @@ export const getLogger = (name: string): Logger => {
   }
 }
 
-/** Overwrite built-in console.log functions to point to `LOG`. */
-function overwriteConsoleLogFunctions() {
-  const w = window as any;
-  if (LOG === LOG_PROD) {
-    w.console.orig = LOG_BUILTIN;
-
-    w.console.debug = LOG_PROD.debug;
-    w.console.log = LOG_PROD.info;
-    w.console.warn = LOG_PROD.warn;
-    w.console.error = LOG_PROD.error;
-  }
-
-  LOG.info('Logging initialized');
-}
-
-function setupMvuiStateLogging() {
-  rx.State.loggingCallback = (name, prev, next) => {
-    const prevScalar = isScalar(prev);
-    const nextScalar = isScalar(prev);
-    const msg = `[state-change] <${name}>`;
-
-    if (!prevScalar && !nextScalar) {
-      LOG.debug(msg);
-    } else {
-      LOG.debug(msg, {
-        prev: prevScalar ? prev : `[${typeof prev}]`,
-        next: nextScalar ? next : `[${typeof next}]`,
-      });
-    }
-  };
-}
-
 // ----------------------------------------------------------------------
 // setup
 // ----------------------------------------------------------------------
 
-function maybeShorten(s: string, len: number = 20): string {
-  if (s.length > 20) return s.slice(0, len) + '...';
-  else return s;
-}
+/** Overwrite built-in console.log functions to point to `LOG`. */
+export function loggingOverwriteConsoleLogFunctions() {
+  const c = console as any;
+  if (LOG === LOG_PROD) {
+    c.orig = LOG_BUILTIN;
 
-function logAllClicks() {
-  window.onclick = (e: MouseEvent) => {
-    const path = e.composedPath().filter(
-      el => (
-        el instanceof HTMLElement &&
-          (
-            el.tagName.includes('-') || // custom element
-            el.innerText || el.title
-          )
-      )
-    ) as HTMLElement[];
-
-    if (path[0] === undefined) return; // drag outside of window
-
-    if (path[0].tagName.includes('WOURNAL-DOCUMENT')) return;
-
-    const pathStr = path.map(el => {
-      let ret = el.tagName.toLowerCase();
-      if (el.innerText)
-        ret += ` [${maybeShorten(el.innerText.replace('\n', ' '))}]`;
-      else if (el.title)
-        ret += ` [${maybeShorten(el.title)}]`;
-      return ret
-    });
-
-    LOG.debug(`[click] ${pathStr.join(' > ')}`);
+    c.debug = LOG_PROD.debug;
+    c.log = LOG_PROD.info;
+    c.warn = LOG_PROD.warn;
+    c.error = LOG_PROD.error;
   }
-}
 
-export function setupLogging() {
-  overwriteConsoleLogFunctions();
-  setupMvuiStateLogging();
-  logAllClicks();
+  LOG.info('Logging initialized');
 }
-
 
 // ----------------------------------------------------------------------
 // helpers

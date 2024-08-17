@@ -1,6 +1,5 @@
-import { ApiClient } from "electron-api-client";
-import environment from "Shared/environment";
-import { getLogger } from "util/Logging";
+import { getConfigFileDir } from "Shared/const";
+import { getLogger } from "Shared/logging";
 import { ConfigDTO, ConfigDTOVersioner, defaultConfig } from "./ConfigDTO";
 import { ConfigRepository } from "./ConfigRepository";
 import { ConfigRepositoryLocalStorage, CONFIG_LOCALSTORAGE_KEY } from "./ConfigRepositoryLocalStorage";
@@ -8,16 +7,6 @@ import FileSystemElectron from "./FileSystemElectron";
 
 const LOG = getLogger(__filename);
 const fs = FileSystemElectron;
-
-const getConfigFileDir = async () => (
-  environment.pkgPortable
-    ? (await ApiClient["process:getAppDir"]()).replaceAll('\\', '/')
-    : (
-      navigator.userAgent.includes('Windows')
-        ? '~/AppData/Roaming/Wournal/config'
-        : '~/.config/Wournal/config'
-    )
-);
 
 const CONFIG_FILE_NAME = 'config.json';
 

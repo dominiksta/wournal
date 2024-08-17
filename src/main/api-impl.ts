@@ -9,6 +9,10 @@ import { parseArgs } from 'node:util';
 import { argvParseSpec } from './argv';
 import { homedir } from 'os';
 import path from 'path';
+import { APP_CACHE_DIR, getAppDir } from 'Shared/const';
+import { getLogger } from 'Shared/logging';
+
+const LOG = getLogger(__filename);
 
 type ApiImpl<T extends ApiSpec<ApiRouteName>> = {
   [K in ApiRouteName]: (e: IpcMainInvokeEvent, ...args: Parameters<T[K]>) => ReturnType<T[K]>
@@ -21,7 +25,7 @@ export function registerApiHandlers() {
       return msg;
     },
     'debug:showDevTools': async (e) => {
-      console.log('Opening Devtools');
+      LOG.info('Opening Devtools');
       instances.get(e.sender)!.win.webContents.openDevTools();
     },
     'debug:binTest': async () => {
@@ -38,7 +42,7 @@ export function registerApiHandlers() {
 
     'file:read': async (_, filePath) => {
       filePath = filePath.replace(/^~/, homedir);
-      console.log(`Loading file: ${filePath}`);
+      LOG.info(`Loading file: ${filePath}`);
       if (!fs.existsSync(filePath)) return false;
       const b = fs.readFileSync(filePath, { encoding: null });
       // Jesus chist node. This is why nobody likes javascript.
@@ -65,7 +69,7 @@ export function registerApiHandlers() {
     },
     'file:write': async (_, filePath, data) => {
       filePath = filePath.replace(/^~/, homedir);
-      console.log(`Writing file: ${filePath}`);
+      LOG.info(`Writing file: ${filePath}`);
       fs.writeFileSync(filePath, new DataView(data), { encoding: null });
     },
     'file:savePrompt': async (e, defaultPath, filters) => {
@@ -89,11 +93,10 @@ export function registerApiHandlers() {
       return fs.readdirSync(dirName);
     },
     'file:rm': async (_, fileName) => {
-      const allowedDir = process.platform === 'win32'
-        ? '~/AppData/Roaming/Wournal/'
-        : '~/.cache/wournal/';
-      if (!fileName.startsWith(allowedDir))
-        throw new Error(`Cannot rm in dir: ${fileName}`);
+      if (!fileName.startsWith(`${APP_CACHE_DIR}/`))
+        throw new Error(
+          `Cannot rm in dir: ${fileName}, allowed is ${APP_CACHE_DIR}`
+        );
       fileName = fileName.replace(/^~/, homedir);
       return fs.rmSync(fileName);
     },
@@ -115,9 +118,7 @@ export function registerApiHandlers() {
 
       return entry;
     },
-    'process:getAppDir': async () =>
-      path.normalize(path.resolve(path.dirname(app.getAppPath()), '..', 'user')),
-
+    'process:getAppDir': async () => getAppDir(),
     'window:setTitle': async (e, title) => {
       instances.get(e.sender)!.win.setTitle(title);
     },
@@ -164,7 +165,7 @@ export function registerCallbacks(win: BrowserWindow) {
 
   for (let key in impl) (impl as any)[key](
     (...args: any[]) => {
-      console.log(`Callback Triggered: ${key}`);
+      LOG.info(`Callback Triggered: ${key}`);
       win.webContents.send(key, ...args);
     }
   )

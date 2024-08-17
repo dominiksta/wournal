@@ -36,10 +36,12 @@ import RecentFiles from 'persistence/recent-files';
 import { debounce } from 'lodash';
 import { checkDisplayUpdates, compareVersionStrings, getGithubReleases } from 'app/updater';
 import PackageJson from 'PackageJson';
-import { getLogger, logFunction, logObject } from 'util/Logging';
+import { getLogger, logFunction, logObject } from 'Shared/logging';
 import { PageProps } from 'document/WournalPage';
 import environment from 'Shared/environment';
 import { SVGUtils } from 'util/SVGUtils';
+import { AUTOSAVE_DIR } from 'Shared/const';
+import { LastPages } from 'document/last-pages';
 
 const LOG = getLogger(__filename);
 
@@ -128,6 +130,7 @@ export default class Wournal extends Component {
       return true;
     },
     loadDocument: async (fileName: string) => {
+      this.flushLastPages();
       LOG.info('loading file: ' + fileName);
       RecentFiles.add(fileName);
       this.doc.next(WournalDocument.create(this.getContext.bind(this)));
@@ -212,6 +215,8 @@ export default class Wournal extends Component {
       await this.doc.value.free();
       this.doc.next(doc);
       closePleaseWait();
+      const lastPage = LastPages.get(fileName);
+      if (lastPage !== false) this.api.scrollPage(lastPage);
       this.shortcutsCtx.focus();
       return true;
     },
@@ -227,6 +232,7 @@ export default class Wournal extends Component {
         LOG.info('new document', [ identification, doc.isSinglePage ]);
       }
     },
+    getDocumentId: () => this.doc.value.fileName ?? false,
     createTestPages: () => {
       this.doc.value.addNewPage({
         width: WournalPageSize.DINA4.height,
@@ -244,6 +250,7 @@ export default class Wournal extends Component {
       });
     },
     promptClosingUnsaved: async () => {
+      this.flushLastPages();
       const doc = this.doc.value;
       if (!doc.dirty) return false;
       return new Promise<boolean>(resolve => {
@@ -507,21 +514,40 @@ export default class Wournal extends Component {
     });
   }
 
+  private flushLastPages () {
+    LastPages.read();
+    let fileName: string | false = false;
+
+    const firstPageWithPDF =
+      this.doc.value.pages.value.find(p => p.pdfMode !== undefined);
+    if (firstPageWithPDF !== undefined)
+      fileName = firstPageWithPDF.pdfMode.fileName;
+
+    const docId = this.api.getDocumentId();
+    if (docId !== false) fileName = docId;
+
+    if (fileName !== false) LastPages.set(fileName, this.api.getCurrentPageNr());
+    LastPages.write();
+  }
+
   render() {
     this.setAttribute('data-ui5-compact-size', 'true');
 
     this.subscribe(this.configCtx, v => this.confRepo.save(v));
+    this.subscribe(
+      rx.interval(30 * 1000).pipe(rx.startWith(0)),
+      _ => this.flushLastPages()
+    );
 
     this.onRendered(() => {
       const stopAutoSave = setupAutosave(
         this.configCtx.value.autosave, () => this.doc.value,
         msg => this.dialog.infoBox('Autosave Error', [
           h.p([
-            'Something went wrong with the autosave system.',
-            'Please check file permissions on the autosave directory',
-            '(%USERPROFILE%\AppData\Roaming\Wournal\autosave on Windows, ',
-            '~/.cache/wournal/autosave/ on linux). If the error persists, ',
-            'you can disable the autosave system in the settings panel.',
+            `Something went wrong with the autosave system.`,
+            `Please check file permissions on the autosave directory`,
+            `(${AUTOSAVE_DIR}). If the error persists, you can disable`,
+            `the autosave system in the settings panel.`,
           ]),
           h.p(['The error message was: ', msg]),
         ], 'Warning'),

@@ -1,13 +1,23 @@
 Changelog
 ======================================================================
 
-`0.0.7` - _unreleased_
+`0.0.7` - _2024-08-16_
 ----------------------------------------------------------------------
+**Hotfix for Autosaves and some Quality of Life**
+
+### Added
+
+- A new option (intended for left-handed users) in settings for changing the
+  angle of the pen cursor
+- When closing Wournal, it will now remember the size and maximized state and
+  apply that to any new windows
+- Remember the last page when reopening a document
 
 ### Fixed
 
 - Autosave on Windows
 - Opening the autosave directory from settings would throw an error
+- Links and other annotations where active even without the text selection tool
 
 `0.0.6` - _2024-08-08_
 ----------------------------------------------------------------------

@@ -1,5 +1,5 @@
 import { JTDDataType } from "ajv/dist/core";
-import DTOVersioner from "util/DTOVersioner";
+import DTOVersioner from "Shared/dto-versioner";
 import Ajv from 'ajv/dist/jtd';
 import PackageJson from 'PackageJson';
 
