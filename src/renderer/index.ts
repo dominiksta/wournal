@@ -1,5 +1,7 @@
+// import './global-styles';
 import { Component, h, rx } from '@mvuijs/core';
 import { TabBar, TabDef } from 'common/tab-bar';
+import { DSUtils } from 'util/DSUtils';
 
 @Component.register
 export class App extends Component {
@@ -42,7 +44,12 @@ export class App extends Component {
         events: {
           close: ({ detail }) => {
             tabs.next(val => val.filter(tab => tab.id !== detail));
-          }
+          },
+          move: ({ detail }) => {
+            DSUtils.moveInArr(tabs.value, detail.from, detail.to);
+            tabs.next(v => [ ...v ]);
+            console.log('move', detail);
+          },
         }
       }),
     ]

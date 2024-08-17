@@ -2,11 +2,21 @@ import { rx, h, Component, style, TemplateElementChild } from '@mvuijs/core';
 import * as ui5 from '@mvuijs/ui5';
 import { debounce } from 'lodash';
 
+const TAB_WIDTH = '12em';
+const DROP_INDICATOR_WIDTH = '.2em';
+
+// [dominiksta:2024-08-17]: This feels like a dirty hack but it *sort of*
+// isn't. If we assume the user does not have two mice plugged in or uses two
+// fingers simultaneously to drag something around, having this as a global
+// works. For some reason a context didn't work andI don't feel like investigating.
+let dragStart: TabButton | false = false;
+
 @Component.register
 class TabButton extends Component<{
   events: {
     close: CustomEvent<string>,
     select: CustomEvent<string>,
+    dropped: CustomEvent<{ fromId: string, toId: string, pos: 'left' | 'right'}>,
   },
   slots: { 'default': HTMLElement }
 }> {
@@ -19,63 +29,155 @@ class TabButton extends Component<{
   render() {
     const { title, id, active } = this.props;
 
+    const showDrpIndLeft = new rx.State(false);
+    const showDrpIndRight = new rx.State(false);
+
     return [
       h.div(
         {
           fields: { id: 'container' },
-          classes: { active },
-          events: { click: _ => this.dispatch('select', id.value) }
+          events: {
+          }
         },
         [
-          h.span({
-            classes: { active },
-            fields: { id: 'title' },
-          }, title),
-          ui5.icon({
-            fields: { id: 'close', design: 'Neutral', name: 'decline' },
-            events: {
-              click: e => {
-                e.stopPropagation();
-                this.dispatch('close', id.value);
+          h.div({
+            fields: { id: 'drop-indicator-left' },
+            style: { display: showDrpIndLeft.ifelse(
+              { if: 'inline-block', else: 'none' }
+            )}
+          }),
+          h.div(
+            {
+              fields: { id: 'tab-container', draggable: true },
+              classes: { active },
+              events: {
+                click: _ => this.dispatch('select', id.value),
+                dragstart: e => {
+                  {
+                    dragStart = this;
+                    // drag handle
+                    const dragImageHide = this.cloneNode(true) as TabButton;
+                    dragImageHide.id = "drag-image-hide"
+                    dragImageHide.style.opacity = '0';
+
+                    const dragImage = document.createElement('span');
+                    dragImage.id = "drag-image";
+                    dragImage.style.pointerEvents = 'none';
+                    dragImage.textContent = this.props.title.value;
+                    dragImage.style.fontFamily = ui5.Theme.FontFamily;
+                    dragImage.style.fontSize = ui5.Theme.FontSize;
+                    dragImage.style.opacity = '0.5';
+                    dragImage.style.position = "absolute";
+
+                    document.body.appendChild(dragImageHide);
+                    document.body.appendChild(dragImage);
+                    e.dataTransfer.setDragImage(dragImageHide, 0, 0);
+                  }
+                },
+                drag: e => {
+                  {
+                    // drag handle
+                    const dragImage = document.getElementById('drag-image');
+                    dragImage.style.left = `${e.x + 10}px`;
+                    dragImage.style.top = `${e.y + 10}px`;
+                  }
+                },
+                dragend: e => {
+                  {
+                    // drag handle
+                    const dragImage = document.getElementById('drag-image');
+                    const dragImageHide = document.getElementById('drag-image-hide');
+                    dragImage?.remove();
+                    dragImageHide?.remove();
+                  }
+                  showDrpIndLeft.next(false); showDrpIndRight.next(false);
+                },
+                dragover: e => {
+                  e.preventDefault();
+                  const me = this.getBoundingClientRect();
+                  const middle = me.left + me.width / 2;
+                  showDrpIndLeft.next(e.x < middle);
+                  showDrpIndRight.next(e.x >= middle);
+                },
+                dragleave: _ => {
+                  showDrpIndLeft.next(false); showDrpIndRight.next(false);
+                },
+                drop: e => {
+                  {
+                    // drag handle
+                    const dragImage = document.getElementById('drag-image');
+                    const dragImageHide = document.getElementById('drag-image-hide');
+                    dragImage.remove();
+                    dragImageHide.remove();
+                  }
+                  if (dragStart === false) throw new Error('no drag start element');
+                  const me = this.getBoundingClientRect();
+                  const middle = me.left + me.width / 2;
+                  this.dispatch('dropped', {
+                    fromId: dragStart.props.id.value, toId: id.value,
+                    pos: e.x < middle ? 'left' : 'right'
+                  });
+                  showDrpIndLeft.next(false); showDrpIndRight.next(false);
+                },
               }
-            }
+            },
+            [
+              h.span({
+                classes: { active },
+                fields: { id: 'title' },
+              }, title),
+              ui5.icon({
+                fields: { id: 'close', design: 'Neutral', name: 'decline' },
+                events: {
+                  click: e => {
+                    e.stopPropagation();
+                    this.dispatch('close', id.value);
+                  }
+                }
+              }),
+            ]
+          ),
+          h.div({
+            fields: { id: 'drop-indicator-right' },
+            style: { display: showDrpIndRight.ifelse(
+              { if: 'inline-block', else: 'none' }
+            )}
           }),
         ]
-      )
+      ),
     ]
   }
 
   static styles = style.sheet({
+    // '*': { outline: '1px solid lightgreen' },
     ':host': {
       display: 'inline-block',
-      margin: '.2em',
+      // margin: '.2em',
       fontFamily: ui5.Theme.FontFamily,
       fontSize: ui5.Theme.FontSize,
       cursor: 'default',
-      width: '10em',
-      padding: '.3em',
-    },
-    '#container:hover': {
-      background: ui5.Theme.Button_Hover_Background,
+      width: TAB_WIDTH,
+      // padding: '.3em',
     },
     '#container': {
+      display: 'flex',
+      alignItems: 'center',
+    },
+    '#tab-container:hover': {
+      background: ui5.Theme.Button_Hover_Background,
+    },
+    '#tab-container': {
       borderRadius: '.2em',
-      width: '100%',
-      padding: '.3em',
+      flexGrow: '1',
+      width: `calc(${TAB_WIDTH} - 3em)`,
+      padding: '4px',
       display: 'flex',
       alignItems: 'center',
       height: '1.5em',
     },
-    '#container.active': {
+    '#tab-container.active': {
       borderBottom: `2px solid ${ui5.Theme.Button_Active_BorderColor}`,
-      marginBottom: '-2px',
-    },
-    '#close': {
-      display: 'none',
-      marginLeft: '.3em',
-    },
-    '#container.active:hover > #close': {
-      display: 'unset',
+      paddingBottom: '2px',
     },
     '#title': {
       marginLeft: '.2em',
@@ -92,8 +194,24 @@ class TabButton extends Component<{
     '#title.active': {
       color: ui5.Theme.Button_TextColor,
     },
+    '#close': {
+      display: 'none',
+      marginLeft: '.3em',
+    },
+    '#tab-container.active:hover #title': {
+      maxWidth: `calc(${TAB_WIDTH} - 3em)`,
+    },
+    '#tab-container.active:hover > #close': {
+      display: 'inline-block',
+    },
     '#close:hover, #close:active': {
       color: 'red',
+    },
+    '#drop-indicator-left, #drop-indicator-right': {
+      display: 'inline-block',
+      height: '1.4em',
+      width: '0px',
+      outline: `${DROP_INDICATOR_WIDTH} solid ${ui5.Theme.Button_TextColor}`,
     }
   })
 }
@@ -108,6 +226,7 @@ export type TabDef = {
 export class TabBar extends Component<{
   events: {
     close: CustomEvent<string>,
+    move: CustomEvent<{ from: number, to: number }>,
   }
 }> {
   props = {
@@ -180,16 +299,24 @@ export class TabBar extends Component<{
             },
             h.div(
               { fields: { id: 'tabs' } },
-              tabs.derive(tabs => tabs.map(t => TabButton.t({
+              tabs.derive(tabs => tabs.map((t, idx) => TabButton.t({
                 props: {
                   id: t.id, title: t.title,
-                  active: activeTab.derive(at => at === t.id)
+                  active: activeTab.derive(at => at === t.id),
                 },
                 events: {
                   select: ({ detail }) => activeTab.next(detail),
                   close: ({ detail }) => {
                     lastClosed.next(tabs.findIndex(t => t.id === detail));
                     this.dispatch('close', detail);
+                  },
+                  dropped: ({ detail }) => {
+                    const from = tabs.findIndex(t => t.id === detail.fromId);
+                    let to = tabs.findIndex(t => t.id === detail.toId);
+                    if (from < to && detail.pos === 'left') to = Math.max(0, to - 1);
+                    if (from > to && detail.pos === 'right') to = Math.min(tabs.length, to + 1);
+                    if (from === to) return;
+                    this.dispatch('move', { from, to });
                   },
                 }
               }))),
@@ -270,6 +397,7 @@ export class TabBar extends Component<{
       display: 'none',
     },
     '#tabs': {
+      display: 'flex',
       width: 'max-content',
       height: '100%',
     }
