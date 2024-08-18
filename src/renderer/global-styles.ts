@@ -58,6 +58,7 @@ style.util.applySheetAsStyleTag(document.body, style.sheet({
     margin: '0px',
     width: '100vw',
     height: '100vh',
+    position: 'fixed',
   },
   'html': {
     overflow: 'hidden',

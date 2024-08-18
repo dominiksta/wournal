@@ -231,11 +231,19 @@ export class TabBar extends Component<{
 }> {
   props = {
     tabs: rx.prop<TabDef[]>(),
+    activeTab: rx.prop<string | false>({ defaultValue: false }),
+  }
+
+  private tabContentRef = this.ref<HTMLDivElement>();
+
+  public get activeTabContent() {
+    return Array.from(this.tabContentRef.current.children)
+      .find(c => c.getAttribute('tab-id') === this.props.activeTab.value)
+      .children[0];
   }
 
   render() {
-    const { tabs } = this.props;
-    const activeTab = new rx.State<string | false>(false);
+    const { tabs, activeTab } = this.props;
     const lastClosed = new rx.State<number>(0);
 
     // select tab 0 if no other is selected. disable tab display if
@@ -250,6 +258,12 @@ export class TabBar extends Component<{
           activeTab.next(tabs[0].id);
       }
     });
+
+    this.subscribe(activeTab, async at => {
+      const tabs = await this.queryAll<TabButton>(TabButton.tagName, false);
+      const tabEl = Array.from(tabs).find(tab => tab.props.id.value === at);
+      if (tabEl) tabEl.scrollIntoView();
+    })
 
     const overflowingTabs = new rx.State<string[]>([]);
 
@@ -282,7 +296,9 @@ export class TabBar extends Component<{
         rx.tap(_ => updateOverflow()),
       ))
     });
-    this.subscribe(tabs, _ => updateOverflow());
+    this.subscribe(tabs, _ => {
+      requestAnimationFrame(updateOverflow);
+    });
 
     return [
       h.div(
@@ -357,7 +373,6 @@ export class TabBar extends Component<{
                   const tabEls = await this.queryAll<TabButton>(TabButton.tagName);
                   const scrollToEl =
                     Array.from(tabEls).find(el => el.props.id.value === t.id);
-                  scrollToEl.scrollIntoView();
                   activeTab.next(t.id);
                 }
               }
@@ -366,21 +381,27 @@ export class TabBar extends Component<{
         ]
       ),
       h.div(
-        { fields: { id: 'tab-content' } },
-        activeTab.derive(
-          at => at === false
-            ? '<No tab selected or no content>'
-            : tabs.value.find(t => at === t.id).template
-        ),
+        { fields: { id: 'tab-content' }, ref: this.tabContentRef },
+        tabs.derive(tabdefs => tabdefs.map(tabdef => h.div({
+          attrs: { tabId: tabdef.id },
+          style: {
+            display: activeTab
+              .derive(at => at === tabdef.id)
+              .ifelse({ if: 'block', else: 'none' }),
+            height: '100%',
+          }
+        }, tabdef.template)))
       )
     ]
   }
 
   static styles = style.sheet({
     ':host': {
-      display: 'block',
+      display: 'flex',
+      flexDirection: 'column',
     },
     '#tabbar': {
+      background: ui5.Theme.Button_Background,
       display: 'flex',
       alignItems: 'center',
     },
@@ -400,6 +421,10 @@ export class TabBar extends Component<{
       display: 'flex',
       width: 'max-content',
       height: '100%',
+    },
+    '#tab-content': {
+      flexShrink: '1',
+      overflow: 'auto',
     }
   })
 }

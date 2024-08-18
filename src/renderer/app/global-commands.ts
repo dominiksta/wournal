@@ -12,6 +12,7 @@ export const GlobalCommandId = [
   'file_save_as',
   'file_save_as_single_page',
   'file_load',
+  'file_close',
   'file_export_pdf',
 
   'history_undo',
