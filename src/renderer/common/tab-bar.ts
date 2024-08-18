@@ -188,7 +188,7 @@ class TabButton extends Component<{
     },
     '#title, #close': {
       border: 'none',
-      color: 'black',
+      color: ui5.Theme.TextColor,
       background: 'none',
     },
     '#title.active': {
