@@ -112,6 +112,7 @@ export default class Wournal extends Component {
       doc.fileName = identification;
       doc.meta.next(m => ({ ...m, lastSavedTime: new Date().toISOString() }));
       doc.markSaved();
+      this.openDocs.next(v => [...v]);
       updateTitle(doc, this.activeTabId.value);
       this.toast.open('Document Saved');
     },
