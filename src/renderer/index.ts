@@ -18,6 +18,7 @@ import { ConfigDTO, defaultConfig } from "persistence/ConfigDTO";
 import 'res/font/roboto.css';
 import 'res/font/roboto-mono.css';
 import { LastPages } from "document/last-pages";
+import { ArgvParsed } from "../main/argv";
 
 {
   loggingOverwriteConsoleLogFunctions();
@@ -41,11 +42,12 @@ function setupErrorPopup() {
   });
 }
 
-async function maybeLoadArgvDoc(wournal: Wournal) {
+async function maybeLoadArgvDoc(
+  wournal: Wournal, argv: ArgvParsed
+) {
   // electron-forge seems to run wournal with an argv of "." by default
   if (!environment.production) return;
 
-  const argv = await ApiClient["process:argv"]();
   if (argv.positionals.length > 3) return; // dev
   if (argv.positionals.length > 1) {
     const path = argv.positionals[argv.positionals.length - 1];
@@ -141,6 +143,11 @@ async function main() {
     }
   })
 
+  window.electron.on['file:open'](async ([args]) => {
+    LOG.info('Opening new file from system electron callback');
+    maybeLoadArgvDoc(wournal, args.argv);
+  });
+
   wournal.shortcutsCtx.addEl(document);
 
   ApiClient['window:setZoom'](config.zoomUI);
@@ -167,7 +174,7 @@ async function main() {
   });
 
   document.body.appendChild(wournal);
-  maybeLoadArgvDoc(wournal);
+  maybeLoadArgvDoc(wournal, await ApiClient["process:argv"]());
   LOG.info('Startup Complete')
 }
 

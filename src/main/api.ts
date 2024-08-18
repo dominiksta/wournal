@@ -75,11 +75,13 @@ export interface ElectronApi extends ApiSpec<ApiRouteName> {
 }
 
 export const ElectronCallbackNames = [
-  'window:close'
+  'window:close',
+  'file:open',
 ] as const;
 
 export interface ElectronCallbacks {
 
   'window:close': { },
+  'file:open': { argv: ArgvParsed, pwd: string },
 
 }

@@ -2,7 +2,7 @@ import type { ElectronCallbacks } from "../main/api";
 
 type ElectronCallbackClient = {
   [channel in keyof ElectronCallbacks]: (
-    callback: (args: ElectronCallbacks[channel]) => void
+    callback: (args: [ ElectronCallbacks[channel] ]) => void
   ) => void;
 }
 

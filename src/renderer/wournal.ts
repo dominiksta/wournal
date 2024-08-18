@@ -217,7 +217,7 @@ export default class Wournal extends Component {
             'Warning',
           );
           closePleaseWait();
-          return false;
+          return true;
         }
       }
 

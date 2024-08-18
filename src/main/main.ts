@@ -25,6 +25,8 @@ if (environment.pkgPortable) app.setPath(
   path.resolve(path.dirname(app.getAppPath()), '..', 'user', 'data')
 );
 
+let lastFocusedWindow: BrowserWindow;
+
 export const instances: Map<WebContents, {
   win: BrowserWindow, pwd: string, argv: string[]
 }> = new Map();
@@ -70,6 +72,8 @@ function createWindow(argv: string[], pwd: string) {
     })
   });
 
+  win.on('focus', () => { lastFocusedWindow = win });
+
   win.show();
 }
 
@@ -79,9 +83,10 @@ if (!gotTheLock) {
 } else {
   registerApiHandlers();
   app.whenReady().then(() => createWindow(process.argv, process.cwd()));
-  app.on('second-instance', (_, argv, pwd) => createWindow(argv, pwd));
+  app.on('second-instance', (_, argv, pwd) => {
+    // lastFocusedWindow.webContents.
+  });
   app.on('window-all-closed', () => {
     app.quit();
-
   });
 }

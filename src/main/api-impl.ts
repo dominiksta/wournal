@@ -161,12 +161,16 @@ export function registerCallbacks(win: BrowserWindow) {
       send({})
     }),
 
+    'file:open': send => app.on('second-instance', (_, argv, pwd) => {
+      send({ argv: parseArgs({ args: argv, ...argvParseSpec}), pwd });
+    })
+
   }
 
   for (let key in impl) (impl as any)[key](
-    (...args: any[]) => {
+    (args: any) => {
       LOG.info(`Callback Triggered: ${key}`);
-      win.webContents.send(key, ...args);
+      win.webContents.send(key, args);
     }
   )
 }
