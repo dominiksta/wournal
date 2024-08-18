@@ -206,6 +206,20 @@ export default class Wournal extends Component {
           this.getContext.bind(this), fileName, blob, pdfNotFoundActions
         );
       }
+      for (const openDoc of this.openDocs.value) {
+        if (doc.fileName !== undefined && openDoc.doc.fileName === doc.fileName) {
+          this.dialog.infoBox(
+            'Same Document Already Open', (
+              'You cannot open the same document twice in the same instance of ' +
+              'Wournal'
+            ),
+            'Warning',
+          );
+          closePleaseWait();
+          return false;
+        }
+      }
+
       if (doc.isSinglePage) this.toast.open(
         'This is a single page document (SVG). You will not be able to add ' +
         'pages unless you save as a .woj file'
@@ -1131,7 +1145,9 @@ export default class Wournal extends Component {
 }
 
 function updateTitle(doc: WournalDocument, tabId: string) {
-  ApiClient['window:setTitle']('Wournal - ' + tabTitle(doc, tabId));
+  ApiClient['window:setTitle'](
+    'Wournal - ' + (doc.dirty ? '*' : '') + tabTitle(doc, tabId)
+  );
 }
 
 function tabTitle(doc: WournalDocument, tabId: string) {
