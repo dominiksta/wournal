@@ -74,11 +74,11 @@ export function registerApiHandlers() {
     },
     'file:savePrompt': async (e, defaultPath, filters) => {
       const win = instances.get(e.sender)!.win;
-      const resp = dialog.showSaveDialogSync(win, {
+      const resp = await dialog.showSaveDialog(win, {
         filters, properties: ['showOverwriteConfirmation'], defaultPath
       });
-      if (!resp) return false;
-      return resp;
+      if (resp.canceled) return false;
+      return resp.filePath;
     },
     'file:exists': async (_, fileName) => {
       fileName = fileName.replace(/^~/, homedir);
