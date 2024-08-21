@@ -143,10 +143,11 @@ const ConfigDTOSchema = {
 
 export type ConfigDTO = JTDDataType<typeof ConfigDTOSchema>;
 
+const validate = ajv.compile(ConfigDTOSchema);
+
 export const ConfigDTOVersioner = new DTOVersioner<ConfigDTO>({
   name: 'ConfigDTO',
   validator: ((() => {
-    const validate = ajv.compile(ConfigDTOSchema);
     return obj => {
       const res = validate(obj);
       return { success: res, error: JSON.stringify(validate.errors) };

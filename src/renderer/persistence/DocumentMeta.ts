@@ -35,10 +35,11 @@ const DocumentMetaSchema = {
 
 export type DocumentMeta = JTDDataType<typeof DocumentMetaSchema>;
 
+const validate = ajv.compile(DocumentMetaSchema);
+
 export const DocumentMetaVersioner = new DTOVersioner<DocumentMeta>({
   name: 'DocumentMeta',
   validator: ((() => {
-    const validate = ajv.compile(DocumentMetaSchema);
     return obj => {
       const res = validate(obj);
       return { success: res, error: validate.errors?.toString() };
