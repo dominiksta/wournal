@@ -33,7 +33,6 @@ import {
 import PackageJson from 'PackageJson';
 import { pairwise } from "util/rx";
 import { getLogger } from "Shared/logging";
-import { ToastCtx } from "app/toast-context";
 import WournalPDFPageViewContextMenu from "pdf/WournalPDFPageViewContextMenu";
 
 const LOG = getLogger(__filename);

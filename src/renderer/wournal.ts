@@ -49,16 +49,61 @@ const LOG = getLogger(__filename);
 @Component.register
 export default class Wournal extends Component {
 
+  private configCtx: rx.State<ConfigDTO>;
+
+  private readonly tabIds = new IdCounter();
+  private openDocs: rx.State<{ id: string, doc: WournalDocument }[]>;
+  private activeTabId: rx.State<string>;
+  private openTabs: rx.DerivedState<TabDef[]>;
+  private currDoc: rx.DerivedState<WournalDocument>;
+
+  private tabbarRef = this.ref<TabBar>();
+  private get currDocDisplay() {
+    return this.tabbarRef.current.activeTabContent as DocumentDisplay;
+  }
+
+  private settingsOpen = new rx.State(false, 'Wournal:settingsOpen');
+
+  private dialog = this.provideContext(BasicDialogManagerContext);
+
   constructor(config: ConfigDTO) {
     super();
-    this.configCtx.next(config);
+    this.configCtx = this.provideContext(ConfigCtx, new rx.State(config));
+
+    const initialTabName = this.tabIds.nextId().toString();
+    this.openDocs = new rx.State([
+      {
+        id: initialTabName,
+        doc: WournalDocument.create(this.getContext.bind(this))
+      },
+      {
+        id: this.tabIds.nextId().toString(),
+        doc: WournalDocument.create(this.getContext.bind(this))
+      },
+    ]);
+    this.activeTabId = new rx.State<string>(initialTabName, 'Wournal:activeTabId');
+
+    this.openTabs =
+      this.openDocs.derive(docs => docs.map(doc => ({
+        id: doc.id.toString(),
+        title: tabTitle(doc.doc, doc.id),
+        template: DocumentDisplay.t({
+          props: {
+            doc: new rx.State(doc.doc), // HACK: fixed in mvui 0.0.4
+            hideSearchBox: rx.bind(this.hideSearchBox),
+            hideSideBar: rx.bind(this.hideSideBar),
+          }
+        })
+      })));
+
+    this.currDoc = this.provideContext(DocumentCtx, this.activeTabId.derive(
+      at => this.openDocs.value.find(d => d.id === at).doc
+    ));
   }
 
   private fileSystem = inject('FileSystem');
   private confRepo = inject('ConfigRepository');
 
-  private configCtx =
-    this.provideContext(ConfigCtx, new rx.State(defaultConfig()));
   public shortcutsCtx =
     this.provideContext(ShortcutsCtx, new ShortcutManager());
 
@@ -506,47 +551,6 @@ export default class Wournal extends Component {
     }
     return true;
   }
-
-  private readonly tabIds = new IdCounter();
-  private readonly initialTabName = this.tabIds.nextId().toString();
-  private openDocs = new rx.State<{ id: string, doc: WournalDocument }[]>([
-    {
-      id: this.initialTabName,
-      doc: WournalDocument.create(this.getContext.bind(this))
-    },
-    {
-      id: this.tabIds.nextId().toString(),
-      doc: WournalDocument.create(this.getContext.bind(this))
-    },
-  ]);
-  private activeTabId =
-    new rx.State<string>(this.initialTabName, 'Wournal:activeTabId');
-
-  private openTabs: rx.DerivedState<TabDef[]> =
-    this.openDocs.derive(docs => docs.map(doc => ({
-      id: doc.id.toString(),
-      title: tabTitle(doc.doc, doc.id),
-      template: DocumentDisplay.t({
-        props: {
-          doc: new rx.State(doc.doc), // HACK: fixed in mvui 0.0.4
-          hideSearchBox: rx.bind(this.hideSearchBox),
-          hideSideBar: rx.bind(this.hideSideBar),
-        }
-      })
-    })));
-
-  private tabbarRef = this.ref<TabBar>();
-  private get currDocDisplay() {
-    return this.tabbarRef.current.activeTabContent as DocumentDisplay;
-  }
-
-  private currDoc = this.provideContext(DocumentCtx, this.activeTabId.derive(
-    at => this.openDocs.value.find(d => d.id === at).doc
-  ));
-
-  private settingsOpen = new rx.State(false, 'Wournal:settingsOpen');
-
-  private dialog = this.provideContext(BasicDialogManagerContext);
 
   private setupShortcuts() {
     const globalCmds = this.#globalCmds;
@@ -1000,12 +1004,12 @@ export default class Wournal extends Component {
     'tool_hand': {
       human_name: 'Hand',
       func: (() => {
-        let previousTool = this.api.getTool()
+        let previousTool: CanvasToolName | false = false;
 
         return () => {
           const current = this.api.getTool()
           if (current === 'CanvasToolHand') {
-            this.api.setTool(previousTool);
+            if (previousTool !== false) this.api.setTool(previousTool);
           } else {
             previousTool = current;
             this.api.setTool('CanvasToolHand');
