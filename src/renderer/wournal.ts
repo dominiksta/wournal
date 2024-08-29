@@ -71,16 +71,10 @@ export default class Wournal extends Component {
     this.configCtx = this.provideContext(ConfigCtx, new rx.State(config));
 
     const initialTabName = this.tabIds.nextId().toString();
-    this.openDocs = new rx.State([
-      {
-        id: initialTabName,
-        doc: WournalDocument.create(this.getContext.bind(this))
-      },
-      {
-        id: this.tabIds.nextId().toString(),
-        doc: WournalDocument.create(this.getContext.bind(this))
-      },
-    ]);
+    this.openDocs = new rx.State([{
+      id: initialTabName,
+      doc: WournalDocument.create(this.getContext.bind(this))
+    }]);
     this.activeTabId = new rx.State<string>(initialTabName, 'Wournal:activeTabId');
 
     this.openTabs =
