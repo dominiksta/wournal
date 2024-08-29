@@ -257,6 +257,7 @@ export default class Wournal extends Component {
         }]);
       } else {
         const idx = openDocs.findIndex(od => od.doc === currDoc)
+        if (idx !== 0) this.activeTabId.next(openDocs[idx - 1].id);
         this.openDocs.next(od => [...od.slice(0, idx), ...od.slice(idx + 1)]);
       }
       currDoc.free();

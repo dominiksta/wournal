@@ -252,7 +252,7 @@ export class TabBar extends Component<{
       if (tabs.find(t => t.id === activeTab.value) !== undefined) return;
       if (tabs.length === 0) activeTab.next(false);
       else {
-        if (lastClosed.value > 1)
+        if (lastClosed.value > 1 && (lastClosed.value-1) in tabs)
           activeTab.next(tabs[lastClosed.value-1].id);
         else
           activeTab.next(tabs[0].id);
