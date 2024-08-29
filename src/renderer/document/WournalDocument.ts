@@ -32,9 +32,9 @@ import {
 } from "persistence/DocumentMeta";
 import PackageJson from 'PackageJson';
 import { pairwise } from "util/rx";
-import { PDF_CTX_MENU } from "pdf/WournalPDFPageView";
 import { getLogger } from "Shared/logging";
 import { ToastCtx } from "app/toast-context";
+import WournalPDFPageViewContextMenu from "pdf/WournalPDFPageViewContextMenu";
 
 const LOG = getLogger(__filename);
 
@@ -76,6 +76,11 @@ export class WournalDocument extends Component {
     this.setTool(CanvasToolSelectRectangle);
   }
 
+  private pdfContextMenuRef = this.ref<WournalPDFPageViewContextMenu>();
+  public showPdfContextMenu(point: {x: number, y: number}, sel: Selection) {
+    this.pdfContextMenuRef.current.show(point, sel);
+  }
+
   render() {
     this.subscribe(this.activePage, p => {
       this.pages.value.forEach(p => p.display.classList.remove('active'));
@@ -95,9 +100,12 @@ export class WournalDocument extends Component {
 
     this.setupListenChangeOutlinePages();
 
-    this.setupListenPDFCtxMenu();
+    this.onRendered(() => this.setupListenPDFCtxMenu());
 
-    return [h.div(this.display)];
+    return [
+      WournalPDFPageViewContextMenu.t({ ref: this.pdfContextMenuRef }),
+      h.div(this.display),
+    ];
   }
 
   static styles = style.sheet({
@@ -579,7 +587,7 @@ export class WournalDocument extends Component {
   }
 
   private setupListenPDFCtxMenu() {
-    this.subscribe(PDF_CTX_MENU.events, async e => {
+    this.subscribe(this.pdfContextMenuRef.current.events, async e => {
       if (e.type === 'copy') { // ========================================
 
         navigator.clipboard.writeText(e.data);

@@ -342,6 +342,7 @@ export class WournalPage {
         LOG.info(`Scrolling to Linked Page: ${page}`);
         this.doc.api.scrollPage(page);
       },
+      this.doc.showPdfContextMenu.bind(this.doc),
       this.zoom,
     );
     if (this.doc.config.value.hideAnnotations) this.pdfViewer.setAnnotationVisility(false);

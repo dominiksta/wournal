@@ -9,7 +9,6 @@ import type { PDFPageProxy, RefProxy } from 'pdfjs-dist/types/src/display/api';
 import { PDFPageView } from 'pdfjs-dist/web/pdf_viewer.mjs';
 import { DEFAULT_ZOOM_FACTOR } from 'document/WournalPageSize';
 import { debounce } from 'lodash';
-import WournalPDFPageViewContextMenu from './WournalPDFPageViewContextMenu';
 import { SearchText } from 'document/types';
 import { SVGUtils } from 'util/SVGUtils';
 import getTextRanges from 'util/get-text-ranges';
@@ -21,9 +20,6 @@ import { inject } from 'dependency-injection';
 import { style } from '@mvuijs/core';
 
 const LOG = getLogger(__filename);
-
-export const PDF_CTX_MENU = new WournalPDFPageViewContextMenu();
-document.body.append(PDF_CTX_MENU);
 
 const PDF_PAGE_VIEW_CSS_SHEET = new CSSStyleSheet();
 PDF_PAGE_VIEW_CSS_SHEET.replaceSync(css);
@@ -52,6 +48,7 @@ export class WournalPDFPageView {
     private page: PDFPageProxy,
     private isVisible: () => boolean,
     private scrollToDest: (dest: PDFDestination) => void,
+    onContextMenuShow: (point: {x: number, y: number}, sel: Selection) => void,
     initialZoom?: number,
     private defaultZoom: number = 1,
   ) {
@@ -71,7 +68,7 @@ export class WournalPDFPageView {
         ? (this.shadow as any).getSelection()
         : document.getSelection();
 
-      PDF_CTX_MENU.show(e, sel);
+      onContextMenuShow(e, sel);
     });
 
     this.shadow = this.display.attachShadow({ mode: 'open' });
