@@ -218,7 +218,8 @@ export default class Toolbars extends Component {
             }),
             ui5.menuItem({
               fields: {
-                icon: 'navigation-left-arrow', ...globalCmdMenuItem('jumplist_prev')
+                icon: 'navigation-left-arrow', ...globalCmdMenuItem('jumplist_prev'),
+                startsSection: true
               }
             }),
             ui5.menuItem({
@@ -233,7 +234,19 @@ export default class Toolbars extends Component {
             }),
             ui5.menuItem({
               fields: {
-                icon: 'full-screen', ...globalCmdMenuItem('fullscreen_toggle')
+                icon: 'arrow-right', ...globalCmdMenuItem('tab_next'),
+                startsSection: true,
+              }
+            }),
+            ui5.menuItem({
+              fields: {
+                icon: 'arrow-left', ...globalCmdMenuItem('tab_prev'),
+              }
+            }),
+            ui5.menuItem({
+              fields: {
+                icon: 'full-screen', ...globalCmdMenuItem('fullscreen_toggle'),
+                startsSection: true,
               }
             }),
             ui5.menuItem({

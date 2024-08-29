@@ -558,6 +558,14 @@ export default class Wournal extends Component {
       ));
     }
 
+    const extras: { [shortcut: string]: () => any } = {
+      'Ctrl+Tab': globalCmds['tab_next'].func,
+      'Ctrl+Shift+Tab': globalCmds['tab_prev'].func,
+    };
+
+    for (const extra in extras)
+      this.shortcutsCtx.addShortcut(Shortcut.fromId(extra, extras[extra]));
+
     let currentScrollZoom = 0;
     const maybeScrollZoom = debounce((pos: {x: number, y: number}) => {
       this.currDoc.value.setZoom(
@@ -1109,6 +1117,27 @@ export default class Wournal extends Component {
         this.api.jumplistMark();
       },
       shortcut: 'Alt+DownArrow',
+    },
+
+    'tab_next': {
+      human_name: 'Next Tab',
+      func: () => {
+        const ods = this.openDocs.value;
+        const idx = ods.findIndex(od => od.id === this.activeTabId.value);
+        if (idx === ods.length - 1 || ods.length <= 1) return;
+        this.activeTabId.next(ods[idx+1].id);
+      },
+      shortcut: 'Ctrl+PageDown',
+    },
+    'tab_prev': {
+      human_name: 'Previous Tab',
+      func: () => {
+        const ods = this.openDocs.value;
+        const idx = ods.findIndex(od => od.id === this.activeTabId.value);
+        if (idx === 0 || ods.length <= 1) return;
+        this.activeTabId.next(ods[idx-1].id);
+      },
+      shortcut: 'Ctrl+PageUp',
     },
 
     'system_show_debug_info': {

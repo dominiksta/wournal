@@ -74,6 +74,9 @@ export const GlobalCommandId = [
   'jumplist_next',
   'jumplist_mark',
 
+  'tab_next',
+  'tab_prev',
+
   'system_show_debug_info',
   'system_update',
 
