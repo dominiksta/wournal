@@ -370,9 +370,6 @@ export class TabBar extends Component<{
                 click: async _ => {
                   const pop = await this.query<ui5.types.Popover>('#popover-more');
                   pop.open = false;
-                  const tabEls = await this.queryAll<TabButton>(TabButton.tagName);
-                  const scrollToEl =
-                    Array.from(tabEls).find(el => el.props.id.value === t.id);
                   activeTab.next(t.id);
                 }
               }
@@ -382,15 +379,20 @@ export class TabBar extends Component<{
       ),
       h.div(
         { fields: { id: 'tab-content' }, ref: this.tabContentRef },
-        tabs.derive(tabdefs => tabdefs.map(tabdef => h.div({
-          attrs: { tabId: tabdef.id },
-          style: {
-            display: activeTab
-              .derive(at => at === tabdef.id)
-              .ifelse({ if: 'block', else: 'none' }),
-            height: '100%',
-          }
-        }, tabdef.template)))
+        h.foreach(
+          // the reason why we sort these here is because we dont want to
+          // re-render anything when the order changes. this is not strictly
+          // necessary but a bit nicer for performance.
+          tabs.derive(tabs => [...tabs].sort((a, b) => parseInt(a.id) - parseInt(b.id))),
+          tabdef => tabdef.id,
+          tabdef => h.div({
+            attrs: {
+              tabId: tabdef.value.id,
+              hidden: activeTab.derive(at => at === tabdef.value.id ? undefined : ''),
+            },
+            style: { height: '100%' }
+          }, tabdef.value.template)
+        )
       )
     ]
   }
