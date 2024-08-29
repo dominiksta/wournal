@@ -13,9 +13,10 @@ const LOG = getLogger(__filename);
 
 @Component.register
 export default class DocumentDisplay extends Component {
+  public hideSideBar = new rx.State(true);
+
   props = {
     doc: rx.prop<WournalDocument>(),
-    hideSideBar: rx.prop<boolean>(),
     hideSearchBox: rx.prop<boolean>(),
   }
 
@@ -29,7 +30,7 @@ export default class DocumentDisplay extends Component {
   public get document() { return this.documentRef.current }
 
   render() {
-    const { doc, hideSideBar, hideSearchBox } = this.props;
+    const { doc, hideSearchBox } = this.props;
     const api = this.getContext(ApiCtx);
     const dialog = this.getContext(BasicDialogManagerContext);
 
@@ -97,10 +98,10 @@ export default class DocumentDisplay extends Component {
         }
       }, [
         h.div({
-          fields: { id: 'sidebar', hidden: hideSideBar },
+          fields: { id: 'sidebar', hidden: this.hideSideBar },
         }, [OutlineContainer.t({ ref: this.outlineRef })]),
         h.div({
-          fields: { id: 'seperator', hidden: hideSideBar },
+          fields: { id: 'seperator', hidden: this.hideSideBar },
         }),
         h.div(
           { fields: { id: 'main-right' } },

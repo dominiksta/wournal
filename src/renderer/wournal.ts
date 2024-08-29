@@ -85,7 +85,6 @@ export default class Wournal extends Component {
           props: {
             doc: new rx.State(doc.doc), // HACK: fixed in mvui 0.0.4
             hideSearchBox: rx.bind(this.hideSearchBox),
-            hideSideBar: rx.bind(this.hideSideBar),
           }
         })
       })));
@@ -101,7 +100,6 @@ export default class Wournal extends Component {
   public shortcutsCtx =
     this.provideContext(ShortcutsCtx, new ShortcutManager());
 
-  private hideSideBar = new rx.State(true, 'Wournal:hideSideBar');
   private hideSearchBox = new rx.State(true, 'Wournal:hideSearchBox');
 
   private toast = this.provideContext(ToastCtx, {
@@ -271,6 +269,7 @@ export default class Wournal extends Component {
       const lastPage = LastPages.get(fileName);
       if (lastPage !== false) this.api.scrollPage(lastPage);
       this.shortcutsCtx.focus();
+      this.currDocDisplay.hideSideBar.next(doc.meta.value.outline.length === 0);
       return true;
     },
     newDocument: async (props: PageProps, identification: string) => {
@@ -677,7 +676,6 @@ export default class Wournal extends Component {
 
     this.subscribe(this.currDoc, doc => {
       updateTitle(doc, this.activeTabId.value);
-      this.hideSideBar.next(doc.meta.value.outline.length === 0);
     });
     this.subscribe(
       this.currDoc.pipe(rx.switchMap(doc => doc.undoStack.undoAvailable)),
@@ -1074,7 +1072,7 @@ export default class Wournal extends Component {
     'bookmark_add': {
       human_name: 'Add Bookmark',
       func: () => {
-        this.hideSideBar.next(false);
+        this.currDocDisplay.hideSideBar.next(true);
         this.currDocDisplay.outline.add();
       },
       shortcut: 'Ctrl+B',
@@ -1083,7 +1081,7 @@ export default class Wournal extends Component {
     'bookmark_display_toggle': {
       human_name: 'Toggle Display Bookmarks',
       func: async () => {
-        this.hideSideBar.next(v => !v);
+        this.currDocDisplay.hideSideBar.next(v => !v);
       },
       shortcut: 'F12',
     },
