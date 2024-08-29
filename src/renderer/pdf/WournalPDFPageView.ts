@@ -86,6 +86,7 @@ export class WournalPDFPageView {
     }
 
     this.zoomPreview.hidden = true;
+    this.zoomPreview.style.filter = theme.invert;
     this.shadow.appendChild(this.zoomPreview);
     this.shadow.appendChild(this.textHighlightLayer);
     this.disableZoomPreview();

@@ -1,6 +1,15 @@
 Changelog
 ======================================================================
 
+`0.0.8` - _unreleased_
+----------------------------------------------------------------------
+
+### Fixed
+
+- PDF zoom preview in dark mode was not inverted, resulting in a flashbang on
+  every zoom
+
+
 `0.0.7` - _2024-08-16_
 ----------------------------------------------------------------------
 **Hotfix for Autosaves and some Quality of Life**
