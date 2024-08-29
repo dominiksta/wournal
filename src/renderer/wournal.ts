@@ -261,6 +261,7 @@ export default class Wournal extends Component {
         this.openDocs.next(od => [...od.slice(0, idx), ...od.slice(idx + 1)]);
       }
       currDoc.free();
+      return true;
     },
     getDocumentId: () => this.currDoc.value.fileName ?? false,
     createTestPages: () => {
@@ -309,7 +310,14 @@ export default class Wournal extends Component {
         }));
       });
     },
-
+    closeDocumentPromptAll: async () => {
+      for (const doc of this.openDocs.value) {
+        if (!doc.doc.dirty) continue;
+        this.activeTabId.next(doc.id);
+        if (!await this.api.closeDocumentPrompt()) return false;
+      }
+      return true;
+    },
     promptExportPDF: async () => {
       const doc = this.currDoc.value;
       const resp = await this.fileSystem.savePrompt(

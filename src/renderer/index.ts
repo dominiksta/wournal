@@ -137,7 +137,7 @@ async function main() {
     if (docId !== false) LastPages.set(docId, wournal.api.getCurrentPageNr())
     LastPages.write();
 
-    if (!(await wournal.api.promptClosingUnsaved())) {
+    if (await wournal.api.closeDocumentPromptAll()) {
       LOG.info('Closing Window');
       ApiClient["window:destroy"]();
     }
