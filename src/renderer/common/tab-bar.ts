@@ -1,5 +1,6 @@
 import { rx, h, Component, style, TemplateElementChild } from '@mvuijs/core';
 import * as ui5 from '@mvuijs/ui5';
+import { theme } from 'global-styles';
 import { debounce } from 'lodash';
 
 const DROP_INDICATOR_WIDTH = '.2em';
@@ -407,6 +408,7 @@ export class TabBar extends Component<{
     ':host': {
       display: 'flex',
       flexDirection: 'column',
+      background: theme.documentBackground,
     },
     '#tabbar': {
       background: ui5.Theme.Button_Background,

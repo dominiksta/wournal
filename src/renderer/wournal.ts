@@ -479,7 +479,7 @@ export default class Wournal extends Component {
       const pagePos = pages[page].display.getBoundingClientRect();
       const viewport = this.currDocDisplay.document.getBoundingClientRect();
 
-      if (SVGUtils.rectIntersect(viewport, pagePos)) return;
+      // if (SVGUtils.rectIntersect(viewport, pagePos)) return;
       const pagePosInViewPort = pagePos.top - viewport.top;
       this.api.scrollPos(prevScrollPos.top + pagePosInViewPort, prevScrollPos.left);
     },
