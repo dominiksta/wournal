@@ -1,7 +1,7 @@
 {
   "name": "wournal",
   "productName": "Wournal",
-  "version": "0.0.8",
+  "version": "0.0.9-dev",
   "description": "An SVG Editor for Handwritten Documents",
   "author": {
     "name": "dominiksta"
