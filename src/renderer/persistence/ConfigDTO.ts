@@ -291,7 +291,7 @@ export function defaultConfig(): ConfigDTO {
       CanvasToolPen: {
         color: "#000000",
         strokeWidth: "medium",
-        mouseBufferSize: 4,
+        mouseBufferSize: 2,
       },
       CanvasToolEraser: {
         strokeWidth: "medium",

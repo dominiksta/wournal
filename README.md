@@ -46,7 +46,7 @@ quite a bit when that happens.
   - [x] Exporting to PDF with [pdf-lib](https://pdf-lib.js.org/)
   - [x] Table of Contents
     - [x] Auto Import From PDF
-  - [ ] Tabs
+  - [x] Tabs
   - [ ] Tablet (and Phone) Friendly UI
   - [ ] Android Version with Cordova or Capacitor
   - [x] Stack Trace & Bug Report Dialog

@@ -24,6 +24,11 @@ Changelog
 - "Recent Files" menu was not sometimes not showing. (This was an upstream bug
   (SAP/ui5-webcomponents#7391)).
 
+### Changed
+
+- The default mouse smoothing factor is now set to 2. This should make the pen
+  input feel a bit more responsive.
+
 
 `0.0.7` - _2024-08-16_
 ----------------------------------------------------------------------
