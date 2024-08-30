@@ -231,6 +231,7 @@ export class TabBar extends Component<{
   props = {
     tabs: rx.prop<TabDef[]>(),
     activeTab: rx.prop<string | false>({ defaultValue: false }),
+    hidden: rx.prop<boolean>({ defaultValue: false }),
   }
 
   private tabContentRef = this.ref<HTMLDivElement>();
@@ -242,7 +243,7 @@ export class TabBar extends Component<{
   }
 
   render() {
-    const { tabs, activeTab } = this.props;
+    const { tabs, activeTab, hidden } = this.props;
     const lastClosed = new rx.State<number>(0);
 
     // select tab 0 if no other is selected. disable tab display if
@@ -301,11 +302,11 @@ export class TabBar extends Component<{
 
     return [
       h.div(
-        { fields: { id: 'tabbar' } },
+        { fields: { id: 'tabbar', hidden } },
         [
           h.div(
             {
-              fields: { id: 'tabs-scroll-container' },
+              fields: { id: 'tabs-scroll-container', hidden },
               events: {
                 scroll: debounce(_ => {
                   updateOverflow();

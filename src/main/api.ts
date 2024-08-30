@@ -69,7 +69,7 @@ export interface ElectronApi extends ApiSpec<ApiRouteName> {
   'window:setTitle': (title: string) => Promise<void>;
   'window:destroy': () => Promise<void>;
   'window:setZoom': (zoom: number) => Promise<void>;
-  'window:new': () => Promise<void>;
+  'window:new': (argv?: ArgvParsed, pwd?: string) => Promise<void>;
   'window:list': () => Promise<{ id: number, title: string, focused: boolean }[]>;
   'window:focus': (id: number) => Promise<void>;
 

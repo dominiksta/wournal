@@ -69,6 +69,7 @@ export class Settings extends Component {
             defaultZoomDocument: rx.bind(conf.partial('defaultZoomDocument')),
             checkUpdatesOnStartup: rx.bind(conf.partial('checkUpdatesOnStartup')),
             penCursorLeftAngle: rx.bind(conf.partial('penCursorLeftAngle')),
+            enableTabs: rx.bind(conf.partial('enableTabs')),
           }})
         ]),
         ui5.panel({ fields: { headerText: 'Default Tool Settings', collapsed: true }}, [
@@ -219,6 +220,7 @@ class UserInterfaceSettings extends Component {
     defaultZoomDocument: rx.prop<number>(),
     checkUpdatesOnStartup: rx.prop<boolean>(),
     penCursorLeftAngle: rx.prop<boolean>(),
+    enableTabs: rx.prop<boolean>(),
   }
 
   render() {
@@ -262,13 +264,6 @@ class UserInterfaceSettings extends Component {
           'Note that you can temporarily toggle dark mode using ',
           h.i(globalCmds.toggle_dark_mode_temp.shortcut), '.'
         ]),
-        h.div(ui5.checkbox({
-          fields: {
-            checked: rx.bind(this.props.penCursorLeftAngle),
-            wrappingType: 'Normal',
-            text: 'Swap Angle of Pen Cursor (May be Desirable for Lefties)',
-          }
-        })),
       ]),
 
       ui5.title({ fields: { level: 'H5' }}, 'Zoom'),
@@ -303,6 +298,24 @@ class UserInterfaceSettings extends Component {
           checked: rx.bind(this.props.checkUpdatesOnStartup),
           wrappingType: 'Normal',
           text: 'Periodically Check for Updates on Startup',
+        }
+      })),
+
+      ui5.title({ fields: { level: 'H5' }}, 'Other'),
+      h.hr(),
+
+      h.div(ui5.checkbox({
+        fields: {
+          checked: rx.bind(this.props.penCursorLeftAngle),
+          wrappingType: 'Normal',
+          text: 'Swap Angle of Pen Cursor (May be Desirable for Lefties)',
+        }
+      })),
+      h.div(ui5.checkbox({
+        fields: {
+          checked: rx.bind(this.props.enableTabs),
+          wrappingType: 'Normal',
+          text: 'Enable Tabs (Disable to Open Every Document in a New Window)*',
         }
       })),
 

@@ -102,8 +102,7 @@ export function registerApiHandlers() {
     },
 
     'process:argv': async (e) => {
-      const argv = instances.get(e.sender)!.argv;
-      return parseArgs({ args: argv, ...argvParseSpec});
+      return instances.get(e.sender)!.argv;
     },
     'process:getRendererSourceDir': async () => {
       // @ts-ignore
@@ -129,9 +128,11 @@ export function registerApiHandlers() {
     'window:setZoom': async (e, zoom) => {
       instances.get(e.sender)!.win.webContents.setZoomFactor(zoom);
     },
-    'window:new': async (e) => {
-      const win = instances.get(e.sender);
-      createWindow([], win.pwd);
+    'window:new': async (e, argv, pwd) => {
+      createWindow(
+        argv ?? parseArgs({ args: [], ...argvParseSpec}),
+        pwd ?? instances.get(e.sender)!.pwd
+      );
     },
     'window:list': async _ => {
       return [...instances.values()]

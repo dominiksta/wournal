@@ -154,6 +154,8 @@ export default class Wournal extends Component {
       this.toast.open('Document Saved');
     },
     loadDocumentPrompt: async () => {
+      if (!this.configCtx.value.enableTabs && await this.api.promptClosingUnsaved())
+        return;
       const userResp = await this.fileSystem.loadPrompt([
         { extensions: ['woj', 'pdf', 'svg'], name: 'All Supported Types (.woj/.pdf/.svg)' },
         { extensions: ['woj'], name: 'Wournal File (Multi-Page) (.woj)' },
@@ -264,13 +266,16 @@ export default class Wournal extends Component {
       const tabId = this.tabIds.nextId().toString()
       const idx =
         this.openDocs.value.findIndex(od => od.id === this.activeTabId.value);
-      this.openDocs.next(v => [
-        ...v.slice(0, idx+1), { id: tabId, doc: doc as WournalDocument },
-        ...v.slice(idx+1),
-      ]);
-      this.activeTabId.next(tabId);
-      if (replace) {
-        this.openDocs.next(v => [...v.slice(0, idx), ...v.slice(idx+1)]);
+      if (this.configCtx.value.enableTabs) {
+        this.openDocs.next(v => [
+          ...v.slice(0, idx + 1), { id: tabId, doc: doc as WournalDocument },
+          ...v.slice(idx + 1),
+        ]);
+        this.activeTabId.next(tabId);
+        if (replace)
+          this.openDocs.next(v => [...v.slice(0, idx), ...v.slice(idx + 1)]);
+      } else {
+        this.openDocs.next([{ id: tabId, doc: doc as WournalDocument }]);
       }
       closePleaseWait();
       const lastPage = LastPages.get(fileName);
@@ -282,11 +287,17 @@ export default class Wournal extends Component {
     newDocument: async (props: PageProps, identification: string) => {
       const doc = WournalDocument.create(this.getContext.bind(this), props);
       const tabId = this.tabIds.nextId().toString();
-      const idx = this.openDocs.value.findIndex(od => od.id === this.activeTabId.value);
-      this.openDocs.next(docs => [
-        ...docs.slice(0, idx+1), { id: tabId, doc }, ...docs.slice(idx+1),
-      ]);
-      this.activeTabId.next(tabId);
+      if (this.configCtx.value.enableTabs) {
+        const idx =
+          this.openDocs.value.findIndex(od => od.id === this.activeTabId.value);
+        this.openDocs.next(docs => [
+          ...docs.slice(0, idx + 1), { id: tabId, doc }, ...docs.slice(idx + 1),
+        ]);
+        this.activeTabId.next(tabId);
+      } else {
+        if (await this.api.promptClosingUnsaved()) return;
+        this.openDocs.next([{ id: tabId, doc }]);
+      }
       if (identification) {
         doc.fileName = identification;
         updateTitle(doc, this.activeTabId.value);
@@ -295,6 +306,7 @@ export default class Wournal extends Component {
       }
     },
     closeDocumentPrompt: async () => {
+      if (!this.configCtx.value.enableTabs) return;
       if (await this.api.promptClosingUnsaved()) return false;
       const currDoc = this.currDoc.value;
       const openDocs = this.openDocs.value;
@@ -713,6 +725,7 @@ export default class Wournal extends Component {
           props: {
             tabs: this.openTabs,
             activeTab: rx.bind(this.activeTabId),
+            hidden: this.configCtx.derive(cfg => !cfg.enableTabs),
           },
           // css is weird man. see https://stackoverflow.com/a/50189188
           style: { flexGrow: '1', height: '10%' },

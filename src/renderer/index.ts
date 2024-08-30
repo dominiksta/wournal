@@ -145,7 +145,11 @@ async function main() {
 
   window.electron.on['file:open'](async ([args]) => {
     LOG.info('Opening new file from system electron callback');
-    maybeLoadArgvDoc(wournal, args.argv, false);
+    if (config.enableTabs) {
+      maybeLoadArgvDoc(wournal, args.argv, false);
+    } else {
+      ApiClient['window:new'](args.argv, args.pwd);
+    }
   });
 
   wournal.shortcutsCtx.addEl(document);
