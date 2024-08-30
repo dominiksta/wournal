@@ -81,6 +81,13 @@ export class WournalDocument extends Component {
   }
 
   render() {
+    // HACK: revert to static stylesheet once mvui 0.0.5 is out
+    this.styles.next(style.sheet({
+      '.wournal-page.active': {
+        borderColor: `${theme.pageActive} !important`,
+      }
+    }));
+
     this.subscribe(this.activePage, p => {
       this.pages.value.forEach(p => p.display.classList.remove('active'));
       p.display.classList.add('active');
@@ -106,12 +113,6 @@ export class WournalDocument extends Component {
       h.div(this.display),
     ];
   }
-
-  static styles = style.sheet({
-    '.wournal-page.active': {
-      borderColor: `${theme.pageActive} !important`,
-    }
-  })
 
   // ------------------------------------------------------------
   // initialization and serialization
