@@ -10,9 +10,11 @@ const LOG = getLogger(__filename);
 
 export default function setupAutosave(
   cfg: AutosaveConfig,
-  currentDoc: () => WournalDocument,
+  getOpenDocs: () => WournalDocument[],
   notify: (msg: string) => void,
 ): () => void {
+  if (!cfg.enable) LOG.info('Autosave disabled');
+
   const fs = inject('FileSystem');
   LOG.info(
     `Autosave initialized with ${cfg.intervalSeconds}s interval`
@@ -55,49 +57,50 @@ export default function setupAutosave(
   const interval = setInterval(async () => {
     LOG.info('Checking Autosave...');
 
-    const doc = currentDoc();
-    if (!doc.dirty) {
-      LOG.info('Autosave skipped because document is not dirty');
-      return;
-    }
-
-    try {
-      await fs.mkdir(AUTOSAVE_DIR);
-      const existing = await fs.ls(AUTOSAVE_DIR);
-      if (existing.length > cfg.keepFiles) {
-        // smaller (-> older) first
-        LOG.info(existing);
-        const sorted = existing
-          .map(parseDate)
-          .filter(el => el.date !== false)
-          .sort() as { fileName: string, date: Date }[];
-        if (sorted.length <= cfg.keepFiles) {
-          LOG.info('No autosave files found to delete')
-          return;
-        }
-        for (const f of sorted.slice(0, sorted.length - cfg.keepFiles)) {
-          LOG.info(`Deleting autosave ${f.fileName}`)
-          await fs.rm(`${AUTOSAVE_DIR}/${f.fileName}`);
-        }
+    for (const doc of getOpenDocs()) {
+      if (!doc.dirty) {
+        LOG.info('Autosave skipped because document is not dirty');
+        return;
       }
-    } catch(e) {
-      const msg = 'Could not delete autosaves';
-      notify(`${msg}. Error: ${DSUtils.trySerialize(e)}`);
-      LOG.warn(msg, e);
-      stop();
-    }
 
-    const now = new Date();
-    now.getFullYear()
-    const fileName = autosaveFileName(doc);
-    LOG.info(`Saving autosave ${fileName}`);
-    try {
-      fs.write(`${AUTOSAVE_DIR}/${fileName}`, await doc.toFile());
-    } catch (e) {
-      const msg = 'Could not write autosave';
-      notify(`${msg}. Error: ${DSUtils.trySerialize(e)}`);
-      LOG.warn(msg, e);
-      stop();
+      try {
+        await fs.mkdir(AUTOSAVE_DIR);
+        const existing = await fs.ls(AUTOSAVE_DIR);
+        if (existing.length > cfg.keepFiles) {
+          // smaller (-> older) first
+          LOG.info(existing);
+          const sorted = existing
+            .map(parseDate)
+            .filter(el => el.date !== false)
+            .sort() as { fileName: string, date: Date }[];
+          if (sorted.length <= cfg.keepFiles) {
+            LOG.info('No autosave files found to delete')
+            return;
+          }
+          for (const f of sorted.slice(0, sorted.length - cfg.keepFiles)) {
+            LOG.info(`Deleting autosave ${f.fileName}`)
+            await fs.rm(`${AUTOSAVE_DIR}/${f.fileName}`);
+          }
+        }
+      } catch (e) {
+        const msg = 'Could not delete autosaves';
+        notify(`${msg}. Error: ${DSUtils.trySerialize(e)}`);
+        LOG.warn(msg, e);
+        stop();
+      }
+
+      const now = new Date();
+      now.getFullYear()
+      const fileName = autosaveFileName(doc);
+      LOG.info(`Saving autosave ${fileName}`);
+      try {
+        fs.write(`${AUTOSAVE_DIR}/${fileName}`, await doc.toFile());
+      } catch (e) {
+        const msg = 'Could not write autosave';
+        notify(`${msg}. Error: ${DSUtils.trySerialize(e)}`);
+        LOG.warn(msg, e);
+        stop();
+      }
     }
 
   }, cfg.intervalSeconds * 1000) as any as number;

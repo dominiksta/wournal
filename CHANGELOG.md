@@ -10,6 +10,7 @@ Changelog
   every zoom
 - The default document zoom level was not respected for the first page in the
   initial startup document
+- Autosaves could not be disabled
 
 
 `0.0.7` - _2024-08-16_

@@ -636,7 +636,8 @@ export default class Wournal extends Component {
 
     this.onRendered(() => {
       const stopAutoSave = setupAutosave(
-        this.configCtx.value.autosave, () => this.currDoc.value,
+        this.configCtx.value.autosave,
+        () => this.openDocs.value.map(od => od.doc),
         msg => this.dialog.infoBox('Autosave Error', [
           h.p([
             `Something went wrong with the autosave system.`,
