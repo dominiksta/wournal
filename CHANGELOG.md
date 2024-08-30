@@ -39,13 +39,19 @@ Changelog
 
 ### Fixed
 
-- Autosave on Windows
+- Autosave on Windows (#15)
 - Opening the autosave directory from settings would throw an error
 - Links and other annotations where active even without the text selection tool
 
 `0.0.6` - _2024-08-08_
 ----------------------------------------------------------------------
 **Jumplist, Toggle Dark Mode, Click to Select and Various Fixes**
+
+### Known Issues
+
+- The autosave feature is broken. If you still insist on using this version,
+  please disable the autosave feature under "Edit" -> "Open Preferences" ->
+  "Autosaving". See GitHub issue #15.
 
 ### Added
 
