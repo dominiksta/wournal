@@ -4,6 +4,7 @@ import path from 'node:path';
 import environment from 'Shared/environment';
 import { loggingOverwriteConsoleLogFunctions } from 'Shared/logging';
 import { getTempConfig, TEMP_CONFIG_CURRENT_VERSION, writeTempConfig } from './temp-config';
+import IdCounter from 'Shared/id-counter';
 
 {
   loggingOverwriteConsoleLogFunctions();
@@ -27,7 +28,10 @@ if (environment.pkgPortable) app.setPath(
 
 export const instances: Map<WebContents, {
   win: BrowserWindow, pwd: string, argv: string[], lastFocused: boolean,
+  id: number,
 }> = new Map();
+
+const instanceIds = new IdCounter();
 
 export function createWindow(argv: string[], pwd: string) {
   const tempCfg = getTempConfig();
@@ -59,7 +63,9 @@ export function createWindow(argv: string[], pwd: string) {
     win.webContents.openDevTools();
   }
 
-  instances.set(win.webContents, { win, argv, pwd, lastFocused: true });
+  instances.set(win.webContents, {
+    win, argv, pwd, lastFocused: true, id: instanceIds.nextId()
+  });
 
   win.on('close', () => {
     writeTempConfig({

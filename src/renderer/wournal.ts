@@ -42,7 +42,7 @@ import { AUTOSAVE_DIR } from 'Shared/const';
 import { LastPages } from 'document/last-pages';
 import { TabBar, TabDef } from 'common/tab-bar';
 import DocumentDisplay from './document-display';
-import IdCounter from 'util/id-counter';
+import IdCounter from 'Shared/id-counter';
 
 const LOG = getLogger(__filename);
 

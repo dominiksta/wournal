@@ -18,7 +18,6 @@ class TabButton extends Component<{
     select: CustomEvent<string>,
     dropped: CustomEvent<{ fromId: string, toId: string, pos: 'left' | 'right'}>,
   },
-  slots: { 'default': HTMLElement }
 }> {
   props = {
     id: rx.prop<string>(),

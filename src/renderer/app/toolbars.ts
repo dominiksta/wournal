@@ -26,6 +26,7 @@ import { FileUtils } from "util/FileUtils";
 import RecentFiles from "persistence/recent-files";
 import imgAutorenew from 'res/icon/material/autorenew.svg';
 import imgDefaultPen from 'res/icon/custom/default-pen.svg';
+import { ApiClient } from "electron-api-client";
 
 @Component.register
 export default class Toolbars extends Component {
@@ -79,6 +80,8 @@ export default class Toolbars extends Component {
     });
 
     const recentFiles = new rx.State(RecentFiles.getPaths());
+    const windowList =
+      new rx.State<{ title: string, id: number, focused: boolean }[]>([]);
 
     return [
       h.div({ fields: { className: 'topbar' } }, [
@@ -87,8 +90,9 @@ export default class Toolbars extends Component {
         ui5.menu({
           fields: { id: 'menu' },
           events: {
-            'after-open': _ => {
+            'after-open': async _ => {
               recentFiles.next(RecentFiles.getPaths());
+              windowList.next(await ApiClient['window:list']());
             },
             'item-click': e => {
               const id = e.detail.item.id as GlobalCommandIdT | '';
@@ -97,6 +101,9 @@ export default class Toolbars extends Component {
                 return;
               } else if (id.startsWith('recent:')) {
                 api.loadDocument(id.split('recent:')[1]);
+                return;
+              } else if (id.startsWith('window-switch:')) {
+                ApiClient['window:focus'](parseInt(id.split('window-switch:')[1]));
                 return;
               } else if (id === '') return;
               console.assert(GlobalCommandId.indexOf(id) !== -1);
@@ -407,6 +414,23 @@ export default class Toolbars extends Component {
                 ...globalCmdMenuItem('tool_default_pen'),
               }
             }),
+          ]),
+
+          ui5.menuItem({ fields: { text: 'Window' } }, [
+            ui5.menuItem({
+              fields: { icon: 'tnt/subject', ...globalCmdMenuItem('new_window') },
+            }),
+            h.fragment(windowList, windows => windows.map(w => ui5.menuItem({
+              fields: {
+                icon: 'tnt/local-process-call',
+                text: w.title.includes('Wournal - ')
+                  ? w.title.split('Wournal - ')[1]
+                  : w.title,
+                additionalText: w.focused ? 'this' : '',
+                disabled: w.focused,
+                id: `window-switch:${w.id}`
+              },
+            })))
           ]),
 
           ui5.menuItem({ fields: { text: 'Help' } }, [

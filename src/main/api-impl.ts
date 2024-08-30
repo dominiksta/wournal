@@ -122,13 +122,26 @@ export function registerApiHandlers() {
     'window:setTitle': async (e, title) => {
       instances.get(e.sender)!.win.setTitle(title);
     },
-    'window:destroy': async (e) => { instances.get(e.sender)!.win.destroy(); },
+    'window:destroy': async (e) => {
+      instances.get(e.sender)!.win.destroy();
+      instances.delete(e.sender);
+    },
     'window:setZoom': async (e, zoom) => {
       instances.get(e.sender)!.win.webContents.setZoomFactor(zoom);
     },
     'window:new': async (e) => {
       const win = instances.get(e.sender);
       createWindow([], win.pwd);
+    },
+    'window:list': async _ => {
+      return [...instances.values()]
+        .map(inst => ({
+          title: inst.win.getTitle(), id: inst.id,
+          focused: inst.lastFocused
+        }));
+    },
+    'window:focus': async (_, id) => {
+      [...instances.values()].find(inst => inst.id === id).win.focus();
     },
 
     'clipboard:writeWournal': async (_, d) => clipboard.writeBuffer(
