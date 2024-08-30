@@ -144,7 +144,10 @@ export class SearchBox extends Component<{
       // TODO: scroll to element
       // const topOfEl = topOfPage + elRect.y;
       // LOG.info(found.value[foundPage][foundPageOffset].rect, elRect.y);
-      if (foundPage !== api.getCurrentPageNr() - 1) api.scrollPos(topOfPage, 0);
+      if (foundPage !== api.getCurrentPageNr() - 1) {
+        api.jumplistMark();
+        api.scrollPos(topOfPage, 0);
+      };
     }
 
     function continueSearch(dir: 'forward' | 'backward') {
