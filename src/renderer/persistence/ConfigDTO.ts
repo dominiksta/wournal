@@ -137,6 +137,7 @@ const ConfigDTOSchema = {
     tools: CanvasToolConfigSchema,
     autosave: AutosaveConfigSchema,
     enableTabs: { type: 'boolean' },
+    tabWidthEm: { type: 'int32' },
     defaultZoomDocument: { type: 'float32' },
     zoomUI: { type: 'float32' },
   }
@@ -239,6 +240,7 @@ export const ConfigDTOVersioner = new DTOVersioner<ConfigDTO>({
       return {
         ...ver0_9, version: 1,
         enableTabs: true,
+        tabWidthEm: 14,
       };
     },
   }
@@ -283,6 +285,7 @@ export function defaultConfig(): ConfigDTO {
     },
     defaultZoomDocument: 1.0,
     enableTabs: true,
+    tabWidthEm: 12,
     zoomUI: 1.0,
     tools: {
       CanvasToolPen: {

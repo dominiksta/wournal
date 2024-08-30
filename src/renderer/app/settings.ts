@@ -70,6 +70,7 @@ export class Settings extends Component {
             checkUpdatesOnStartup: rx.bind(conf.partial('checkUpdatesOnStartup')),
             penCursorLeftAngle: rx.bind(conf.partial('penCursorLeftAngle')),
             enableTabs: rx.bind(conf.partial('enableTabs')),
+            tabWidthEm: rx.bind(conf.partial('tabWidthEm')),
           }})
         ]),
         ui5.panel({ fields: { headerText: 'Default Tool Settings', collapsed: true }}, [
@@ -221,6 +222,7 @@ class UserInterfaceSettings extends Component {
     checkUpdatesOnStartup: rx.prop<boolean>(),
     penCursorLeftAngle: rx.prop<boolean>(),
     enableTabs: rx.prop<boolean>(),
+    tabWidthEm: rx.prop<number>(),
   }
 
   render() {
@@ -318,6 +320,20 @@ class UserInterfaceSettings extends Component {
           text: 'Enable Tabs (Disable to Open Every Document in a New Window)*',
         }
       })),
+      h.div([
+        ui5.label({
+          fields: { for: 'setting-tab-width-em' },
+          style: { marginLeft: '0.5em' },
+        }, 'Tab Width (Measured in "em", Proportional to Font Size)'),
+        ui5.stepInput({
+          fields: {
+            id: 'setting-tab-width-em',
+            value: rx.bind(this.props.tabWidthEm),
+            step: 1, min: 8, max: 40, valuePrecision: 0,
+          },
+          style: { width: '6em', marginLeft: '1.5em' },
+        })
+      ]),
 
       h.p(h.i('*: Restart Required')),
     ]

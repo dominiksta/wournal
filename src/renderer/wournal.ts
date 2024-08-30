@@ -727,6 +727,7 @@ export default class Wournal extends Component {
             tabs: this.openTabs,
             activeTab: rx.bind(this.activeTabId),
             hidden: this.configCtx.derive(cfg => !cfg.enableTabs),
+            tabWidthEm: this.configCtx.derive(cfg => cfg.tabWidthEm),
           },
           // css is weird man. see https://stackoverflow.com/a/50189188
           style: { flexGrow: '1', height: '10%' },

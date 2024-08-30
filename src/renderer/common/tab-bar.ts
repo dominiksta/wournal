@@ -2,7 +2,6 @@ import { rx, h, Component, style, TemplateElementChild } from '@mvuijs/core';
 import * as ui5 from '@mvuijs/ui5';
 import { debounce } from 'lodash';
 
-const TAB_WIDTH = '12em';
 const DROP_INDICATOR_WIDTH = '.2em';
 
 // [dominiksta:2024-08-17]: This feels like a dirty hack but it *sort of*
@@ -23,6 +22,7 @@ class TabButton extends Component<{
     id: rx.prop<string>(),
     title: rx.prop<string>(),
     active: rx.prop<boolean>(),
+    tabWidthEm: rx.prop<number>(),
   }
 
   render() {
@@ -30,6 +30,15 @@ class TabButton extends Component<{
 
     const showDrpIndLeft = new rx.State(false);
     const showDrpIndRight = new rx.State(false);
+
+    this.subscribe(this.props.tabWidthEm, tw => {
+      const width = `${tw}em`;
+      this.styles.next(style.sheet({
+        ':host': { width },
+        '#tab-container': { width: `calc(${width} - 3em)` },
+        '#tab-container.active:hover #title': { maxWidth: `calc(${width} - 3em)` },
+      }))
+    })
 
     return [
       h.div(
@@ -123,7 +132,7 @@ class TabButton extends Component<{
             [
               h.span({
                 classes: { active },
-                fields: { id: 'title' },
+                fields: { id: 'title', title },
               }, title),
               ui5.icon({
                 fields: { id: 'close', design: 'Neutral', name: 'decline' },
@@ -155,7 +164,6 @@ class TabButton extends Component<{
       fontFamily: ui5.Theme.FontFamily,
       fontSize: ui5.Theme.FontSize,
       cursor: 'default',
-      width: TAB_WIDTH,
       // padding: '.3em',
     },
     '#container': {
@@ -168,7 +176,6 @@ class TabButton extends Component<{
     '#tab-container': {
       borderRadius: '.2em',
       flexGrow: '1',
-      width: `calc(${TAB_WIDTH} - 3em)`,
       padding: '4px',
       display: 'flex',
       alignItems: 'center',
@@ -196,9 +203,6 @@ class TabButton extends Component<{
     '#close': {
       display: 'none',
       marginLeft: '.3em',
-    },
-    '#tab-container.active:hover #title': {
-      maxWidth: `calc(${TAB_WIDTH} - 3em)`,
     },
     '#tab-container.active:hover > #close': {
       display: 'inline-block',
@@ -232,6 +236,7 @@ export class TabBar extends Component<{
     tabs: rx.prop<TabDef[]>(),
     activeTab: rx.prop<string | false>({ defaultValue: false }),
     hidden: rx.prop<boolean>({ defaultValue: false }),
+    tabWidthEm: rx.prop<number>({ defaultValue: 14 }),
   }
 
   private tabContentRef = this.ref<HTMLDivElement>();
@@ -243,7 +248,7 @@ export class TabBar extends Component<{
   }
 
   render() {
-    const { tabs, activeTab, hidden } = this.props;
+    const { tabs, activeTab, hidden, tabWidthEm } = this.props;
     const lastClosed = new rx.State<number>(0);
 
     // select tab 0 if no other is selected. disable tab display if
@@ -315,10 +320,11 @@ export class TabBar extends Component<{
             },
             h.div(
               { fields: { id: 'tabs' } },
-              tabs.derive(tabs => tabs.map((t, idx) => TabButton.t({
+              tabs.derive(tabs => tabs.map((t) => TabButton.t({
                 props: {
                   id: t.id, title: t.title,
                   active: activeTab.derive(at => at === t.id),
+                  tabWidthEm,
                 },
                 events: {
                   select: ({ detail }) => activeTab.next(detail),
