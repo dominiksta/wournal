@@ -142,7 +142,8 @@ export function registerApiHandlers() {
         }));
     },
     'window:focus': async (_, id) => {
-      [...instances.values()].find(inst => inst.id === id).win.focus();
+      const win = [...instances.values()].find(inst => inst.id === id).win;
+      win.show(); win.focus();
     },
 
     'clipboard:writeWournal': async (_, d) => clipboard.writeBuffer(
@@ -182,7 +183,7 @@ export function registerCallbacks(win: BrowserWindow) {
     'file:open': send => app.on('second-instance', (_, argv, pwd) => {
       const lastFocused = [...instances.values()].find(instance => instance.lastFocused);
       if (lastFocused.win !== win) return;
-      win.focus();
+      win.show(); win.focus();
       send({ argv: parseArgs({ args: argv, ...argvParseSpec}), pwd });
     })
 
