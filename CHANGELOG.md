@@ -21,6 +21,8 @@ Changelog
 - The default document zoom level was not respected for the first page in the
   initial startup document
 - Autosaves could not be disabled
+- "Recent Files" menu was not sometimes not showing. (This was an upstream bug
+  (SAP/ui5-webcomponents#7391)).
 
 
 `0.0.7` - _2024-08-16_

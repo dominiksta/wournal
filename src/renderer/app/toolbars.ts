@@ -124,22 +124,6 @@ export default class Toolbars extends Component {
             }),
             ui5.menuItem({
               fields: {
-                icon: 'history', id: '',
-                text: 'Recent Documents',
-              }
-            }, recentFiles.derive(rf => {
-              if (rf.length === 0) return [ui5.menuItem({
-                fields: { id: '', text: 'No Recent Documents' }
-              })];
-              return rf.map(path => ui5.menuItem({
-                fields: {
-                  id: 'recent:' + path,
-                  text: FileUtils.shorterReadablePath(path),
-                }
-              }))
-            })),
-            ui5.menuItem({
-              fields: {
                 icon: 'save', ...globalCmdMenuItem('file_save'),
               }
             }),
@@ -159,6 +143,23 @@ export default class Toolbars extends Component {
               }
             }),
           ]),
+
+          ui5.menuItem({
+            fields: {
+              // icon: 'history',
+              id: '', text: 'Recent Documents',
+            }
+          }, recentFiles.derive(rf => {
+            if (rf.length === 0) return [ui5.menuItem({
+              fields: { id: '', text: 'No Recent Documents' }
+            })];
+            return rf.map(path => ui5.menuItem({
+              fields: {
+                id: 'recent:' + path,
+                text: FileUtils.shorterReadablePath(path),
+              }
+            }))
+          })),
 
           ui5.menuItem({ fields: { text: 'Edit' } }, [
             ui5.menuItem({
@@ -362,47 +363,54 @@ export default class Toolbars extends Component {
                 ...globalCmdMenuItem('tool_select_text'),
               }
             }),
-            ui5.menuItem({
-              fields: {text: 'Color', icon: 'palette', startsSection: true }
-            }, [
-              h.fragment(configCtx, config => config.colorPalette.map(col =>
-                ui5.menuItem({
-                  fields: {
-                    text: col.name,
-                    id: `color:${col.color}`,
-                    icon: strokeColor.map(
-                      c => c === col.color ? 'wournal/menu-selected' : ''
-                    ),
-                  }
-                })
-              ))
-            ]),
-            ui5.menuItem({ fields: { text: 'Stroke Width' } }, [
-              ui5.menuItem({
-                fields: {
-                  icon: strokeWidth.map(
-                    s => s === 'fine' ? 'wournal/menu-selected' : ''
-                  ),
-                  ...globalCmdMenuItem('tool_stroke_width_fine'),
-                }
-              }),
-              ui5.menuItem({
-                fields: {
-                  icon: strokeWidth.map(
-                    s => s === 'medium' ? 'wournal/menu-selected' : ''
-                  ),
-                  ...globalCmdMenuItem('tool_stroke_width_medium'),
-                }
-              }),
-              ui5.menuItem({
-                fields: {
-                  icon: strokeWidth.map(
-                    s => s === 'thick' ? 'wournal/menu-selected' : ''
-                  ),
-                  ...globalCmdMenuItem('tool_stroke_width_thick'),
-                }
-              }),
-            ]),
+
+            // HACK: These are disabled because of an upstream issue in ui5
+            // (https://github.com/SAP/ui5-webcomponents/issues/7391). They
+            // claim it is resolved but it still doesnt work. Will have to
+            // update to v2 at some point.
+
+            // ui5.menuItem({
+            //   fields: {text: 'Color', icon: 'palette', startsSection: true }
+            // }, [
+            //   h.fragment(configCtx, config => config.colorPalette.map(col =>
+            //     ui5.menuItem({
+            //       fields: {
+            //         text: col.name,
+            //         id: `color:${col.color}`,
+            //         icon: strokeColor.map(
+            //           c => c === col.color ? 'wournal/menu-selected' : ''
+            //         ),
+            //       }
+            //     })
+            //   ))
+            // ]),
+            // ui5.menuItem({ fields: { text: 'Stroke Width' } }, [
+            //   ui5.menuItem({
+            //     fields: {
+            //       icon: strokeWidth.map(
+            //         s => s === 'fine' ? 'wournal/menu-selected' : ''
+            //       ),
+            //       ...globalCmdMenuItem('tool_stroke_width_fine'),
+            //     }
+            //   }),
+            //   ui5.menuItem({
+            //     fields: {
+            //       icon: strokeWidth.map(
+            //         s => s === 'medium' ? 'wournal/menu-selected' : ''
+            //       ),
+            //       ...globalCmdMenuItem('tool_stroke_width_medium'),
+            //     }
+            //   }),
+            //   ui5.menuItem({
+            //     fields: {
+            //       icon: strokeWidth.map(
+            //         s => s === 'thick' ? 'wournal/menu-selected' : ''
+            //       ),
+            //       ...globalCmdMenuItem('tool_stroke_width_thick'),
+            //     }
+            //   }),
+            // ]),
+
             ui5.menuItem({
               fields: {
                 ...globalCmdMenuItem('tool_current_default'),
