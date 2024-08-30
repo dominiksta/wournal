@@ -43,7 +43,7 @@ function setupErrorPopup() {
 }
 
 async function maybeLoadArgvDoc(
-  wournal: Wournal, argv: ArgvParsed
+  wournal: Wournal, argv: ArgvParsed, initial: boolean,
 ) {
   // electron-forge seems to run wournal with an argv of "." by default
   if (!environment.production) return;
@@ -51,7 +51,7 @@ async function maybeLoadArgvDoc(
   if (argv.positionals.length > 3) return; // dev
   if (argv.positionals.length > 1) {
     const path = argv.positionals[argv.positionals.length - 1];
-    const exists = await wournal.api.loadDocument(path);
+    const exists = await wournal.api.loadDocument(path, initial);
     if (!exists) {
       wournal.api.newDocument({
         backgroundColor: argv.values["page-color"] as string ?? '#FFFFFF',
@@ -145,7 +145,7 @@ async function main() {
 
   window.electron.on['file:open'](async ([args]) => {
     LOG.info('Opening new file from system electron callback');
-    maybeLoadArgvDoc(wournal, args.argv);
+    maybeLoadArgvDoc(wournal, args.argv, false);
   });
 
   wournal.shortcutsCtx.addEl(document);
@@ -174,7 +174,7 @@ async function main() {
   });
 
   document.body.appendChild(wournal);
-  maybeLoadArgvDoc(wournal, await ApiClient["process:argv"]());
+  maybeLoadArgvDoc(wournal, await ApiClient["process:argv"](), true);
   LOG.info('Startup Complete')
 }
 

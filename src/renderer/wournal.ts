@@ -165,11 +165,10 @@ export default class Wournal extends Component {
       await this.api.loadDocument(userResp);
       return true;
     },
-    loadDocument: async (fileName: string) => {
+    loadDocument: async (fileName: string, replace = false) => {
       this.flushLastPages();
       LOG.info('loading file: ' + fileName);
       RecentFiles.add(fileName);
-      // this.doc.next(WournalDocument.create(this.getContext.bind(this)));
       const closePleaseWait = this.dialog.pleaseWait(
         'Loading Document',
       );
@@ -263,8 +262,16 @@ export default class Wournal extends Component {
         'pages unless you save as a .woj file'
       )
       const tabId = this.tabIds.nextId().toString()
-      this.openDocs.next(v => [...v, { id: tabId, doc: doc as WournalDocument }]);
+      const idx =
+        this.openDocs.value.findIndex(od => od.id === this.activeTabId.value);
+      this.openDocs.next(v => [
+        ...v.slice(0, idx+1), { id: tabId, doc: doc as WournalDocument },
+        ...v.slice(idx+1),
+      ]);
       this.activeTabId.next(tabId);
+      if (replace) {
+        this.openDocs.next(v => [...v.slice(0, idx), ...v.slice(idx+1)]);
+      }
       closePleaseWait();
       const lastPage = LastPages.get(fileName);
       if (lastPage !== false) this.api.scrollPage(lastPage);
@@ -275,7 +282,10 @@ export default class Wournal extends Component {
     newDocument: async (props: PageProps, identification: string) => {
       const doc = WournalDocument.create(this.getContext.bind(this), props);
       const tabId = this.tabIds.nextId().toString();
-      this.openDocs.next(docs => [...docs, { id: tabId, doc } ]);
+      const idx = this.openDocs.value.findIndex(od => od.id === this.activeTabId.value);
+      this.openDocs.next(docs => [
+        ...docs.slice(0, idx+1), { id: tabId, doc }, ...docs.slice(idx+1),
+      ]);
       this.activeTabId.next(tabId);
       if (identification) {
         doc.fileName = identification;

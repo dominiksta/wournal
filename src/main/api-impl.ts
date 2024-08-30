@@ -161,7 +161,8 @@ export function registerCallbacks(win: BrowserWindow) {
       send({})
     }),
 
-    'file:open': send => app.on('second-instance', (_, argv, pwd) => {
+    'file:open': send => app.on('second-instance', (e, argv, pwd) => {
+      win.focus();
       send({ argv: parseArgs({ args: argv, ...argvParseSpec}), pwd });
     })
 
