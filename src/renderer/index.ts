@@ -168,15 +168,6 @@ async function main() {
     }
   });
 
-  document.addEventListener('keyup', e => {
-    if (!e.altKey) return;
-    switch (e.key) {
-      case 'ArrowLeft': wournal.api.jumplistPrev(); break;
-      case 'ArrowRight': wournal.api.jumplistNext(); break;
-      case 'ArrowDown': wournal.api.jumplistMark(); break;
-    }
-  });
-
   document.body.appendChild(wournal);
   maybeLoadArgvDoc(wournal, await ApiClient["process:argv"](), true);
   LOG.info('Startup Complete')

@@ -1124,20 +1124,20 @@ export default class Wournal extends Component {
     'jumplist_prev': {
       human_name: 'Jump to Previous Marked Position',
       func: () => this.api.jumplistPrev(),
-      shortcut: 'Alt+LeftArrow',
+      shortcut: 'Alt+ArrowLeft',
     },
     'jumplist_next': {
       human_name: 'Jump to Next Marked Position',
       func: () => this.api.jumplistNext(),
-      shortcut: 'Alt+RightArrow',
+      shortcut: 'Alt+ArrowRight',
     },
     'jumplist_mark': {
       human_name: 'Mark Current Position',
       func: () => {
-        this.toast.open('Current Position Marked');
         this.api.jumplistMark();
+        this.toast.open('Current Position Marked');
       },
-      shortcut: 'Alt+DownArrow',
+      shortcut: 'Alt+ArrowDown',
     },
 
     'tab_next': {
