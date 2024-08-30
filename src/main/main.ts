@@ -25,13 +25,11 @@ if (environment.pkgPortable) app.setPath(
   path.resolve(path.dirname(app.getAppPath()), '..', 'user', 'data')
 );
 
-let lastFocusedWindow: BrowserWindow;
-
 export const instances: Map<WebContents, {
-  win: BrowserWindow, pwd: string, argv: string[]
+  win: BrowserWindow, pwd: string, argv: string[], lastFocused: boolean,
 }> = new Map();
 
-function createWindow(argv: string[], pwd: string) {
+export function createWindow(argv: string[], pwd: string) {
   const tempCfg = getTempConfig();
   const win = new BrowserWindow({
     width: tempCfg.windowWidth,
@@ -61,7 +59,7 @@ function createWindow(argv: string[], pwd: string) {
     win.webContents.openDevTools();
   }
 
-  instances.set(win.webContents, { win, argv, pwd });
+  instances.set(win.webContents, { win, argv, pwd, lastFocused: true });
 
   win.on('close', () => {
     writeTempConfig({
@@ -72,7 +70,10 @@ function createWindow(argv: string[], pwd: string) {
     })
   });
 
-  win.on('focus', () => { lastFocusedWindow = win });
+  win.on('focus', () => {
+    for (const instance of instances.values()) instance.lastFocused = false;
+    instances.get(win.webContents).lastFocused = true;
+  });
 
   win.show();
 }
@@ -83,9 +84,6 @@ if (!gotTheLock) {
 } else {
   registerApiHandlers();
   app.whenReady().then(() => createWindow(process.argv, process.cwd()));
-  app.on('second-instance', (_, argv, pwd) => {
-    // lastFocusedWindow.webContents.
-  });
   app.on('window-all-closed', () => {
     app.quit();
   });

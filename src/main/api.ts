@@ -28,6 +28,7 @@ export const ApiRouteNames = [
   'window:setTitle',
   'window:destroy',
   'window:setZoom',
+  'window:new',
 
   'clipboard:writeWournal',
   'clipboard:readText',
@@ -66,6 +67,7 @@ export interface ElectronApi extends ApiSpec<ApiRouteName> {
   'window:setTitle': (title: string) => Promise<void>;
   'window:destroy': () => Promise<void>;
   'window:setZoom': (zoom: number) => Promise<void>;
+  'window:new': () => Promise<void>;
 
   'clipboard:writeWournal': (data: any) => Promise<void>;
   'clipboard:readText': () => Promise<string | false>;

@@ -76,6 +76,7 @@ export const GlobalCommandId = [
 
   'tab_next',
   'tab_prev',
+  'new_window',
 
   'system_show_debug_info',
   'system_update',

@@ -1145,6 +1145,11 @@ export default class Wournal extends Component {
       },
       shortcut: 'Ctrl+PageUp',
     },
+    'new_window': {
+      human_name: 'New Window',
+      func: () => ApiClient['window:new'](),
+      shortcut: 'Ctrl+Shift+N',
+    },
 
     'system_show_debug_info': {
       human_name: 'System Debug Information',

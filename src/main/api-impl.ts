@@ -4,7 +4,7 @@ import {
 } from 'electron';
 import type { ElectronApi, ApiSpec, ApiRouteName, ElectronCallbacks } from './api';
 import fs from 'fs';
-import { instances } from './main';
+import { createWindow, instances } from './main';
 import { parseArgs } from 'node:util';
 import { argvParseSpec } from './argv';
 import { homedir } from 'os';
@@ -126,6 +126,10 @@ export function registerApiHandlers() {
     'window:setZoom': async (e, zoom) => {
       instances.get(e.sender)!.win.webContents.setZoomFactor(zoom);
     },
+    'window:new': async (e) => {
+      const win = instances.get(e.sender);
+      createWindow([], win.pwd);
+    },
 
     'clipboard:writeWournal': async (_, d) => clipboard.writeBuffer(
       'image/wournal', Buffer.from(JSON.stringify(d), 'utf-8')
@@ -161,7 +165,9 @@ export function registerCallbacks(win: BrowserWindow) {
       send({})
     }),
 
-    'file:open': send => app.on('second-instance', (e, argv, pwd) => {
+    'file:open': send => app.on('second-instance', (_, argv, pwd) => {
+      const lastFocused = [...instances.values()].find(instance => instance.lastFocused);
+      if (lastFocused.win !== win) return;
       win.focus();
       send({ argv: parseArgs({ args: argv, ...argvParseSpec}), pwd });
     })
