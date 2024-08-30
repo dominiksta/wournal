@@ -12,6 +12,7 @@ Changelog
   Window`. If you don't like tabs and want every document to open in its own
   window, you can switch to the previous behaviour in the settings under `[Menu]
   -> Edit -> Open Preferences -> UI -> Enable Tabs`.
+- New button to reset all settings to default
 
 ### Fixed
 

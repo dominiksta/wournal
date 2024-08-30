@@ -1,6 +1,7 @@
 import { Component, h, rx, style } from "@mvuijs/core";
 import * as ui5 from "@mvuijs/ui5";
 import { ConfigCtx } from "app/config-context";
+import { BasicDialogManagerContext } from "common/dialog-manager";
 import { FontPicker } from "common/font-picker";
 import { SimpleSelect } from "common/simple-select";
 import { CanvasToolName, CanvasToolNames } from "document/CanvasTool";
@@ -24,6 +25,7 @@ export class Settings extends Component {
   render() {
     const configCtx = this.getContext(ConfigCtx, true);
     const toast = this.getContext(ToastCtx, true).open;
+    const dialog = this.getContext(BasicDialogManagerContext);
 
     // local while editing
     const conf = new rx.State(defaultConfig());
@@ -46,6 +48,27 @@ export class Settings extends Component {
         slots: {
           footer: [
             h.div({ fields: { id: 'footer' }}, [
+              ui5.button({
+                fields: { design: 'Transparent' },
+                events: {
+                  click: async _ => {
+                    const resp = await dialog.promptYesOrNo(
+                      'Reset Configuration',
+                      'Are you sure you want to reset all settings to default?',
+                      'Warning',
+                    );
+                    if (!resp) return;
+                    configCtx.next(defaultConfig());
+                    this.props.open.next(false);
+                    dialog.infoBox(
+                      'Configuration Reset',
+                      'Configuration Reset successful. You may have to restart ' +
+                      'Wournal for some settings to take effect.',
+                      'Information'
+                    );
+                  }
+                }
+              }, 'Reset to Default'),
               ui5.button({
                 events: { click: _ => { this.props.open.next(false); }}
               }, 'Cancel'),
@@ -125,9 +148,12 @@ export class Settings extends Component {
       justifyContent: 'flex-end',
       alignItems: 'center',
     },
+    '#footer > ui5-button:first-child': {
+      marginRight: 'auto',
+    },
     '#footer > ui5-button': {
       margin: '3px',
-    }
+    },
   })
 
 }
