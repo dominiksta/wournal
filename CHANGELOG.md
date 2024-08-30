@@ -1,6 +1,27 @@
 Changelog
 ======================================================================
 
+`0.0.8` - _unreleased_
+----------------------------------------------------------------------
+**Tabs!**
+
+### Added
+
+- Tabs! By default, Wournal will now open documents in tabs. You can still
+  create new Windows with Ctrl+Shift+N or in the menu from `Window -> New
+  Window`. If you don't like tabs and want every document to open in its own
+  window, you can switch to the previous behaviour in the settings under `[Menu]
+  -> Edit -> Open Preferences -> UI -> Enable Tabs`.
+
+### Fixed
+
+- PDF zoom preview in dark mode was not inverted, resulting in a flashbang on
+  every zoom
+- The default document zoom level was not respected for the first page in the
+  initial startup document
+- Autosaves could not be disabled
+
+
 `0.0.7` - _2024-08-16_
 ----------------------------------------------------------------------
 **Hotfix for Autosaves and some Quality of Life**

@@ -115,8 +115,6 @@ export class StatusBar extends Component {
       padding: '1px 0px',
       fontSize: '80%',
       display: 'block',
-      position: 'fixed',
-      bottom: '0',
       width: '100%',
       zIndex: '2',
       borderTop: `1px solid ${ui5.Theme.PageFooter_BorderColor}`,

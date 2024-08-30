@@ -1,5 +1,6 @@
 import { getLogger } from 'Shared/logging';
 import { ApiRouteNames, ElectronApi } from '../main/api';
+import environment from 'Shared/environment';
 
 const LOG = getLogger(__filename);
 
@@ -16,7 +17,7 @@ function registerDevToolsShortcut() {
       ApiClient['debug:showDevTools']();
 
     if (
-      (e.ctrlKey && e.key === 'r')
+      (e.ctrlKey && e.key === 'r' && !environment.production)
     ) {
       location.reload();
     }

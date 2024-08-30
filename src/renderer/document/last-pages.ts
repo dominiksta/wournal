@@ -9,7 +9,7 @@ const LOG = getLogger(__filename);
 
 export const LastPages = {
   read() {
-    LOG.info('Reading last pages');
+    // LOG.info('Reading last pages');
     const inStorage = localStorage.getItem(LAST_PAGES_LS_KEY);
 
     if (inStorage === null) LAST_PAGES = [];
@@ -20,7 +20,7 @@ export const LastPages = {
   },
 
   write(): void {
-    LOG.info('Writing last pages');
+    // LOG.info('Writing last pages');
     localStorage.setItem(
       LAST_PAGES_LS_KEY, JSON.stringify(LAST_PAGES, null, 2)
     );

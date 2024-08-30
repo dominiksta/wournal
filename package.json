@@ -1,7 +1,7 @@
 {
   "name": "wournal",
   "productName": "Wournal",
-  "version": "0.0.7",
+  "version": "0.0.8-dev",
   "description": "An SVG Editor for Handwritten Documents",
   "author": {
     "name": "dominiksta"
@@ -24,7 +24,7 @@
     "make": "electron-forge make"
   },
   "dependencies": {
-    "@mvuijs/core": "0.0.3",
+    "@mvuijs/core": "0.0.4",
     "@mvuijs/ui5": "1.24.8",
     "@ui5/webcomponents": "1.24.8",
     "@pdf-lib/fontkit": "^1.1.1",

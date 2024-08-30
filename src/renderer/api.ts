@@ -15,8 +15,10 @@ export interface WournalApi {
     defaultIdentification?: string
   ): Promise<string | false>;
   loadDocumentPrompt(): Promise<boolean>;
-  loadDocument(identification: string): Promise<boolean>;
+  loadDocument(identification: string, replace?: boolean): Promise<boolean>;
   newDocument(props?: PageProps, identification?: string): void;
+  closeDocumentPrompt(): Promise<boolean>;
+  closeDocumentPromptAll(): Promise<boolean>;
   getDocumentId(): string | false;
   createTestPages(): void;
   promptClosingUnsaved(): Promise<boolean>;

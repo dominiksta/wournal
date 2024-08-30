@@ -4,7 +4,7 @@ import {
 } from 'electron';
 import type { ElectronApi, ApiSpec, ApiRouteName, ElectronCallbacks } from './api';
 import fs from 'fs';
-import { instances } from './main';
+import { createWindow, instances } from './main';
 import { parseArgs } from 'node:util';
 import { argvParseSpec } from './argv';
 import { homedir } from 'os';
@@ -74,11 +74,11 @@ export function registerApiHandlers() {
     },
     'file:savePrompt': async (e, defaultPath, filters) => {
       const win = instances.get(e.sender)!.win;
-      const resp = dialog.showSaveDialogSync(win, {
+      const resp = await dialog.showSaveDialog(win, {
         filters, properties: ['showOverwriteConfirmation'], defaultPath
       });
-      if (!resp) return false;
-      return resp;
+      if (resp.canceled) return false;
+      return resp.filePath;
     },
     'file:exists': async (_, fileName) => {
       fileName = fileName.replace(/^~/, homedir);
@@ -102,8 +102,7 @@ export function registerApiHandlers() {
     },
 
     'process:argv': async (e) => {
-      const argv = instances.get(e.sender)!.argv;
-      return parseArgs({ args: argv, ...argvParseSpec});
+      return instances.get(e.sender)!.argv;
     },
     'process:getRendererSourceDir': async () => {
       // @ts-ignore
@@ -122,9 +121,28 @@ export function registerApiHandlers() {
     'window:setTitle': async (e, title) => {
       instances.get(e.sender)!.win.setTitle(title);
     },
-    'window:destroy': async (e) => { instances.get(e.sender)!.win.destroy(); },
+    'window:destroy': async (e) => {
+      instances.get(e.sender)!.win.destroy();
+      instances.delete(e.sender);
+    },
     'window:setZoom': async (e, zoom) => {
       instances.get(e.sender)!.win.webContents.setZoomFactor(zoom);
+    },
+    'window:new': async (e, argv, pwd) => {
+      createWindow(
+        argv ?? parseArgs({ args: [], ...argvParseSpec}),
+        pwd ?? instances.get(e.sender)!.pwd
+      );
+    },
+    'window:list': async _ => {
+      return [...instances.values()]
+        .map(inst => ({
+          title: inst.win.getTitle(), id: inst.id,
+          focused: inst.lastFocused
+        }));
+    },
+    'window:focus': async (_, id) => {
+      [...instances.values()].find(inst => inst.id === id).win.focus();
     },
 
     'clipboard:writeWournal': async (_, d) => clipboard.writeBuffer(
@@ -161,12 +179,19 @@ export function registerCallbacks(win: BrowserWindow) {
       send({})
     }),
 
+    'file:open': send => app.on('second-instance', (_, argv, pwd) => {
+      const lastFocused = [...instances.values()].find(instance => instance.lastFocused);
+      if (lastFocused.win !== win) return;
+      win.focus();
+      send({ argv: parseArgs({ args: argv, ...argvParseSpec}), pwd });
+    })
+
   }
 
   for (let key in impl) (impl as any)[key](
-    (...args: any[]) => {
+    (args: any) => {
       LOG.info(`Callback Triggered: ${key}`);
-      win.webContents.send(key, ...args);
+      win.webContents.send(key, args);
     }
   )
 }

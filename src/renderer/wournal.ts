@@ -3,7 +3,7 @@ import './global-styles';
 import './app/debugger';
 import * as ui5 from "@mvuijs/ui5";
 import Toolbars from 'app/toolbars';
-import { customScrollbar, darkTheme, lightTheme, theme } from "./global-styles";
+import { darkTheme, lightTheme } from "./global-styles";
 import { WournalDocument } from "document/WournalDocument";
 import { WournalPageSize } from 'document/WournalPageSize';
 import { ConfigCtx } from 'app/config-context';
@@ -28,10 +28,8 @@ import About from 'app/about';
 import { FileNotFoundError } from 'pdf/PDFCache';
 import { CanvasToolStrokeWidth, ConfigDTO, defaultConfig } from 'persistence/ConfigDTO';
 import PDFExporter from 'pdf/PDFExporter';
-import { OutlineContainer } from 'app/outline';
 import openSystemDebugInfo from 'app/debug-info';
 import setupAutosave from 'document/autosave';
-import { SearchBox } from 'app/search-box';
 import RecentFiles from 'persistence/recent-files';
 import { debounce } from 'lodash';
 import { checkDisplayUpdates, compareVersionStrings, getGithubReleases } from 'app/updater';
@@ -42,29 +40,67 @@ import environment from 'Shared/environment';
 import { SVGUtils } from 'util/SVGUtils';
 import { AUTOSAVE_DIR } from 'Shared/const';
 import { LastPages } from 'document/last-pages';
+import { TabBar, TabDef } from 'common/tab-bar';
+import DocumentDisplay from './document-display';
+import IdCounter from 'Shared/id-counter';
 
 const LOG = getLogger(__filename);
 
 @Component.register
 export default class Wournal extends Component {
 
+  private configCtx: rx.State<ConfigDTO>;
+
+  private readonly tabIds = new IdCounter();
+  private openDocs: rx.State<{ id: string, doc: WournalDocument }[]>;
+  private activeTabId: rx.State<string>;
+  private openTabs: rx.DerivedState<TabDef[]>;
+  private currDoc: rx.DerivedState<WournalDocument>;
+
+  private tabbarRef = this.ref<TabBar>();
+  private get currDocDisplay() {
+    return this.tabbarRef.current.activeTabContent as DocumentDisplay;
+  }
+
+  private settingsOpen = new rx.State(false, 'Wournal:settingsOpen');
+
+  private dialog = this.provideContext(BasicDialogManagerContext);
+
   constructor(config: ConfigDTO) {
     super();
-    this.configCtx.next(config);
+    this.configCtx = this.provideContext(ConfigCtx, new rx.State(config));
+
+    const initialTabName = this.tabIds.nextId().toString();
+    this.openDocs = new rx.State([{
+      id: initialTabName,
+      doc: WournalDocument.create(this.getContext.bind(this))
+    }]);
+    this.activeTabId = new rx.State<string>(initialTabName, 'Wournal:activeTabId');
+
+    this.openTabs =
+      this.openDocs.derive(docs => docs.map(doc => ({
+        id: doc.id.toString(),
+        title: tabTitle(doc.doc, doc.id),
+        template: DocumentDisplay.t({
+          props: {
+            doc: new rx.State(doc.doc), // HACK: fixed in mvui 0.0.4
+            hideSearchBox: rx.bind(this.hideSearchBox),
+          }
+        })
+      })));
+
+    this.currDoc = this.provideContext(DocumentCtx, this.activeTabId.derive(
+      at => this.openDocs.value.find(d => d.id === at).doc
+    ));
   }
 
   private fileSystem = inject('FileSystem');
   private confRepo = inject('ConfigRepository');
 
-  private configCtx =
-    this.provideContext(ConfigCtx, new rx.State(defaultConfig()));
   public shortcutsCtx =
     this.provideContext(ShortcutsCtx, new ShortcutManager());
 
-  private readonly outlineRef = this.ref<OutlineContainer>();
-  private hideSideBar = new rx.State(true, 'Wournal:hideSideBar');
   private hideSearchBox = new rx.State(true, 'Wournal:hideSearchBox');
-  private searchBoxRef = this.ref<SearchBox>();
 
   private toast = this.provideContext(ToastCtx, {
     open: async (msg: string) => {
@@ -79,7 +115,7 @@ export default class Wournal extends Component {
     // document
     // ----------------------------------------------------------------------
     saveDocumentPromptSinglePage: async (defaultIdentification: string) => {
-      const doc = this.doc.value
+      const doc = this.currDoc.value
       if (doc.pages.value.length > 1) {
         this.dialog.infoBox(
           'Warning',
@@ -108,16 +144,18 @@ export default class Wournal extends Component {
       return resp;
     },
     saveDocument: async (identification: string) => {
-      const doc = this.doc.value;
+      const doc = this.currDoc.value;
       await this.fileSystem.write(identification, await doc.toFile());
       doc.fileName = identification;
       doc.meta.next(m => ({ ...m, lastSavedTime: new Date().toISOString() }));
       doc.markSaved();
-      updateTitle(doc);
+      this.openDocs.next(v => [...v]);
+      updateTitle(doc, this.activeTabId.value);
       this.toast.open('Document Saved');
     },
     loadDocumentPrompt: async () => {
-      if (await this.api.promptClosingUnsaved()) return;
+      if (!this.configCtx.value.enableTabs && await this.api.promptClosingUnsaved())
+        return;
       const userResp = await this.fileSystem.loadPrompt([
         { extensions: ['woj', 'pdf', 'svg'], name: 'All Supported Types (.woj/.pdf/.svg)' },
         { extensions: ['woj'], name: 'Wournal File (Multi-Page) (.woj)' },
@@ -129,11 +167,10 @@ export default class Wournal extends Component {
       await this.api.loadDocument(userResp);
       return true;
     },
-    loadDocument: async (fileName: string) => {
+    loadDocument: async (fileName: string, replace = false) => {
       this.flushLastPages();
       LOG.info('loading file: ' + fileName);
       RecentFiles.add(fileName);
-      this.doc.next(WournalDocument.create(this.getContext.bind(this)));
       const closePleaseWait = this.dialog.pleaseWait(
         'Loading Document',
       );
@@ -208,50 +245,104 @@ export default class Wournal extends Component {
           this.getContext.bind(this), fileName, blob, pdfNotFoundActions
         );
       }
+      for (const openDoc of this.openDocs.value) {
+        if (doc.fileName !== undefined && openDoc.doc.fileName === doc.fileName) {
+          this.dialog.infoBox(
+            'Same Document Already Open', (
+              'You cannot open the same document twice in the same instance of ' +
+              'Wournal'
+            ),
+            'Warning',
+          );
+          closePleaseWait();
+          return true;
+        }
+      }
+
       if (doc.isSinglePage) this.toast.open(
         'This is a single page document (SVG). You will not be able to add ' +
         'pages unless you save as a .woj file'
       )
-      await this.doc.value.free();
-      this.doc.next(doc);
+      const tabId = this.tabIds.nextId().toString()
+      const idx =
+        this.openDocs.value.findIndex(od => od.id === this.activeTabId.value);
+      if (this.configCtx.value.enableTabs) {
+        this.openDocs.next(v => [
+          ...v.slice(0, idx + 1), { id: tabId, doc: doc as WournalDocument },
+          ...v.slice(idx + 1),
+        ]);
+        this.activeTabId.next(tabId);
+        if (replace)
+          this.openDocs.next(v => [...v.slice(0, idx), ...v.slice(idx + 1)]);
+      } else {
+        this.openDocs.next([{ id: tabId, doc: doc as WournalDocument }]);
+      }
       closePleaseWait();
       const lastPage = LastPages.get(fileName);
       if (lastPage !== false) this.api.scrollPage(lastPage);
       this.shortcutsCtx.focus();
+      this.currDocDisplay.hideSideBar.next(doc.meta.value.outline.length === 0);
       return true;
     },
     newDocument: async (props: PageProps, identification: string) => {
-      if (await this.api.promptClosingUnsaved()) return;
       const doc = WournalDocument.create(this.getContext.bind(this), props);
-      await this.doc.value.free();
-      this.doc.next(doc);
+      const tabId = this.tabIds.nextId().toString();
+      if (this.configCtx.value.enableTabs) {
+        const idx =
+          this.openDocs.value.findIndex(od => od.id === this.activeTabId.value);
+        this.openDocs.next(docs => [
+          ...docs.slice(0, idx + 1), { id: tabId, doc }, ...docs.slice(idx + 1),
+        ]);
+        this.activeTabId.next(tabId);
+      } else {
+        if (await this.api.promptClosingUnsaved()) return;
+        this.openDocs.next([{ id: tabId, doc }]);
+      }
       if (identification) {
         doc.fileName = identification;
-        updateTitle(doc);
+        updateTitle(doc, this.activeTabId.value);
         doc.isSinglePage = identification.endsWith('.svg');
         LOG.info('new document', [ identification, doc.isSinglePage ]);
       }
     },
-    getDocumentId: () => this.doc.value.fileName ?? false,
+    closeDocumentPrompt: async () => {
+      if (!this.configCtx.value.enableTabs) return;
+      if (await this.api.promptClosingUnsaved()) return false;
+      const currDoc = this.currDoc.value;
+      const openDocs = this.openDocs.value;
+      if (openDocs.length === 1) {
+        this.openDocs.next([{
+          id: this.tabIds.nextId().toString(),
+          doc: WournalDocument.create(this.getContext.bind(this))
+        }]);
+      } else {
+        const idx = openDocs.findIndex(od => od.doc === currDoc)
+        if (idx !== 0) this.activeTabId.next(openDocs[idx - 1].id);
+        this.openDocs.next(od => [...od.slice(0, idx), ...od.slice(idx + 1)]);
+      }
+      currDoc.free();
+      return true;
+    },
+    getDocumentId: () => this.currDoc.value.fileName ?? false,
     createTestPages: () => {
-      this.doc.value.addNewPage({
+      this.currDoc.value.addNewPage({
         width: WournalPageSize.DINA4.height,
         height: WournalPageSize.DINA4.width,
         backgroundColor: '#FFFFFF',
         backgroundStyle: 'ruled',
       });
-      this.doc.value.addNewPage({
+      this.currDoc.value.addNewPage({
         ...WournalPageSize.DINA5, backgroundColor: '#FFFFFF',
         backgroundStyle: 'blank'
       });
-      this.doc.value.addNewPage({
+      this.currDoc.value.addNewPage({
         ...WournalPageSize.DINA5, backgroundColor: '#FFFFFF',
         backgroundStyle: 'graph'
       });
     },
     promptClosingUnsaved: async () => {
       this.flushLastPages();
-      const doc = this.doc.value;
+      const doc = this.currDoc.value;
       if (!doc.dirty) return false;
       return new Promise<boolean>(resolve => {
         this.dialog.openDialog(close => ({
@@ -279,9 +370,16 @@ export default class Wournal extends Component {
         }));
       });
     },
-
+    closeDocumentPromptAll: async () => {
+      for (const doc of this.openDocs.value) {
+        if (!doc.doc.dirty) continue;
+        this.activeTabId.next(doc.id);
+        if (!await this.api.closeDocumentPrompt()) return false;
+      }
+      return true;
+    },
     promptExportPDF: async () => {
-      const doc = this.doc.value;
+      const doc = this.currDoc.value;
       const resp = await this.fileSystem.savePrompt(
         doc.fileName !== undefined
           ? (doc.fileName + '.pdf')
@@ -303,65 +401,65 @@ export default class Wournal extends Component {
 
     // history
     // ----------------------------------------------------------------------
-    undo: () => { this.doc.value.undo() },
-    redo: () => { this.doc.value.redo() },
+    undo: () => { this.currDoc.value.undo() },
+    redo: () => { this.currDoc.value.redo() },
 
     // clipboard/selection
     // ----------------------------------------------------------------------
-    pasteClipboard: () => { this.doc.value.pasteClipboard() },
-    cutSelection: () => { this.doc.value.selectionCut() },
-    copySelection: () => { this.doc.value.selectionCopy() },
-    deleteSelection: () => { this.doc.value.selectionCut(true) },
+    pasteClipboard: () => { this.currDoc.value.pasteClipboard() },
+    cutSelection: () => { this.currDoc.value.selectionCut() },
+    copySelection: () => { this.currDoc.value.selectionCopy() },
+    deleteSelection: () => { this.currDoc.value.selectionCut(true) },
 
     // jumplist
     // ----------------------------------------------------------------------
-    jumplistPrev: () => { this.doc.value.jumplistPrev() },
-    jumplistNext: () => { this.doc.value.jumplistNext() },
-    jumplistMark: () => { this.doc.value.jumplistAdd(this.doc.value.activePage.value) },
+    jumplistPrev: () => { this.currDoc.value.jumplistPrev() },
+    jumplistNext: () => { this.currDoc.value.jumplistNext() },
+    jumplistMark: () => { this.currDoc.value.jumplistAdd(this.currDoc.value.activePage.value) },
 
     // zoom
     // ----------------------------------------------------------------------
-    setZoom: (zoom: number) => { this.doc.value.setZoom(zoom) },
-    getZoom: () => { return this.doc.value.getZoom(); },
+    setZoom: (zoom: number) => { this.currDoc.value.setZoom(zoom) },
+    getZoom: () => { return this.currDoc.value.getZoom(); },
     setZoomFitWidth: () => {
       const idx = this.api.getCurrentPageNr();
-      this.doc.value.setZoomFitWidth();
-      this.doc.value.setActivePageForCurrentScroll();
+      this.currDoc.value.setZoomFitWidth();
+      this.currDoc.value.setActivePageForCurrentScroll();
       if (idx !== this.api.getCurrentPageNr()) this.api.scrollPage(idx);
     },
 
     // tools
     // ----------------------------------------------------------------------
     setTool: (tool: CanvasToolName) => {
-      this.doc.value.setTool(CanvasToolFactory.forName(tool));
+      this.currDoc.value.setTool(CanvasToolFactory.forName(tool));
     },
     getTool: () => {
-      return this.doc.value.currentTool.value.name;
+      return this.currDoc.value.currentTool.value.name;
     },
     setStrokeWidth: (width: CanvasToolStrokeWidth) => {
-      this.doc.value.setStrokeWidth(width);
+      this.currDoc.value.setStrokeWidth(width);
     },
     setColorByName: (name: string) => {
-      this.doc.value.setColor(
+      this.currDoc.value.setColor(
         this.configCtx.value.colorPalette.find(c => c.name === name).color
       );
     },
     setColorByHex: (color: string) => {
-      this.doc.value.setColor(color);
+      this.currDoc.value.setColor(color);
     },
     setFont: (opt: {
       family: string, size: number, weight: 'normal' | 'bold',
       style: 'normal' | 'italic'
     }) => {
-      const newCfg = DSUtils.copyObj(this.doc.value.toolConfig.value);
+      const newCfg = DSUtils.copyObj(this.currDoc.value.toolConfig.value);
       newCfg.CanvasToolText.fontFamily = opt.family;
       newCfg.CanvasToolText.fontSize = opt.size;
       newCfg.CanvasToolText.fontStyle = opt.style;
       newCfg.CanvasToolText.fontWeight = opt.weight;
-      this.doc.value.toolConfig.next(newCfg);
+      this.currDoc.value.toolConfig.next(newCfg);
     },
     getFont: () => {
-      const cfg = this.doc.value.toolConfig.value.CanvasToolText;
+      const cfg = this.currDoc.value.toolConfig.value.CanvasToolText;
       return {
         family: cfg.fontFamily,
         size: cfg.fontSize,
@@ -374,64 +472,66 @@ export default class Wournal extends Component {
     // ----------------------------------------------------------------------
     scrollPage: (page: number) => {
       page -= 1;
-      const doc = this.doc.value; const pages = doc.pages.value;
+      const doc = this.currDoc.value; const pages = doc.pages.value;
       if (page < 0 || page >= pages.length) return;
       doc.activePage.next(pages[page]);
       const prevScrollPos = this.api.getScrollPos();
       const pagePos = pages[page].display.getBoundingClientRect();
-      const viewport = this.documentRef.current.getBoundingClientRect();
+      const viewport = this.currDocDisplay.document.getBoundingClientRect();
+
       if (SVGUtils.rectIntersect(viewport, pagePos)) return;
       const pagePosInViewPort = pagePos.top - viewport.top;
       this.api.scrollPos(prevScrollPos.top + pagePosInViewPort, prevScrollPos.left);
     },
     scrollPos: (top: number, left: number) => {
-      this.documentRef.current.scrollTop = top;
-      this.documentRef.current.scrollLeft = left;
+      this.currDocDisplay.document.scrollTop = top;
+      this.currDocDisplay.document.scrollLeft = left;
     },
     getScrollPos: () => {
+      console.log(this.currDocDisplay);
       return {
-        top: this.documentRef.current.scrollTop,
-        left: this.documentRef.current.scrollLeft,
+        top: this.currDocDisplay.document.scrollTop,
+        left: this.currDocDisplay.document.scrollLeft,
       }
     },
 
     // layers
     // ----------------------------------------------------------------------
     newLayer: (name: string) => {
-      this.doc.value.activePage.value.addLayer(name);
+      this.currDoc.value.activePage.value.addLayer(name);
     },
     setActiveLayer: (name: string) => {
-      this.doc.value.activePage.value.setActivePaintLayer(name);
+      this.currDoc.value.activePage.value.setActivePaintLayer(name);
     },
     getLayerStatus: () => {
-      return this.doc.value.activePage.value.layers.value;
+      return this.currDoc.value.activePage.value.layers.value;
     },
     setLayerVisible: (name: string, visible: boolean) => {
-      return this.doc.value.activePage.value.setLayerVisible(name, visible);
+      return this.currDoc.value.activePage.value.setLayerVisible(name, visible);
     },
     deleteLayer: (name: string) => {
-      return this.doc.value.activePage.value.deleteLayer(name);
+      return this.currDoc.value.activePage.value.deleteLayer(name);
     },
     moveLayer: (name: string, direction: 'up' | 'down') => {
-      return this.doc.value.activePage.value.moveLayer(name, direction);
+      return this.currDoc.value.activePage.value.moveLayer(name, direction);
     },
     renameLayer: (name: string, newName: string) => {
-      this.doc.value.activePage.value.renameLayer(name, newName);
+      this.currDoc.value.activePage.value.renameLayer(name, newName);
     },
 
     // page manipulation
     // ----------------------------------------------------------------------
     getCurrentPageNr: () => {
-      return this.doc.value.pages.value.indexOf(this.doc.value.activePage.value) + 1;
+      return this.currDoc.value.pages.value.indexOf(this.currDoc.value.activePage.value) + 1;
     },
     getPageCount: () => {
-      return this.doc.value.pages.value.length;
+      return this.currDoc.value.pages.value.length;
     },
     setPageProps: (props: PageProps) => {
-      this.doc.value.activePage.value.setPageProps(props);
+      this.currDoc.value.activePage.value.setPageProps(props);
     },
     setPagePropsPrompt: async () => {
-      const page = this.doc.value.activePage.value;
+      const page = this.currDoc.value.activePage.value;
       const resp = await pageStyleDialog(
         this.dialog.openDialog, DSUtils.copyObj(page.getPageProps())
       );
@@ -439,24 +539,24 @@ export default class Wournal extends Component {
     },
     addPage: (addAfterPageNr: number, props: PageProps) => {
       if (!this.checkSinglePage()) return;
-      this.doc.value.addNewPage(props, addAfterPageNr);
+      this.currDoc.value.addNewPage(props, addAfterPageNr);
     },
     deletePage: (pageNr: number) => {
       if (!this.checkSinglePage()) return;
-      this.doc.value.deletePage(pageNr);
+      this.currDoc.value.deletePage(pageNr);
     },
     getPageProps: (pageNr: number) => {
-      const page = this.doc.value.pages.value[pageNr - 1];
+      const page = this.currDoc.value.pages.value[pageNr - 1];
       return page.getPageProps();
     },
     movePage: (pageNr: number, direction: 'up' | 'down') => {
       if (!this.checkSinglePage()) return;
-      this.doc.value.movePage(pageNr, direction);
+      this.currDoc.value.movePage(pageNr, direction);
     },
   }, 'wournal-api-call'))
 
   private checkSinglePage() {
-    if (this.doc.value.isSinglePage) {
+    if (this.currDoc.value.isSinglePage) {
       this.dialog.infoBox(
         'Warning',
         'Operation Disabled in Single Page Documents',
@@ -466,20 +566,6 @@ export default class Wournal extends Component {
     }
     return true;
   }
-
-  private doc = this.provideContext(
-    DocumentCtx,
-    new rx.State(
-      WournalDocument.create(this.getContext.bind(this)),
-      'Wournal:doc'
-    )
-  );
-
-  private settingsOpen = new rx.State(false, 'Wournal:settingsOpen');
-
-  private dialog = this.provideContext(BasicDialogManagerContext);
-
-  private documentRef = this.ref<HTMLDivElement>();
 
   private setupShortcuts() {
     const globalCmds = this.#globalCmds;
@@ -491,9 +577,17 @@ export default class Wournal extends Component {
       ));
     }
 
+    const extras: { [shortcut: string]: () => any } = {
+      'Ctrl+Tab': globalCmds['tab_next'].func,
+      'Ctrl+Shift+Tab': globalCmds['tab_prev'].func,
+    };
+
+    for (const extra in extras)
+      this.shortcutsCtx.addShortcut(Shortcut.fromId(extra, extras[extra]));
+
     let currentScrollZoom = 0;
     const maybeScrollZoom = debounce((pos: {x: number, y: number}) => {
-      this.doc.value.setZoom(
+      this.currDoc.value.setZoom(
         Math.max(0.1, this.api.getZoom() + currentScrollZoom * 0.1),
         pos
       );
@@ -519,7 +613,7 @@ export default class Wournal extends Component {
     let fileName: string | false = false;
 
     const firstPageWithPDF =
-      this.doc.value.pages.value.find(p => p.pdfMode !== undefined);
+      this.currDoc.value.pages.value.find(p => p.pdfMode !== undefined);
     if (firstPageWithPDF !== undefined)
       fileName = firstPageWithPDF.pdfMode.fileName;
 
@@ -531,6 +625,7 @@ export default class Wournal extends Component {
   }
 
   render() {
+
     this.setAttribute('data-ui5-compact-size', 'true');
 
     this.subscribe(this.configCtx, v => this.confRepo.save(v));
@@ -541,7 +636,8 @@ export default class Wournal extends Component {
 
     this.onRendered(() => {
       const stopAutoSave = setupAutosave(
-        this.configCtx.value.autosave, () => this.doc.value,
+        this.configCtx.value.autosave,
+        () => this.openDocs.value.map(od => od.doc),
         msg => this.dialog.infoBox('Autosave Error', [
           h.p([
             `Something went wrong with the autosave system.`,
@@ -601,100 +697,53 @@ export default class Wournal extends Component {
       }
     });
 
-    this.subscribe(this.doc, doc => {
-      updateTitle(doc);
-      this.hideSideBar.next(doc.meta.value.outline.length === 0);
+    this.subscribe(this.currDoc, doc => {
+      updateTitle(doc, this.activeTabId.value);
     });
     this.subscribe(
-      this.doc.pipe(rx.switchMap(doc => doc.undoStack.undoAvailable)),
-      _undoavailable => { updateTitle(this.doc.value); }
+      this.currDoc.pipe(rx.switchMap(doc => doc.undoStack.undoAvailable)),
+      _undoavailable => { updateTitle(this.currDoc.value, this.activeTabId.value); }
     );
-
-    // sidebar resizing
-    Promise.all([
-      this.query('#seperator'), this.query('#sidebar'),
-    ]).then(([sep, sideb]) => {
-      let oldMouseX = 0;
-      sideb.style.minWidth = '200px'; sideb.style.maxWidth = '200px';
-      const resize = (e: MouseEvent) => {
-        const mouseX =
-          Math.max(200, Math.min(e.clientX, this.getBoundingClientRect().width - 50));
-        sideb.style.minWidth =
-          parseInt(sideb.style.minWidth.split('px')[0]) + mouseX - oldMouseX + 'px';
-        sideb.style.maxWidth = sideb.style.minWidth;
-        oldMouseX = mouseX;
-      }
-      const stopListening = () => {
-        document.removeEventListener('mousemove', resize);
-        document.removeEventListener('mouseup', stopListening);
-        this.style.userSelect = 'unset';
-      }
-      this.subscribe(rx.fromEvent(sep, 'mousedown'), e => {
-        oldMouseX = e.clientX;
-        this.style.userSelect = 'none';
-        document.addEventListener('mousemove', resize);
-        document.addEventListener('mouseup', stopListening);
-        e.stopPropagation();
-      });
-    })
 
     // for (let i = 0; i < 100; i++) this.api.createTestPages();
     // this.api.createTestPages();
-    this.doc.value.undoStack.clear();
+    this.currDoc.value.undoStack.clear();
 
     if (this.configCtx.value.checkUpdatesOnStartup && environment.production)
       checkDisplayUpdates(this.dialog.openDialog);
 
     return [
-      Toolbars.t({
-        fields: { id: 'toolbar' },
-        props: { doc: this.doc },
-      }),
-      StatusBar.t({
-        props: { doc: this.doc },
-      }),
       h.div(this.dialog.dialogs),
       Settings.t({ props: { open: rx.bind(this.settingsOpen) } }),
       ui5.toast({ fields: { id: 'toast', placement: 'BottomEnd' } }),
-      h.div({
-        fields: { id: 'main' },
-        events: {
-          drop: this.handleDrop.bind(this),
-          dragover: e => e.preventDefault(),
-        }
-      }, [
-        h.div({
-          fields: { id: 'sidebar', hidden: this.hideSideBar },
-        }, [OutlineContainer.t({ ref: this.outlineRef })]),
-        h.div({
-          fields: { id: 'seperator', hidden: this.hideSideBar },
+      h.div({ fields: { id: 'app' } }, [
+        Toolbars.t({
+          fields: { id: 'toolbar' },
+          props: { doc: this.currDoc },
         }),
-        h.div(
-          { fields: { id: 'main-right' } },
-          [
-            h.div(
-              {
-                fields: { id: 'search-box', hidden: this.hideSearchBox },
-              },
-              SearchBox.t({
-                ref: this.searchBoxRef,
-                events: {
-                  'search-stop': _ => this.hideSearchBox.next(true),
-                }
-              }),
-            ),
-            h.div({
-              ref: this.documentRef,
-              fields: { id: 'document-wrapper' },
-              events: {
-                scroll: () => {
-                  this.doc.value.setActivePageForCurrentScroll();
-                }
-              }
+        TabBar.t({
+          ref: this.tabbarRef,
+          props: {
+            tabs: this.openTabs,
+            activeTab: rx.bind(this.activeTabId),
+            hidden: this.configCtx.derive(cfg => !cfg.enableTabs),
+          },
+          // css is weird man. see https://stackoverflow.com/a/50189188
+          style: { flexGrow: '1', height: '10%' },
+          events: {
+            close: ({ detail }) => {
+              this.activeTabId.next(detail);
+              this.api.closeDocumentPrompt();
             },
-              this.doc
-            )
-          ]),
+            move: ({ detail }) => {
+              DSUtils.moveInArr(this.openDocs.value, detail.from, detail.to);
+              this.openDocs.next(v => [...v]);
+            },
+          }
+        }),
+        StatusBar.t({
+          props: { doc: this.currDoc },
+        }),
       ]),
     ]
   }
@@ -717,7 +766,7 @@ export default class Wournal extends Component {
     'file_save': {
       human_name: 'Save File',
       func: async () => {
-        const doc = this.doc.value;
+        const doc = this.currDoc.value;
         const id = doc.fileName;
         if (id === undefined) {
           return await this.api.saveDocumentPromptMultiPage(doc.defaultFileName('woj'));
@@ -731,7 +780,7 @@ export default class Wournal extends Component {
     'file_save_as': {
       human_name: 'Save As',
       func: () => {
-        const doc = this.doc.value;
+        const doc = this.currDoc.value;
         this.api.saveDocumentPromptMultiPage(
           doc.fileName ?? doc.defaultFileName('woj')
         );
@@ -741,7 +790,7 @@ export default class Wournal extends Component {
     'file_save_as_single_page': {
       human_name: 'Save as Single SVG',
       func: () => {
-        const doc = this.doc.value;
+        const doc = this.currDoc.value;
         this.api.saveDocumentPromptSinglePage(
           doc.fileName ?? doc.defaultFileName('svg')
         );
@@ -752,6 +801,11 @@ export default class Wournal extends Component {
       human_name: 'Load File',
       func: this.api.loadDocumentPrompt,
       shortcut: 'Ctrl+O',
+    },
+    'file_close': {
+      human_name: 'Close File',
+      func: this.api.closeDocumentPrompt,
+      shortcut: 'Ctrl+W',
     },
     'file_export_pdf': {
       human_name: 'Export as PDF',
@@ -802,7 +856,7 @@ export default class Wournal extends Component {
       human_name: 'New Page After',
       func: () => {
         const nr = this.api.getCurrentPageNr();
-        if (this.doc.value.pages.value[nr - 1].pdfMode) {
+        if (this.currDoc.value.pages.value[nr - 1].pdfMode) {
           this.api.addPage(nr, {
             ...this.api.getPageProps(nr),
             backgroundStyle: 'graph',
@@ -905,7 +959,7 @@ export default class Wournal extends Component {
       human_name: 'Default Pen',
       func: () => {
         this.api.setTool('CanvasToolPen');
-        this.doc.value.toolConfig.next(v => ({
+        this.currDoc.value.toolConfig.next(v => ({
           ...v,
           CanvasToolPen: this.configCtx.value.tools.CanvasToolPen,
         }));
@@ -921,7 +975,7 @@ export default class Wournal extends Component {
           curr == 'CanvasToolImage' ||
           curr == 'CanvasToolSelectText'
         ) return;
-        this.doc.value.toolConfig.next(v => {
+        this.currDoc.value.toolConfig.next(v => {
           const ret = DSUtils.copyObj(v);
           ret[curr] = this.configCtx.value.tools[curr] as any;
           return ret;
@@ -966,12 +1020,12 @@ export default class Wournal extends Component {
     'tool_hand': {
       human_name: 'Hand',
       func: (() => {
-        let previousTool = this.api.getTool()
+        let previousTool: CanvasToolName | false = false;
 
         return () => {
           const current = this.api.getTool()
           if (current === 'CanvasToolHand') {
-            this.api.setTool(previousTool);
+            if (previousTool !== false) this.api.setTool(previousTool);
           } else {
             previousTool = current;
             this.api.setTool('CanvasToolHand');
@@ -1042,8 +1096,8 @@ export default class Wournal extends Component {
     'bookmark_add': {
       human_name: 'Add Bookmark',
       func: () => {
-        this.hideSideBar.next(false);
-        this.outlineRef.current.add();
+        this.currDocDisplay.hideSideBar.next(true);
+        this.currDocDisplay.outline.add();
       },
       shortcut: 'Ctrl+B',
     },
@@ -1051,17 +1105,14 @@ export default class Wournal extends Component {
     'bookmark_display_toggle': {
       human_name: 'Toggle Display Bookmarks',
       func: async () => {
-        this.hideSideBar.next(v => !v);
+        this.currDocDisplay.hideSideBar.next(v => !v);
       },
       shortcut: 'F12',
     },
 
     'search_box_show': {
       human_name: 'Search Document',
-      func: () => {
-        this.hideSearchBox.next(false);
-        this.searchBoxRef.current.focus();
-      },
+      func: () => this.hideSearchBox.next(false),
       shortcut: 'Ctrl+F',
     },
     'search_box_hide': {
@@ -1086,6 +1137,32 @@ export default class Wournal extends Component {
         this.api.jumplistMark();
       },
       shortcut: 'Alt+DownArrow',
+    },
+
+    'tab_next': {
+      human_name: 'Next Tab',
+      func: () => {
+        const ods = this.openDocs.value;
+        const idx = ods.findIndex(od => od.id === this.activeTabId.value);
+        if (idx === ods.length - 1 || ods.length <= 1) return;
+        this.activeTabId.next(ods[idx+1].id);
+      },
+      shortcut: 'Ctrl+PageDown',
+    },
+    'tab_prev': {
+      human_name: 'Previous Tab',
+      func: () => {
+        const ods = this.openDocs.value;
+        const idx = ods.findIndex(od => od.id === this.activeTabId.value);
+        if (idx === 0 || ods.length <= 1) return;
+        this.activeTabId.next(ods[idx-1].id);
+      },
+      shortcut: 'Ctrl+PageUp',
+    },
+    'new_window': {
+      human_name: 'New Window',
+      func: () => ApiClient['window:new'](),
+      shortcut: 'Ctrl+Shift+N',
     },
 
     'system_show_debug_info': {
@@ -1122,70 +1199,30 @@ export default class Wournal extends Component {
       display: 'block',
       height: '100%',
     },
-    '#main': {
-      position: 'relative',
-      top: '87px',
-      display: 'flex',
-      marginBottom: '100px',
-      height: 'calc(100% - 87px - 35px)',
-      width: '100%',
-    },
-    '#seperator': {
-      width: '0.7em',
-      cursor: 'col-resize',
-      borderRadius: '3px',
-      backgroundColor: ui5.Theme.BaseColor,
-    },
-    '#main-right': {
+    '#app': {
       display: 'flex',
       flexDirection: 'column',
-      flexGrow: '1',
-      overflowX: 'auto',
-      // height: '100%',
-    },
-    '#document-wrapper': {
-      background: theme.documentBackground,
-      // height: '100%',
-      flexGrow: '1',
-      // width: '100%',
-      overflowY: 'auto',
-    },
-    '#document-wrapper > div': {
-      overflow: 'auto',
       height: '100%',
-      width: '100%',
     },
-    ...customScrollbar,
   });
 
-  private async handleDrop(e: DragEvent) {
-    LOG.info('Handling File Drop');
-    e.preventDefault();
-    for (const item of e.dataTransfer.items) {
-      if (item.kind !== 'file') continue;
-      const path: string = (item.getAsFile() as any).path
-      const ext = FileUtils.fileExtension(path).toLowerCase();
-      if (ext !== 'woj' && ext !== 'svg' && ext !== 'pdf') {
-        this.dialog.infoBox(
-          `Unsupported File Extension '${ext.toUpperCase()}'`,
-          `The file '${path}' has an extension that is not compatible ` +
-          `with Wournal.`,
-          'Error',
-        );
-        break;
-      }
-      if (await this.api.promptClosingUnsaved()) return;
-      this.api.loadDocument(path);
-      break;
-    }
-  }
 }
 
-function updateTitle(doc: WournalDocument) {
-  const dirty = doc.dirty ? '*' : '';
+function updateTitle(doc: WournalDocument, tabId: string) {
   ApiClient['window:setTitle'](
-    doc.fileName
-      ? 'Wournal - ' + dirty + FileUtils.fileNameNoPath(doc.fileName)
-      : 'Wournal'
+    'Wournal - ' + (doc.dirty ? '*' : '') + tabTitle(doc, tabId)
   );
+}
+
+function tabTitle(doc: WournalDocument, tabId: string) {
+  let fileName: string | false = false;
+
+  const firstPageWithPDF = doc.pages.value.find(p => p.pdfMode !== undefined);
+  if (firstPageWithPDF !== undefined) fileName = firstPageWithPDF.pdfMode.fileName;
+
+  const docId = doc.fileName;
+  if (docId !== undefined) fileName = docId;
+
+  return fileName !== false
+    ? FileUtils.fileNameNoPath(fileName) : `Unsaved ${tabId}`;
 }

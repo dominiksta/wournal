@@ -18,10 +18,11 @@ const TempConfigSchema = {
 } as const;
 export type TempConfig = JTDDataType<typeof TempConfigSchema>;
 
+const validate = ajv.compile(TempConfigSchema);
+
 export const TempConfigVersioner = new DTOVersioner<TempConfig>({
   name: 'TempConfig',
   validator: ((() => {
-    const validate = ajv.compile(TempConfigSchema);
     return obj => {
       const res = validate(obj);
       return { success: res, error: JSON.stringify(validate.errors) };

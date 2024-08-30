@@ -60,7 +60,7 @@ quite a bit when that happens.
   - [x] Default Document Zoom Level Config Option
   - [x] Drag&Drop From File Manager to Open
   - [x] Jumplist
-  - [ ] Customizable Pen Cursor Angle Change (Especially for Lefties)
+  - [x] Customizable Pen Cursor Angle Change (Especially for Lefties)
   - [ ] Lasso Select
   - [ ] Set Default Paper Style
   - [ ] Vertical Space Tool

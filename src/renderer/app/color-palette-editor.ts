@@ -10,7 +10,6 @@ export default class ColorPaletteEditor extends Component {
 
   render() {
     const { palette } = this.props;
-
     const cfg = this.getContext(ConfigCtx);
     const darkInverts = rx.derive(cfg, style.currentTheme, (cfg, curr) =>
       cfg.invertDocument && (
@@ -41,16 +40,14 @@ export default class ColorPaletteEditor extends Component {
         }
       }, 'Colors are inverted because dark mode is enabled'),
       h.table(
-        // palette.derive(p => p.map(c => h.tr(JSON.stringify(c)))),
-        palette.derive(p => p.map((color, idx) => h.tr([
+        h.foreach(palette.asReadonly(), 'pos', (color, i) => h.tr([
           h.td(
             ui5.input({
-              fields: { value: color.name },
+              fields: { value: color.derive(c => c.name) },
               events: {
-                change: e => {
-                  palette.next(v => arrayPatch(v, idx, {
-                    ...color,
-                    name: (e.target as ui5.types.Input).value,
+                keyup: e => {
+                  palette.next(v => arrayPatch(v, i, {
+                    ...color.value, name: (e.target as ui5.types.Input).value,
                   }));
                 }
               }
@@ -58,12 +55,11 @@ export default class ColorPaletteEditor extends Component {
           ),
           h.td(
             ColorPicker.t({
-              props: { color: color.color },
+              props: { color: color.derive(c => c.color) },
               events: {
                 change: e => {
-                  palette.next(v => arrayPatch(v, idx, {
-                    ...color,
-                    color: e.detail,
+                  palette.next(v => arrayPatch(v, i, {
+                    ...color.value, color: e.detail,
                   }));
                 }
               }
@@ -73,11 +69,11 @@ export default class ColorPaletteEditor extends Component {
             ui5.button({
               fields: { icon: 'delete' },
               events: { click: () => palette.next(v => [
-                ...v.slice(0, idx), ...v.slice(idx+1)
+                ...v.slice(0, i), ...v.slice(i+1)
               ])}
             })
           )
-        ])))
+        ]))
       ),
       ui5.button({
         fields: { icon: 'add' },
@@ -105,17 +101,17 @@ export class ColorPicker extends Component<{
 }> {
 
   props = {
-    color: rx.prop<string>(),
+    color: rx.prop<string>({ reflect: true }),
   }
 
   render() {
     const { color } = this.props;
-    this.subscribe(color.pipe(rx.skip(1)), col => this.dispatch('change', col));
 
     const changeColor = (e: Event) => {
       const newCol = (e.target as ui5.types.Input).value.toUpperCase();
       if (!newCol.match("^#[A-F0-9]*$")) return;
       color.next(newCol);
+      this.dispatch('change', newCol);
     }
 
     return [

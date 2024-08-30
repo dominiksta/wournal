@@ -136,6 +136,7 @@ const ConfigDTOSchema = {
     hideAnnotations: { type: 'boolean' },
     tools: CanvasToolConfigSchema,
     autosave: AutosaveConfigSchema,
+    enableTabs: { type: 'boolean' },
     defaultZoomDocument: { type: 'float32' },
     zoomUI: { type: 'float32' },
   }
@@ -143,10 +144,11 @@ const ConfigDTOSchema = {
 
 export type ConfigDTO = JTDDataType<typeof ConfigDTOSchema>;
 
+const validate = ajv.compile(ConfigDTOSchema);
+
 export const ConfigDTOVersioner = new DTOVersioner<ConfigDTO>({
   name: 'ConfigDTO',
   validator: ((() => {
-    const validate = ajv.compile(ConfigDTOSchema);
     return obj => {
       const res = validate(obj);
       return { success: res, error: JSON.stringify(validate.errors) };
@@ -230,6 +232,15 @@ export const ConfigDTOVersioner = new DTOVersioner<ConfigDTO>({
         penCursorLeftAngle: false,
       };
     },
+
+    // ver 1 -- disable tabs
+    // ----------------------------------------------------------------------
+    1: (ver0_9: any) => {
+      return {
+        ...ver0_9, version: 1,
+        enableTabs: true,
+      };
+    },
   }
 })
 
@@ -271,6 +282,7 @@ export function defaultConfig(): ConfigDTO {
       keepFiles: 300,
     },
     defaultZoomDocument: 1.0,
+    enableTabs: true,
     zoomUI: 1.0,
     tools: {
       CanvasToolPen: {

@@ -18,6 +18,7 @@ import { ConfigDTO, defaultConfig } from "persistence/ConfigDTO";
 import 'res/font/roboto.css';
 import 'res/font/roboto-mono.css';
 import { LastPages } from "document/last-pages";
+import { ArgvParsed } from "../main/argv";
 
 {
   loggingOverwriteConsoleLogFunctions();
@@ -41,15 +42,16 @@ function setupErrorPopup() {
   });
 }
 
-async function maybeLoadArgvDoc(wournal: Wournal) {
+async function maybeLoadArgvDoc(
+  wournal: Wournal, argv: ArgvParsed, initial: boolean,
+) {
   // electron-forge seems to run wournal with an argv of "." by default
   if (!environment.production) return;
 
-  const argv = await ApiClient["process:argv"]();
   if (argv.positionals.length > 3) return; // dev
   if (argv.positionals.length > 1) {
     const path = argv.positionals[argv.positionals.length - 1];
-    const exists = await wournal.api.loadDocument(path);
+    const exists = await wournal.api.loadDocument(path, initial);
     if (!exists) {
       wournal.api.newDocument({
         backgroundColor: argv.values["page-color"] as string ?? '#FFFFFF',
@@ -135,11 +137,20 @@ async function main() {
     if (docId !== false) LastPages.set(docId, wournal.api.getCurrentPageNr())
     LastPages.write();
 
-    if (!(await wournal.api.promptClosingUnsaved())) {
+    if (await wournal.api.closeDocumentPromptAll()) {
       LOG.info('Closing Window');
       ApiClient["window:destroy"]();
     }
   })
+
+  window.electron.on['file:open'](async ([args]) => {
+    LOG.info('Opening new file from system electron callback');
+    if (config.enableTabs) {
+      maybeLoadArgvDoc(wournal, args.argv, false);
+    } else {
+      ApiClient['window:new'](args.argv, args.pwd);
+    }
+  });
 
   wournal.shortcutsCtx.addEl(document);
 
@@ -167,7 +178,7 @@ async function main() {
   });
 
   document.body.appendChild(wournal);
-  maybeLoadArgvDoc(wournal);
+  maybeLoadArgvDoc(wournal, await ApiClient["process:argv"](), true);
   LOG.info('Startup Complete')
 }
 

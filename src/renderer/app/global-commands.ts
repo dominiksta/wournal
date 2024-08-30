@@ -12,6 +12,7 @@ export const GlobalCommandId = [
   'file_save_as',
   'file_save_as_single_page',
   'file_load',
+  'file_close',
   'file_export_pdf',
 
   'history_undo',
@@ -72,6 +73,10 @@ export const GlobalCommandId = [
   'jumplist_prev',
   'jumplist_next',
   'jumplist_mark',
+
+  'tab_next',
+  'tab_prev',
+  'new_window',
 
   'system_show_debug_info',
   'system_update',

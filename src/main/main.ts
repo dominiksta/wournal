@@ -1,9 +1,12 @@
 import { registerApiHandlers, registerCallbacks } from './api-impl';
 import { app, BrowserWindow, shell, WebContents } from 'electron';
+import { parseArgs } from 'node:util';
 import path from 'node:path';
 import environment from 'Shared/environment';
 import { loggingOverwriteConsoleLogFunctions } from 'Shared/logging';
 import { getTempConfig, TEMP_CONFIG_CURRENT_VERSION, writeTempConfig } from './temp-config';
+import IdCounter from 'Shared/id-counter';
+import { ArgvParsed, argvParseSpec } from './argv';
 
 {
   loggingOverwriteConsoleLogFunctions();
@@ -26,10 +29,13 @@ if (environment.pkgPortable) app.setPath(
 );
 
 export const instances: Map<WebContents, {
-  win: BrowserWindow, pwd: string, argv: string[]
+  win: BrowserWindow, pwd: string, argv: ArgvParsed, lastFocused: boolean,
+  id: number,
 }> = new Map();
 
-function createWindow(argv: string[], pwd: string) {
+const instanceIds = new IdCounter();
+
+export function createWindow(argv: ArgvParsed, pwd: string) {
   const tempCfg = getTempConfig();
   const win = new BrowserWindow({
     width: tempCfg.windowWidth,
@@ -59,15 +65,30 @@ function createWindow(argv: string[], pwd: string) {
     win.webContents.openDevTools();
   }
 
-  instances.set(win.webContents, { win, argv, pwd });
+  instances.set(win.webContents, {
+    win, argv, pwd, lastFocused: true, id: instanceIds.nextId()
+  });
 
   win.on('close', () => {
+
+    // when a window is closed and another one is not immediatly focused, we set
+    // lastFocused to the first window to still have some sane value
+    if (instances.get(win.webContents).lastFocused) {
+      const instancesV = [...instances.values()];
+      if (instancesV.length !== 0) instancesV[0].lastFocused = true;
+    }
+
     writeTempConfig({
       version: TEMP_CONFIG_CURRENT_VERSION,
       windowHeight: win.getBounds().height,
       windowWidth: win.getBounds().width,
       maximized: win.isMaximized(),
     })
+  });
+
+  win.on('focus', () => {
+    for (const instance of instances.values()) instance.lastFocused = false;
+    instances.get(win.webContents).lastFocused = true;
   });
 
   win.show();
@@ -78,10 +99,10 @@ if (!gotTheLock) {
   app.quit();
 } else {
   registerApiHandlers();
-  app.whenReady().then(() => createWindow(process.argv, process.cwd()));
-  app.on('second-instance', (_, argv, pwd) => createWindow(argv, pwd));
+  app.whenReady().then(() => createWindow(
+    parseArgs({ args: process.argv, ...argvParseSpec}), process.cwd()
+  ));
   app.on('window-all-closed', () => {
     app.quit();
-
   });
 }

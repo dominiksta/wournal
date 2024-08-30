@@ -32,10 +32,10 @@ export class ErrorPopup extends Component {
 
   constructor() {
     super();
-    if (!mainSourceMap) getMainSourceMap().then(map => mainSourceMap = map);
   }
 
   async show(error: any) {
+    mainSourceMap = await getMainSourceMap();
     LOG.error('Displaying uncaught error');
     this.error.next(error);
     try {
