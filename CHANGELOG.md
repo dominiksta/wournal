@@ -9,6 +9,11 @@ Changelog
 - When wournal is minimized and a file is opened, the window was not
   automatically unminimized.
 
+### Changed
+
+- Shapes (ruler, rectangle & ellipse) are now grouped under a single toolbar
+  entry.
+
 `0.0.8` - _2024-08-30_
 ----------------------------------------------------------------------
 **Tabs!**

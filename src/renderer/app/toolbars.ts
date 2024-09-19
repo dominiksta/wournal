@@ -4,7 +4,7 @@ import { CanvasToolEraser } from "document/CanvasToolEraser";
 import { CanvasToolPen } from "document/CanvasToolPen";
 import { CanvasToolText } from "document/CanvasToolText";
 import { Newable } from "util/Newable";
-import { CanvasTool } from "document/CanvasTool";
+import { CanvasTool, CanvasToolName, CanvasToolNames } from "document/CanvasTool";
 import Toolbar, { ToolbarSeperator } from "common/toolbar";
 import { ToolbarButton } from "common/toolbar";
 import { CanvasToolRectangle } from "document/CanvasToolRectangle";
@@ -37,11 +37,6 @@ export default class Toolbars extends Component {
   render() {
     const d = this.props.doc;
     const configCtx = this.getContext(ConfigCtx);
-
-    const noSelection = d.pipe(
-      rx.switchMap(doc => doc.selection.available),
-      rx.map(v => !v)
-    );
 
     const isSinglePage = d.derive(d => d.isSinglePage);
 
@@ -82,6 +77,16 @@ export default class Toolbars extends Component {
     const recentFiles = new rx.State(RecentFiles.getPaths());
     const windowList =
       new rx.State<{ title: string, id: number, focused: boolean }[]>([]);
+
+    const shapeTools = [
+      'CanvasToolRuler', 'CanvasToolRectangle', 'CanvasToolEllipse'
+    ] as const;
+    const lastShapeTool = new rx.State<typeof shapeTools[number]>('CanvasToolRuler');
+    this.subscribe(currentTool, tool => {
+      const t = tool.name as typeof shapeTools[number];
+      if (shapeTools.includes(t)) lastShapeTool.next(t);
+    });
+    const shapePopoverRef = this.ref<ui5.types.Popover>();
 
     return [
       h.div({ fields: { className: 'topbar' } }, [
@@ -619,28 +624,27 @@ export default class Toolbars extends Component {
             events: { click: _ => api.setTool('CanvasToolImage') }
           }),
           ToolbarButton.t({
+            fields: { id: 'btn-tools-shapes' },
             props: {
-              img: 'icon:draw-rectangle',
-              alt: `Rectangle (${globalCmnds['tool_rectangle'].shortcut})`,
-              current: isCurrentTool(CanvasToolRectangle),
+              img: lastShapeTool.derive(lt => {
+                return ({
+                  'CanvasToolRuler': 'icon:tnt/unit',
+                  'CanvasToolRectangle': 'icon:draw-rectangle',
+                  'CanvasToolEllipse': 'icon:circle-task',
+                })[lt]
+              }),
+              alt: `Shapes`,
+              current: currentTool.map(ct => shapeTools.includes(ct.name as any)),
             },
-            events: { click: _ => api.setTool('CanvasToolRectangle') }
-          }),
-          ToolbarButton.t({
-            props: {
-              img: 'icon:tnt/unit',
-              alt: `Ruler (${globalCmnds['tool_ruler'].shortcut})`,
-              current: isCurrentTool(CanvasToolRuler),
-            },
-            events: { click: _ => api.setTool('CanvasToolRuler') }
-          }),
-          ToolbarButton.t({
-            props: {
-              img: 'icon:circle-task',
-              alt: `Ruler (${globalCmnds['tool_ellipse'].shortcut})`,
-              current: isCurrentTool(CanvasToolEllipse),
-            },
-            events: { click: _ => api.setTool('CanvasToolEllipse') }
+            events: {
+              click: _ => {
+                if (shapeTools.includes(d.value.currentTool.value.name as any)) {
+                  shapePopoverRef.current.open = !shapePopoverRef.current.open;
+                } else {
+                  api.setTool(lastShapeTool.value);
+                }
+              }
+            }
           }),
           ToolbarButton.t({
             props: {
@@ -727,6 +731,56 @@ export default class Toolbars extends Component {
           )),
         ]),
 
+      ]),
+
+      ui5.popover({
+        ref: shapePopoverRef,
+        id: 'popover-shape',
+        fields: {
+          headerText: 'Shapes', opener: 'btn-tools-shapes',
+          placementType: 'Bottom',
+          initialFocus: lastShapeTool.derive(lt => `choice-${lt}`),
+        },
+        style: { marginTop: '1em' },
+      }, [
+        ToolTypeChoice.t({
+          fields: { id: 'choice-CanvasToolRuler' },
+          props: {
+            icon: 'tnt/unit', name: `Ruler`,
+            additionalText: globalCmnds['tool_ruler'].shortcut,
+            active: lastShapeTool.derive(lt => lt === 'CanvasToolRuler'),
+          },
+          events: { click: _ => {
+            api.setTool('CanvasToolRuler');
+            shapePopoverRef.current.open = false;
+          }},
+        }),
+        ToolTypeChoice.t({
+          fields: { id: 'choice-CanvasToolRectangle' },
+          props: {
+            icon: 'draw-rectangle',
+            name: `Rectangle`,
+            additionalText: globalCmnds['tool_rectangle'].shortcut,
+            active: lastShapeTool.derive(lt => lt === 'CanvasToolRectangle'),
+          },
+          events: { click: _ => {
+            api.setTool('CanvasToolRectangle');
+            shapePopoverRef.current.open = false;
+          }},
+        }),
+        ToolTypeChoice.t({
+          fields: { id: 'choice-CanvasToolEllipse' },
+          props: {
+            icon: 'circle-task',
+            name: `Ellipse`,
+            additionalText: globalCmnds['tool_ellipse'].shortcut,
+            active: lastShapeTool.derive(lt => lt === 'CanvasToolEllipse'),
+          },
+          events: { click: _ => {
+            api.setTool('CanvasToolEllipse');
+            shapePopoverRef.current.open = false;
+          }},
+        }),
       ])
     ]
   }
@@ -736,6 +790,67 @@ export default class Toolbars extends Component {
       width: '100%',
       zIndex: '2',
       outline: 'none',
-    }
+    },
+    '#popover-shape > *': {
+      display: 'flex',
+    },
   })
+}
+
+
+@Component.register
+class ToolTypeChoice extends Component<{
+  events: { click: MouseEvent }
+}> {
+  props = {
+    name: rx.prop<string>(),
+    icon: rx.prop<string>(),
+    active: rx.prop<boolean>({ defaultValue: false }),
+    additionalText: rx.prop<string>({ defaultValue: '' }),
+  }
+
+  private btnRef = this.ref<ui5.types.Button>();
+
+  render() {
+    const { name, icon, active, additionalText } = this.props;
+
+    return [
+      ui5.button({
+        ref: this.btnRef,
+        events: {
+          click: e => this.reDispatch('click', e)
+        },
+        classes: { active },
+        fields: {
+          design: active.ifelse({ if: 'Default', else: 'Transparent' }),
+        }
+      }, [
+        ui5.icon({ fields: { name: icon }}),
+        h.div(name),
+        h.div(
+          { fields: { id: 'additional-text' } },
+          additionalText.derive(at => ` (${at})`),
+        )
+      ]),
+    ]
+  }
+
+  override focus() { this.btnRef.current.focus(); }
+
+  static styles = style.sheet({
+    'ui5-button': {
+      height: '6em',
+      width: '6em',
+      margin: '0.3em',
+    },
+    'ui5-icon': {
+      height: '1.5em',
+      width: '1.5em',
+      marginBottom: '0.3em',
+    },
+    '#additional-text': {
+      color: ui5.Theme.NeutralTextColor,
+      opacity: ui5.Theme.Content_DisabledOpacity,
+    },
+  });
 }

@@ -243,7 +243,7 @@ export class CanvasSelection {
             width: dim * 2, height: dim * 2,
           });
           return (el instanceof SVGPathElement)
-            ? new CanvasPath(el).isTouchingRect(fakeSelRect)
+            ? (el.hasAttribute('d') && new CanvasPath(el).isTouchingRect(fakeSelRect))
             : SVGUtils.rectIntersect(selRect, elRect);
         } else { // actual rectangle
           return SVGUtils.rectInRect(selRect, elRect);

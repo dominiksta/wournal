@@ -8,8 +8,8 @@ import { WournalPage } from "./WournalPage";
 export const CanvasToolNames = [
   "CanvasToolPen",
   "CanvasToolHighlighter",
-  "CanvasToolRuler",
   "CanvasToolEraser",
+  "CanvasToolRuler",
   "CanvasToolRectangle",
   "CanvasToolEllipse",
   "CanvasToolSelectRectangle",
