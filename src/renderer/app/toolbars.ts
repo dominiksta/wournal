@@ -27,6 +27,7 @@ import RecentFiles from "persistence/recent-files";
 import imgAutorenew from 'res/icon/material/autorenew.svg';
 import imgDefaultPen from 'res/icon/custom/default-pen.svg';
 import { ApiClient } from "electron-api-client";
+import ColorPopover, { ColorDef } from "common/color-popover";
 
 @Component.register
 export default class Toolbars extends Component {
@@ -87,6 +88,23 @@ export default class Toolbars extends Component {
       if (shapeTools.includes(t)) lastShapeTool.next(t);
     });
     const shapePopoverRef = this.ref<ui5.types.Popover>();
+
+    const colorPopoverRef = this.ref<ColorPopover>();
+    async function pickColor(showAt: HTMLElement): Promise<'cancel' | ColorDef> {
+      return new Promise(resolve => {
+        const pop = colorPopoverRef.current;
+        function onPicked(e: CustomEvent<ColorDef>) { ret(e.detail) };
+        function onCancel() { ret('cancel') };
+        function ret(val: 'cancel' | ColorDef) {
+          resolve(val);
+          pop.removeEventListener('color-selected', onPicked);
+          pop.removeEventListener('after-close', onCancel);
+        }
+        pop.showAt(showAt);
+        pop.addEventListener('color-selected', onPicked);
+        pop.addEventListener('after-close', onCancel);
+      });
+    }
 
     return [
       h.div({ fields: { className: 'topbar' } }, [
@@ -720,7 +738,22 @@ export default class Toolbars extends Component {
           }),
           ToolbarSeperator.t(),
 
-          h.fragment(configCtx, config => config.colorPalette.map(col =>
+          ToolbarButton.t({
+            fields: { id: 'btn-color-1' },
+            props: { img: `color:#000000`, alt: 'alt', current: false },
+            events: {
+              click: async _ => {
+                if (colorPopoverRef.current.open) {
+                  colorPopoverRef.current.close();
+                  return;
+                }
+                const resp = await pickColor(await this.query('#btn-color-1'));
+                if (resp !== 'cancel') api.setColorByHex(resp.color);
+              }
+            }
+          }),
+
+          h.fragment(configCtx, config => config.colorPaletteWrite.map(col =>
             ToolbarButton.t({
               props: {
                 img: `color:${col.color}`, alt: col.name,
@@ -732,6 +765,15 @@ export default class Toolbars extends Component {
         ]),
 
       ]),
+
+      ColorPopover.t({
+        ref: colorPopoverRef,
+        style: { marginTop: '.3em' },
+        props: {
+          palette: configCtx.partial('colorPaletteWrite'),
+          currentColor: strokeColor,
+        }
+      }),
 
       ui5.popover({
         ref: shapePopoverRef,

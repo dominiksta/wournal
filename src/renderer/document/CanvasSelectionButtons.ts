@@ -8,6 +8,7 @@ export default class CanvasSelectionButtons extends Component {
     private onCut: () => void,
     private onCopy: () => void,
     private onDelete: () => void,
+    // private onChangeColor: (color: string) => void,
   ) {
     super();
 
@@ -40,6 +41,13 @@ export default class CanvasSelectionButtons extends Component {
             events: { click: this.onDelete }
           },
           // 'Delete'
+        ),
+        ui5.button(
+          {
+            fields: { design: 'Transparent', icon: 'palette', title: 'Change Color' },
+            events: { click: this.onDelete }
+          },
+          // 'Change Color'
         ),
       ])
     ]

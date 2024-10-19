@@ -441,7 +441,7 @@ export default class Wournal extends Component {
     },
     setColorByName: (name: string) => {
       this.currDoc.value.setColor(
-        this.configCtx.value.colorPalette.find(c => c.name === name).color
+        this.configCtx.value.colorPaletteWrite.find(c => c.name === name).color
       );
     },
     setColorByHex: (color: string) => {

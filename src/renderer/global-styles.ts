@@ -50,7 +50,7 @@ export const customScrollbar: { [selector: string]: style.MvuiCSSDeclarations } 
   '*::-webkit-scrollbar-corner': {
     // background: ui5.Theme.ScrollBar_TrackColor,
     background: 'transparent',
-  },
+  }
 }
 
 style.util.applySheetAsStyleTag(document.body, style.sheet({

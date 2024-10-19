@@ -121,11 +121,18 @@ const ConfigDTOSchema = {
     ] },
     invertDocument: { type: 'boolean' },
     penCursorLeftAngle: { type: 'boolean' },
-    colorPalette: {
+    colorPaletteWrite: {
       elements: {
         properties: { color: { type: 'string' }, name: { type: 'string' } }
       }
     },
+    colorPaletteWriteFavorites: { elements: { type: 'int32' } },
+    colorPaletteHighlight: {
+      elements: {
+        properties: { color: { type: 'string' }, name: { type: 'string' } }
+      }
+    },
+    colorPaletteHighlightFavorites: { elements: { type: 'int32' } },
     binds: {
       properties: {
         rightClick: { enum: CanvasToolNames },
@@ -263,7 +270,7 @@ export function defaultConfig(): ConfigDTO {
       rightClick: "CanvasToolEraser",
       middleClick: "CanvasToolHand",
     },
-    colorPalette: [ // stolen from xournal
+    colorPaletteWrite: [ // stolen from xournal
       { name: "Black", color: "#000000" },
       { name: "Blue", color: "#2F2FE7" },
       { name: "Red", color: "#FF0000" },
@@ -276,6 +283,21 @@ export function defaultConfig(): ConfigDTO {
       { name: "Yellow", color: "#FFFF00" },
       { name: "White", color: "#FFFFFF" },
     ],
+    colorPaletteWriteFavorites: [ 0, 1, 2 ],
+    colorPaletteHighlight: [
+      { name: "Yellow", color: "#FFFF00" },
+      { name: "Green", color: "#008A00" },
+      { name: "Blue", color: "#2F2FE7" },
+      { name: "Red", color: "#FF0000" },
+      { name: "Magenta", color: "#FF00FF" },
+      { name: "Orange", color: "#FF7B00" },
+      { name: "Light Blue", color: "#00CAFF" },
+      { name: "Light Green", color: "#00FF00" },
+      { name: "Black", color: "#000000" },
+      { name: "Gray", color: "#808080" },
+      { name: "White", color: "#FFFFFF" },
+    ],
+    colorPaletteHighlightFavorites: [ 0, 1, 2 ],
     autoOpenWojWithSameNameAsPDF: true,
     hideAnnotations: false,
     autosave: {

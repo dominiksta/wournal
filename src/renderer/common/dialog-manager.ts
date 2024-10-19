@@ -10,7 +10,7 @@ const LOG = getLogger(__filename);
 type ButtonDesign =
   'Default' | 'Positive' | 'Negative' | 'Transparent' | 'Emphasized' | 'Attention';
 
-type DialogButtons = {
+export type DialogButtons = {
   name: string, action: () => void,
   design?: ButtonDesign, icon?: string,
 }[];
@@ -21,6 +21,7 @@ export type OpenDialog = (decl: (close: () => void) => {
   buttons: DialogButtons,
   state?: ui5.types.Dialog['state'],
   maxWidth?: string,
+  onCloseNoBtn?: () => void,
 }) => void;
 
 export const BasicDialogManagerContext = new rx.Context<{
@@ -57,7 +58,7 @@ function newDialogId(): number { return DIALOG_COUNTER++; }
 @Component.register
 export class BasicDialog extends Component<{
   slots: { default: any },
-  events: { close: CustomEvent }
+  events: { close: CustomEvent<{ escPressed: boolean }> }
 }> {
   props = {
     heading: rx.prop<TemplateElementChild>(),
@@ -115,9 +116,7 @@ export class BasicDialog extends Component<{
           ),
         },
         events: {
-          'after-close': _ => {
-            this.dispatch('close', new CustomEvent('close'));
-          }
+          'before-close': e => { this.dispatch('close', e.detail) }
         }
       }, h.slot())
     ]
@@ -149,15 +148,18 @@ export function mkDialogManagerCtx() {
       buttons: DialogButtons,
       state?: ui5.types.Dialog['state'],
       maxWidth?: string,
+      onCloseNoBtn?: () => void,
     }
   ) => {
     const num = newDialogId();
     const close = mkCloseDialog(num);
-    const { heading, content, buttons, state, maxWidth } = decl(close);
+    const { heading, content, buttons, state, maxWidth, onCloseNoBtn } = decl(close);
     LOG.info(`Opening dialogue with heading '${heading}'`);
     const dialog = BasicDialog.t({
       props: { heading, buttons, num, state, maxWidth },
-      events: { close }
+      events: { close: e => {
+        if (e.detail.escPressed) onCloseNoBtn();
+      }}
     }, content);
     dialogs.next(d => [...d, dialog]);
   }

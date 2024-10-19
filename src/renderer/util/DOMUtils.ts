@@ -58,5 +58,20 @@ export const DOMUtils = {
         WOURNAL_SVG_PAGE_PDF_ATTR,
       ],
     });
-  }
+  },
+
+
+  /**
+   * Get the active element (like document.activeElement, except it "pierces"
+   * shadow roots). Thanks to
+   * https://www.abeautifulsite.net/posts/finding-the-active-element-in-a-shadow-root/
+   */
+  getActiveElement: function (root: Document | ShadowRoot = document): Element | null {
+    const activeEl = root.activeElement;
+    if (!activeEl) return null;
+    return (activeEl.shadowRoot)
+      ? this.getActiveElement(activeEl.shadowRoot)
+      : activeEl;
+  },
+
 }

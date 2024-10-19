@@ -12,7 +12,7 @@ import {
 } from "persistence/ConfigDTO";
 import { AUTOSAVE_DIR } from "Shared/const";
 import { DSUtils } from "util/DSUtils";
-import ColorPaletteEditor, { ColorPicker } from "./color-palette-editor";
+import { ColorPicker } from "./color-palette-editor";
 import { GlobalCommandsCtx } from "./global-commands";
 import { ToastCtx } from "./toast-context";
 
@@ -106,11 +106,6 @@ export class Settings extends Component {
             rightClick: rx.bind(conf.partial('binds', 'rightClick')),
             middleClick: rx.bind(conf.partial('binds', 'middleClick')),
           }}),
-        ]),
-        ui5.panel({ fields: { headerText: 'Color Palette', collapsed: true }}, [
-          ColorPaletteEditor.t({
-            props: { palette: rx.bind(conf.partial('colorPalette')) }
-          }),
         ]),
         ui5.panel({ fields: { headerText: 'PDF Annotation', collapsed: true }}, [
           h.div(ui5.checkbox({ fields: {
