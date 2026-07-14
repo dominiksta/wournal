@@ -17,18 +17,35 @@ matter.
 
 ![Screenshot PDF Annotation](docs/assets/readme-screenshot-pdf-annotation.png)
 
-## Current Project Status
+## Project Status
 
-Wournal is currently still considered alpha software. While that means that
-there may still be some bugs creeping around, it should be mostly stable.
+The project is effectively in maintenance-mode. I (@dominiksta) and some of
+my friends are still using Wournal every few days for our personal note-taking.
+It is still too useful to just deprecate entirely. However, since I have
+converted to the church of C# and Blazor, I am no longer interested in 
+maintaining a large-ish scale Typescript project. This lack of interest is
+made worse because I decided to write a fully custom frontend framework 
+["mvui"](https://github.com/dominiksta/mvui) just for Wournal, which itself
+is now considered deprecated for the same reason (though you can read up
+a few more details there in its README).
 
-The plan is to first create an *Android version* and to wait a while for bug
-reports before releasing it as beta. The Android release will require a somewhat
-significant rewrite of many UI components, so the look and feel will change
-quite a bit when that happens.
+If I had to do the project all over again (and there is a non-zero chance
+that I will one day), I would write it in Blazor and care far more about
+testing and module separation (which btw is one of those weirdly painful
+things in JS which every other mature ecosystem has figured out long ago).
+
+In any case, as I said, I am still willing to work on the occasional bugfix
+and PR's are still open since I *am* still using it somewhat actively.
+In the extremely unlikely event that someone else wants to maintain the 
+project, maybe even together with Mvui, I will gladly transfer ownership
+of the repo.
+
+It saddens me a bit to let go, since this project absolutely was a labor
+of love and I look back fondly to writing it. But sometimes we need to
+move on and accept that we've grown past our old ways of doing things.
 
 <details>
-  <summary>Development Roadmap</summary>
+  <summary>Original Development Roadmap</summary>
   
   **Known Issues**:
   
